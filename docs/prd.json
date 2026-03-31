@@ -120,7 +120,7 @@
         "Field shows timestamp 'Cash updated X days ago' and appears with a staleness nudge after 5+ days without update"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

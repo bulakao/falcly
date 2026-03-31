@@ -18,6 +18,8 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Swipe-impact screen is the card detail screen — card-level actions (update balance, edit, delete) live here
 - Staleness helpers in `utils/staleness.ts`: `formatUpdatedAgo()`, `getStalenessLevel()`, `daysSinceUpdate()`
 - Staleness levels: fresh (<5 days), warning (5–9 days, amber), stale (10+ days, badge replaced)
+- User profile store: `store/userStore.ts` with Zustand persist, store name `falcly-user`
+- Cash on hand is `number | null` — null means not yet set; swipe impact shows "Not set" gracefully
 
 ---
 
@@ -117,4 +119,19 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - Staleness is a UI-level concern — it doesn't modify the decision engine's output, it overrides the badge display
   - Shared utils in `utils/` prevent duplication between home screen and card detail
   - Pre-existing eslint error on line 112 of index.tsx (unescaped apostrophe) — not introduced by CL-07
+---
+
+## 2026-03-31 - CA-01
+- Created `store/userStore.ts` — Zustand persisted store for user profile (cashOnHand, cashUpdatedAt)
+- Rebuilt Settings tab (`app/(tabs)/two.tsx`) with cash on hand field: display value, inline edit, save/cancel
+- Cash timestamp shown with staleness coloring (amber at 5+ days, gray at 10+ days)
+- Staleness nudge banners at 5+ and 10+ days, tappable to trigger edit mode
+- Wired `cashOnHand` from userStore into swipe-impact screen — replaces hardcoded `null` in `calculateSwipeImpact`
+- Net available cash now recalculates immediately in swipe impact when cash on hand changes
+- Files changed: `store/userStore.ts` (new), `app/(tabs)/two.tsx`, `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - User profile data lives in `store/userStore.ts` (separate from card store) — CA-02/CA-03 will add income, payday, expenses here
+  - Settings screen uses inline editing pattern (tap Update → input appears → Save/Cancel) rather than a separate modal
+  - Staleness reuse: `getStalenessLevel()` and `formatUpdatedAgo()` from `utils/staleness.ts` work for any timestamp, not just card balances
+  - Onboarding prompt for cash on hand (AC item 1) is deferred to OB-01 story which handles optional enrichment fields
 ---
