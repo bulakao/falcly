@@ -135,7 +135,7 @@
         "Monthly income is added to net available cash only when payday precedes the card due date; excluded otherwise"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

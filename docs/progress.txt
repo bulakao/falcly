@@ -20,6 +20,7 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Staleness levels: fresh (<5 days), warning (5–9 days, amber), stale (10+ days, badge replaced)
 - User profile store: `store/userStore.ts` with Zustand persist, store name `falcly-user`
 - Cash on hand is `number | null` — null means not yet set; swipe impact shows "Not set" gracefully
+- Net available cash is per-card: `computeNetAvailableCash(cash, income, payday, card)` in `utils/decisionEngine.ts` — income included only when payday ≤ card due date
 
 ---
 
@@ -134,4 +135,16 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - Settings screen uses inline editing pattern (tap Update → input appears → Save/Cancel) rather than a separate modal
   - Staleness reuse: `getStalenessLevel()` and `formatUpdatedAgo()` from `utils/staleness.ts` work for any timestamp, not just card balances
   - Onboarding prompt for cash on hand (AC item 1) is deferred to OB-01 story which handles optional enrichment fields
+---
+
+## 2026-03-31 - CA-02
+- Added `monthlyIncome` and `payday` fields to `store/userStore.ts` with `setIncome()` action
+- Added `computeNetAvailableCash()` helper to `utils/decisionEngine.ts` — computes per-card net available cash, including income only when payday ≤ card due date
+- Added Monthly Income & Payday section to Settings screen with inline edit pattern (income + payday fields)
+- Updated swipe-impact screen to use `computeNetAvailableCash()` instead of raw `cashOnHand`
+- Files changed: `store/userStore.ts`, `utils/decisionEngine.ts`, `app/swipe-impact.tsx`, `app/(tabs)/two.tsx`
+- **Learnings for future iterations:**
+  - Net available cash is per-card because income inclusion depends on whether payday ≤ that card's due date — use `computeNetAvailableCash()` everywhere instead of raw `cashOnHand`
+  - `getCycleDates()` returns `dueDate` as a full Date object — use `.getDate()` to get the day-of-month for payday comparison
+  - CA-03 (committed expenses) and CA-04 (net available cash display) will extend `computeNetAvailableCash()` with expense deduction
 ---
