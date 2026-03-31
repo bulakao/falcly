@@ -13,6 +13,7 @@ import { Text, View } from '@/components/Themed';
 import { useUserStore } from '@/store/userStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 export default function SettingsScreen() {
   const cashOnHand = useUserStore((s) => s.cashOnHand);
@@ -40,6 +41,8 @@ export default function SettingsScreen() {
 
   const [editingExpenses, setEditingExpenses] = useState(false);
   const [expensesText, setExpensesText] = useState('');
+
+  const { isOffline } = useNetworkStatus();
 
   const cashStaleness = cashUpdatedAt ? getStalenessLevel(cashUpdatedAt) : null;
 
@@ -327,6 +330,25 @@ export default function SettingsScreen() {
             </View>
           )}
         </View>
+
+        {/* Cloud Sync Status */}
+        {tier === 'pro' && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Cloud Sync</Text>
+            <Text style={styles.sectionSubtitle}>
+              Pro feature — sync your card data across devices.
+            </Text>
+            {isOffline ? (
+              <View style={styles.cloudOffline}>
+                <Text style={styles.cloudOfflineText}>
+                  Cloud sync unavailable — you are offline. Your data is saved locally and all core features work normally.
+                </Text>
+              </View>
+            ) : (
+              <Text style={styles.cloudOnlineText}>Connected — sync available</Text>
+            )}
+          </View>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -497,5 +519,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#888',
     marginTop: 4,
+  },
+  cloudOffline: {
+    backgroundColor: '#f3f4f6',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+  },
+  cloudOfflineText: {
+    fontSize: 13,
+    color: '#6b7280',
+  },
+  cloudOnlineText: {
+    fontSize: 13,
+    color: '#10b981',
+    fontWeight: '600',
   },
 });
