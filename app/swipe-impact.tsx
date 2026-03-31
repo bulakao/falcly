@@ -13,7 +13,7 @@ import { Text, View } from '@/components/Themed';
 import { BillingTimeline } from '@/components/BillingTimeline';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
-import { calculateSwipeImpact } from '@/utils/decisionEngine';
+import { calculateSwipeImpact, computeNetAvailableCash } from '@/utils/decisionEngine';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import type { CardStatus } from '@/types/card';
 
@@ -44,6 +44,8 @@ export default function SwipeImpactScreen() {
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
   const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
   const cashOnHand = useUserStore((s) => s.cashOnHand);
+  const monthlyIncome = useUserStore((s) => s.monthlyIncome);
+  const payday = useUserStore((s) => s.payday);
   const [amountText, setAmountText] = useState('');
 
   const proposedAmount = useMemo(() => {
@@ -51,10 +53,15 @@ export default function SwipeImpactScreen() {
     return isNaN(n) || n < 0 ? 0 : n;
   }, [amountText]);
 
+  const netAvailableCash = useMemo(() => {
+    if (!card) return null;
+    return computeNetAvailableCash(cashOnHand, monthlyIncome, payday, card);
+  }, [card, cashOnHand, monthlyIncome, payday]);
+
   const impact = useMemo(() => {
     if (!card) return null;
-    return calculateSwipeImpact(card, proposedAmount, cashOnHand);
-  }, [card, proposedAmount, cashOnHand]);
+    return calculateSwipeImpact(card, proposedAmount, netAvailableCash);
+  }, [card, proposedAmount, netAvailableCash]);
 
   if (!card || !impact) {
     return (
