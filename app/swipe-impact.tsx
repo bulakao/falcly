@@ -46,6 +46,7 @@ export default function SwipeImpactScreen() {
   const cashOnHand = useUserStore((s) => s.cashOnHand);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
   const payday = useUserStore((s) => s.payday);
+  const committedExpenses = useUserStore((s) => s.committedExpenses);
   const [amountText, setAmountText] = useState('');
 
   const proposedAmount = useMemo(() => {
@@ -55,8 +56,8 @@ export default function SwipeImpactScreen() {
 
   const netAvailableCash = useMemo(() => {
     if (!card) return null;
-    return computeNetAvailableCash(cashOnHand, monthlyIncome, payday, card);
-  }, [card, cashOnHand, monthlyIncome, payday]);
+    return computeNetAvailableCash(cashOnHand, monthlyIncome, payday, card, committedExpenses);
+  }, [card, cashOnHand, monthlyIncome, payday, committedExpenses]);
 
   const impact = useMemo(() => {
     if (!card) return null;
@@ -187,6 +188,15 @@ export default function SwipeImpactScreen() {
                 : 'Not set'}
             </Text>
           </View>
+
+          {committedExpenses !== null && committedExpenses > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.rowLabel}>Committed expenses</Text>
+              <Text style={styles.rowValueMuted}>
+                −{formatPeso(committedExpenses)}
+              </Text>
+            </View>
+          )}
 
           <View style={styles.row}>
             <Text style={styles.rowLabel}>Minimum payment</Text>

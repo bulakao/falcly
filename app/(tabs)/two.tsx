@@ -20,6 +20,8 @@ export default function SettingsScreen() {
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
   const payday = useUserStore((s) => s.payday);
   const setIncome = useUserStore((s) => s.setIncome);
+  const committedExpenses = useUserStore((s) => s.committedExpenses);
+  const setCommittedExpenses = useUserStore((s) => s.setCommittedExpenses);
 
   const [editing, setEditing] = useState(false);
   const [cashText, setCashText] = useState('');
@@ -27,6 +29,9 @@ export default function SettingsScreen() {
   const [editingIncome, setEditingIncome] = useState(false);
   const [incomeText, setIncomeText] = useState('');
   const [paydayText, setPaydayText] = useState('');
+
+  const [editingExpenses, setEditingExpenses] = useState(false);
+  const [expensesText, setExpensesText] = useState('');
 
   const cashStaleness = cashUpdatedAt ? getStalenessLevel(cashUpdatedAt) : null;
 
@@ -72,6 +77,25 @@ export default function SettingsScreen() {
 
   function handleCancelIncome() {
     setEditingIncome(false);
+  }
+
+  function handleEditExpenses() {
+    setExpensesText(committedExpenses !== null ? String(committedExpenses) : '');
+    setEditingExpenses(true);
+  }
+
+  function handleSaveExpenses() {
+    const amount = parseFloat(expensesText);
+    if (isNaN(amount) || amount < 0) {
+      Alert.alert('Invalid', 'Enter a valid amount.');
+      return;
+    }
+    setCommittedExpenses(amount);
+    setEditingExpenses(false);
+  }
+
+  function handleCancelExpenses() {
+    setEditingExpenses(false);
   }
 
   return (
@@ -217,6 +241,50 @@ export default function SettingsScreen() {
                   </Text>
                 </Pressable>
               </View>
+            </View>
+          )}
+        </View>
+
+        {/* Committed Monthly Expenses */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Committed Monthly Expenses</Text>
+          <Text style={styles.sectionSubtitle}>
+            Your total fixed monthly expenses (rent, utilities, etc.). Deducted from available cash in payoff projections.
+          </Text>
+
+          {editingExpenses ? (
+            <View>
+              <TextInput
+                style={styles.input}
+                value={expensesText}
+                onChangeText={setExpensesText}
+                placeholder="e.g. 15000"
+                placeholderTextColor="#999"
+                keyboardType="numeric"
+                autoFocus
+                selectTextOnFocus
+              />
+              <View style={styles.buttonRow}>
+                <Pressable style={styles.cancelButton} onPress={handleCancelExpenses}>
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </Pressable>
+                <Pressable style={styles.saveButton} onPress={handleSaveExpenses}>
+                  <Text style={styles.saveButtonText}>Save</Text>
+                </Pressable>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.valueRow}>
+              <Text style={styles.valueText}>
+                {committedExpenses !== null
+                  ? `₱${committedExpenses.toLocaleString()}`
+                  : 'Not set'}
+              </Text>
+              <Pressable style={styles.editButton} onPress={handleEditExpenses}>
+                <Text style={styles.editButtonText}>
+                  {committedExpenses !== null ? 'Update' : 'Set Expenses'}
+                </Text>
+              </Pressable>
             </View>
           )}
         </View>

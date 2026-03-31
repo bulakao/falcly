@@ -260,6 +260,7 @@ export function computeNetAvailableCash(
   monthlyIncome: number | null,
   payday: number | null,
   card: Card,
+  committedExpenses: number | null = null,
   today: Date = new Date(),
 ): number | null {
   if (cashOnHand === null) return null;
@@ -272,6 +273,10 @@ export function computeNetAvailableCash(
     if (payday <= dueDayOfMonth) {
       net += monthlyIncome;
     }
+  }
+
+  if (committedExpenses !== null) {
+    net -= committedExpenses;
   }
 
   return net;

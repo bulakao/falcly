@@ -7,8 +7,10 @@ interface UserStore {
   cashUpdatedAt: number | null;
   monthlyIncome: number | null;
   payday: number | null; // day of month, 1–31
+  committedExpenses: number | null;
   setCashOnHand: (amount: number) => void;
   setIncome: (income: number, payday: number) => void;
+  setCommittedExpenses: (amount: number) => void;
 }
 
 export const useUserStore = create<UserStore>()(
@@ -18,11 +20,15 @@ export const useUserStore = create<UserStore>()(
       cashUpdatedAt: null,
       monthlyIncome: null,
       payday: null,
+      committedExpenses: null,
       setCashOnHand: (amount: number) => {
         set({ cashOnHand: amount, cashUpdatedAt: Date.now() });
       },
       setIncome: (income: number, payday: number) => {
         set({ monthlyIncome: income, payday });
+      },
+      setCommittedExpenses: (amount: number) => {
+        set({ committedExpenses: amount });
       },
     }),
     {
