@@ -36,8 +36,8 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
-      // Check if Pro trial has expired on app launch
-      useSubscriptionStore.getState().checkTrialExpiry();
+      // Verify Pro entitlement on app launch (checks trial expiry for trial users)
+      useSubscriptionStore.getState().verifyEntitlement();
     }
   }, [loaded]);
 

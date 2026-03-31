@@ -26,6 +26,8 @@ export default function SettingsScreen() {
 
   const tier = useSubscriptionStore((s) => s.tier);
   const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
+  const isPaidPro = useSubscriptionStore((s) => s.isPaidPro);
+  const planType = useSubscriptionStore((s) => s.planType);
   const getTrialEndDate = useSubscriptionStore((s) => s.getTrialEndDate);
   const trialEndDate = getTrialEndDate();
 
@@ -120,7 +122,9 @@ export default function SettingsScreen() {
                 <Text style={styles.proBadgeText}>PRO</Text>
               </View>
               <Text style={styles.proStatusText}>
-                {isTrialActive() ? 'Free Trial' : 'Active'}
+                {isPaidPro()
+                  ? planType === 'annual' ? 'Annual Plan' : 'Monthly Plan'
+                  : isTrialActive() ? 'Free Trial' : 'Active'}
               </Text>
             </View>
             {isTrialActive() && trialEndDate && (
@@ -131,6 +135,11 @@ export default function SettingsScreen() {
                   month: 'long',
                   day: 'numeric',
                 })}
+              </Text>
+            )}
+            {isPaidPro() && (
+              <Text style={styles.trialEndText}>
+                {planType === 'annual' ? '₱999/yr' : '₱149/mo'} · Cancel anytime
               </Text>
             )}
           </View>

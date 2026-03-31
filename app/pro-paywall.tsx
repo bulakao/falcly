@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import type { PlanType } from '@/store/subscriptionStore';
 
 const PRO_FEATURES = [
   { icon: '💳', label: 'Unlimited cards' },
@@ -14,6 +15,8 @@ const PRO_FEATURES = [
 export default function ProPaywallScreen() {
   const startTrial = useSubscriptionStore((s) => s.startTrial);
   const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
+  const purchasePro = useSubscriptionStore((s) => s.purchasePro);
+  const isPaidPro = useSubscriptionStore((s) => s.isPaidPro);
 
   function handleStartTrial() {
     // RevenueCat would handle payment method collection here
@@ -34,17 +37,53 @@ export default function ProPaywallScreen() {
     );
   }
 
+  function handlePurchase(plan: PlanType) {
+    const planLabel = plan === 'annual' ? 'Annual (₱999/yr)' : 'Monthly (₱149/mo)';
+    // RevenueCat would handle the actual purchase flow here
+    Alert.alert(
+      'Subscribe to Pro',
+      `You selected the ${planLabel} plan. Less than one late payment fee. Cancel anytime.\n\nIn the full app, RevenueCat handles the purchase.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Subscribe',
+          onPress: () => {
+            purchasePro(plan);
+            router.back();
+          },
+        },
+      ],
+    );
+  }
+
   function handleAnnual() {
-    // MO-03 will integrate RevenueCat purchase here
-    router.back();
+    handlePurchase('annual');
   }
 
   function handleMonthly() {
-    // MO-03 will integrate RevenueCat purchase here
-    router.back();
+    handlePurchase('monthly');
   }
 
   const trialActive = isTrialActive();
+  const paidPro = isPaidPro();
+
+  // If already a paid Pro subscriber, show confirmation instead of paywall
+  if (paidPro) {
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.emoji}>✅</Text>
+          <Text style={styles.title}>You&apos;re on Pro</Text>
+          <Text style={styles.subtitle}>
+            You have full access to all Pro features.
+          </Text>
+        </View>
+        <Pressable style={styles.dismissButton} onPress={() => router.back()}>
+          <Text style={styles.dismissText}>Go back</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
