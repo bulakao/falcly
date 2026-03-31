@@ -11,6 +11,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useUserStore } from '@/store/userStore';
 import { initFirestore } from '@/utils/firebase';
 import { initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
+import { initCrashReporting } from '@/utils/crashReporting';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -39,6 +40,8 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
+      // Initialize Firebase Crashlytics with global JS error handler
+      initCrashReporting();
       // Initialize Firestore with offline persistence (encrypted at rest by native SDK)
       initFirestore();
       // Verify Pro entitlement on app launch (checks trial expiry for trial users)
