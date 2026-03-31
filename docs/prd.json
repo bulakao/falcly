@@ -150,7 +150,7 @@
         "Shown as a labeled line item in the Swipe Impact breakdown: 'Committed expenses: −₱X,XXX'"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
