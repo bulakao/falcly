@@ -420,7 +420,7 @@
         "PostHog is configured on EU region for RA 10173 / GDPR compatibility; analytics opt-out is available in settings"
       ],
       "priority": 28,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

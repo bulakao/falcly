@@ -40,6 +40,9 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Cloud sync: `prepareCardForSync()`/`restoreCardFromSync()` in `utils/cloudSync.ts` — encrypts sensitive card fields before Firestore write
 - Secure logging: `secureLog()`/`secureWarn()` in `utils/secureLogger.ts` — redacts sensitive financial fields; suppressed in production
 - CSV export: `exportDataAsCSV()` in `utils/csvExport.ts` — uses `expo-file-system/next` (File/Paths API) + `expo-sharing`
+- Analytics: `utils/analytics.ts` — PostHog EU region; use `trackXxx()` helpers for events; amounts anonymized into tiers via `getAmountTier()`
+- Analytics opt-out: `analyticsOptOut` in `store/userStore.ts` — persisted; restored on app launch in `_layout.tsx`
+- All hooks (useRef, useEffect) must be called before any early return in React components — move them above guard clauses
 
 ---
 
@@ -424,4 +427,20 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - `Paths.cache` gives the cache directory as a `Directory` instance — pass as first arg to `new File(Paths.cache, name)`
   - `expo-sharing`'s `shareAsync` accepts `UTI` for iOS type hints: `'public.comma-separated-values-text'` for CSV
   - Export button uses loading state (`exporting`) to prevent double-taps during file write + share
+---
+
+## 2026-03-31 - AQ-01
+- Installed `posthog-react-native` and created `utils/analytics.ts` with PostHog EU region config
+- Created typed event tracking helpers: `trackCardAdded`, `trackSwipeCheckPerformed`, `trackProConversionStarted`, `trackProTrialStarted`, `trackProConverted`, `trackDataStalenessWarningShown`
+- Amount anonymization via `getAmountTier()` — no exact balances or amounts tracked, only tier buckets
+- Added `analyticsOptOut` to `store/userStore.ts` with Zustand persist; restored on app launch in `_layout.tsx`
+- Added analytics opt-out toggle (Switch) to settings screen (`app/(tabs)/two.tsx`)
+- Integrated event tracking in: `add-card.tsx`, `onboarding.tsx`, `swipe-impact.tsx`, `pro-paywall.tsx`, `app/(tabs)/index.tsx`
+- Files changed: `utils/analytics.ts` (new), `store/userStore.ts`, `app/_layout.tsx`, `app/add-card.tsx`, `app/onboarding.tsx`, `app/swipe-impact.tsx`, `app/pro-paywall.tsx`, `app/(tabs)/index.tsx`, `app/(tabs)/two.tsx`, `package.json`
+- **Learnings for future iterations:**
+  - PostHog RN SDK uses `new PostHog(key, options)` constructor — not `initAsync` (that's the older API)
+  - Option is `captureAppLifecycleEvents` not `captureNativeAppLifecycleEvents`
+  - `optOut()`/`optIn()` are async (return Promise) but can be fire-and-forget
+  - All hooks (useRef, useEffect) must be placed before early returns in React components to satisfy rules-of-hooks lint
+  - PostHog API key placeholder `__POSTHOG_API_KEY__` needs to be replaced with real key before production
 ---
