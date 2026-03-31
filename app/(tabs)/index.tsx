@@ -22,20 +22,24 @@ function CardItem({ card }: { card: Card }) {
   const { status, reason } = calculateCardStatus(card);
 
   return (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.bankName}>{card.bankName}</Text>
-        <View style={[styles.badge, { backgroundColor: STATUS_COLORS[status] }]}>
-          <Text style={styles.badgeText}>
-            {STATUS_ICONS[status]} {status}
+    <Link href={{ pathname: '/swipe-impact', params: { cardId: card.id } }} asChild>
+      <Pressable>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.bankName}>{card.bankName}</Text>
+            <View style={[styles.badge, { backgroundColor: STATUS_COLORS[status] }]}>
+              <Text style={styles.badgeText}>
+                {STATUS_ICONS[status]} {status}
+              </Text>
+            </View>
+          </View>
+          <Text style={styles.reason}>{reason}</Text>
+          <Text style={styles.detail}>
+            ₱{card.outstandingBalance.toLocaleString()} / ₱{card.creditLimit.toLocaleString()}
           </Text>
         </View>
-      </View>
-      <Text style={styles.reason}>{reason}</Text>
-      <Text style={styles.detail}>
-        ₱{card.outstandingBalance.toLocaleString()} / ₱{card.creditLimit.toLocaleString()}
-      </Text>
-    </View>
+      </Pressable>
+    </Link>
   );
 }
 

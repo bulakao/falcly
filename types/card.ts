@@ -19,6 +19,16 @@ export interface CardStatusResult {
   reason: string;
 }
 
+export interface SwipeImpactResult {
+  status: CardStatus;
+  reason: string;
+  projectedBalance: number;
+  netAvailableCash: number | null; // null when cash not set (CA stories)
+  minimumPayment: number;
+  carriedBalance: number; // 0 if full payoff possible
+  monthlyInterest: number; // 0 if no carried balance
+}
+
 export const DEFAULT_DUE_DAY_OFFSET = 21;
 export const DEFAULT_INTEREST_RATE = 0.02;
 export const DEFAULT_MIN_PAYMENT_PCT = 0.05;
