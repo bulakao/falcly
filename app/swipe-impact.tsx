@@ -13,6 +13,7 @@ import { Text, View } from '@/components/Themed';
 import { BillingTimeline } from '@/components/BillingTimeline';
 import { useCardStore } from '@/store/cardStore';
 import { calculateSwipeImpact } from '@/utils/decisionEngine';
+import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import type { CardStatus } from '@/types/card';
 
 const STATUS_COLORS: Record<CardStatus, string> = {
@@ -26,17 +27,6 @@ const STATUS_ICONS: Record<CardStatus, string> = {
   CAUTION: '⚠',
   RISKY: '✕',
 };
-
-function formatUpdatedAgo(timestamp: number): string {
-  const diffMs = Date.now() - timestamp;
-  const diffMinutes = Math.floor(diffMs / 60000);
-  if (diffMinutes < 1) return 'just now';
-  if (diffMinutes < 60) return `${diffMinutes}m ago`;
-  const diffHours = Math.floor(diffMinutes / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays}d ago`;
-}
 
 const QUICK_AMOUNTS = [
   { label: '₱500', value: 500 },
@@ -78,6 +68,7 @@ export default function SwipeImpactScreen() {
   }
 
   const showCarriedBalance = impact.carriedBalance > 0 && impact.monthlyInterest > 0;
+  const staleness = getStalenessLevel(card.balanceUpdatedAt);
 
   return (
     <KeyboardAvoidingView
@@ -85,20 +76,43 @@ export default function SwipeImpactScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container}>
+        {/* Staleness banner at 5+ days — tappable to update balance */}
+        {staleness !== 'fresh' && (
+          <Link href={{ pathname: '/update-balance', params: { cardId: card.id } }} asChild>
+            <Pressable style={staleness === 'stale' ? styles.staleBanner : styles.warningBanner}>
+              <Text style={staleness === 'stale' ? styles.staleBannerText : styles.warningBannerText}>
+                {staleness === 'stale'
+                  ? '⚠ Data stale — update before trusting this status'
+                  : '⚠️ Balance may be outdated · Tap to update'}
+              </Text>
+            </Pressable>
+          </Link>
+        )}
+
         {/* Card header */}
         <View style={styles.cardHeader}>
           <Text style={styles.bankName}>{card.bankName}</Text>
-          <View style={[styles.badge, { backgroundColor: STATUS_COLORS[impact.status] }]}>
-            <Text style={styles.badgeText}>
-              {STATUS_ICONS[impact.status]} {impact.status}
-            </Text>
-          </View>
+          {staleness === 'stale' ? (
+            <View style={[styles.badge, { backgroundColor: '#6b7280' }]}>
+              <Text style={styles.badgeText}>⚠ STALE</Text>
+            </View>
+          ) : (
+            <View style={[styles.badge, { backgroundColor: STATUS_COLORS[impact.status] }]}>
+              <Text style={styles.badgeText}>
+                {STATUS_ICONS[impact.status]} {impact.status}
+              </Text>
+            </View>
+          )}
         </View>
-        <Text style={styles.reason}>{impact.reason}</Text>
+        <Text style={styles.reason}>{staleness !== 'stale' ? impact.reason : ''}</Text>
 
         {/* Balance timestamp + update action */}
         <View style={styles.balanceRow}>
-          <Text style={styles.balanceTimestamp}>
+          <Text style={[
+            styles.balanceTimestamp,
+            staleness === 'warning' && { color: '#f59e0b' },
+            staleness === 'stale' && { color: '#6b7280', fontWeight: '600' },
+          ]}>
             Balance updated {formatUpdatedAgo(card.balanceUpdatedAt)}
           </Text>
           <Link href={{ pathname: '/update-balance', params: { cardId: card.id } }} asChild>
@@ -356,5 +370,33 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  warningBanner: {
+    backgroundColor: '#fef3c7',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  warningBannerText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#92400e',
+    textAlign: 'center',
+  },
+  staleBanner: {
+    backgroundColor: '#f3f4f6',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+  },
+  staleBannerText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#6b7280',
+    textAlign: 'center',
   },
 });

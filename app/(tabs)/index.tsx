@@ -4,6 +4,7 @@ import { Link } from 'expo-router';
 import { Text, View } from '@/components/Themed';
 import { useCardStore } from '@/store/cardStore';
 import { calculateCardStatus, calculateBestCard } from '@/utils/decisionEngine';
+import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import type { Card, CardStatus } from '@/types/card';
 
 const STATUS_COLORS: Record<CardStatus, string> = {
@@ -52,6 +53,7 @@ function BestCardHero({ cards }: { cards: Card[] }) {
 
 function CardItem({ card }: { card: Card }) {
   const { status, reason } = calculateCardStatus(card);
+  const staleness = getStalenessLevel(card.balanceUpdatedAt);
 
   return (
     <Link href={{ pathname: '/swipe-impact', params: { cardId: card.id } }} asChild>
@@ -59,16 +61,39 @@ function CardItem({ card }: { card: Card }) {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.bankName}>{card.bankName}</Text>
-            <View style={[styles.badge, { backgroundColor: STATUS_COLORS[status] }]}>
-              <Text style={styles.badgeText}>
-                {STATUS_ICONS[status]} {status}
+            {staleness === 'stale' ? (
+              <View style={[styles.badge, { backgroundColor: '#6b7280' }]}>
+                <Text style={styles.badgeText}>⚠ STALE</Text>
+              </View>
+            ) : (
+              <View style={[styles.badge, { backgroundColor: STATUS_COLORS[status] }]}>
+                <Text style={styles.badgeText}>
+                  {STATUS_ICONS[status]} {status}
+                </Text>
+              </View>
+            )}
+          </View>
+          {staleness === 'stale' && (
+            <Text style={styles.staleWarning}>
+              Data stale — update before trusting this status
+            </Text>
+          )}
+          {staleness === 'warning' && (
+            <View style={styles.stalenessWarningRow}>
+              <Text style={styles.stalenessWarningText}>
+                ⚠️ Balance may be outdated · Tap to update
               </Text>
             </View>
+          )}
+          <Text style={styles.reason}>{staleness !== 'stale' ? reason : ''}</Text>
+          <View style={styles.cardFooter}>
+            <Text style={styles.detail}>
+              ₱{card.outstandingBalance.toLocaleString()} / ₱{card.creditLimit.toLocaleString()}
+            </Text>
+            <Text style={styles.updatedAgo}>
+              Updated {formatUpdatedAgo(card.balanceUpdatedAt)}
+            </Text>
           </View>
-          <Text style={styles.reason}>{reason}</Text>
-          <Text style={styles.detail}>
-            ₱{card.outstandingBalance.toLocaleString()} / ₱{card.creditLimit.toLocaleString()}
-          </Text>
         </View>
       </Pressable>
     </Link>
@@ -151,6 +176,34 @@ const styles = StyleSheet.create({
   detail: {
     fontSize: 14,
     color: '#888',
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  updatedAgo: {
+    fontSize: 12,
+    color: '#999',
+  },
+  stalenessWarningRow: {
+    backgroundColor: '#fef3c7',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 6,
+  },
+  stalenessWarningText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#92400e',
+  },
+  staleWarning: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6b7280',
+    marginBottom: 4,
+    fontStyle: 'italic',
   },
   empty: {
     flex: 1,
