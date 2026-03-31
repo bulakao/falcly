@@ -9,6 +9,7 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Decision engine logic in `utils/decisionEngine.ts` — deterministic, first-match-wins evaluation
 - Card status uses three channels: color (emerald/amber/crimson) + icon (✓/⚠/✕) + text label
 - After adding new route files, Expo regenerates `.expo/types/router.d.ts` — run tsc after to verify
+- Zustand persist with AsyncStorage: use `persist` + `createJSONStorage(() => AsyncStorage)` middleware, store name `falcly-cards`
 
 ---
 
@@ -23,4 +24,15 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - Default Expo template has placeholder tabs (Tab One/Two) — renamed to Cards/Settings
   - Decision engine is simplified for CL-01 (no cash/income inputs) — will need expansion for CA and DE stories
   - Sensible defaults: due day offset 21, interest rate 2%, min payment 5% or ₱500 floor
+---
+
+## 2026-03-31 - CL-02
+- Added Zustand persistence via AsyncStorage so cards survive app restarts
+- Moved `nextId` counter into the store (`_nextId`) so IDs persist correctly
+- Home screen status display (color + icon + text + reason) was already implemented in CL-01
+- Files changed: `store/cardStore.ts`, `package.json`
+- **Learnings for future iterations:**
+  - Zustand persist middleware wraps create with double parens: `create<T>()(persist(...))`
+  - Store counter (`_nextId`) must be persisted alongside data to avoid ID collisions after restart
+  - CL-02 was mostly satisfied by CL-01's UI work — the missing piece was data persistence
 ---

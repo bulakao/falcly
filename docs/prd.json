@@ -30,7 +30,7 @@
         "Each status includes a one-line reason (e.g., '14 days to statement · 28% utilization')"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
