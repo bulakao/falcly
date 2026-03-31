@@ -28,6 +28,7 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Future cycle projections: `projectFutureCycles(card, netAvailableCash, today)` in `utils/decisionEngine.ts` — returns array of `FutureCycleProjection` with `isKnown` flag for signal-only cycles
 - Onboarding flow: `app/onboarding.tsx` → `app/onboarding-result.tsx` → home; uses `router.replace()` to prevent back-nav to completed forms
 - STATUS_EXPLANATIONS in `app/onboarding-result.tsx` — contextual one-sentence meaning for each status tier
+- `StatusTooltip` component (`components/StatusTooltip.tsx`) — reusable dismissible tooltip for status badge education, uses Modal + backdrop pattern
 
 ---
 
@@ -290,4 +291,17 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - `headerShown: false` on Stack.Screen options creates an immersive full-screen experience for onboarding — no navigation chrome
   - STATUS_EXPLANATIONS map provides contextual one-sentence meanings for each status tier — reusable for OB-02 tooltips
   - Enrichment fields use inline expand pattern (tap to reveal) rather than a separate screen — keeps the flow lightweight
+---
+
+## 2026-03-31 - OB-02
+- AC1 (contextual explanation) and AC2 (color + icon + text) were already implemented in OB-01's `onboarding-result.tsx`
+- Created `components/StatusTooltip.tsx` — reusable dismissible info tooltip (Modal-based) explaining all three status tiers
+- Integrated StatusTooltip next to status badges on onboarding result screen and home screen card items
+- Tooltip shows all three tiers with their badge color, icon, and one-sentence description; dismissed via "Got it" or backdrop tap
+- Files changed: `components/StatusTooltip.tsx` (new), `app/onboarding-result.tsx`, `app/(tabs)/index.tsx`
+- **Learnings for future iterations:**
+  - `Modal` with `transparent` + backdrop `Pressable` is the standard RN pattern for dismissible tooltips/popovers
+  - `hitSlop={8}` on small touch targets (like the ⓘ icon) improves usability on mobile
+  - StatusTooltip is stateless regarding which status is active — it always shows all three tiers for educational context
+  - Most of OB-02 was already satisfied by OB-01 — the only missing piece was the dismissible tooltip (AC3)
 ---

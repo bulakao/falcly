@@ -300,7 +300,7 @@
         "A dismissible info tooltip is available on the status badge explaining the three-tier system"
       ],
       "priority": 20,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
