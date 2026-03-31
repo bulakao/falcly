@@ -360,7 +360,7 @@
         "Card data is preserved for 90 days post-expiry; a warning is shown before any data deletion occurs"
       ],
       "priority": 24,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

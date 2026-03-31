@@ -32,6 +32,8 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Subscription store: `store/subscriptionStore.ts` with Zustand persist, store name `falcly-subscription` — `canAddCard(count)` checks tier + card limit
 - FREE_CARD_LIMIT = 2 — exported from `store/subscriptionStore.ts`
 - Subscription state: `isPaidPro()` = paid subscriber, `isTrialActive()` = trial user, `tier === 'free'` = free user — use these helpers, not raw state checks
+- Read-only cards: `isCardReadOnly(cardIndex)` checks free tier + index >= FREE_CARD_LIMIT — use to gate editing/reminders on expired Pro cards
+- Data retention: `proExpiredAt` tracks when Pro expired; `daysUntilDataDeletion()` returns remaining days of 90-day retention window
 
 ---
 
@@ -355,4 +357,20 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - `isTrialActive()` now also checks `planType === null` to exclude paid subscribers from trial logic
   - RevenueCat purchase flow is simulated via `Alert.alert` — real integration requires `react-native-purchases` SDK
   - Annual plan is pre-selected as primary (emerald CTA), monthly as secondary (bordered) — matches existing MO-01 layout
+---
+
+## 2026-03-31 - MO-04
+- Added `proExpiredAt` timestamp, `isCardReadOnly(cardIndex)`, and `daysUntilDataDeletion()` to subscription store
+- `checkTrialExpiry()` now sets `proExpiredAt` when trial expires; `startTrial()` and `purchasePro()` clear it
+- Home screen: cards at index >= FREE_CARD_LIMIT show read-only styling (dashed border, reduced opacity) with "Reactivate Pro to manage all cards" upgrade banner when on free tier
+- Home screen: data retention warning banner shows days remaining (90-day countdown) when `proExpiredAt` is set, links to paywall
+- Swipe impact (card detail): read-only cards show upgrade banner, hide edit/delete/update-balance actions, hide staleness reminders
+- All read-only cards still display balance, status badge, and reason — fully visible but not editable
+- Files changed: `store/subscriptionStore.ts`, `app/(tabs)/index.tsx`, `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - `isCardReadOnly(cardIndex)` uses array index, not card ID — card order in the store determines which cards are read-only
+  - `proExpiredAt` is set on trial expiry and cleared on re-subscription or new trial — prevents stale retention warnings
+  - Read-only cards disable staleness reminders (no "tap to update" since updates are disabled)
+  - `borderStyle: 'dashed'` in React Native works for visual read-only indication
+  - `daysUntilDataDeletion()` returns null when Pro or no expiry — only shows warning to expired users
 ---
