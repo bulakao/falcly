@@ -15,7 +15,7 @@
         "Status is calculated and displayed without requiring an app reload or additional action"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

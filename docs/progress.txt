@@ -1,0 +1,26 @@
+# Ralph Progress Log
+Started: Tue 31 Mar 2026 14:15:37 PST
+
+## Codebase Patterns
+- Use `@/` path alias for all imports (maps to project root)
+- Expo Router file-based routing: screens in `app/`, modal screens registered in `app/_layout.tsx`
+- Zustand stores go in `store/` directory, one store per domain
+- Types/interfaces go in `types/` directory
+- Decision engine logic in `utils/decisionEngine.ts` — deterministic, first-match-wins evaluation
+- Card status uses three channels: color (emerald/amber/crimson) + icon (✓/⚠/✕) + text label
+- After adding new route files, Expo regenerates `.expo/types/router.d.ts` — run tsc after to verify
+
+---
+
+## 2026-03-31 - CL-01
+- Implemented add-card form with bank name, credit limit, outstanding balance, statement day, due day offset
+- Created decision engine with SAFE/CAUTION/RISKY logic (utilization + days-to-statement)
+- Created Zustand card store with addCard action
+- Updated home screen to show card list with status badges
+- Files changed: `types/card.ts`, `utils/decisionEngine.ts`, `store/cardStore.ts`, `app/add-card.tsx`, `app/(tabs)/index.tsx`, `app/(tabs)/_layout.tsx`, `app/_layout.tsx`
+- **Learnings for future iterations:**
+  - Expo Router generates typed routes in `.expo/types/router.d.ts` — new route files need a tsc run to regenerate types
+  - Default Expo template has placeholder tabs (Tab One/Two) — renamed to Cards/Settings
+  - Decision engine is simplified for CL-01 (no cash/income inputs) — will need expansion for CA and DE stories
+  - Sensible defaults: due day offset 21, interest rate 2%, min payment 5% or ₱500 floor
+---
