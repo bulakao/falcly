@@ -45,7 +45,7 @@
         "Carried balance amount and estimated monthly interest cost are shown when full payoff is not possible given net available cash"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

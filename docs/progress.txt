@@ -10,6 +10,8 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Card status uses three channels: color (emerald/amber/crimson) + icon (✓/⚠/✕) + text label
 - After adding new route files, Expo regenerates `.expo/types/router.d.ts` — run tsc after to verify
 - Zustand persist with AsyncStorage: use `persist` + `createJSONStorage(() => AsyncStorage)` middleware, store name `falcly-cards`
+- Swipe impact: `calculateSwipeImpact(card, amount, netAvailableCash)` in `utils/decisionEngine.ts` — netAvailableCash is null until CA stories
+- Route params: use `useLocalSearchParams<{ paramName: string }>()` for typed params in Expo Router screens
 
 ---
 
@@ -35,4 +37,20 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - Zustand persist middleware wraps create with double parens: `create<T>()(persist(...))`
   - Store counter (`_nextId`) must be persisted alongside data to avoid ID collisions after restart
   - CL-02 was mostly satisfied by CL-01's UI work — the missing piece was data persistence
+---
+
+## 2026-03-31 - CL-03
+- Added `SwipeImpactResult` type and `calculateSwipeImpact()` to decision engine
+- Created swipe-impact modal screen with numeric input, quick-amount chips (₱500/₱1K/₱2K/₱5K), real-time status/projection updates
+- Shows projected statement balance, minimum payment, credit available after swipe
+- Carried balance and monthly interest shown when net available cash < projected balance
+- Made home screen cards tappable — tap navigates to swipe impact for that card
+- Registered `/swipe-impact` route in root layout
+- Files changed: `types/card.ts`, `utils/decisionEngine.ts`, `app/swipe-impact.tsx`, `app/_layout.tsx`, `app/(tabs)/index.tsx`
+- **Learnings for future iterations:**
+  - `calculateSwipeImpact` mirrors the first-match-wins pattern from `calculateCardStatus` but with projected values
+  - `netAvailableCash` is null until CA stories implement cash/income inputs — UI shows "Not set" gracefully
+  - Expo typed routes regenerate via `npx expo export` — `.expo/types/router.d.ts` is gitignored so new routes need an export/tsc cycle to verify
+  - `useLocalSearchParams<{ cardId: string }>()` for typed route params in Expo Router
+  - Quick-amount chips use flex:1 in a row for equal sizing without hardcoded widths
 ---
