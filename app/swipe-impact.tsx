@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   TextInput,
@@ -18,6 +18,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { calculateSwipeImpact, computeNetAvailableCash, getCycleDates, projectedStatementBalance } from '@/utils/decisionEngine';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import type { CardStatus } from '@/types/card';
+import { trackSwipeCheckPerformed, trackDataStalenessWarningShown } from '@/utils/analytics';
 
 const STATUS_COLORS: Record<CardStatus, string> = {
   SAFE: '#10b981',
@@ -79,6 +80,26 @@ export default function SwipeImpactScreen() {
     return calculateSwipeImpact(card, proposedAmount, netAvailableCash);
   }, [card, proposedAmount, netAvailableCash]);
 
+  const staleness = card ? getStalenessLevel(card.balanceUpdatedAt) : 'fresh' as const;
+
+  // Track swipe check when user enters a non-zero proposed amount
+  const prevAmountRef = useRef(0);
+  useEffect(() => {
+    if (proposedAmount > 0 && proposedAmount !== prevAmountRef.current && impact) {
+      trackSwipeCheckPerformed(impact.status, proposedAmount);
+    }
+    prevAmountRef.current = proposedAmount;
+  }, [proposedAmount, impact]);
+
+  // Track staleness warning shown once per screen mount
+  const stalenessTrackedRef = useRef(false);
+  useEffect(() => {
+    if (!stalenessTrackedRef.current && staleness !== 'fresh') {
+      trackDataStalenessWarningShown(staleness);
+      stalenessTrackedRef.current = true;
+    }
+  }, [staleness]);
+
   if (!card || !impact) {
     return (
       <View style={styles.container}>
@@ -112,8 +133,7 @@ export default function SwipeImpactScreen() {
     );
   }
 
-  const showCarriedBalance = impact ? impact.carriedBalance > 0 && impact.monthlyInterest > 0 : false;
-  const staleness = getStalenessLevel(card.balanceUpdatedAt);
+  const showCarriedBalance = impact.carriedBalance > 0 && impact.monthlyInterest > 0;
 
   return (
     <KeyboardAvoidingView

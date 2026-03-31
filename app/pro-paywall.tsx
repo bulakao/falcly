@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { Text, View } from '@/components/Themed';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import type { PlanType } from '@/store/subscriptionStore';
+import { trackProConversionStarted, trackProTrialStarted, trackProConverted } from '@/utils/analytics';
 
 const PRO_FEATURES = [
   { icon: '💳', label: 'Unlimited cards' },
@@ -29,6 +30,7 @@ export default function ProPaywallScreen() {
         {
           text: 'Start Trial',
           onPress: () => {
+            trackProTrialStarted();
             startTrial();
             router.back();
           },
@@ -39,6 +41,7 @@ export default function ProPaywallScreen() {
 
   function handlePurchase(plan: PlanType) {
     const planLabel = plan === 'annual' ? 'Annual (₱999/yr)' : 'Monthly (₱149/mo)';
+    trackProConversionStarted('paywall');
     // RevenueCat would handle the actual purchase flow here
     Alert.alert(
       'Subscribe to Pro',
@@ -48,6 +51,7 @@ export default function ProPaywallScreen() {
         {
           text: 'Subscribe',
           onPress: () => {
+            trackProConverted(plan);
             purchasePro(plan);
             router.back();
           },

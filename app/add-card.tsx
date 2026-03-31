@@ -12,6 +12,7 @@ import { router } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
+import { trackCardAdded } from '@/utils/analytics';
 
 export default function AddCardScreen() {
   const addCard = useCardStore((s) => s.addCard);
@@ -52,6 +53,7 @@ export default function AddCardScreen() {
       minPaymentPct: cardDefaults.minPaymentPct,
       minPaymentFloor: cardDefaults.minPaymentFloor,
     });
+    trackCardAdded('manual_add');
 
     router.back();
   }

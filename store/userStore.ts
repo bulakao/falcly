@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { setAnalyticsOptOut } from '@/utils/analytics';
 
 interface UserStore {
   cashOnHand: number | null;
@@ -8,9 +9,11 @@ interface UserStore {
   monthlyIncome: number | null;
   payday: number | null; // day of month, 1–31
   committedExpenses: number | null;
+  analyticsOptOut: boolean;
   setCashOnHand: (amount: number) => void;
   setIncome: (income: number, payday: number) => void;
   setCommittedExpenses: (amount: number) => void;
+  setAnalyticsOptOut: (optOut: boolean) => void;
 }
 
 export const useUserStore = create<UserStore>()(
@@ -21,6 +24,7 @@ export const useUserStore = create<UserStore>()(
       monthlyIncome: null,
       payday: null,
       committedExpenses: null,
+      analyticsOptOut: false,
       setCashOnHand: (amount: number) => {
         set({ cashOnHand: amount, cashUpdatedAt: Date.now() });
       },
@@ -29,6 +33,10 @@ export const useUserStore = create<UserStore>()(
       },
       setCommittedExpenses: (amount: number) => {
         set({ committedExpenses: amount });
+      },
+      setAnalyticsOptOut: (optOut: boolean) => {
+        setAnalyticsOptOut(optOut);
+        set({ analyticsOptOut: optOut });
       },
     }),
     {

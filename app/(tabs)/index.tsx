@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { StyleSheet, Pressable, FlatList } from 'react-native';
 import { Link, router } from 'expo-router';
 
@@ -10,6 +10,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { calculateCardStatus, calculateBestCard, computeNetAvailableCash } from '@/utils/decisionEngine';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import type { Card, CardStatus } from '@/types/card';
+import { trackDataStalenessWarningShown } from '@/utils/analytics';
 
 const STATUS_COLORS: Record<CardStatus, string> = {
   SAFE: '#10b981',
@@ -132,6 +133,21 @@ export default function HomeScreen() {
     (card: Card) => computeNetAvailableCash(cashOnHand, monthlyIncome, payday, card, committedExpenses),
     [cashOnHand, monthlyIncome, payday, committedExpenses],
   );
+
+  // Track staleness warning shown once per screen mount
+  const stalenessTrackedRef = useRef(false);
+  useEffect(() => {
+    if (stalenessTrackedRef.current) return;
+    const hasStale = cards.some((c) => getStalenessLevel(c.balanceUpdatedAt) === 'stale');
+    const hasWarning = cards.some((c) => getStalenessLevel(c.balanceUpdatedAt) === 'warning');
+    if (hasStale) {
+      trackDataStalenessWarningShown('stale');
+      stalenessTrackedRef.current = true;
+    } else if (hasWarning) {
+      trackDataStalenessWarningShown('warning');
+      stalenessTrackedRef.current = true;
+    }
+  }, [cards]);
 
   function handleAddCard() {
     if (canAddCard(cards.length)) {

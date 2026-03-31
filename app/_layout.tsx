@@ -8,7 +8,9 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { useUserStore } from '@/store/userStore';
 import { initFirestore } from '@/utils/firebase';
+import { initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -41,6 +43,11 @@ export default function RootLayout() {
       initFirestore();
       // Verify Pro entitlement on app launch (checks trial expiry for trial users)
       useSubscriptionStore.getState().verifyEntitlement();
+      // Initialize PostHog analytics (EU region)
+      initAnalytics();
+      // Restore opt-out preference from persisted store
+      const optOut = useUserStore.getState().analyticsOptOut;
+      if (optOut) setAnalyticsOptOut(true);
     }
   }, [loaded]);
 

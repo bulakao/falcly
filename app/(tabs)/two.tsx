@@ -7,6 +7,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Switch,
 } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
@@ -43,6 +44,9 @@ export default function SettingsScreen() {
 
   const [editingExpenses, setEditingExpenses] = useState(false);
   const [expensesText, setExpensesText] = useState('');
+
+  const analyticsOptOut = useUserStore((s) => s.analyticsOptOut);
+  const setAnalyticsOptOutStore = useUserStore((s) => s.setAnalyticsOptOut);
 
   const cards = useCardStore((s) => s.cards);
   const { isOffline } = useNetworkStatus();
@@ -385,6 +389,21 @@ export default function SettingsScreen() {
             )}
           </View>
         )}
+        {/* Analytics Opt-Out */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Analytics</Text>
+          <Text style={styles.sectionSubtitle}>
+            Anonymous behavioral analytics help us improve Falcly. No personal or financial data is ever tracked.
+          </Text>
+          <View style={styles.valueRow}>
+            <Text style={styles.optOutLabel}>Opt out of analytics</Text>
+            <Switch
+              value={analyticsOptOut}
+              onValueChange={setAnalyticsOptOutStore}
+              trackColor={{ true: '#ef4444' }}
+            />
+          </View>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -571,6 +590,10 @@ const styles = StyleSheet.create({
   cloudOnlineText: {
     fontSize: 13,
     color: '#10b981',
+    fontWeight: '600',
+  },
+  optOutLabel: {
+    fontSize: 15,
     fontWeight: '600',
   },
   exportButton: {

@@ -12,6 +12,7 @@ import { router } from 'expo-router';
 
 import { Text } from '@/components/Themed';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
+import { trackCardAdded } from '@/utils/analytics';
 
 export default function OnboardingScreen() {
   const addCard = useCardStore((s) => s.addCard);
@@ -44,6 +45,7 @@ export default function OnboardingScreen() {
       minPaymentPct: cardDefaults.minPaymentPct,
       minPaymentFloor: cardDefaults.minPaymentFloor,
     });
+    trackCardAdded('onboarding');
 
     // Navigate to result screen showing first status
     const cards = useCardStore.getState().cards;
