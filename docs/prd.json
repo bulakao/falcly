@@ -405,7 +405,7 @@
         "CSV format includes column headers and uses ₱ for currency values in PH locale"
       ],
       "priority": 27,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

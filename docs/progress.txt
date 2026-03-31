@@ -39,6 +39,7 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Encryption: `encrypt()`/`decrypt()` in `utils/encryption.ts` — AES-256-GCM via `@noble/ciphers`; uses `.js` extension in imports (`@noble/ciphers/aes.js`)
 - Cloud sync: `prepareCardForSync()`/`restoreCardFromSync()` in `utils/cloudSync.ts` — encrypts sensitive card fields before Firestore write
 - Secure logging: `secureLog()`/`secureWarn()` in `utils/secureLogger.ts` — redacts sensitive financial fields; suppressed in production
+- CSV export: `exportDataAsCSV()` in `utils/csvExport.ts` — uses `expo-file-system/next` (File/Paths API) + `expo-sharing`
 
 ---
 
@@ -409,4 +410,18 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - Cloud sync separates plaintext metadata (for Firestore querying) from encrypted sensitive data — this allows server-side filtering without exposing financials
   - `EncryptedPayload` includes `algorithm` and `version` fields for future-proofing migration to different ciphers
   - `btoa`/`atob` are available in React Native (Hermes) for base64 encoding — no polyfill needed
+---
+
+## 2026-03-31 - DP-03
+- Created `utils/csvExport.ts` — exports all cards, installments, subscriptions, and user profile as CSV with ₱ currency formatting
+- CSV includes section headers (Cards, User Profile) with column headers; uses PH locale for dates and currency
+- Added "Export as CSV" button to Settings screen — available for both Free and Pro tiers
+- Uses `expo-file-system/next` (File/Paths API) to write CSV to cache directory + `expo-sharing` for share sheet
+- Files changed: `utils/csvExport.ts` (new), `app/(tabs)/two.tsx`, `package.json`
+- **Learnings for future iterations:**
+  - `expo-file-system` v18+ uses a new API: `import { File, Paths } from 'expo-file-system/next'` — the old `cacheDirectory`/`writeAsStringAsync` are gone
+  - `File.create()` + `File.write()` replaces `writeAsStringAsync` — synchronous write API
+  - `Paths.cache` gives the cache directory as a `Directory` instance — pass as first arg to `new File(Paths.cache, name)`
+  - `expo-sharing`'s `shareAsync` accepts `UTI` for iOS type hints: `'public.comma-separated-values-text'` for CSV
+  - Export button uses loading state (`exporting`) to prevent double-taps during file write + share
 ---
