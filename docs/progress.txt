@@ -246,3 +246,17 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - Cards without any fixed events (installments/subscriptions/annualFee all 0) produce no future projections — FutureTimeline returns null
   - Manual simulator/browser verification needed for the future timeline UI layout
 ---
+
+## 2026-03-31 - CM-01
+- Added `updateCard` action to `store/cardStore.ts` — accepts partial card field updates
+- Created `app/edit-card.tsx` modal with all editable fields: bank name, credit limit, statement day, due day offset, interest rate, min payment pct/floor, annual fee/month, pending transactions, installments, subscriptions
+- Added "Edit Card" button to swipe-impact (card detail) screen alongside existing "Update Balance" button
+- Registered `/edit-card` route in root layout
+- Saving edits triggers Zustand reactivity → home screen and all dependent calculations recalculate immediately
+- Files changed: `store/cardStore.ts`, `app/edit-card.tsx` (new), `app/swipe-impact.tsx`, `app/_layout.tsx`
+- **Learnings for future iterations:**
+  - `updateCard` uses `Partial<EditableCardFields>` — only changed fields are spread into the card object
+  - Interest rate and min payment pct are stored as decimals (0.02) but displayed as percentages (2%) in the edit form — convert on save
+  - The swipe-impact screen is the card detail screen — all card-level actions (update balance, edit, delete) live here
+  - `selectTextOnFocus` on pre-filled numeric fields makes editing easier — user can overwrite without manual selection
+---

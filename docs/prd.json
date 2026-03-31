@@ -255,7 +255,7 @@
         "Edit screen is accessible from the card detail screen with a clearly labeled 'Edit Card' action"
       ],
       "priority": 17,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
