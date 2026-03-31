@@ -444,3 +444,18 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - All hooks (useRef, useEffect) must be placed before early returns in React components to satisfy rules-of-hooks lint
   - PostHog API key placeholder `__POSTHOG_API_KEY__` needs to be replaced with real key before production
 ---
+
+## 2026-03-31 - AQ-02
+- Created `utils/crashReporting.ts` — initializes Firebase Crashlytics with global JS error handler via `ErrorUtils.setGlobalHandler`
+- `recordSafeError()` sanitizes error messages (strips currency amounts, long numeric sequences) before sending to Crashlytics
+- `logBreadcrumb()` uses `redactSensitive()` from secureLogger to strip PII from breadcrumb data objects
+- `sanitizeErrorMessage()` replaces ₱/$/PHP amounts and 8+ digit numbers with placeholders
+- Wired `initCrashReporting()` into `app/_layout.tsx` on app start (before Firestore init)
+- Source maps handled automatically by `@react-native-firebase/crashlytics` Expo config plugin during EAS Build
+- Files changed: `utils/crashReporting.ts` (new), `app/_layout.tsx`
+- **Learnings for future iterations:**
+  - `@react-native-firebase/crashlytics` has no `beforeSend` hook like Sentry — instead, sanitize data before calling `recordError()` and `log()`
+  - `ErrorUtils.getGlobalHandler()` / `setGlobalHandler()` is the React Native global JS error handler — must chain to default handler for dev red screen
+  - Crashlytics `recordError()` takes an Error object and optional jsErrorName string — create a new Error with sanitized message but preserve original stack
+  - The Expo config plugin (`@react-native-firebase/crashlytics` in app.json plugins) handles native integration and source map upload during EAS Build
+---

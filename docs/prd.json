@@ -435,7 +435,7 @@
         "Crash reports are visible in Firebase console within 60 seconds of a crash occurring on a user device"
       ],
       "priority": 29,
-      "passes": false,
+      "passes": true,
       "notes": "Updated from Sentry to Firebase Crashlytics per tech stack decision"
     }
   ]
