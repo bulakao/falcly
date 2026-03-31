@@ -40,7 +40,9 @@ npm run android      # Run on Android emulator
 
 ## PRD Execution
 
-Use **wiggum** (`~/Code/wiggum/`) for PRD-driven implementation. This repo's `prd.json` is at `docs/prd.json` (not project root). Companion markdown PRD at `docs/prd.md`.
+Use **wiggum** for PRD-driven implementation: `docs/wiggum.sh --tool claude`
+- `docs/wiggum.sh` is a symlink to `~/Code/wiggum/ralph.sh`
+- `docs/prd.json` has the structured stories; `docs/prd.md` is the companion markdown PRD
 
 ## Key Docs
 
