@@ -31,6 +31,7 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - `StatusTooltip` component (`components/StatusTooltip.tsx`) — reusable dismissible tooltip for status badge education, uses Modal + backdrop pattern
 - Subscription store: `store/subscriptionStore.ts` with Zustand persist, store name `falcly-subscription` — `canAddCard(count)` checks tier + card limit
 - FREE_CARD_LIMIT = 2 — exported from `store/subscriptionStore.ts`
+- Subscription state: `isPaidPro()` = paid subscriber, `isTrialActive()` = trial user, `tier === 'free'` = free user — use these helpers, not raw state checks
 
 ---
 
@@ -336,4 +337,22 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - RevenueCat integration is simulated via `Alert.alert` confirmation — real RevenueCat purchase flow comes in MO-03
   - Trial CTA uses indigo (#6366f1) color to distinguish from the emerald purchase CTAs — visual hierarchy: trial > annual > monthly
   - `getTrialEndDate()` returns a Date object for formatting; `toLocaleDateString('en-PH', ...)` gives localized date display
+---
+
+## 2026-03-31 - MO-03
+- Added `purchasePro(plan)` action and `isPaidPro()` helper to `store/subscriptionStore.ts`
+- Added `planType` ('annual' | 'monthly' | null) to subscription store, persisted via partialize
+- Added `verifyEntitlement()` action — called on app launch, delegates to `checkTrialExpiry()` (RevenueCat verification placeholder)
+- Updated `checkTrialExpiry()` to skip paid subscribers (only expires trial users)
+- Updated paywall screen: `handleAnnual`/`handleMonthly` now show purchase confirmation dialogs with price framing ("Less than one late payment fee", "Cancel anytime")
+- Paywall shows "You're on Pro" message if user is already a paid subscriber
+- Updated Settings screen: shows "Annual Plan" or "Monthly Plan" label with pricing for paid Pro; "Free Trial" with end date for trial users
+- Updated root layout to call `verifyEntitlement()` instead of `checkTrialExpiry()` on app launch
+- Files changed: `store/subscriptionStore.ts`, `app/pro-paywall.tsx`, `app/(tabs)/two.tsx`, `app/_layout.tsx`
+- **Learnings for future iterations:**
+  - `planType` distinguishes trial from paid: null = trial/free, 'annual'/'monthly' = paid subscriber
+  - `isPaidPro()` checks `tier === 'pro' && planType !== null` — use this to differentiate paid vs trial in UI
+  - `isTrialActive()` now also checks `planType === null` to exclude paid subscribers from trial logic
+  - RevenueCat purchase flow is simulated via `Alert.alert` — real integration requires `react-native-purchases` SDK
+  - Annual plan is pre-selected as primary (emerald CTA), monthly as secondary (bordered) — matches existing MO-01 layout
 ---

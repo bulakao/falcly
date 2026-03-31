@@ -345,7 +345,7 @@
         "RevenueCat entitlement 'pro' is granted immediately on purchase and verified on every app launch"
       ],
       "priority": 23,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
