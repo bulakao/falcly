@@ -55,6 +55,7 @@ function RootLayoutNav() {
         <Stack.Screen name="add-card" options={{ presentation: 'modal', title: 'Add Card' }} />
         <Stack.Screen name="swipe-impact" options={{ presentation: 'modal', title: 'Swipe Impact' }} />
         <Stack.Screen name="update-balance" options={{ presentation: 'modal', title: 'Update Balance' }} />
+        <Stack.Screen name="edit-card" options={{ presentation: 'modal', title: 'Edit Card' }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
     </ThemeProvider>

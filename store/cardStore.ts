@@ -9,10 +9,13 @@ import {
   DEFAULT_MIN_PAYMENT_FLOOR,
 } from '@/types/card';
 
+type EditableCardFields = Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt'>;
+
 interface CardStore {
   cards: Card[];
   _nextId: number;
   addCard: (card: Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt' | 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'> & Partial<Pick<Card, 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'>>) => void;
+  updateCard: (cardId: string, updates: Partial<EditableCardFields>) => void;
   updateBalance: (cardId: string, newBalance: number) => void;
 }
 
@@ -38,6 +41,13 @@ export const useCardStore = create<CardStore>()(
         set((state) => ({
           cards: [...state.cards, card],
           _nextId: state._nextId + 1,
+        }));
+      },
+      updateCard: (cardId, updates) => {
+        set((state) => ({
+          cards: state.cards.map((c) =>
+            c.id === cardId ? { ...c, ...updates } : c,
+          ),
         }));
       },
       updateBalance: (cardId, newBalance) => {

@@ -121,7 +121,7 @@ export default function SwipeImpactScreen() {
         </View>
         <Text style={styles.reason}>{staleness !== 'stale' ? impact.reason : ''}</Text>
 
-        {/* Balance timestamp + update action */}
+        {/* Balance timestamp + actions */}
         <View style={styles.balanceRow}>
           <Text style={[
             styles.balanceTimestamp,
@@ -130,11 +130,18 @@ export default function SwipeImpactScreen() {
           ]}>
             Balance updated {formatUpdatedAgo(card.balanceUpdatedAt)}
           </Text>
-          <Link href={{ pathname: '/update-balance', params: { cardId: card.id } }} asChild>
-            <Pressable style={styles.updateButton}>
-              <Text style={styles.updateButtonText}>Update Balance</Text>
-            </Pressable>
-          </Link>
+          <View style={styles.actionRow}>
+            <Link href={{ pathname: '/edit-card', params: { cardId: card.id } }} asChild>
+              <Pressable style={styles.updateButton}>
+                <Text style={styles.editButtonText}>Edit Card</Text>
+              </Pressable>
+            </Link>
+            <Link href={{ pathname: '/update-balance', params: { cardId: card.id } }} asChild>
+              <Pressable style={styles.updateButton}>
+                <Text style={styles.updateButtonText}>Update Balance</Text>
+              </Pressable>
+            </Link>
+          </View>
         </View>
 
         {/* Billing cycle timeline */}
@@ -360,6 +367,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  editButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6366f1',
   },
   updateButtonText: {
     fontSize: 12,
