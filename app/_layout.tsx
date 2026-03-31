@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -35,6 +36,8 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
+      // Check if Pro trial has expired on app launch
+      useSubscriptionStore.getState().checkTrialExpiry();
     }
   }, [loaded]);
 

@@ -1,7 +1,8 @@
-import { StyleSheet, Pressable, ScrollView } from 'react-native';
+import { StyleSheet, Pressable, ScrollView, Alert } from 'react-native';
 import { router } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 
 const PRO_FEATURES = [
   { icon: '💳', label: 'Unlimited cards' },
@@ -11,15 +12,39 @@ const PRO_FEATURES = [
 ];
 
 export default function ProPaywallScreen() {
+  const startTrial = useSubscriptionStore((s) => s.startTrial);
+  const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
+
+  function handleStartTrial() {
+    // RevenueCat would handle payment method collection here
+    // For now, simulate trial activation
+    Alert.alert(
+      'Start Free Trial',
+      'In the full app, you would be asked to add a payment method. No charge for 14 days. Start your free trial now?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Start Trial',
+          onPress: () => {
+            startTrial();
+            router.back();
+          },
+        },
+      ],
+    );
+  }
+
   function handleAnnual() {
-    // MO-02/MO-03 will integrate RevenueCat here
+    // MO-03 will integrate RevenueCat purchase here
     router.back();
   }
 
   function handleMonthly() {
-    // MO-02/MO-03 will integrate RevenueCat here
+    // MO-03 will integrate RevenueCat purchase here
     router.back();
   }
+
+  const trialActive = isTrialActive();
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -39,6 +64,16 @@ export default function ProPaywallScreen() {
           </View>
         ))}
       </View>
+
+      {/* Trial CTA */}
+      {!trialActive && (
+        <Pressable style={styles.trialButton} onPress={handleStartTrial}>
+          <Text style={styles.trialButtonText}>Try Free for 14 Days</Text>
+          <Text style={styles.trialSubtext}>
+            Payment method required. No charge for 14 days.
+          </Text>
+        </Pressable>
+      )}
 
       <View style={styles.plans}>
         <Pressable style={styles.annualPlan} onPress={handleAnnual}>
@@ -114,6 +149,24 @@ const styles = StyleSheet.create({
   featureLabel: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  trialButton: {
+    width: '100%',
+    backgroundColor: '#6366f1',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  trialButtonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  trialSubtext: {
+    fontSize: 13,
+    color: '#c7d2fe',
   },
   plans: {
     width: '100%',

@@ -11,6 +11,7 @@ import {
 
 import { Text, View } from '@/components/Themed';
 import { useUserStore } from '@/store/userStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 
 export default function SettingsScreen() {
@@ -22,6 +23,11 @@ export default function SettingsScreen() {
   const setIncome = useUserStore((s) => s.setIncome);
   const committedExpenses = useUserStore((s) => s.committedExpenses);
   const setCommittedExpenses = useUserStore((s) => s.setCommittedExpenses);
+
+  const tier = useSubscriptionStore((s) => s.tier);
+  const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
+  const getTrialEndDate = useSubscriptionStore((s) => s.getTrialEndDate);
+  const trialEndDate = getTrialEndDate();
 
   const [editing, setEditing] = useState(false);
   const [cashText, setCashText] = useState('');
@@ -105,6 +111,30 @@ export default function SettingsScreen() {
     >
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.heading}>Settings</Text>
+
+        {/* Pro Subscription Status */}
+        {tier === 'pro' && (
+          <View style={styles.proSection}>
+            <View style={styles.proBadgeRow}>
+              <View style={styles.proBadge}>
+                <Text style={styles.proBadgeText}>PRO</Text>
+              </View>
+              <Text style={styles.proStatusText}>
+                {isTrialActive() ? 'Free Trial' : 'Active'}
+              </Text>
+            </View>
+            {isTrialActive() && trialEndDate && (
+              <Text style={styles.trialEndText}>
+                Your trial ends on{' '}
+                {trialEndDate.toLocaleDateString('en-PH', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </Text>
+            )}
+          </View>
+        )}
 
         {/* Cash on Hand */}
         <View style={styles.section}>
@@ -303,6 +333,41 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 24,
+  },
+  proSection: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#6366f1',
+    backgroundColor: '#eef2ff',
+    padding: 16,
+    marginBottom: 16,
+  },
+  proBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: 'transparent',
+  },
+  proBadge: {
+    backgroundColor: '#6366f1',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  proBadgeText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  proStatusText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#4338ca',
+  },
+  trialEndText: {
+    fontSize: 13,
+    color: '#6366f1',
+    marginTop: 8,
   },
   section: {
     borderRadius: 12,

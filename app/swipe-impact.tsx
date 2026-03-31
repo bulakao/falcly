@@ -14,6 +14,7 @@ import { Text, View } from '@/components/Themed';
 import { BillingTimeline } from '@/components/BillingTimeline';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { calculateSwipeImpact, computeNetAvailableCash, getCycleDates, projectedStatementBalance } from '@/utils/decisionEngine';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import type { CardStatus } from '@/types/card';
@@ -50,6 +51,7 @@ export default function SwipeImpactScreen() {
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
   const payday = useUserStore((s) => s.payday);
   const committedExpenses = useUserStore((s) => s.committedExpenses);
+  const subscriptionTier = useSubscriptionStore((s) => s.tier);
   const [amountText, setAmountText] = useState('');
 
   const proposedAmount = useMemo(() => {
@@ -338,6 +340,18 @@ export default function SwipeImpactScreen() {
             Set your cash on hand in Settings to see payoff projections.
           </Text>
         )}
+
+        {/* Trial CTA — payoff planner entry point */}
+        {subscriptionTier === 'free' && (
+          <Link href="/pro-paywall" asChild>
+            <Pressable style={styles.trialCta}>
+              <Text style={styles.trialCtaText}>Try Free for 14 Days</Text>
+              <Text style={styles.trialCtaSubtext}>
+                Unlock payment planning, installment tracking & more
+              </Text>
+            </Pressable>
+          </Link>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -551,5 +565,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#6b7280',
     textAlign: 'center',
+  },
+  trialCta: {
+    backgroundColor: '#eef2ff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#6366f1',
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  trialCtaText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#6366f1',
+    marginBottom: 4,
+  },
+  trialCtaSubtext: {
+    fontSize: 13,
+    color: '#818cf8',
   },
 });
