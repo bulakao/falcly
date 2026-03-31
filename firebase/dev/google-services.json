@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "919376331601",
+    "project_id": "falcly-dev",
+    "storage_bucket": "falcly-dev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:919376331601:android:ebaa23031e084d231a0970",
+        "android_client_info": {
+          "package_name": "com.bulakao.falcly"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMTGm6dyn917ILy4F6laaZlN1MIwADt3w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

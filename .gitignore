@@ -33,9 +33,9 @@ yarn-error.*
 # local env files
 .env*.local
 
-# Firebase config (contains API keys)
-google-services.json
-GoogleService-Info.plist
+# Firebase config (root copies are build artifacts; source lives in firebase/dev and firebase/prod)
+/google-services.json
+/GoogleService-Info.plist
 
 # typescript
 *.tsbuildinfo
