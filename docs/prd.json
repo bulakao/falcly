@@ -240,7 +240,7 @@
         "Cycles beyond the last known fixed event show a signal only (On Track / At Risk / Unknown) — no fabricated numbers"
       ],
       "priority": 16,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

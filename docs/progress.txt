@@ -25,6 +25,7 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - `scoreCard()` and `calculateBestCard()` also accept net available cash — pass a getter function for per-card computation
 - Projected balance formula: `projectedStatementBalance(card, proposedSwipe, today)` — canonical function, includes pending/installments/subscriptions/annual fee
 - When adding new Card fields: add Zustand persist migration in `store/cardStore.ts` to backfill defaults for existing data
+- Future cycle projections: `projectFutureCycles(card, netAvailableCash, today)` in `utils/decisionEngine.ts` — returns array of `FutureCycleProjection` with `isKnown` flag for signal-only cycles
 
 ---
 
@@ -226,4 +227,22 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - `projectedStatementBalance()` is the canonical formula — use it anywhere projected balance is needed
   - Annual fee uses month comparison (1-based) against `statementClose.getMonth() + 1` from `getCycleDates()`
   - The `addCard` type uses `Omit` + `Partial<Pick>` to make new fields optional with defaults in the store
+---
+
+## 2026-03-31 - DE-05
+- Added `FutureCycleProjection` and `FutureSignal` types to `types/card.ts`
+- Created `projectFutureCycles()` in `utils/decisionEngine.ts` — projects future billing cycles based on known fixed events (installments, subscriptions, annual fees)
+- Horizon: recurring events → 6 cycles; annual fee → project until next occurrence (up to 12). One signal-only cycle added beyond horizon.
+- Current cycle (cycle 0) uses `projectedStatementBalance()` for full balance; future cycles show only known committed items (no fabricated spending)
+- Signal-only cycles beyond the last fixed event show On Track / At Risk / Unknown based on current status
+- Created `components/FutureTimeline.tsx` — renders per-card cycle projection cards with status badges and committed item breakdowns
+- Integrated FutureTimeline into Timeline screen (`app/(tabs)/timeline.tsx`) below the Gantt chart, filtered to cards with fixed events
+- Cleaned up pre-existing unused `CardStatus` import in `utils/decisionEngine.ts`
+- Files changed: `types/card.ts`, `utils/decisionEngine.ts`, `components/FutureTimeline.tsx`, `app/(tabs)/timeline.tsx`
+- **Learnings for future iterations:**
+  - `projectFutureCycles()` is the canonical function for future cycle projections — use it anywhere multi-cycle forecasting is needed
+  - `getFutureCycleDates()` (internal helper) offsets statement close by N months from current cycle — handles month rollover via `Date.setMonth()`
+  - Future cycle status is based on committed items vs credit limit utilization, not the full decision engine (no days-to-statement logic for future cycles)
+  - Cards without any fixed events (installments/subscriptions/annualFee all 0) produce no future projections — FutureTimeline returns null
+  - Manual simulator/browser verification needed for the future timeline UI layout
 ---
