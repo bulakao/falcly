@@ -390,7 +390,7 @@
         "Pro cloud sync encrypts card config client-side (AES-256-GCM) before transmission — Firestore stores ciphertext only; balances and transactions never leave the device unencrypted"
       ],
       "priority": 26,
-      "passes": false,
+      "passes": true,
       "notes": "Updated from SQLite/SQLCipher to Firebase Firestore per tech stack decision"
     },
     {

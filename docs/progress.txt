@@ -35,6 +35,10 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Read-only cards: `isCardReadOnly(cardIndex)` checks free tier + index >= FREE_CARD_LIMIT — use to gate editing/reminders on expired Pro cards
 - Data retention: `proExpiredAt` tracks when Pro expired; `daysUntilDataDeletion()` returns remaining days of 90-day retention window
 - Network status: `useNetworkStatus()` hook from `hooks/useNetworkStatus.ts` — returns `{ isConnected, isOffline }`; `OfflineChip` component renders automatically in tab headers
+- Firebase Firestore init: `initFirestore()` in `utils/firebase.ts` — call once at app startup; enables offline persistence with encrypted-at-rest cache
+- Encryption: `encrypt()`/`decrypt()` in `utils/encryption.ts` — AES-256-GCM via `@noble/ciphers`; uses `.js` extension in imports (`@noble/ciphers/aes.js`)
+- Cloud sync: `prepareCardForSync()`/`restoreCardFromSync()` in `utils/cloudSync.ts` — encrypts sensitive card fields before Firestore write
+- Secure logging: `secureLog()`/`secureWarn()` in `utils/secureLogger.ts` — redacts sensitive financial fields; suppressed in production
 
 ---
 
@@ -389,4 +393,20 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - `headerRightContainerStyle: { paddingRight: 16 }` adds spacing between chip and screen edge
   - All core features are inherently offline — no network calls needed for calculations. Only cloud sync (future Pro feature) requires connectivity
   - Network status hook initializes with `true` (optimistic) — `null` from NetInfo means unknown, treated as connected
+---
+
+## 2026-03-31 - DP-02
+- Initialized Firebase Firestore with offline persistence in `utils/firebase.ts` — native SDK encrypts cached data at rest on both iOS (Data Protection) and Android (Keystore)
+- Created `utils/secureLogger.ts` — `secureLog()`/`secureWarn()` redact sensitive financial fields (balances, limits, income) from debug output; logging suppressed entirely in production builds
+- Created `utils/encryption.ts` — AES-256-GCM encrypt/decrypt using `@noble/ciphers` (audited, pure JS); generates `EncryptedPayload` with base64 ciphertext + nonce + algorithm tag
+- Created `utils/cloudSync.ts` — `prepareCardForSync()` splits card into plaintext metadata (bankName, statementDay) + encrypted sensitive fields (balances, limits, rates); `restoreCardFromSync()` decrypts back to full Card object
+- Wired `initFirestore()` into `app/_layout.tsx` on app startup
+- Files changed: `utils/firebase.ts` (new), `utils/secureLogger.ts` (new), `utils/encryption.ts` (new), `utils/cloudSync.ts` (new), `app/_layout.tsx`, `package.json`
+- **Learnings for future iterations:**
+  - `@noble/ciphers` requires `.js` extension in subpath imports (`@noble/ciphers/aes.js`, not `@noble/ciphers/aes`) due to its package exports map
+  - Firestore `settings()` can only be called once before any other Firestore usage — wrap in try/catch for "already called" error
+  - `redactSensitive()` operates on arbitrary objects recursively — reusable for any logging context, not just cards
+  - Cloud sync separates plaintext metadata (for Firestore querying) from encrypted sensitive data — this allows server-side filtering without exposing financials
+  - `EncryptedPayload` includes `algorithm` and `version` fields for future-proofing migration to different ciphers
+  - `btoa`/`atob` are available in React Native (Hermes) for base64 encoding — no polyfill needed
 ---
