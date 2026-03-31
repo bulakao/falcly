@@ -13,7 +13,7 @@ import { Text, View } from '@/components/Themed';
 import { BillingTimeline } from '@/components/BillingTimeline';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
-import { calculateSwipeImpact, computeNetAvailableCash, getCycleDates } from '@/utils/decisionEngine';
+import { calculateSwipeImpact, computeNetAvailableCash, getCycleDates, projectedStatementBalance } from '@/utils/decisionEngine';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import type { CardStatus } from '@/types/card';
 
@@ -182,8 +182,47 @@ export default function SwipeImpactScreen() {
           </Text>
 
           <View style={styles.row}>
-            <Text style={styles.rowLabel}>Projected statement balance</Text>
-            <Text style={styles.rowValue}>{formatPeso(impact.projectedBalance)}</Text>
+            <Text style={styles.rowLabel}>Outstanding balance</Text>
+            <Text style={styles.rowValue}>{formatPeso(card.outstandingBalance)}</Text>
+          </View>
+          {card.pendingTransactions > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.rowLabel}>Pending transactions</Text>
+              <Text style={styles.rowValue}>+{formatPeso(card.pendingTransactions)}</Text>
+            </View>
+          )}
+          {card.installmentsMonthlyAmount > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.rowLabel}>Installments</Text>
+              <Text style={styles.rowValue}>+{formatPeso(card.installmentsMonthlyAmount)}</Text>
+            </View>
+          )}
+          {card.subscriptionsThisCycle > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.rowLabel}>Subscriptions</Text>
+              <Text style={styles.rowValue}>+{formatPeso(card.subscriptionsThisCycle)}</Text>
+            </View>
+          )}
+          {card.annualFee > 0 && card.annualFeeMonth > 0 && (() => {
+            const cycle = getCycleDates(card);
+            const cycleMonth = cycle.statementClose.getMonth() + 1;
+            return cycleMonth === card.annualFeeMonth;
+          })() && (
+            <View style={styles.row}>
+              <Text style={styles.rowLabel}>Annual fee</Text>
+              <Text style={styles.rowValue}>+{formatPeso(card.annualFee)}</Text>
+            </View>
+          )}
+          {proposedAmount > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.rowLabel}>Proposed swipe</Text>
+              <Text style={styles.rowValue}>+{formatPeso(proposedAmount)}</Text>
+            </View>
+          )}
+          <View style={styles.divider} />
+          <View style={styles.row}>
+            <Text style={[styles.rowLabel, { fontWeight: '700' }]}>Projected statement balance</Text>
+            <Text style={[styles.rowValue, { fontWeight: '700' }]}>{formatPeso(impact.projectedBalance)}</Text>
           </View>
 
           {impact.netAvailableCash !== null ? (

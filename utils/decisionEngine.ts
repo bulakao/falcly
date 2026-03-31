@@ -65,6 +65,34 @@ export function getCycleDates(card: Card, today: Date = new Date()): CycleDates 
 }
 
 /**
+ * Calculate the projected statement balance for a card.
+ * Formula: outstanding_balance + pending_transactions + installments_monthly_amount
+ *          + subscriptions_this_cycle + proposed_swipe + annual_fee (if due this cycle)
+ */
+export function projectedStatementBalance(
+  card: Card,
+  proposedSwipe: number = 0,
+  today: Date = new Date(),
+): number {
+  let projected = card.outstandingBalance
+    + card.pendingTransactions
+    + card.installmentsMonthlyAmount
+    + card.subscriptionsThisCycle
+    + proposedSwipe;
+
+  // Add annual fee if it falls in the current cycle month
+  if (card.annualFee > 0 && card.annualFeeMonth > 0) {
+    const cycle = getCycleDates(card, today);
+    const cycleMonth = cycle.statementClose.getMonth() + 1; // 1-based
+    if (cycleMonth === card.annualFeeMonth) {
+      projected += card.annualFee;
+    }
+  }
+
+  return projected;
+}
+
+/**
  * Calculate utilization ratio.
  */
 export function utilization(outstandingBalance: number, creditLimit: number): number {
@@ -146,7 +174,7 @@ export function calculateSwipeImpact(
   netAvailableCash: number | null = null,
   today: Date = new Date(),
 ): SwipeImpactResult {
-  const projectedBalance = card.outstandingBalance + proposedAmount;
+  const projectedBalance = projectedStatementBalance(card, proposedAmount, today);
   const projectedUtil = utilization(projectedBalance, card.creditLimit);
   const projectedUtilPct = Math.round(projectedUtil * 100);
   const days = daysToStatement(card.statementDay, today);

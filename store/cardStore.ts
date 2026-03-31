@@ -12,7 +12,7 @@ import {
 interface CardStore {
   cards: Card[];
   _nextId: number;
-  addCard: (card: Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt'>) => void;
+  addCard: (card: Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt' | 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'> & Partial<Pick<Card, 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'>>) => void;
   updateBalance: (cardId: string, newBalance: number) => void;
 }
 
@@ -25,6 +25,11 @@ export const useCardStore = create<CardStore>()(
         const now = Date.now();
         const id = get()._nextId;
         const card: Card = {
+          pendingTransactions: 0,
+          installmentsMonthlyAmount: 0,
+          subscriptionsThisCycle: 0,
+          annualFee: 0,
+          annualFeeMonth: 0,
           ...cardData,
           id: String(id),
           balanceUpdatedAt: now,
@@ -48,6 +53,22 @@ export const useCardStore = create<CardStore>()(
     {
       name: 'falcly-cards',
       storage: createJSONStorage(() => AsyncStorage),
+      version: 1,
+      migrate: (persisted: unknown, version: number) => {
+        const state = persisted as CardStore;
+        if (version === 0) {
+          // Backfill new projected balance fields for existing cards
+          state.cards = state.cards.map((c) => ({
+            ...c,
+            pendingTransactions: c.pendingTransactions ?? 0,
+            installmentsMonthlyAmount: c.installmentsMonthlyAmount ?? 0,
+            subscriptionsThisCycle: c.subscriptionsThisCycle ?? 0,
+            annualFee: c.annualFee ?? 0,
+            annualFeeMonth: c.annualFeeMonth ?? 0,
+          }));
+        }
+        return state;
+      },
     },
   ),
 );

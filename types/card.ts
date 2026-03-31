@@ -8,6 +8,11 @@ export interface Card {
   interestRate: number; // monthly rate, e.g. 0.02 = 2%
   minPaymentPct: number; // e.g. 0.05 = 5%
   minPaymentFloor: number; // e.g. 500
+  pendingTransactions: number; // pending charges not yet posted
+  installmentsMonthlyAmount: number; // committed installment amount per cycle
+  subscriptionsThisCycle: number; // subscriptions hitting this billing cycle
+  annualFee: number; // annual fee amount (0 if none)
+  annualFeeMonth: number; // month (1–12) when annual fee is charged (0 if none)
   balanceUpdatedAt: number; // timestamp
   createdAt: number;
 }
