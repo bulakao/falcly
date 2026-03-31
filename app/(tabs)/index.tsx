@@ -122,6 +122,11 @@ export default function HomeScreen() {
           <Text style={styles.emptySubtitle}>
             Add your first credit card to see if it&apos;s safe to swipe.
           </Text>
+          <Link href="/onboarding" asChild>
+            <Pressable style={styles.onboardingButton}>
+              <Text style={styles.onboardingButtonText}>Get Started</Text>
+            </Pressable>
+          </Link>
         </View>
       ) : (
         <FlatList
@@ -231,6 +236,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#888',
     textAlign: 'center',
+  },
+  onboardingButton: {
+    marginTop: 20,
+    backgroundColor: '#10b981',
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 10,
+  },
+  onboardingButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
   },
   addButton: {
     position: 'absolute',
