@@ -55,14 +55,23 @@ function BestCardHero({ cards, getNetAvailableCash }: { cards: Card[]; getNetAva
   );
 }
 
-function CardItem({ card, netAvailableCash }: { card: Card; netAvailableCash: number | null }) {
+function CardItem({ card, netAvailableCash, readOnly }: { card: Card; netAvailableCash: number | null; readOnly: boolean }) {
   const { status, reason } = calculateCardStatus(card, new Date(), netAvailableCash);
   const staleness = getStalenessLevel(card.balanceUpdatedAt);
 
   return (
     <Link href={{ pathname: '/swipe-impact', params: { cardId: card.id } }} asChild>
       <Pressable>
-        <View style={styles.card}>
+        <View style={[styles.card, readOnly && styles.readOnlyCard]}>
+          {readOnly && (
+            <Link href="/pro-paywall" asChild>
+              <Pressable style={styles.readOnlyBanner}>
+                <Text style={styles.readOnlyBannerText}>
+                  Reactivate Pro to manage all cards
+                </Text>
+              </Pressable>
+            </Link>
+          )}
           <View style={styles.cardHeader}>
             <Text style={styles.bankName}>{card.bankName}</Text>
             <View style={styles.badgeRow}>
@@ -80,12 +89,12 @@ function CardItem({ card, netAvailableCash }: { card: Card; netAvailableCash: nu
               <StatusTooltip />
             </View>
           </View>
-          {staleness === 'stale' && (
+          {staleness === 'stale' && !readOnly && (
             <Text style={styles.staleWarning}>
               Data stale — update before trusting this status
             </Text>
           )}
-          {staleness === 'warning' && (
+          {staleness === 'warning' && !readOnly && (
             <View style={styles.stalenessWarningRow}>
               <Text style={styles.stalenessWarningText}>
                 ⚠️ Balance may be outdated · Tap to update
@@ -110,10 +119,14 @@ function CardItem({ card, netAvailableCash }: { card: Card; netAvailableCash: nu
 export default function HomeScreen() {
   const cards = useCardStore((s) => s.cards);
   const canAddCard = useSubscriptionStore((s) => s.canAddCard);
+  const isCardReadOnly = useSubscriptionStore((s) => s.isCardReadOnly);
+  const daysUntilDataDeletion = useSubscriptionStore((s) => s.daysUntilDataDeletion);
   const cashOnHand = useUserStore((s) => s.cashOnHand);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
   const payday = useUserStore((s) => s.payday);
   const committedExpenses = useUserStore((s) => s.committedExpenses);
+
+  const daysRemaining = daysUntilDataDeletion();
 
   const getNetAvailableCash = useCallback(
     (card: Card) => computeNetAvailableCash(cashOnHand, monthlyIncome, payday, card, committedExpenses),
@@ -146,8 +159,25 @@ export default function HomeScreen() {
         <FlatList
           data={cards}
           keyExtractor={(c) => c.id}
-          renderItem={({ item }) => <CardItem card={item} netAvailableCash={getNetAvailableCash(item)} />}
-          ListHeaderComponent={<BestCardHero cards={cards} getNetAvailableCash={getNetAvailableCash} />}
+          renderItem={({ item, index }) => (
+            <CardItem card={item} netAvailableCash={getNetAvailableCash(item)} readOnly={isCardReadOnly(index)} />
+          )}
+          ListHeaderComponent={
+            <>
+              <BestCardHero cards={cards} getNetAvailableCash={getNetAvailableCash} />
+              {daysRemaining !== null && (
+                <Link href="/pro-paywall" asChild>
+                  <Pressable style={styles.retentionWarning}>
+                    <Text style={styles.retentionWarningText}>
+                      {daysRemaining > 0
+                        ? `Your Pro card data will be deleted in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}. Reactivate Pro to keep it.`
+                        : 'Your Pro card data is scheduled for deletion. Reactivate Pro to keep it.'}
+                    </Text>
+                  </Pressable>
+                </Link>
+              )}
+            </>
+          }
           contentContainerStyle={styles.list}
         />
       )}
@@ -319,5 +349,38 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#92400e',
+  },
+  readOnlyCard: {
+    opacity: 0.75,
+    borderColor: '#d1d5db',
+    borderStyle: 'dashed',
+  },
+  readOnlyBanner: {
+    backgroundColor: '#eef2ff',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginBottom: 8,
+  },
+  readOnlyBannerText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6366f1',
+    textAlign: 'center',
+  },
+  retentionWarning: {
+    backgroundColor: '#fef2f2',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#fecaca',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 12,
+  },
+  retentionWarningText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#dc2626',
+    textAlign: 'center',
   },
 });

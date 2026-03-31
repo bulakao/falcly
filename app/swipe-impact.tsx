@@ -44,7 +44,9 @@ function formatPeso(amount: number): string {
 
 export default function SwipeImpactScreen() {
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
-  const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
+  const cards = useCardStore((s) => s.cards);
+  const card = cards.find((c) => c.id === cardId);
+  const cardIndex = cards.findIndex((c) => c.id === cardId);
   const deleteCard = useCardStore((s) => s.deleteCard);
   const router = useRouter();
   const cashOnHand = useUserStore((s) => s.cashOnHand);
@@ -52,6 +54,8 @@ export default function SwipeImpactScreen() {
   const payday = useUserStore((s) => s.payday);
   const committedExpenses = useUserStore((s) => s.committedExpenses);
   const subscriptionTier = useSubscriptionStore((s) => s.tier);
+  const isCardReadOnly = useSubscriptionStore((s) => s.isCardReadOnly);
+  const readOnly = isCardReadOnly(cardIndex);
   const [amountText, setAmountText] = useState('');
 
   const proposedAmount = useMemo(() => {
@@ -117,8 +121,19 @@ export default function SwipeImpactScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Staleness banner at 5+ days — tappable to update balance */}
-        {staleness !== 'fresh' && (
+        {/* Read-only upgrade banner for expired Pro cards */}
+        {readOnly && (
+          <Link href="/pro-paywall" asChild>
+            <Pressable style={styles.readOnlyBanner}>
+              <Text style={styles.readOnlyBannerText}>
+                Reactivate Pro to manage all cards
+              </Text>
+            </Pressable>
+          </Link>
+        )}
+
+        {/* Staleness banner at 5+ days — tappable to update balance (disabled for read-only) */}
+        {staleness !== 'fresh' && !readOnly && (
           <Link href={{ pathname: '/update-balance', params: { cardId: card.id } }} asChild>
             <Pressable style={staleness === 'stale' ? styles.staleBanner : styles.warningBanner}>
               <Text style={staleness === 'stale' ? styles.staleBannerText : styles.warningBannerText}>
@@ -156,21 +171,23 @@ export default function SwipeImpactScreen() {
           ]}>
             Balance updated {formatUpdatedAgo(card.balanceUpdatedAt)}
           </Text>
-          <View style={styles.actionRow}>
-            <Link href={{ pathname: '/edit-card', params: { cardId: card.id } }} asChild>
-              <Pressable style={styles.updateButton}>
-                <Text style={styles.editButtonText}>Edit Card</Text>
+          {!readOnly && (
+            <View style={styles.actionRow}>
+              <Link href={{ pathname: '/edit-card', params: { cardId: card.id } }} asChild>
+                <Pressable style={styles.updateButton}>
+                  <Text style={styles.editButtonText}>Edit Card</Text>
+                </Pressable>
+              </Link>
+              <Link href={{ pathname: '/update-balance', params: { cardId: card.id } }} asChild>
+                <Pressable style={styles.updateButton}>
+                  <Text style={styles.updateButtonText}>Update Balance</Text>
+                </Pressable>
+              </Link>
+              <Pressable style={styles.deleteButton} onPress={handleDeleteCard}>
+                <Text style={styles.deleteButtonText}>Delete</Text>
               </Pressable>
-            </Link>
-            <Link href={{ pathname: '/update-balance', params: { cardId: card.id } }} asChild>
-              <Pressable style={styles.updateButton}>
-                <Text style={styles.updateButtonText}>Update Balance</Text>
-              </Pressable>
-            </Link>
-            <Pressable style={styles.deleteButton} onPress={handleDeleteCard}>
-              <Text style={styles.deleteButtonText}>Delete</Text>
-            </Pressable>
-          </View>
+            </View>
+          )}
         </View>
 
         {/* Billing cycle timeline */}
@@ -584,5 +601,19 @@ const styles = StyleSheet.create({
   trialCtaSubtext: {
     fontSize: 13,
     color: '#818cf8',
+  },
+  readOnlyBanner: {
+    backgroundColor: '#eef2ff',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#6366f1',
+    padding: 14,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  readOnlyBannerText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#6366f1',
   },
 });

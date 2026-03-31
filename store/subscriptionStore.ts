@@ -7,11 +7,13 @@ export type PlanType = 'annual' | 'monthly';
 
 const FREE_CARD_LIMIT = 2;
 const TRIAL_DURATION_DAYS = 14;
+const DATA_RETENTION_DAYS = 90;
 
 interface SubscriptionStore {
   tier: SubscriptionTier;
   trialEndsAt: number | null; // timestamp, set when trial starts
   planType: PlanType | null; // null = trial or free, set on purchase
+  proExpiredAt: number | null; // timestamp when Pro expired (for 90-day data retention)
   startTrial: () => void;
   isTrialActive: () => boolean;
   isPaidPro: () => boolean;
@@ -20,6 +22,8 @@ interface SubscriptionStore {
   checkTrialExpiry: () => void;
   canAddCard: (currentCardCount: number) => boolean;
   getTrialEndDate: () => Date | null;
+  isCardReadOnly: (cardIndex: number) => boolean;
+  daysUntilDataDeletion: () => number | null;
 }
 
 export const useSubscriptionStore = create<SubscriptionStore>()(
@@ -28,9 +32,10 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
       tier: 'free' as SubscriptionTier,
       trialEndsAt: null,
       planType: null as PlanType | null,
+      proExpiredAt: null as number | null,
       startTrial: () => {
         const trialEnd = Date.now() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000;
-        set({ tier: 'pro', trialEndsAt: trialEnd });
+        set({ tier: 'pro', trialEndsAt: trialEnd, proExpiredAt: null });
       },
       isTrialActive: () => {
         const { tier, trialEndsAt, planType } = get();
@@ -43,7 +48,7 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
       purchasePro: (plan: PlanType) => {
         // RevenueCat would handle the actual purchase here
         // On success, grant 'pro' entitlement and record plan type
-        set({ tier: 'pro', planType: plan, trialEndsAt: null });
+        set({ tier: 'pro', planType: plan, trialEndsAt: null, proExpiredAt: null });
       },
       verifyEntitlement: () => {
         // RevenueCat would verify the entitlement on app launch
@@ -55,7 +60,7 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
         const { tier, trialEndsAt, planType } = get();
         // Only expire trial users (not paid subscribers)
         if (tier === 'pro' && planType === null && trialEndsAt !== null && Date.now() >= trialEndsAt) {
-          set({ tier: 'free' });
+          set({ tier: 'free', proExpiredAt: Date.now() });
         }
       },
       canAddCard: (currentCardCount: number) => {
@@ -65,6 +70,18 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
         const { trialEndsAt } = get();
         return trialEndsAt !== null ? new Date(trialEndsAt) : null;
       },
+      isCardReadOnly: (cardIndex: number) => {
+        const { tier } = get();
+        // Cards at index >= FREE_CARD_LIMIT are read-only on free tier
+        return tier === 'free' && cardIndex >= FREE_CARD_LIMIT;
+      },
+      daysUntilDataDeletion: () => {
+        const { tier, proExpiredAt } = get();
+        if (tier === 'pro' || proExpiredAt === null) return null;
+        const elapsed = Date.now() - proExpiredAt;
+        const remaining = DATA_RETENTION_DAYS - Math.floor(elapsed / (24 * 60 * 60 * 1000));
+        return Math.max(0, remaining);
+      },
     }),
     {
       name: 'falcly-subscription',
@@ -73,9 +90,10 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
         tier: state.tier,
         trialEndsAt: state.trialEndsAt,
         planType: state.planType,
+        proExpiredAt: state.proExpiredAt,
       }),
     },
   ),
 );
 
-export { FREE_CARD_LIMIT, TRIAL_DURATION_DAYS };
+export { FREE_CARD_LIMIT, TRIAL_DURATION_DAYS, DATA_RETENTION_DAYS };
