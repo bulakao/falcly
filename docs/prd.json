@@ -105,7 +105,7 @@
         "At 10+ days since last update: the SAFE/CAUTION/RISKY status badge is replaced by a staleness indicator ('Data stale — update before trusting this status')"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

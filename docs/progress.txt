@@ -16,7 +16,8 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Cycle date math: `getCycleDates(card, today)` in `utils/decisionEngine.ts` returns cycleStart, statementClose, dueDate, and progress metrics
 - New tab screens go in `app/(tabs)/` and must be registered in `app/(tabs)/_layout.tsx`
 - Swipe-impact screen is the card detail screen — card-level actions (update balance, edit, delete) live here
-- `formatUpdatedAgo(timestamp)` in `app/swipe-impact.tsx` converts timestamps to relative time strings
+- Staleness helpers in `utils/staleness.ts`: `formatUpdatedAgo()`, `getStalenessLevel()`, `daysSinceUpdate()`
+- Staleness levels: fresh (<5 days), warning (5–9 days, amber), stale (10+ days, badge replaced)
 
 ---
 
@@ -101,4 +102,19 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - The swipe-impact screen doubles as the card detail screen — card-level actions (update, edit, delete) live here
   - `selectTextOnFocus` on TextInput is useful for pre-filled numeric fields so users can overwrite easily
   - Staleness warning banner (CL-07) will need to link to the update-balance modal — route is already registered
+---
+
+## 2026-03-31 - CL-07
+- Extracted `formatUpdatedAgo` from swipe-impact into shared `utils/staleness.ts`
+- Added `getStalenessLevel()` and `daysSinceUpdate()` helpers with three-tier system (fresh/warning/stale)
+- Home screen cards now show "Updated Xd ago" timestamp at all times
+- At 5+ days: amber inline warning with "Tap to update" CTA on home screen cards
+- At 10+ days: SAFE/CAUTION/RISKY badge replaced by gray "⚠ STALE" badge, reason text cleared
+- Swipe-impact (card detail) screen: tappable staleness banner links to update-balance modal, badge replaced at 10+ days
+- Balance timestamp text changes color based on staleness (amber at warning, gray at stale)
+- Files changed: `utils/staleness.ts` (new), `app/(tabs)/index.tsx`, `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - Staleness is a UI-level concern — it doesn't modify the decision engine's output, it overrides the badge display
+  - Shared utils in `utils/` prevent duplication between home screen and card detail
+  - Pre-existing eslint error on line 112 of index.tsx (unescaped apostrophe) — not introduced by CL-07
 ---
