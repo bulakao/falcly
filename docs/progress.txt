@@ -15,6 +15,8 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Route params: use `useLocalSearchParams<{ paramName: string }>()` for typed params in Expo Router screens
 - Cycle date math: `getCycleDates(card, today)` in `utils/decisionEngine.ts` returns cycleStart, statementClose, dueDate, and progress metrics
 - New tab screens go in `app/(tabs)/` and must be registered in `app/(tabs)/_layout.tsx`
+- Swipe-impact screen is the card detail screen — card-level actions (update balance, edit, delete) live here
+- `formatUpdatedAgo(timestamp)` in `app/swipe-impact.tsx` converts timestamps to relative time strings
 
 ---
 
@@ -86,4 +88,17 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - `position: 'relative'` on parent + `position: 'absolute'` with `left: '%'` works well for timeline markers in RN
   - Tab ordering in `_layout.tsx` determines the order in the tab bar — insert new tabs before Settings
   - Manual browser/simulator verification needed for visual timeline components
+---
+
+## 2026-03-31 - CL-06
+- Added `updateBalance` action to cardStore — updates `outstandingBalance` and `balanceUpdatedAt` timestamp
+- Created `app/update-balance.tsx` modal with single numeric field, pre-filled with current balance, confirms on tap
+- Added "Balance updated X ago" timestamp and "Update Balance" CTA to swipe-impact (card detail) screen
+- Registered `/update-balance` route in root layout
+- Files changed: `store/cardStore.ts`, `app/update-balance.tsx`, `app/_layout.tsx`, `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - `formatUpdatedAgo()` helper converts timestamp to human-readable relative time — reusable for staleness warnings (CL-07)
+  - The swipe-impact screen doubles as the card detail screen — card-level actions (update, edit, delete) live here
+  - `selectTextOnFocus` on TextInput is useful for pre-filled numeric fields so users can overwrite easily
+  - Staleness warning banner (CL-07) will need to link to the update-balance modal — route is already registered
 ---
