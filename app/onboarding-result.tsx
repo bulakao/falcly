@@ -10,6 +10,7 @@ import {
 import { useLocalSearchParams, router } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
+import StatusTooltip from '@/components/StatusTooltip';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { calculateCardStatus } from '@/utils/decisionEngine';
@@ -94,10 +95,13 @@ export default function OnboardingResultScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         {/* Status result */}
         <View style={[styles.statusCard, { borderColor: color }]}>
-          <View style={[styles.badge, { backgroundColor: color }]}>
-            <Text style={styles.badgeText}>
-              {STATUS_ICONS[status]} {status}
-            </Text>
+          <View style={styles.badgeRow}>
+            <View style={[styles.badge, { backgroundColor: color }]}>
+              <Text style={styles.badgeText}>
+                {STATUS_ICONS[status]} {status}
+              </Text>
+            </View>
+            <StatusTooltip />
           </View>
           <Text style={styles.reason}>{reason}</Text>
           <Text style={styles.explanation}>{STATUS_EXPLANATIONS[status]}</Text>
@@ -186,11 +190,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   badge: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
-    marginBottom: 12,
   },
   badgeText: {
     color: '#fff',

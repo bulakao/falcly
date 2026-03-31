@@ -3,6 +3,7 @@ import { StyleSheet, Pressable, FlatList } from 'react-native';
 import { Link } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
+import StatusTooltip from '@/components/StatusTooltip';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { calculateCardStatus, calculateBestCard, computeNetAvailableCash } from '@/utils/decisionEngine';
@@ -63,17 +64,20 @@ function CardItem({ card, netAvailableCash }: { card: Card; netAvailableCash: nu
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.bankName}>{card.bankName}</Text>
-            {staleness === 'stale' ? (
-              <View style={[styles.badge, { backgroundColor: '#6b7280' }]}>
-                <Text style={styles.badgeText}>⚠ STALE</Text>
-              </View>
-            ) : (
-              <View style={[styles.badge, { backgroundColor: STATUS_COLORS[status] }]}>
-                <Text style={styles.badgeText}>
-                  {STATUS_ICONS[status]} {status}
-                </Text>
-              </View>
-            )}
+            <View style={styles.badgeRow}>
+              {staleness === 'stale' ? (
+                <View style={[styles.badge, { backgroundColor: '#6b7280' }]}>
+                  <Text style={styles.badgeText}>⚠ STALE</Text>
+                </View>
+              ) : (
+                <View style={[styles.badge, { backgroundColor: STATUS_COLORS[status] }]}>
+                  <Text style={styles.badgeText}>
+                    {STATUS_ICONS[status]} {status}
+                  </Text>
+                </View>
+              )}
+              <StatusTooltip />
+            </View>
           </View>
           {staleness === 'stale' && (
             <Text style={styles.staleWarning}>
@@ -173,6 +177,10 @@ const styles = StyleSheet.create({
   bankName: {
     fontSize: 18,
     fontWeight: '700',
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   badge: {
     paddingHorizontal: 10,
