@@ -10,6 +10,7 @@ import {
 import { useLocalSearchParams } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
+import { BillingTimeline } from '@/components/BillingTimeline';
 import { useCardStore } from '@/store/cardStore';
 import { calculateSwipeImpact } from '@/utils/decisionEngine';
 import type { CardStatus } from '@/types/card';
@@ -83,6 +84,9 @@ export default function SwipeImpactScreen() {
           </View>
         </View>
         <Text style={styles.reason}>{impact.reason}</Text>
+
+        {/* Billing cycle timeline */}
+        <BillingTimeline card={card} />
 
         {/* Amount input */}
         <Text style={styles.label}>How much will you swipe?</Text>

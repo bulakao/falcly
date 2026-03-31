@@ -36,6 +36,16 @@ export interface BestCardResult {
   warning: string | null; // non-null when no SAFE card available
 }
 
+export interface CycleDates {
+  cycleStart: Date;
+  statementClose: Date;
+  dueDate: Date;
+  today: Date;
+  totalDays: number; // cycle length in days
+  daysSinceStart: number;
+  daysToStatement: number;
+}
+
 export const DEFAULT_DUE_DAY_OFFSET = 21;
 export const DEFAULT_INTEREST_RATE = 0.02;
 export const DEFAULT_MIN_PAYMENT_PCT = 0.05;

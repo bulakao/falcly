@@ -1,4 +1,4 @@
-import { Card, CardStatus, CardStatusResult, SwipeImpactResult, BestCardResult } from '@/types/card';
+import { Card, CardStatus, CardStatusResult, SwipeImpactResult, BestCardResult, CycleDates } from '@/types/card';
 
 /**
  * Calculate days until statement close from today.
@@ -20,6 +20,48 @@ export function daysToStatement(statementDay: number, today: Date = new Date()):
 
   const diffMs = statementDate.getTime() - today.getTime();
   return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * Calculate the key dates in a card's billing cycle.
+ * cycleStart is the day after the previous statement close.
+ */
+export function getCycleDates(card: Card, today: Date = new Date()): CycleDates {
+  const currentDay = today.getDate();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+
+  // Statement close date (same logic as daysToStatement)
+  let statementClose: Date;
+  if (currentDay <= card.statementDay) {
+    statementClose = new Date(currentYear, currentMonth, card.statementDay);
+  } else {
+    statementClose = new Date(currentYear, currentMonth + 1, card.statementDay);
+  }
+
+  // Cycle start = day after previous statement close (previous month's statement day + 1)
+  const prevStatementClose = new Date(statementClose);
+  prevStatementClose.setMonth(prevStatementClose.getMonth() - 1);
+  const cycleStart = new Date(prevStatementClose);
+  cycleStart.setDate(cycleStart.getDate() + 1);
+
+  // Due date = statement close + dueDayOffset
+  const dueDate = new Date(statementClose);
+  dueDate.setDate(dueDate.getDate() + card.dueDayOffset);
+
+  const totalDays = Math.round((statementClose.getTime() - cycleStart.getTime()) / (1000 * 60 * 60 * 24));
+  const daysSinceStart = Math.round((today.getTime() - cycleStart.getTime()) / (1000 * 60 * 60 * 24));
+  const daysToStmt = Math.ceil((statementClose.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+  return {
+    cycleStart,
+    statementClose,
+    dueDate,
+    today,
+    totalDays,
+    daysSinceStart: Math.max(0, daysSinceStart),
+    daysToStatement: daysToStmt,
+  };
 }
 
 /**
