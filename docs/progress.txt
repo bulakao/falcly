@@ -13,6 +13,8 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Swipe impact: `calculateSwipeImpact(card, amount, netAvailableCash)` in `utils/decisionEngine.ts` — netAvailableCash is null until CA stories
 - Best card scoring: `scoreCard(card)` and `calculateBestCard(cards)` in `utils/decisionEngine.ts` — lowest score wins; cash penalty stubbed until CA
 - Route params: use `useLocalSearchParams<{ paramName: string }>()` for typed params in Expo Router screens
+- Cycle date math: `getCycleDates(card, today)` in `utils/decisionEngine.ts` returns cycleStart, statementClose, dueDate, and progress metrics
+- New tab screens go in `app/(tabs)/` and must be registered in `app/(tabs)/_layout.tsx`
 
 ---
 
@@ -68,4 +70,20 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - Scoring formula: `utilization×100 + (30 - daysToStatement) + statusPenalty(SAFE=0/CAUTION=50/RISKY=100) + cashPenalty(0 until CA)`
   - `FlatList.ListHeaderComponent` is the clean way to add a hero above a list without nesting ScrollViews
   - Cash coverage penalty is stubbed at 0 — will need wiring when CA stories land
+---
+
+## 2026-03-31 - CL-05
+- Added `CycleDates` type and `getCycleDates()` helper to decision engine for cycle date calculations
+- Created `BillingTimeline` component: single-card timeline strip showing cycle start → today → statement close → due date
+- Statement close marker changes color: emerald (safe), amber (≤7 days), crimson (≤2 days)
+- Created `GanttTimeline` component: multi-card Gantt view with cards stacked vertically, sorted by urgency
+- Added new "Timeline" tab to tab layout with calendar icon
+- Integrated single-card timeline strip into swipe-impact screen
+- Files changed: `types/card.ts`, `utils/decisionEngine.ts`, `components/BillingTimeline.tsx`, `components/GanttTimeline.tsx`, `app/(tabs)/timeline.tsx`, `app/(tabs)/_layout.tsx`, `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - Cycle date math: cycle start = previous statement day + 1, due date = statement close + dueDayOffset
+  - For timeline positioning, calculate a global date range across all cards and convert dates to percentages
+  - `position: 'relative'` on parent + `position: 'absolute'` with `left: '%'` works well for timeline markers in RN
+  - Tab ordering in `_layout.tsx` determines the order in the tab bar — insert new tabs before Settings
+  - Manual browser/simulator verification needed for visual timeline components
 ---

@@ -75,7 +75,7 @@
         "Multi-card Gantt view shows all cards stacked vertically, sorted by urgency (closest statement close first), with color-coded bars by status"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
