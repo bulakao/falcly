@@ -3,7 +3,7 @@ import { Link } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { useCardStore } from '@/store/cardStore';
-import { calculateCardStatus } from '@/utils/decisionEngine';
+import { calculateCardStatus, calculateBestCard } from '@/utils/decisionEngine';
 import type { Card, CardStatus } from '@/types/card';
 
 const STATUS_COLORS: Record<CardStatus, string> = {
@@ -17,6 +17,38 @@ const STATUS_ICONS: Record<CardStatus, string> = {
   CAUTION: '⚠',
   RISKY: '✕',
 };
+
+function BestCardHero({ cards }: { cards: Card[] }) {
+  const best = calculateBestCard(cards);
+  if (!best) return null;
+
+  const { card, status, warning } = best;
+  const color = STATUS_COLORS[status.status];
+
+  return (
+    <Link href={{ pathname: '/swipe-impact', params: { cardId: card.id } }} asChild>
+      <Pressable>
+        <View style={[styles.hero, { borderColor: color }]}>
+          {warning && (
+            <View style={styles.warningBanner}>
+              <Text style={styles.warningText}>⚠ {warning}</Text>
+            </View>
+          )}
+          <Text style={styles.heroLabel}>Best card to use today</Text>
+          <View style={styles.heroRow}>
+            <Text style={styles.heroBankName}>{card.bankName}</Text>
+            <View style={[styles.badge, { backgroundColor: color }]}>
+              <Text style={styles.badgeText}>
+                {STATUS_ICONS[status.status]} {status.status}
+              </Text>
+            </View>
+          </View>
+          <Text style={styles.heroReason}>{status.reason}</Text>
+        </View>
+      </Pressable>
+    </Link>
+  );
+}
 
 function CardItem({ card }: { card: Card }) {
   const { status, reason } = calculateCardStatus(card);
@@ -60,6 +92,7 @@ export default function HomeScreen() {
           data={cards}
           keyExtractor={(c) => c.id}
           renderItem={({ item }) => <CardItem card={item} />}
+          ListHeaderComponent={<BestCardHero cards={cards} />}
           contentContainerStyle={styles.list}
         />
       )}
@@ -149,5 +182,45 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '700',
+  },
+  hero: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 2,
+  },
+  heroLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#888',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  heroRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  heroBankName: {
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  heroReason: {
+    fontSize: 14,
+    color: '#666',
+  },
+  warningBanner: {
+    backgroundColor: '#fef3c7',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 10,
+  },
+  warningText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#92400e',
   },
 });

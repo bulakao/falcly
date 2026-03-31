@@ -1,4 +1,4 @@
-import { Card, CardStatus, CardStatusResult, SwipeImpactResult } from '@/types/card';
+import { Card, CardStatus, CardStatusResult, SwipeImpactResult, BestCardResult } from '@/types/card';
 
 /**
  * Calculate days until statement close from today.
@@ -207,4 +207,71 @@ export function calculateSwipeImpact(
     carriedBalance,
     monthlyInterest,
   };
+}
+
+/**
+ * Score a card for best-card ranking.
+ * Lower score = better card to use.
+ * score = utilization×100 + days penalty + status penalty + cash coverage penalty
+ */
+export function scoreCard(card: Card, today: Date = new Date()): number {
+  const util = utilization(card.outstandingBalance, card.creditLimit);
+  const days = daysToStatement(card.statementDay, today);
+  const { status } = calculateCardStatus(card, today);
+
+  // Utilization component: 0–100
+  const utilizationScore = util * 100;
+
+  // Days penalty: fewer days to statement = higher penalty (0–30)
+  const daysPenalty = Math.max(0, 30 - days);
+
+  // Status penalty: SAFE=0, CAUTION=50, RISKY=100
+  const statusPenalty = status === 'SAFE' ? 0 : status === 'CAUTION' ? 50 : 100;
+
+  // Cash coverage penalty: deferred until CA stories (always 0 for now)
+  const cashPenalty = 0;
+
+  return utilizationScore + daysPenalty + statusPenalty + cashPenalty;
+}
+
+/**
+ * Find the best card to use today.
+ * Picks the lowest-scoring SAFE card; if none, lowest-scoring CAUTION card with warning.
+ */
+export function calculateBestCard(cards: Card[], today: Date = new Date()): BestCardResult | null {
+  if (cards.length === 0) return null;
+
+  const scored = cards.map((card) => ({
+    card,
+    score: scoreCard(card, today),
+    status: calculateCardStatus(card, today),
+  }));
+
+  // Sort by score ascending (lowest = best)
+  scored.sort((a, b) => a.score - b.score);
+
+  // Pick lowest-scoring SAFE card
+  const safePick = scored.find((s) => s.status.status === 'SAFE');
+  if (safePick) {
+    return {
+      card: safePick.card,
+      status: safePick.status,
+      score: safePick.score,
+      warning: null,
+    };
+  }
+
+  // No SAFE cards — pick lowest-scoring CAUTION card
+  const cautionPick = scored.find((s) => s.status.status === 'CAUTION');
+  if (cautionPick) {
+    return {
+      card: cautionPick.card,
+      status: cautionPick.status,
+      score: cautionPick.score,
+      warning: 'No SAFE cards available — use with caution',
+    };
+  }
+
+  // All cards are RISKY
+  return null;
 }

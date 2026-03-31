@@ -29,6 +29,13 @@ export interface SwipeImpactResult {
   monthlyInterest: number; // 0 if no carried balance
 }
 
+export interface BestCardResult {
+  card: Card;
+  status: CardStatusResult;
+  score: number;
+  warning: string | null; // non-null when no SAFE card available
+}
+
 export const DEFAULT_DUE_DAY_OFFSET = 21;
 export const DEFAULT_INTEREST_RATE = 0.02;
 export const DEFAULT_MIN_PAYMENT_PCT = 0.05;
