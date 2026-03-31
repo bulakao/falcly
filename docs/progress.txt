@@ -21,6 +21,8 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - User profile store: `store/userStore.ts` with Zustand persist, store name `falcly-user`
 - Cash on hand is `number | null` — null means not yet set; swipe impact shows "Not set" gracefully
 - Net available cash is per-card: `computeNetAvailableCash(cash, income, payday, card, committedExpenses)` in `utils/decisionEngine.ts` — income included only when payday ≤ card due date, committed expenses deducted
+- `calculateCardStatus()` accepts optional `netAvailableCash` param — pass it to enable cash-based RISKY detection on home screen
+- `scoreCard()` and `calculateBestCard()` also accept net available cash — pass a getter function for per-card computation
 
 ---
 
@@ -172,4 +174,18 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - `incomeApplies` must be computed per-card since each card has a different due date — use `getCycleDates(card).dueDate.getDate()` to compare with payday
   - auto_payments and subscriptions_this_cycle are part of the formula spec but have no Phase 1 stories — they're effectively 0 until those features are added
   - Strikethrough text (`textDecorationLine: 'line-through'`) is a good visual pattern for showing excluded-but-visible formula components
+---
+
+## 2026-03-31 - DE-01
+- Added cash-below-minimum-payment RISKY check as highest priority condition in `calculateCardStatus()`
+- Extended `calculateCardStatus()` with optional `netAvailableCash` parameter
+- Extended `scoreCard()` and `calculateBestCard()` to pass through net available cash
+- Wired home screen to compute per-card `netAvailableCash` via `computeNetAvailableCash()` and pass to all status calculations
+- Best card hero and card list items now reflect cash-aware RISKY status
+- Files changed: `utils/decisionEngine.ts`, `app/(tabs)/index.tsx`
+- **Learnings for future iterations:**
+  - `calculateCardStatus()` now accepts optional `netAvailableCash` — all callers should pass it when cash data is available
+  - `calculateBestCard()` uses a getter function `(card: Card) => number | null` to compute per-card cash, avoiding pre-computing for all cards
+  - `useCallback` for the getter function avoids re-creating on every render — depends on user store values
+  - The swipe-impact screen already had the minimum payment RISKY check in `calculateSwipeImpact()` — DE-01 brings parity to the home screen via `calculateCardStatus()`
 ---
