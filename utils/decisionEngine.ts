@@ -1,4 +1,4 @@
-import { Card, CardStatus, CardStatusResult, SwipeImpactResult, BestCardResult, CycleDates } from '@/types/card';
+import { Card, CardStatusResult, SwipeImpactResult, BestCardResult, CycleDates, FutureCycleProjection, FutureSignal } from '@/types/card';
 
 /**
  * Calculate days until statement close from today.
@@ -355,6 +355,141 @@ export function scoreCard(
   const cashPenalty = 0;
 
   return utilizationScore + daysPenalty + statusPenalty + cashPenalty;
+}
+
+/**
+ * Get cycle dates for a future cycle N months from now.
+ * cycleOffset: 0 = current, 1 = next, etc.
+ */
+function getFutureCycleDates(card: Card, cycleOffset: number, today: Date = new Date()): { statementClose: Date; dueDate: Date } {
+  const currentCycle = getCycleDates(card, today);
+  const statementClose = new Date(currentCycle.statementClose);
+  statementClose.setMonth(statementClose.getMonth() + cycleOffset);
+  const dueDate = new Date(statementClose);
+  dueDate.setDate(dueDate.getDate() + card.dueDayOffset);
+  return { statementClose, dueDate };
+}
+
+/**
+ * Project future billing cycles based on known fixed events.
+ * Shows committed items per cycle for as many cycles as fixed events exist.
+ * Cycles beyond the last known event get a signal only (no fabricated numbers).
+ */
+export function projectFutureCycles(
+  card: Card,
+  netAvailableCash: number | null = null,
+  today: Date = new Date(),
+): FutureCycleProjection[] {
+  const hasInstallments = card.installmentsMonthlyAmount > 0;
+  const hasSubscriptions = card.subscriptionsThisCycle > 0;
+  const hasAnnualFee = card.annualFee > 0 && card.annualFeeMonth > 0;
+
+  // No fixed events → no future projections
+  if (!hasInstallments && !hasSubscriptions && !hasAnnualFee) return [];
+
+  // Determine projection horizon: project enough cycles to capture all fixed events.
+  // Recurring items (installments/subscriptions) → 6 cycles.
+  // If only annual fee, project until its next occurrence (up to 12).
+  let horizon = 0;
+  if (hasInstallments || hasSubscriptions) {
+    horizon = 6;
+  }
+  if (hasAnnualFee) {
+    // Find how many cycles until annual fee month
+    const currentCycle = getCycleDates(card, today);
+    const currentCycleMonth = currentCycle.statementClose.getMonth() + 1; // 1-based
+    let monthsToFee = card.annualFeeMonth - currentCycleMonth;
+    if (monthsToFee <= 0) monthsToFee += 12;
+    horizon = Math.max(horizon, monthsToFee);
+  }
+
+  // Cap at 12
+  horizon = Math.min(horizon, 12);
+
+  const projections: FutureCycleProjection[] = [];
+
+  // Current cycle (cycle 0)
+  const currentProjected = projectedStatementBalance(card, 0, today);
+  const currentStatus = calculateCardStatus(card, today, netAvailableCash);
+  const currentCycleDates = getCycleDates(card, today);
+  projections.push({
+    cycleNumber: 0,
+    statementClose: currentCycleDates.statementClose,
+    dueDate: currentCycleDates.dueDate,
+    committedItems: {
+      installments: card.installmentsMonthlyAmount,
+      subscriptions: card.subscriptionsThisCycle,
+      annualFee: (() => {
+        const m = currentCycleDates.statementClose.getMonth() + 1;
+        return hasAnnualFee && m === card.annualFeeMonth ? card.annualFee : 0;
+      })(),
+    },
+    projectedBalance: currentProjected,
+    status: currentStatus,
+    isKnown: true,
+  });
+
+  // Future cycles (1..horizon)
+  for (let i = 1; i <= horizon; i++) {
+    const { statementClose, dueDate } = getFutureCycleDates(card, i, today);
+    const cycleMonth = statementClose.getMonth() + 1; // 1-based
+
+    const installments = hasInstallments ? card.installmentsMonthlyAmount : 0;
+    const subscriptions = hasSubscriptions ? card.subscriptionsThisCycle : 0;
+    const annualFee = hasAnnualFee && cycleMonth === card.annualFeeMonth ? card.annualFee : 0;
+
+    const projectedBalance = installments + subscriptions + annualFee;
+
+    // Status for future cycle: evaluate committed items against credit limit
+    const futureUtil = projectedBalance / card.creditLimit;
+    let status: CardStatusResult;
+    if (futureUtil > 0.8) {
+      status = { status: 'RISKY', reason: `Committed charges at ${Math.round(futureUtil * 100)}% of limit` };
+    } else if (futureUtil > 0.5) {
+      status = { status: 'CAUTION', reason: `Committed charges at ${Math.round(futureUtil * 100)}% of limit` };
+    } else if (projectedBalance > 0) {
+      status = { status: 'SAFE', reason: `${formatPeso(projectedBalance)} in known charges` };
+    } else {
+      status = { status: 'SAFE', reason: 'No known charges this cycle' };
+    }
+
+    projections.push({
+      cycleNumber: i,
+      statementClose,
+      dueDate,
+      committedItems: { installments, subscriptions, annualFee },
+      projectedBalance,
+      status,
+      isKnown: true,
+    });
+  }
+
+  // Add one signal-only cycle beyond the horizon
+  const { statementClose: beyondStmt, dueDate: beyondDue } = getFutureCycleDates(card, horizon + 1, today);
+  let signal: FutureSignal;
+  if (currentStatus.status === 'SAFE') {
+    signal = 'On Track';
+  } else if (currentStatus.status === 'CAUTION' || currentStatus.status === 'RISKY') {
+    signal = 'At Risk';
+  } else {
+    signal = 'Unknown';
+  }
+  projections.push({
+    cycleNumber: horizon + 1,
+    statementClose: beyondStmt,
+    dueDate: beyondDue,
+    committedItems: { installments: 0, subscriptions: 0, annualFee: 0 },
+    projectedBalance: 0,
+    status: { status: currentStatus.status, reason: '' },
+    isKnown: false,
+    signal,
+  });
+
+  return projections;
+}
+
+function formatPeso(amount: number): string {
+  return `₱${Math.round(amount).toLocaleString()}`;
 }
 
 /**

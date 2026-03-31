@@ -51,6 +51,23 @@ export interface CycleDates {
   daysToStatement: number;
 }
 
+export type FutureSignal = 'On Track' | 'At Risk' | 'Unknown';
+
+export interface FutureCycleProjection {
+  cycleNumber: number; // 0 = current, 1 = next, etc.
+  statementClose: Date;
+  dueDate: Date;
+  committedItems: {
+    installments: number;
+    subscriptions: number;
+    annualFee: number;
+  };
+  projectedBalance: number; // sum of committed items (for future cycles)
+  status: CardStatusResult;
+  isKnown: boolean; // false for signal-only cycles beyond last fixed event
+  signal?: FutureSignal; // only set when isKnown is false
+}
+
 export const DEFAULT_DUE_DAY_OFFSET = 21;
 export const DEFAULT_INTEREST_RATE = 0.02;
 export const DEFAULT_MIN_PAYMENT_PCT = 0.05;
