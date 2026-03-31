@@ -6,7 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/components/useColorScheme';
+import { useColorScheme } from 'react-native';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useUserStore } from '@/store/userStore';
 import { initFirestore } from '@/utils/firebase';
@@ -18,17 +18,11 @@ export {
   ErrorBoundary,
 } from 'expo-router';
 
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
-};
-
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
 
@@ -75,7 +69,7 @@ function RootLayoutNav() {
         <Stack.Screen name="pro-paywall" options={{ presentation: 'modal', title: 'Upgrade to Pro' }} />
         <Stack.Screen name="onboarding" options={{ presentation: 'modal', title: 'Get Started', headerShown: false }} />
         <Stack.Screen name="onboarding-result" options={{ presentation: 'modal', title: 'Your Status', headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+
       </Stack>
     </ThemeProvider>
   );
