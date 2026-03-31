@@ -1,19 +1,22 @@
-const tintColorLight = '#2f95dc';
-const tintColorDark = '#fff';
+/**
+ * @deprecated Import from '@/theme' instead.
+ * Kept for backward compatibility with components/Themed.tsx and tabs layout.
+ */
+import { lightTheme, darkTheme } from '@/theme';
 
 export default {
   light: {
-    text: '#000',
-    background: '#fff',
-    tint: tintColorLight,
-    tabIconDefault: '#ccc',
-    tabIconSelected: tintColorLight,
+    text: lightTheme.textPrimary,
+    background: lightTheme.background,
+    tint: lightTheme.primary,
+    tabIconDefault: lightTheme.tabIconDefault,
+    tabIconSelected: lightTheme.tabIconSelected,
   },
   dark: {
-    text: '#fff',
-    background: '#000',
-    tint: tintColorDark,
-    tabIconDefault: '#ccc',
-    tabIconSelected: tintColorDark,
+    text: darkTheme.textPrimary,
+    background: darkTheme.background,
+    tint: darkTheme.primary,
+    tabIconDefault: darkTheme.tabIconDefault,
+    tabIconSelected: darkTheme.tabIconSelected,
   },
 };

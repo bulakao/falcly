@@ -6,9 +6,11 @@ import { GanttTimeline } from '@/components/GanttTimeline';
 import { FutureTimeline } from '@/components/FutureTimeline';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
+import { useAppTheme } from '@/theme';
 import { computeNetAvailableCash, getCycleDates } from '@/utils/decisionEngine';
 
 export default function TimelineScreen() {
+  const t = useAppTheme();
   const cards = useCardStore((s) => s.cards);
   const cashOnHand = useUserStore((s) => s.cashOnHand);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
@@ -37,28 +39,28 @@ export default function TimelineScreen() {
     <ScrollView contentContainerStyle={styles.container}>
       {cards.length === 0 ? (
         <View style={styles.empty}>
-          <Text style={styles.emptyTitle}>No cards yet</Text>
-          <Text style={styles.emptySubtitle}>
+          <Text style={[styles.emptyTitle, { color: t.textPrimary }]}>No cards yet</Text>
+          <Text style={[styles.emptySubtitle, { color: t.textMuted }]}>
             Add a credit card to see your billing cycle timelines.
           </Text>
         </View>
       ) : (
         <>
-          <Text style={styles.heading}>Billing Cycles</Text>
-          <Text style={styles.subheading}>
+          <Text style={[styles.heading, { color: t.textPrimary }]}>Billing Cycles</Text>
+          <Text style={[styles.subheading, { color: t.textMuted }]}>
             Sorted by urgency — closest statement close first
           </Text>
           <GanttTimeline cards={cards} />
 
           {sortedCards.length > 0 && (
             <View style={styles.futureSection}>
-              <Text style={styles.heading}>Future Projections</Text>
-              <Text style={styles.subheading}>
+              <Text style={[styles.heading, { color: t.textPrimary }]}>Future Projections</Text>
+              <Text style={[styles.subheading, { color: t.textMuted }]}>
                 Based on installments, subscriptions, and annual fees
               </Text>
               {sortedCards.map((card) => (
                 <View key={card.id} style={styles.cardSection}>
-                  <Text style={styles.cardName}>{card.bankName}</Text>
+                  <Text style={[styles.cardName, { color: t.textPrimary }]}>{card.bankName}</Text>
                   <FutureTimeline card={card} netAvailableCash={getNetCash(card)} />
                 </View>
               ))}
@@ -82,7 +84,6 @@ const styles = StyleSheet.create({
   },
   subheading: {
     fontSize: 13,
-    color: '#888',
     marginBottom: 16,
   },
   empty: {
@@ -99,7 +100,6 @@ const styles = StyleSheet.create({
   },
   emptySubtitle: {
     fontSize: 14,
-    color: '#888',
     textAlign: 'center',
   },
   futureSection: {

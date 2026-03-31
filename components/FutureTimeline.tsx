@@ -2,12 +2,8 @@ import { StyleSheet } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import type { Card, CardStatus, FutureCycleProjection } from '@/types/card';
 import { projectFutureCycles } from '@/utils/decisionEngine';
-
-const STATUS_COLORS: Record<CardStatus, string> = {
-  SAFE: '#10b981',
-  CAUTION: '#f59e0b',
-  RISKY: '#ef4444',
-};
+import { useAppTheme } from '@/theme';
+import type { SemanticTokens } from '@/theme';
 
 const STATUS_ICONS: Record<CardStatus, string> = {
   SAFE: '✓',
@@ -15,17 +11,27 @@ const STATUS_ICONS: Record<CardStatus, string> = {
   RISKY: '✕',
 };
 
-const SIGNAL_COLORS: Record<string, string> = {
-  'On Track': '#10b981',
-  'At Risk': '#ef4444',
-  'Unknown': '#6b7280',
-};
-
 const SIGNAL_ICONS: Record<string, string> = {
   'On Track': '✓',
   'At Risk': '⚠',
   'Unknown': '?',
 };
+
+function getStatusColors(t: SemanticTokens): Record<CardStatus, string> {
+  return {
+    SAFE: t.safe,
+    CAUTION: t.caution,
+    RISKY: t.risky,
+  };
+}
+
+function getSignalColors(t: SemanticTokens): Record<string, string> {
+  return {
+    'On Track': t.safe,
+    'At Risk': t.risky,
+    'Unknown': t.textMuted,
+  };
+}
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -54,6 +60,9 @@ export function FutureTimeline({
   netAvailableCash?: number | null;
   today?: Date;
 }) {
+  const t = useAppTheme();
+  const STATUS_COLORS = getStatusColors(t);
+  const SIGNAL_COLORS = getSignalColors(t);
   const now = today ?? new Date();
   const projections = projectFutureCycles(card, netAvailableCash ?? null, now);
 
@@ -62,19 +71,19 @@ export function FutureTimeline({
   return (
     <View style={styles.container}>
       {projections.map((cycle) => (
-        <View key={cycle.cycleNumber} style={styles.cycleCard}>
+        <View key={cycle.cycleNumber} style={[styles.cycleCard, { borderColor: t.border }]}>
           {/* Header: cycle label + status badge */}
           <View style={styles.cycleHeader}>
             <Text style={styles.cycleLabel}>{formatCycleLabel(cycle)}</Text>
             {cycle.isKnown ? (
               <View style={[styles.badge, { backgroundColor: STATUS_COLORS[cycle.status.status] }]}>
-                <Text style={styles.badgeText}>
+                <Text style={[styles.badgeText, { color: t.textInverse }]}>
                   {STATUS_ICONS[cycle.status.status]} {cycle.status.status}
                 </Text>
               </View>
             ) : (
               <View style={[styles.badge, { backgroundColor: SIGNAL_COLORS[cycle.signal ?? 'Unknown'] }]}>
-                <Text style={styles.badgeText}>
+                <Text style={[styles.badgeText, { color: t.textInverse }]}>
                   {SIGNAL_ICONS[cycle.signal ?? 'Unknown']} {cycle.signal}
                 </Text>
               </View>
@@ -86,8 +95,8 @@ export function FutureTimeline({
               {/* Opening balance for current cycle */}
               {cycle.cycleNumber === 0 && (
                 <View style={styles.itemRow}>
-                  <Text style={styles.itemLabel}>Projected balance</Text>
-                  <Text style={styles.itemValue}>{formatPeso(cycle.projectedBalance)}</Text>
+                  <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Projected balance</Text>
+                  <Text style={[styles.itemValue, { color: t.textPrimary }]}>{formatPeso(cycle.projectedBalance)}</Text>
                 </View>
               )}
 
@@ -96,36 +105,36 @@ export function FutureTimeline({
                 <>
                   {cycle.committedItems.installments > 0 && (
                     <View style={styles.itemRow}>
-                      <Text style={styles.itemLabel}>Installments</Text>
-                      <Text style={styles.itemValue}>{formatPeso(cycle.committedItems.installments)}</Text>
+                      <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Installments</Text>
+                      <Text style={[styles.itemValue, { color: t.textPrimary }]}>{formatPeso(cycle.committedItems.installments)}</Text>
                     </View>
                   )}
                   {cycle.committedItems.subscriptions > 0 && (
                     <View style={styles.itemRow}>
-                      <Text style={styles.itemLabel}>Subscriptions</Text>
-                      <Text style={styles.itemValue}>{formatPeso(cycle.committedItems.subscriptions)}</Text>
+                      <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Subscriptions</Text>
+                      <Text style={[styles.itemValue, { color: t.textPrimary }]}>{formatPeso(cycle.committedItems.subscriptions)}</Text>
                     </View>
                   )}
                   {cycle.committedItems.annualFee > 0 && (
                     <View style={styles.itemRow}>
-                      <Text style={styles.itemLabel}>Annual fee</Text>
-                      <Text style={styles.itemValue}>{formatPeso(cycle.committedItems.annualFee)}</Text>
+                      <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Annual fee</Text>
+                      <Text style={[styles.itemValue, { color: t.textPrimary }]}>{formatPeso(cycle.committedItems.annualFee)}</Text>
                     </View>
                   )}
-                  <View style={styles.totalRow}>
-                    <Text style={styles.totalLabel}>Known charges</Text>
-                    <Text style={styles.totalValue}>{formatPeso(cycle.projectedBalance)}</Text>
+                  <View style={[styles.totalRow, { borderTopColor: t.surface }]}>
+                    <Text style={[styles.totalLabel, { color: t.textPrimary }]}>Known charges</Text>
+                    <Text style={[styles.totalValue, { color: t.textPrimary }]}>{formatPeso(cycle.projectedBalance)}</Text>
                   </View>
                 </>
               )}
 
               {/* Status reason */}
               {cycle.status.reason ? (
-                <Text style={styles.reason}>{cycle.status.reason}</Text>
+                <Text style={[styles.reason, { color: t.textMuted }]}>{cycle.status.reason}</Text>
               ) : null}
             </>
           ) : (
-            <Text style={styles.signalNote}>
+            <Text style={[styles.signalNote, { color: t.textMuted }]}>
               No fixed events scheduled beyond this point
             </Text>
           )}
@@ -142,7 +151,6 @@ const styles = StyleSheet.create({
   cycleCard: {
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
     padding: 14,
   },
   cycleHeader: {
@@ -161,7 +169,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   badgeText: {
-    color: '#fff',
     fontSize: 11,
     fontWeight: '700',
   },
@@ -173,12 +180,10 @@ const styles = StyleSheet.create({
   },
   itemLabel: {
     fontSize: 13,
-    color: '#666',
   },
   itemValue: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#333',
   },
   totalRow: {
     flexDirection: 'row',
@@ -187,26 +192,21 @@ const styles = StyleSheet.create({
     marginTop: 4,
     paddingTop: 6,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
   },
   totalLabel: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#333',
   },
   totalValue: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#333',
   },
   reason: {
     fontSize: 12,
-    color: '#888',
     marginTop: 4,
   },
   signalNote: {
     fontSize: 12,
-    color: '#999',
     fontStyle: 'italic',
   },
 });

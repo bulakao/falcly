@@ -7,16 +7,12 @@ import StatusTooltip from '@/components/StatusTooltip';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { useAppTheme } from '@/theme';
 import { calculateCardStatus, calculateBestCard, computeNetAvailableCash } from '@/utils/decisionEngine';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import type { Card, CardStatus } from '@/types/card';
+import type { SemanticTokens } from '@/theme';
 import { trackDataStalenessWarningShown } from '@/utils/analytics';
-
-const STATUS_COLORS: Record<CardStatus, string> = {
-  SAFE: '#10b981',
-  CAUTION: '#f59e0b',
-  RISKY: '#ef4444',
-};
 
 const STATUS_ICONS: Record<CardStatus, string> = {
   SAFE: '✓',
@@ -24,32 +20,42 @@ const STATUS_ICONS: Record<CardStatus, string> = {
   RISKY: '✕',
 };
 
+function getStatusColor(status: CardStatus, t: SemanticTokens): string {
+  const map: Record<CardStatus, string> = {
+    SAFE: t.safe,
+    CAUTION: t.caution,
+    RISKY: t.risky,
+  };
+  return map[status];
+}
+
 function BestCardHero({ cards, getNetAvailableCash }: { cards: Card[]; getNetAvailableCash: (card: Card) => number | null }) {
+  const t = useAppTheme();
   const best = calculateBestCard(cards, new Date(), getNetAvailableCash);
   if (!best) return null;
 
   const { card, status, warning } = best;
-  const color = STATUS_COLORS[status.status];
+  const color = getStatusColor(status.status, t);
 
   return (
     <Link href={{ pathname: '/swipe-impact', params: { cardId: card.id } }} asChild>
       <Pressable>
         <View style={[styles.hero, { borderColor: color }]}>
           {warning && (
-            <View style={styles.warningBanner}>
-              <Text style={styles.warningText}>⚠ {warning}</Text>
+            <View style={[styles.warningBanner, { backgroundColor: t.cautionBg }]}>
+              <Text style={[styles.warningText, { color: t.cautionText }]}>⚠ {warning}</Text>
             </View>
           )}
-          <Text style={styles.heroLabel}>Best card to use today</Text>
+          <Text style={[styles.heroLabel, { color: t.textMuted }]}>Best card to use today</Text>
           <View style={styles.heroRow}>
-            <Text style={styles.heroBankName}>{card.bankName}</Text>
+            <Text style={[styles.heroBankName, { color: t.textPrimary }]}>{card.bankName}</Text>
             <View style={[styles.badge, { backgroundColor: color }]}>
-              <Text style={styles.badgeText}>
+              <Text style={[styles.badgeText, { color: t.textInverse }]}>
                 {STATUS_ICONS[status.status]} {status.status}
               </Text>
             </View>
           </View>
-          <Text style={styles.heroReason}>{status.reason}</Text>
+          <Text style={[styles.heroReason, { color: t.textSecondary }]}>{status.reason}</Text>
         </View>
       </Pressable>
     </Link>
@@ -57,32 +63,33 @@ function BestCardHero({ cards, getNetAvailableCash }: { cards: Card[]; getNetAva
 }
 
 function CardItem({ card, netAvailableCash, readOnly }: { card: Card; netAvailableCash: number | null; readOnly: boolean }) {
+  const t = useAppTheme();
   const { status, reason } = calculateCardStatus(card, new Date(), netAvailableCash);
   const staleness = getStalenessLevel(card.balanceUpdatedAt);
 
   return (
     <Link href={{ pathname: '/swipe-impact', params: { cardId: card.id } }} asChild>
       <Pressable>
-        <View style={[styles.card, readOnly && styles.readOnlyCard]}>
+        <View style={[styles.card, { borderColor: t.border }, readOnly && styles.readOnlyCard]}>
           {readOnly && (
             <Link href="/pro-paywall" asChild>
-              <Pressable style={styles.readOnlyBanner}>
-                <Text style={styles.readOnlyBannerText}>
+              <Pressable style={[styles.readOnlyBanner, { backgroundColor: t.accentBg }]}>
+                <Text style={[styles.readOnlyBannerText, { color: t.accent }]}>
                   Reactivate Pro to manage all cards
                 </Text>
               </Pressable>
             </Link>
           )}
           <View style={styles.cardHeader}>
-            <Text style={styles.bankName}>{card.bankName}</Text>
+            <Text style={[styles.bankName, { color: t.textPrimary }]}>{card.bankName}</Text>
             <View style={styles.badgeRow}>
               {staleness === 'stale' ? (
-                <View style={[styles.badge, { backgroundColor: '#6b7280' }]}>
-                  <Text style={styles.badgeText}>⚠ STALE</Text>
+                <View style={[styles.badge, { backgroundColor: t.textMuted }]}>
+                  <Text style={[styles.badgeText, { color: t.textInverse }]}>⚠ STALE</Text>
                 </View>
               ) : (
-                <View style={[styles.badge, { backgroundColor: STATUS_COLORS[status] }]}>
-                  <Text style={styles.badgeText}>
+                <View style={[styles.badge, { backgroundColor: getStatusColor(status, t) }]}>
+                  <Text style={[styles.badgeText, { color: t.textInverse }]}>
                     {STATUS_ICONS[status]} {status}
                   </Text>
                 </View>
@@ -91,23 +98,23 @@ function CardItem({ card, netAvailableCash, readOnly }: { card: Card; netAvailab
             </View>
           </View>
           {staleness === 'stale' && !readOnly && (
-            <Text style={styles.staleWarning}>
+            <Text style={[styles.staleWarning, { color: t.textMuted }]}>
               Data stale — update before trusting this status
             </Text>
           )}
           {staleness === 'warning' && !readOnly && (
-            <View style={styles.stalenessWarningRow}>
-              <Text style={styles.stalenessWarningText}>
+            <View style={[styles.stalenessWarningRow, { backgroundColor: t.cautionBg }]}>
+              <Text style={[styles.stalenessWarningText, { color: t.cautionText }]}>
                 ⚠️ Balance may be outdated · Tap to update
               </Text>
             </View>
           )}
-          <Text style={styles.reason}>{staleness !== 'stale' ? reason : ''}</Text>
+          <Text style={[styles.reason, { color: t.textSecondary }]}>{staleness !== 'stale' ? reason : ''}</Text>
           <View style={styles.cardFooter}>
-            <Text style={styles.detail}>
+            <Text style={[styles.detail, { color: t.textMuted }]}>
               ₱{card.outstandingBalance.toLocaleString()} / ₱{card.creditLimit.toLocaleString()}
             </Text>
-            <Text style={styles.updatedAgo}>
+            <Text style={[styles.updatedAgo, { color: t.textMuted }]}>
               Updated {formatUpdatedAgo(card.balanceUpdatedAt)}
             </Text>
           </View>
@@ -118,6 +125,7 @@ function CardItem({ card, netAvailableCash, readOnly }: { card: Card; netAvailab
 }
 
 export default function HomeScreen() {
+  const t = useAppTheme();
   const cards = useCardStore((s) => s.cards);
   const canAddCard = useSubscriptionStore((s) => s.canAddCard);
   const isCardReadOnly = useSubscriptionStore((s) => s.isCardReadOnly);
@@ -161,13 +169,13 @@ export default function HomeScreen() {
     <View style={styles.container}>
       {cards.length === 0 ? (
         <View style={styles.empty}>
-          <Text style={styles.emptyTitle}>No cards yet</Text>
-          <Text style={styles.emptySubtitle}>
+          <Text style={[styles.emptyTitle, { color: t.textPrimary }]}>No cards yet</Text>
+          <Text style={[styles.emptySubtitle, { color: t.textMuted }]}>
             Add your first credit card to see if it&apos;s safe to swipe.
           </Text>
           <Link href="/onboarding" asChild>
-            <Pressable style={styles.onboardingButton}>
-              <Text style={styles.onboardingButtonText}>Get Started</Text>
+            <Pressable style={[styles.onboardingButton, { backgroundColor: t.primary }]}>
+              <Text style={[styles.onboardingButtonText, { color: t.textInverse }]}>Get Started</Text>
             </Pressable>
           </Link>
         </View>
@@ -183,8 +191,8 @@ export default function HomeScreen() {
               <BestCardHero cards={cards} getNetAvailableCash={getNetAvailableCash} />
               {daysRemaining !== null && (
                 <Link href="/pro-paywall" asChild>
-                  <Pressable style={styles.retentionWarning}>
-                    <Text style={styles.retentionWarningText}>
+                  <Pressable style={[styles.retentionWarning, { backgroundColor: t.riskyBg, borderColor: t.riskyBorder }]}>
+                    <Text style={[styles.retentionWarningText, { color: t.risky }]}>
                       {daysRemaining > 0
                         ? `Your Pro card data will be deleted in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}. Reactivate Pro to keep it.`
                         : 'Your Pro card data is scheduled for deletion. Reactivate Pro to keep it.'}
@@ -198,8 +206,8 @@ export default function HomeScreen() {
         />
       )}
 
-      <Pressable style={styles.addButton} onPress={handleAddCard}>
-        <Text style={styles.addButtonText}>+ Add Card</Text>
+      <Pressable style={[styles.addButton, { backgroundColor: t.primary }]} onPress={handleAddCard}>
+        <Text style={[styles.addButtonText, { color: t.textInverse }]}>+ Add Card</Text>
       </Pressable>
     </View>
   );
@@ -220,7 +228,6 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -242,18 +249,15 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   badgeText: {
-    color: '#fff',
     fontSize: 13,
     fontWeight: '700',
   },
   reason: {
     fontSize: 13,
-    color: '#666',
     marginBottom: 4,
   },
   detail: {
     fontSize: 14,
-    color: '#888',
   },
   cardFooter: {
     flexDirection: 'row',
@@ -262,10 +266,8 @@ const styles = StyleSheet.create({
   },
   updatedAgo: {
     fontSize: 12,
-    color: '#999',
   },
   stalenessWarningRow: {
-    backgroundColor: '#fef3c7',
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -274,12 +276,10 @@ const styles = StyleSheet.create({
   stalenessWarningText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#92400e',
   },
   staleWarning: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6b7280',
     marginBottom: 4,
     fontStyle: 'italic',
   },
@@ -296,18 +296,15 @@ const styles = StyleSheet.create({
   },
   emptySubtitle: {
     fontSize: 14,
-    color: '#888',
     textAlign: 'center',
   },
   onboardingButton: {
     marginTop: 20,
-    backgroundColor: '#10b981',
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 10,
   },
   onboardingButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '700',
   },
@@ -316,13 +313,11 @@ const styles = StyleSheet.create({
     bottom: 24,
     left: 16,
     right: 16,
-    backgroundColor: '#10b981',
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
   },
   addButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '700',
   },
@@ -335,7 +330,6 @@ const styles = StyleSheet.create({
   heroLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#888',
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 8,
@@ -352,10 +346,8 @@ const styles = StyleSheet.create({
   },
   heroReason: {
     fontSize: 14,
-    color: '#666',
   },
   warningBanner: {
-    backgroundColor: '#fef3c7',
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -364,15 +356,12 @@ const styles = StyleSheet.create({
   warningText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#92400e',
   },
   readOnlyCard: {
     opacity: 0.75,
-    borderColor: '#d1d5db',
     borderStyle: 'dashed',
   },
   readOnlyBanner: {
-    backgroundColor: '#eef2ff',
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 8,
@@ -381,14 +370,11 @@ const styles = StyleSheet.create({
   readOnlyBannerText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6366f1',
     textAlign: 'center',
   },
   retentionWarning: {
-    backgroundColor: '#fef2f2',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#fecaca',
     paddingHorizontal: 14,
     paddingVertical: 12,
     marginBottom: 12,
@@ -396,7 +382,6 @@ const styles = StyleSheet.create({
   retentionWarningText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#dc2626',
     textAlign: 'center',
   },
 });

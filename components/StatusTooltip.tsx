@@ -2,15 +2,17 @@ import { useState } from 'react';
 import { StyleSheet, Pressable, Modal } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
-
-const TIERS = [
-  { status: 'SAFE', icon: '✓', color: '#10b981', description: 'Swiping now is unlikely to cause payment stress this cycle.' },
-  { status: 'CAUTION', icon: '⚠', color: '#f59e0b', description: 'Your statement is closing soon or utilization is getting high.' },
-  { status: 'RISKY', icon: '✕', color: '#ef4444', description: 'Swiping now could make it hard to pay your bill on time.' },
-];
+import { useAppTheme } from '@/theme';
 
 export default function StatusTooltip() {
   const [visible, setVisible] = useState(false);
+  const t = useAppTheme();
+
+  const tiers = [
+    { status: 'SAFE', icon: '✓', color: t.safe, description: 'Swiping now is unlikely to cause payment stress this cycle.' },
+    { status: 'CAUTION', icon: '⚠', color: t.caution, description: 'Your statement is closing soon or utilization is getting high.' },
+    { status: 'RISKY', icon: '✕', color: t.risky, description: 'Swiping now could make it hard to pay your bill on time.' },
+  ];
 
   return (
     <>
@@ -19,7 +21,7 @@ export default function StatusTooltip() {
         onPress={() => setVisible(true)}
         hitSlop={8}
       >
-        <Text style={styles.infoIcon}>ⓘ</Text>
+        <Text style={[styles.infoIcon, { color: t.textMuted }]}>ⓘ</Text>
       </Pressable>
 
       <Modal
@@ -28,19 +30,19 @@ export default function StatusTooltip() {
         animationType="fade"
         onRequestClose={() => setVisible(false)}
       >
-        <Pressable style={styles.overlay} onPress={() => setVisible(false)}>
-          <View style={styles.tooltip}>
+        <Pressable style={[styles.overlay, { backgroundColor: t.overlay }]} onPress={() => setVisible(false)}>
+          <View style={[styles.tooltip, { borderColor: t.border }]}>
             <Text style={styles.tooltipTitle}>How status works</Text>
-            {TIERS.map((tier) => (
+            {tiers.map((tier) => (
               <View key={tier.status} style={styles.tierRow}>
                 <View style={[styles.tierBadge, { backgroundColor: tier.color }]}>
-                  <Text style={styles.tierBadgeText}>{tier.icon} {tier.status}</Text>
+                  <Text style={[styles.tierBadgeText, { color: t.textInverse }]}>{tier.icon} {tier.status}</Text>
                 </View>
-                <Text style={styles.tierDescription}>{tier.description}</Text>
+                <Text style={[styles.tierDescription, { color: t.textSecondary }]}>{tier.description}</Text>
               </View>
             ))}
             <Pressable style={styles.dismissButton} onPress={() => setVisible(false)}>
-              <Text style={styles.dismissText}>Got it</Text>
+              <Text style={[styles.dismissText, { color: t.safe }]}>Got it</Text>
             </Pressable>
           </View>
         </Pressable>
@@ -56,11 +58,9 @@ const styles = StyleSheet.create({
   },
   infoIcon: {
     fontSize: 16,
-    color: '#9ca3af',
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 32,
@@ -71,7 +71,6 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 340,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
   },
   tooltipTitle: {
     fontSize: 17,
@@ -90,13 +89,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   tierBadgeText: {
-    color: '#fff',
     fontSize: 12,
     fontWeight: '700',
   },
   tierDescription: {
     fontSize: 13,
-    color: '#666',
     lineHeight: 18,
   },
   dismissButton: {
@@ -107,6 +104,5 @@ const styles = StyleSheet.create({
   dismissText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#10b981',
   },
 });

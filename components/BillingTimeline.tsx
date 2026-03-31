@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import type { Card } from '@/types/card';
 import { getCycleDates } from '@/utils/decisionEngine';
+import { useAppTheme } from '@/theme';
 
 function formatShortDate(date: Date): string {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -14,6 +15,7 @@ function formatShortDate(date: Date): string {
  * Statement close marker changes color at ≤7 days (amber) and ≤2 days (crimson).
  */
 export function BillingTimeline({ card, today }: { card: Card; today?: Date }) {
+  const t = useAppTheme();
   const cycle = getCycleDates(card, today);
 
   // Total span from cycle start to due date for positioning
@@ -24,45 +26,45 @@ export function BillingTimeline({ card, today }: { card: Card; today?: Date }) {
   const statementPct = ((cycle.statementClose.getTime() - cycle.cycleStart.getTime()) / totalSpanMs) * 100;
 
   // Statement close urgency color
-  let statementColor = '#10b981'; // emerald (safe)
+  let statementColor = t.safe;
   if (cycle.daysToStatement <= 2) {
-    statementColor = '#ef4444'; // crimson
+    statementColor = t.risky;
   } else if (cycle.daysToStatement <= 7) {
-    statementColor = '#f59e0b'; // amber
+    statementColor = t.caution;
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Billing Cycle</Text>
+      <Text style={[styles.title, { color: t.textMuted }]}>Billing Cycle</Text>
 
       {/* Track */}
-      <View style={styles.track}>
+      <View style={[styles.track, { backgroundColor: t.border }]}>
         {/* Progress fill up to today */}
-        <View style={[styles.fill, { width: `${todayPct}%` }]} />
+        <View style={[styles.fill, { width: `${todayPct}%`, backgroundColor: t.safe }]} />
 
         {/* Statement close marker */}
-        <View style={[styles.marker, styles.statementMarker, { left: `${statementPct}%`, backgroundColor: statementColor }]} />
+        <View style={[styles.marker, styles.statementMarker, { left: `${statementPct}%`, backgroundColor: statementColor, borderColor: t.textInverse }]} />
 
         {/* Today marker */}
-        <View style={[styles.marker, styles.todayMarker, { left: `${todayPct}%` }]} />
+        <View style={[styles.marker, styles.todayMarker, { left: `${todayPct}%`, backgroundColor: t.accent, borderColor: t.textInverse }]} />
       </View>
 
       {/* Labels row */}
       <View style={styles.labels}>
         <View style={styles.labelStart}>
-          <Text style={styles.labelDate}>{formatShortDate(cycle.cycleStart)}</Text>
-          <Text style={styles.labelName}>Start</Text>
+          <Text style={[styles.labelDate, { color: t.textSecondary }]}>{formatShortDate(cycle.cycleStart)}</Text>
+          <Text style={[styles.labelName, { color: t.textMuted }]}>Start</Text>
         </View>
         <View style={[styles.labelPositioned, { left: `${todayPct}%` }]}>
-          <Text style={[styles.labelDate, styles.todayLabel]}>Today</Text>
+          <Text style={[styles.labelDate, styles.todayLabel, { color: t.accent }]}>Today</Text>
         </View>
         <View style={[styles.labelPositioned, { left: `${statementPct}%` }]}>
           <Text style={[styles.labelDate, { color: statementColor }]}>{formatShortDate(cycle.statementClose)}</Text>
           <Text style={[styles.labelName, { color: statementColor }]}>Statement</Text>
         </View>
         <View style={styles.labelEnd}>
-          <Text style={styles.labelDate}>{formatShortDate(cycle.dueDate)}</Text>
-          <Text style={styles.labelName}>Due</Text>
+          <Text style={[styles.labelDate, { color: t.textSecondary }]}>{formatShortDate(cycle.dueDate)}</Text>
+          <Text style={[styles.labelName, { color: t.textMuted }]}>Due</Text>
         </View>
       </View>
 
@@ -85,14 +87,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#888',
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 12,
   },
   track: {
     height: 8,
-    backgroundColor: '#e5e7eb',
     borderRadius: 4,
     position: 'relative',
     overflow: 'visible',
@@ -102,7 +102,6 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     bottom: 0,
-    backgroundColor: '#10b981',
     borderRadius: 4,
     opacity: 0.3,
   },
@@ -115,15 +114,12 @@ const styles = StyleSheet.create({
     marginLeft: -8,
   },
   todayMarker: {
-    backgroundColor: '#3b82f6',
     borderWidth: 2,
-    borderColor: '#fff',
     zIndex: 2,
   },
   statementMarker: {
     zIndex: 1,
     borderWidth: 2,
-    borderColor: '#fff',
   },
   labels: {
     position: 'relative',
@@ -147,14 +143,11 @@ const styles = StyleSheet.create({
   labelDate: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#666',
   },
   labelName: {
     fontSize: 10,
-    color: '#999',
   },
   todayLabel: {
-    color: '#3b82f6',
     fontWeight: '700',
   },
   urgency: {

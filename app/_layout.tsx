@@ -12,6 +12,7 @@ import { useUserStore } from '@/store/userStore';
 import { initFirestore } from '@/utils/firebase';
 import { initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
 import { initCrashReporting } from '@/utils/crashReporting';
+import { AppThemeProvider } from '@/theme';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -59,18 +60,20 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="add-card" options={{ presentation: 'modal', title: 'Add Card' }} />
-        <Stack.Screen name="swipe-impact" options={{ presentation: 'modal', title: 'Swipe Impact' }} />
-        <Stack.Screen name="update-balance" options={{ presentation: 'modal', title: 'Update Balance' }} />
-        <Stack.Screen name="edit-card" options={{ presentation: 'modal', title: 'Edit Card' }} />
-        <Stack.Screen name="pro-paywall" options={{ presentation: 'modal', title: 'Upgrade to Pro' }} />
-        <Stack.Screen name="onboarding" options={{ presentation: 'modal', title: 'Get Started', headerShown: false }} />
-        <Stack.Screen name="onboarding-result" options={{ presentation: 'modal', title: 'Your Status', headerShown: false }} />
-
-      </Stack>
-    </ThemeProvider>
+    <AppThemeProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="add-card" options={{ presentation: 'modal', title: 'Add Card' }} />
+          <Stack.Screen name="swipe-impact" options={{ presentation: 'modal', title: 'Swipe Impact' }} />
+          <Stack.Screen name="update-balance" options={{ presentation: 'modal', title: 'Update Balance' }} />
+          <Stack.Screen name="edit-card" options={{ presentation: 'modal', title: 'Edit Card' }} />
+          <Stack.Screen name="pro-paywall" options={{ presentation: 'modal', title: 'Upgrade to Pro' }} />
+          <Stack.Screen name="onboarding" options={{ presentation: 'modal', title: 'Get Started', headerShown: false }} />
+          <Stack.Screen name="onboarding-result" options={{ presentation: 'modal', title: 'Your Status', headerShown: false }} />
+          <Stack.Screen name="component-showcase" options={{ presentation: 'modal', title: 'Component Showcase' }} />
+        </Stack>
+      </ThemeProvider>
+    </AppThemeProvider>
   );
 }

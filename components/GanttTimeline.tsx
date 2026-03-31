@@ -2,18 +2,22 @@ import { StyleSheet } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import type { Card, CardStatus } from '@/types/card';
 import { getCycleDates, calculateCardStatus } from '@/utils/decisionEngine';
-
-const STATUS_COLORS: Record<CardStatus, string> = {
-  SAFE: '#10b981',
-  CAUTION: '#f59e0b',
-  RISKY: '#ef4444',
-};
+import { useAppTheme } from '@/theme';
+import type { SemanticTokens } from '@/theme';
 
 const STATUS_ICONS: Record<CardStatus, string> = {
   SAFE: '✓',
   CAUTION: '⚠',
   RISKY: '✕',
 };
+
+function getStatusColors(t: SemanticTokens): Record<CardStatus, string> {
+  return {
+    SAFE: t.safe,
+    CAUTION: t.caution,
+    RISKY: t.risky,
+  };
+}
 
 function formatShortDate(date: Date): string {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -25,6 +29,8 @@ function formatShortDate(date: Date): string {
  * Sorted by urgency (closest statement close first), color-coded by status.
  */
 export function GanttTimeline({ cards, today }: { cards: Card[]; today?: Date }) {
+  const t = useAppTheme();
+  const STATUS_COLORS = getStatusColors(t);
   const now = today ?? new Date();
 
   if (cards.length === 0) return null;
@@ -58,7 +64,7 @@ export function GanttTimeline({ cards, today }: { cards: Card[]; today?: Date })
         <View style={styles.labelCol} />
         <View style={styles.chartCol}>
           <View style={[styles.todayHeaderMarker, { left: `${todayPct}%` }]}>
-            <Text style={styles.todayHeaderText}>Today</Text>
+            <Text style={[styles.todayHeaderText, { color: t.accent }]}>Today</Text>
           </View>
         </View>
       </View>
@@ -72,9 +78,9 @@ export function GanttTimeline({ cards, today }: { cards: Card[]; today?: Date })
         const duePct = toPct(cycle.dueDate);
 
         // Statement close urgency color
-        let stmtColor = '#10b981';
-        if (cycle.daysToStatement <= 2) stmtColor = '#ef4444';
-        else if (cycle.daysToStatement <= 7) stmtColor = '#f59e0b';
+        let stmtColor = t.safe;
+        if (cycle.daysToStatement <= 2) stmtColor = t.risky;
+        else if (cycle.daysToStatement <= 7) stmtColor = t.caution;
 
         return (
           <View key={card.id} style={styles.row}>
@@ -90,24 +96,24 @@ export function GanttTimeline({ cards, today }: { cards: Card[]; today?: Date })
             {/* Gantt bar */}
             <View style={styles.chartCol}>
               {/* Today vertical line */}
-              <View style={[styles.todayLine, { left: `${todayPct}%` }]} />
+              <View style={[styles.todayLine, { left: `${todayPct}%`, backgroundColor: t.accent }]} />
 
               {/* Cycle bar (start → statement close) */}
               <View style={[styles.bar, { left: `${barLeft}%`, width: `${barWidth}%`, backgroundColor: color }]}>
                 {/* Statement close marker */}
-                <View style={[styles.stmtDot, { backgroundColor: stmtColor }]} />
+                <View style={[styles.stmtDot, { backgroundColor: stmtColor, borderColor: t.textInverse }]} />
               </View>
 
               {/* Due date marker */}
-              <View style={[styles.dueDot, { left: `${duePct}%` }]} />
+              <View style={[styles.dueDot, { left: `${duePct}%`, backgroundColor: t.textSecondary, borderColor: t.textInverse }]} />
 
               {/* Date labels below bar */}
               <View style={styles.barLabels}>
-                <Text style={[styles.barDate, { left: `${barLeft}%` }]}>{formatShortDate(cycle.cycleStart)}</Text>
+                <Text style={[styles.barDate, { left: `${barLeft}%`, color: t.textMuted }]}>{formatShortDate(cycle.cycleStart)}</Text>
                 <Text style={[styles.barDate, styles.barDateRight, { left: `${barRight}%`, color: stmtColor }]}>
                   {formatShortDate(cycle.statementClose)}
                 </Text>
-                <Text style={[styles.barDate, { left: `${duePct}%` }]}>{formatShortDate(cycle.dueDate)}</Text>
+                <Text style={[styles.barDate, { left: `${duePct}%`, color: t.textMuted }]}>{formatShortDate(cycle.dueDate)}</Text>
               </View>
             </View>
           </View>
@@ -115,18 +121,18 @@ export function GanttTimeline({ cards, today }: { cards: Card[]; today?: Date })
       })}
 
       {/* Legend */}
-      <View style={styles.legend}>
+      <View style={[styles.legend, { borderTopColor: t.border }]}>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#3b82f6' }]} />
-          <Text style={styles.legendText}>Today</Text>
+          <View style={[styles.legendDot, { backgroundColor: t.accent }]} />
+          <Text style={[styles.legendText, { color: t.textMuted }]}>Today</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendBar, { backgroundColor: '#ccc' }]} />
-          <Text style={styles.legendText}>Cycle</Text>
+          <View style={[styles.legendBar, { backgroundColor: t.border }]} />
+          <Text style={[styles.legendText, { color: t.textMuted }]}>Cycle</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#666' }]} />
-          <Text style={styles.legendText}>Due</Text>
+          <View style={[styles.legendDot, { backgroundColor: t.textSecondary }]} />
+          <Text style={[styles.legendText, { color: t.textMuted }]}>Due</Text>
         </View>
       </View>
     </View>
@@ -159,7 +165,6 @@ const styles = StyleSheet.create({
   todayHeaderText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#3b82f6',
   },
   row: {
     flexDirection: 'row',
@@ -187,7 +192,6 @@ const styles = StyleSheet.create({
     top: -4,
     bottom: -8,
     width: 1.5,
-    backgroundColor: '#3b82f6',
     zIndex: 2,
   },
   bar: {
@@ -205,7 +209,6 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
     borderWidth: 1.5,
-    borderColor: '#fff',
   },
   dueDot: {
     position: 'absolute',
@@ -213,10 +216,8 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#666',
     marginLeft: -4,
     borderWidth: 1.5,
-    borderColor: '#fff',
     zIndex: 1,
   },
   barLabels: {
@@ -229,7 +230,6 @@ const styles = StyleSheet.create({
   barDate: {
     position: 'absolute',
     fontSize: 9,
-    color: '#999',
     transform: [{ translateX: -14 }],
   },
   barDateRight: {
@@ -242,7 +242,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
   },
   legendItem: {
     flexDirection: 'row',
@@ -261,6 +260,5 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 11,
-    color: '#888',
   },
 });
