@@ -10,8 +10,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { useCardStore } from '@/store/cardStore';
+import { useAppTheme } from '@/theme';
 
 export default function UpdateBalanceScreen() {
+  const t = useAppTheme();
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
   const router = useRouter();
   const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
@@ -42,32 +44,33 @@ export default function UpdateBalanceScreen() {
     >
       <View style={styles.container}>
         <Text style={styles.heading}>{card.bankName}</Text>
-        <Text style={styles.subtitle}>Enter your current outstanding balance</Text>
+        <Text style={[styles.subtitle, { color: t.textSecondary }]}>Enter your current outstanding balance</Text>
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
           value={balanceText}
           onChangeText={setBalanceText}
           placeholder="0"
-          placeholderTextColor="#999"
+          placeholderTextColor={t.placeholder}
           keyboardType="numeric"
           autoFocus
           selectTextOnFocus
         />
 
-        <Text style={styles.hint}>
+        <Text style={[styles.hint, { color: t.textMuted }]}>
           Current: ₱{card.outstandingBalance.toLocaleString()}
         </Text>
 
         <Pressable
           style={[
             styles.confirmButton,
+            { backgroundColor: t.primary },
             (!balanceText || isNaN(parseFloat(balanceText))) && styles.confirmButtonDisabled,
           ]}
           onPress={handleConfirm}
           disabled={!balanceText || isNaN(parseFloat(balanceText))}
         >
-          <Text style={styles.confirmButtonText}>Update Balance</Text>
+          <Text style={[styles.confirmButtonText, { color: t.textInverse }]}>Update Balance</Text>
         </Pressable>
       </View>
     </KeyboardAvoidingView>
@@ -87,29 +90,23 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
     marginBottom: 24,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 14,
     fontSize: 28,
     fontWeight: '700',
-    backgroundColor: '#fafafa',
-    color: '#000',
     textAlign: 'center',
     marginBottom: 8,
   },
   hint: {
     fontSize: 13,
-    color: '#999',
     textAlign: 'center',
     marginBottom: 32,
   },
   confirmButton: {
-    backgroundColor: '#10b981',
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
@@ -118,7 +115,6 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   confirmButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '700',
   },

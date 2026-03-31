@@ -13,8 +13,10 @@ import { router } from 'expo-router';
 import { Text } from '@/components/Themed';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { trackCardAdded } from '@/utils/analytics';
+import { useAppTheme } from '@/theme';
 
 export default function AddCardScreen() {
+  const t = useAppTheme();
   const addCard = useCardStore((s) => s.addCard);
 
   const [bankName, setBankName] = useState('');
@@ -66,58 +68,58 @@ export default function AddCardScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.heading}>Add Card</Text>
 
-        <Text style={styles.label}>Bank Name</Text>
+        <Text style={[styles.label, { color: t.textSecondary }]}>Bank Name</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
           value={bankName}
           onChangeText={setBankName}
           placeholder="e.g. BDO, BPI, Metrobank"
-          placeholderTextColor="#999"
+          placeholderTextColor={t.placeholder}
           autoFocus
         />
 
-        <Text style={styles.label}>Credit Limit</Text>
+        <Text style={[styles.label, { color: t.textSecondary }]}>Credit Limit</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
           value={creditLimit}
           onChangeText={setCreditLimit}
           placeholder="e.g. 50000"
-          placeholderTextColor="#999"
+          placeholderTextColor={t.placeholder}
           keyboardType="numeric"
         />
 
-        <Text style={styles.label}>Outstanding Balance</Text>
+        <Text style={[styles.label, { color: t.textSecondary }]}>Outstanding Balance</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
           value={outstandingBalance}
           onChangeText={setOutstandingBalance}
           placeholder="0"
-          placeholderTextColor="#999"
+          placeholderTextColor={t.placeholder}
           keyboardType="numeric"
         />
 
-        <Text style={styles.label}>Statement Day (1–31)</Text>
+        <Text style={[styles.label, { color: t.textSecondary }]}>Statement Day (1–31)</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
           value={statementDay}
           onChangeText={setStatementDay}
           placeholder="e.g. 15"
-          placeholderTextColor="#999"
+          placeholderTextColor={t.placeholder}
           keyboardType="numeric"
         />
 
-        <Text style={styles.label}>Due Day Offset (days after statement)</Text>
+        <Text style={[styles.label, { color: t.textSecondary }]}>Due Day Offset (days after statement)</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
           value={dueDayOffset}
           onChangeText={setDueDayOffset}
           placeholder={String(cardDefaults.dueDayOffset)}
-          placeholderTextColor="#999"
+          placeholderTextColor={t.placeholder}
           keyboardType="numeric"
         />
 
-        <Pressable style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save Card</Text>
+        <Pressable style={[styles.saveButton, { backgroundColor: t.primary }]} onPress={handleSave}>
+          <Text style={[styles.saveButtonText, { color: t.textInverse }]}>Save Card</Text>
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -140,26 +142,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 16,
     marginBottom: 6,
-    color: '#666',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#fafafa',
-    color: '#000',
   },
   saveButton: {
     marginTop: 32,
-    backgroundColor: '#10b981',
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
   },
   saveButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '700',
   },

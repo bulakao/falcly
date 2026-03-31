@@ -5,6 +5,7 @@ import { Text, View } from '@/components/Themed';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import type { PlanType } from '@/store/subscriptionStore';
 import { trackProConversionStarted, trackProTrialStarted, trackProConverted } from '@/utils/analytics';
+import { useAppTheme } from '@/theme';
 
 const PRO_FEATURES = [
   { icon: '💳', label: 'Unlimited cards' },
@@ -14,6 +15,7 @@ const PRO_FEATURES = [
 ];
 
 export default function ProPaywallScreen() {
+  const t = useAppTheme();
   const startTrial = useSubscriptionStore((s) => s.startTrial);
   const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
   const purchasePro = useSubscriptionStore((s) => s.purchasePro);
@@ -78,12 +80,12 @@ export default function ProPaywallScreen() {
         <View style={styles.header}>
           <Text style={styles.emoji}>✅</Text>
           <Text style={styles.title}>You&apos;re on Pro</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.subtitle, { color: t.textSecondary }]}>
             You have full access to all Pro features.
           </Text>
         </View>
         <Pressable style={styles.dismissButton} onPress={() => router.back()}>
-          <Text style={styles.dismissText}>Go back</Text>
+          <Text style={[styles.dismissText, { color: t.textMuted }]}>Go back</Text>
         </Pressable>
       </ScrollView>
     );
@@ -94,14 +96,14 @@ export default function ProPaywallScreen() {
       <View style={styles.header}>
         <Text style={styles.emoji}>🔒</Text>
         <Text style={styles.title}>Upgrade to Pro</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.subtitle, { color: t.textSecondary }]}>
           You&apos;ve reached the 2-card limit on the Free plan. Upgrade to manage all your cards.
         </Text>
       </View>
 
       <View style={styles.featureList}>
         {PRO_FEATURES.map((feature) => (
-          <View key={feature.label} style={styles.featureRow}>
+          <View key={feature.label} style={[styles.featureRow, { borderBottomColor: t.surface }]}>
             <Text style={styles.featureIcon}>{feature.icon}</Text>
             <Text style={styles.featureLabel}>{feature.label}</Text>
           </View>
@@ -110,38 +112,38 @@ export default function ProPaywallScreen() {
 
       {/* Trial CTA */}
       {!trialActive && (
-        <Pressable style={styles.trialButton} onPress={handleStartTrial}>
-          <Text style={styles.trialButtonText}>Try Free for 14 Days</Text>
-          <Text style={styles.trialSubtext}>
+        <Pressable style={[styles.trialButton, { backgroundColor: t.primary }]} onPress={handleStartTrial}>
+          <Text style={[styles.trialButtonText, { color: t.textInverse }]}>Try Free for 14 Days</Text>
+          <Text style={[styles.trialSubtext, { color: t.accentMuted }]}>
             Payment method required. No charge for 14 days.
           </Text>
         </Pressable>
       )}
 
       <View style={styles.plans}>
-        <Pressable style={styles.annualPlan} onPress={handleAnnual}>
+        <Pressable style={[styles.annualPlan, { backgroundColor: t.primary }]} onPress={handleAnnual}>
           <View style={styles.annualPlanContent}>
             <View style={styles.planHeader}>
-              <Text style={styles.annualPlanTitle}>Annual Plan</Text>
-              <View style={styles.saveBadge}>
-                <Text style={styles.saveBadgeText}>Save 44%</Text>
+              <Text style={[styles.annualPlanTitle, { color: t.textInverse }]}>Annual Plan</Text>
+              <View style={[styles.saveBadge, { backgroundColor: t.textInverse }]}>
+                <Text style={[styles.saveBadgeText, { color: t.primary }]}>Save 44%</Text>
               </View>
             </View>
-            <Text style={styles.annualPrice}>₱83/mo, billed ₱999/yr</Text>
-            <Text style={styles.annualCta}>Less than one late payment fee</Text>
+            <Text style={[styles.annualPrice, { color: t.accentMuted }]}>₱83/mo, billed ₱999/yr</Text>
+            <Text style={[styles.annualCta, { color: t.accentMuted }]}>Less than one late payment fee</Text>
           </View>
         </Pressable>
 
-        <Pressable style={styles.monthlyPlan} onPress={handleMonthly}>
-          <Text style={styles.monthlyPlanTitle}>Monthly Plan</Text>
-          <Text style={styles.monthlyPrice}>₱149/mo</Text>
+        <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={handleMonthly}>
+          <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Monthly Plan</Text>
+          <Text style={[styles.monthlyPrice, { color: t.textMuted }]}>₱149/mo</Text>
         </Pressable>
 
-        <Text style={styles.cancelNote}>Cancel anytime</Text>
+        <Text style={[styles.cancelNote, { color: t.textMuted }]}>Cancel anytime</Text>
       </View>
 
       <Pressable style={styles.dismissButton} onPress={() => router.back()}>
-        <Text style={styles.dismissText}>Not now</Text>
+        <Text style={[styles.dismissText, { color: t.textMuted }]}>Not now</Text>
       </Pressable>
     </ScrollView>
   );
@@ -169,7 +171,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 15,
-    color: '#666',
     textAlign: 'center',
     lineHeight: 22,
   },
@@ -183,7 +184,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   featureIcon: {
     fontSize: 20,
@@ -195,7 +195,6 @@ const styles = StyleSheet.create({
   },
   trialButton: {
     width: '100%',
-    backgroundColor: '#6366f1',
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
@@ -204,12 +203,10 @@ const styles = StyleSheet.create({
   trialButtonText: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#fff',
     marginBottom: 4,
   },
   trialSubtext: {
     fontSize: 13,
-    color: '#c7d2fe',
   },
   plans: {
     width: '100%',
@@ -217,7 +214,6 @@ const styles = StyleSheet.create({
   },
   annualPlan: {
     width: '100%',
-    backgroundColor: '#10b981',
     borderRadius: 12,
     padding: 20,
     marginBottom: 12,
@@ -234,10 +230,8 @@ const styles = StyleSheet.create({
   annualPlanTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#fff',
   },
   saveBadge: {
-    backgroundColor: '#fff',
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -246,23 +240,19 @@ const styles = StyleSheet.create({
   saveBadgeText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#10b981',
   },
   annualPrice: {
     fontSize: 15,
-    color: '#d1fae5',
     fontWeight: '600',
     marginBottom: 4,
   },
   annualCta: {
     fontSize: 13,
-    color: '#d1fae5',
     fontStyle: 'italic',
   },
   monthlyPlan: {
     width: '100%',
     borderWidth: 1,
-    borderColor: '#d1d5db',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -273,16 +263,13 @@ const styles = StyleSheet.create({
   monthlyPlanTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
   },
   monthlyPrice: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#6b7280',
   },
   cancelNote: {
     fontSize: 13,
-    color: '#9ca3af',
     marginTop: 4,
   },
   dismissButton: {
@@ -291,6 +278,5 @@ const styles = StyleSheet.create({
   },
   dismissText: {
     fontSize: 15,
-    color: '#9ca3af',
   },
 });

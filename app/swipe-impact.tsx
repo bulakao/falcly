@@ -19,12 +19,7 @@ import { calculateSwipeImpact, computeNetAvailableCash, getCycleDates } from '@/
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import type { CardStatus } from '@/types/card';
 import { trackSwipeCheckPerformed, trackDataStalenessWarningShown } from '@/utils/analytics';
-
-const STATUS_COLORS: Record<CardStatus, string> = {
-  SAFE: '#10b981',
-  CAUTION: '#f59e0b',
-  RISKY: '#ef4444',
-};
+import { useAppTheme } from '@/theme';
 
 const STATUS_ICONS: Record<CardStatus, string> = {
   SAFE: '✓',
@@ -44,6 +39,7 @@ function formatPeso(amount: number): string {
 }
 
 export default function SwipeImpactScreen() {
+  const t = useAppTheme();
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
   const cards = useCardStore((s) => s.cards);
   const card = cards.find((c) => c.id === cardId);
@@ -58,6 +54,12 @@ export default function SwipeImpactScreen() {
   const isCardReadOnly = useSubscriptionStore((s) => s.isCardReadOnly);
   const readOnly = isCardReadOnly(cardIndex);
   const [amountText, setAmountText] = useState('');
+
+  const STATUS_COLORS: Record<CardStatus, string> = {
+    SAFE: t.safe,
+    CAUTION: t.caution,
+    RISKY: t.risky,
+  };
 
   const proposedAmount = useMemo(() => {
     const n = parseFloat(amountText);
@@ -144,8 +146,8 @@ export default function SwipeImpactScreen() {
         {/* Read-only upgrade banner for expired Pro cards */}
         {readOnly && (
           <Link href="/pro-paywall" asChild>
-            <Pressable style={styles.readOnlyBanner}>
-              <Text style={styles.readOnlyBannerText}>
+            <Pressable style={[styles.readOnlyBanner, { backgroundColor: t.accentBg, borderColor: t.accent }]}>
+              <Text style={[styles.readOnlyBannerText, { color: t.accent }]}>
                 Reactivate Pro to manage all cards
               </Text>
             </Pressable>
@@ -155,8 +157,14 @@ export default function SwipeImpactScreen() {
         {/* Staleness banner at 5+ days — tappable to update balance (disabled for read-only) */}
         {staleness !== 'fresh' && !readOnly && (
           <Link href={{ pathname: '/update-balance', params: { cardId: card.id } }} asChild>
-            <Pressable style={staleness === 'stale' ? styles.staleBanner : styles.warningBanner}>
-              <Text style={staleness === 'stale' ? styles.staleBannerText : styles.warningBannerText}>
+            <Pressable style={staleness === 'stale'
+              ? [styles.staleBanner, { backgroundColor: t.surface, borderColor: t.border }]
+              : [styles.warningBanner, { backgroundColor: t.cautionBg }]
+            }>
+              <Text style={staleness === 'stale'
+                ? [styles.staleBannerText, { color: t.textMuted }]
+                : [styles.warningBannerText, { color: t.cautionText }]
+              }>
                 {staleness === 'stale'
                   ? '⚠ Data stale — update before trusting this status'
                   : '⚠️ Balance may be outdated · Tap to update'}
@@ -169,42 +177,43 @@ export default function SwipeImpactScreen() {
         <View style={styles.cardHeader}>
           <Text style={styles.bankName}>{card.bankName}</Text>
           {staleness === 'stale' ? (
-            <View style={[styles.badge, { backgroundColor: '#6b7280' }]}>
-              <Text style={styles.badgeText}>⚠ STALE</Text>
+            <View style={[styles.badge, { backgroundColor: t.textMuted }]}>
+              <Text style={[styles.badgeText, { color: t.textInverse }]}>⚠ STALE</Text>
             </View>
           ) : (
             <View style={[styles.badge, { backgroundColor: STATUS_COLORS[impact.status] }]}>
-              <Text style={styles.badgeText}>
+              <Text style={[styles.badgeText, { color: t.textInverse }]}>
                 {STATUS_ICONS[impact.status]} {impact.status}
               </Text>
             </View>
           )}
         </View>
-        <Text style={styles.reason}>{staleness !== 'stale' ? impact.reason : ''}</Text>
+        <Text style={[styles.reason, { color: t.textSecondary }]}>{staleness !== 'stale' ? impact.reason : ''}</Text>
 
         {/* Balance timestamp + actions */}
         <View style={styles.balanceRow}>
           <Text style={[
             styles.balanceTimestamp,
-            staleness === 'warning' && { color: '#f59e0b' },
-            staleness === 'stale' && { color: '#6b7280', fontWeight: '600' },
+            { color: t.textMuted },
+            staleness === 'warning' && { color: t.caution },
+            staleness === 'stale' && { color: t.textMuted, fontWeight: '600' },
           ]}>
             Balance updated {formatUpdatedAgo(card.balanceUpdatedAt)}
           </Text>
           {!readOnly && (
             <View style={styles.actionRow}>
               <Link href={{ pathname: '/edit-card', params: { cardId: card.id } }} asChild>
-                <Pressable style={styles.updateButton}>
-                  <Text style={styles.editButtonText}>Edit Card</Text>
+                <Pressable style={[styles.updateButton, { backgroundColor: t.surface }]}>
+                  <Text style={[styles.editButtonText, { color: t.primary }]}>Edit Card</Text>
                 </Pressable>
               </Link>
               <Link href={{ pathname: '/update-balance', params: { cardId: card.id } }} asChild>
-                <Pressable style={styles.updateButton}>
-                  <Text style={styles.updateButtonText}>Update Balance</Text>
+                <Pressable style={[styles.updateButton, { backgroundColor: t.surface }]}>
+                  <Text style={[styles.updateButtonText, { color: t.primary }]}>Update Balance</Text>
                 </Pressable>
               </Link>
-              <Pressable style={styles.deleteButton} onPress={handleDeleteCard}>
-                <Text style={styles.deleteButtonText}>Delete</Text>
+              <Pressable style={[styles.deleteButton, { backgroundColor: t.riskyBg }]} onPress={handleDeleteCard}>
+                <Text style={[styles.deleteButtonText, { color: t.risky }]}>Delete</Text>
               </Pressable>
             </View>
           )}
@@ -214,13 +223,13 @@ export default function SwipeImpactScreen() {
         <BillingTimeline card={card} />
 
         {/* Amount input */}
-        <Text style={styles.label}>How much will you swipe?</Text>
+        <Text style={[styles.label, { color: t.textSecondary }]}>How much will you swipe?</Text>
         <TextInput
-          style={styles.amountInput}
+          style={[styles.amountInput, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
           value={amountText}
           onChangeText={setAmountText}
           placeholder="0"
-          placeholderTextColor="#999"
+          placeholderTextColor={t.placeholder}
           keyboardType="numeric"
           autoFocus
         />
@@ -232,14 +241,16 @@ export default function SwipeImpactScreen() {
               key={qa.value}
               style={[
                 styles.chip,
-                proposedAmount === qa.value && styles.chipActive,
+                { borderColor: t.inputBorder, backgroundColor: t.inputBg },
+                proposedAmount === qa.value && { backgroundColor: t.primary, borderColor: t.primary },
               ]}
               onPress={() => handleQuickAmount(qa.value)}
             >
               <Text
                 style={[
                   styles.chipText,
-                  proposedAmount === qa.value && styles.chipTextActive,
+                  { color: t.inputText },
+                  proposedAmount === qa.value && { color: t.textInverse },
                 ]}
               >
                 {qa.label}
@@ -249,31 +260,31 @@ export default function SwipeImpactScreen() {
         </View>
 
         {/* Impact breakdown */}
-        <View style={styles.breakdown}>
+        <View style={[styles.breakdown, { borderColor: t.border }]}>
           <Text style={styles.sectionTitle}>
             {proposedAmount > 0 ? 'If you swipe today:' : 'Current status:'}
           </Text>
 
           <View style={styles.row}>
-            <Text style={styles.rowLabel}>Outstanding balance</Text>
-            <Text style={styles.rowValue}>{formatPeso(card.outstandingBalance)}</Text>
+            <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Outstanding balance</Text>
+            <Text style={[styles.rowValue, { color: t.inputText }]}>{formatPeso(card.outstandingBalance)}</Text>
           </View>
           {card.pendingTransactions > 0 && (
             <View style={styles.row}>
-              <Text style={styles.rowLabel}>Pending transactions</Text>
-              <Text style={styles.rowValue}>+{formatPeso(card.pendingTransactions)}</Text>
+              <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Pending transactions</Text>
+              <Text style={[styles.rowValue, { color: t.inputText }]}>+{formatPeso(card.pendingTransactions)}</Text>
             </View>
           )}
           {card.installmentsMonthlyAmount > 0 && (
             <View style={styles.row}>
-              <Text style={styles.rowLabel}>Installments</Text>
-              <Text style={styles.rowValue}>+{formatPeso(card.installmentsMonthlyAmount)}</Text>
+              <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Installments</Text>
+              <Text style={[styles.rowValue, { color: t.inputText }]}>+{formatPeso(card.installmentsMonthlyAmount)}</Text>
             </View>
           )}
           {card.subscriptionsThisCycle > 0 && (
             <View style={styles.row}>
-              <Text style={styles.rowLabel}>Subscriptions</Text>
-              <Text style={styles.rowValue}>+{formatPeso(card.subscriptionsThisCycle)}</Text>
+              <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Subscriptions</Text>
+              <Text style={[styles.rowValue, { color: t.inputText }]}>+{formatPeso(card.subscriptionsThisCycle)}</Text>
             </View>
           )}
           {card.annualFee > 0 && card.annualFeeMonth > 0 && (() => {
@@ -282,89 +293,89 @@ export default function SwipeImpactScreen() {
             return cycleMonth === card.annualFeeMonth;
           })() && (
             <View style={styles.row}>
-              <Text style={styles.rowLabel}>Annual fee</Text>
-              <Text style={styles.rowValue}>+{formatPeso(card.annualFee)}</Text>
+              <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Annual fee</Text>
+              <Text style={[styles.rowValue, { color: t.inputText }]}>+{formatPeso(card.annualFee)}</Text>
             </View>
           )}
           {proposedAmount > 0 && (
             <View style={styles.row}>
-              <Text style={styles.rowLabel}>Proposed swipe</Text>
-              <Text style={styles.rowValue}>+{formatPeso(proposedAmount)}</Text>
+              <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Proposed swipe</Text>
+              <Text style={[styles.rowValue, { color: t.inputText }]}>+{formatPeso(proposedAmount)}</Text>
             </View>
           )}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: t.border }]} />
           <View style={styles.row}>
-            <Text style={[styles.rowLabel, { fontWeight: '700' }]}>Projected statement balance</Text>
-            <Text style={[styles.rowValue, { fontWeight: '700' }]}>{formatPeso(impact.projectedBalance)}</Text>
+            <Text style={[styles.rowLabel, { color: t.textSecondary, fontWeight: '700' }]}>Projected statement balance</Text>
+            <Text style={[styles.rowValue, { color: t.inputText, fontWeight: '700' }]}>{formatPeso(impact.projectedBalance)}</Text>
           </View>
 
           {impact.netAvailableCash !== null ? (
             <>
               <View style={styles.row}>
-                <Text style={styles.rowLabel}>Cash on hand</Text>
-                <Text style={styles.rowValueMuted}>
+                <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Cash on hand</Text>
+                <Text style={[styles.rowValueMuted, { color: t.textMuted }]}>
                   {cashOnHand !== null ? formatPeso(cashOnHand) : '—'}
                 </Text>
               </View>
               {monthlyIncome !== null && payday !== null && (
                 <View style={styles.row}>
-                  <Text style={styles.rowLabel}>
+                  <Text style={[styles.rowLabel, { color: t.textSecondary }]}>
                     Monthly income{incomeApplies ? '' : ' (payday after due)'}
                   </Text>
-                  <Text style={[styles.rowValueMuted, !incomeApplies && styles.excludedText]}>
+                  <Text style={[styles.rowValueMuted, { color: t.textMuted }, !incomeApplies && { textDecorationLine: 'line-through', color: t.border }]}>
                     {incomeApplies ? `+${formatPeso(monthlyIncome)}` : `+${formatPeso(monthlyIncome)}`}
                   </Text>
                 </View>
               )}
               {committedExpenses !== null && committedExpenses > 0 && (
                 <View style={styles.row}>
-                  <Text style={styles.rowLabel}>Committed expenses</Text>
-                  <Text style={styles.rowValueMuted}>
+                  <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Committed expenses</Text>
+                  <Text style={[styles.rowValueMuted, { color: t.textMuted }]}>
                     −{formatPeso(committedExpenses)}
                   </Text>
                 </View>
               )}
-              <View style={styles.divider} />
+              <View style={[styles.divider, { backgroundColor: t.border }]} />
               <View style={styles.row}>
-                <Text style={[styles.rowLabel, styles.netCashLabel]}>Available to pay</Text>
-                <Text style={styles.netCashValue}>
+                <Text style={[styles.rowLabel, styles.netCashLabel, { color: t.inputText }]}>Available to pay</Text>
+                <Text style={[styles.netCashValue, { color: t.safe }]}>
                   {formatPeso(impact.netAvailableCash)}
                 </Text>
               </View>
             </>
           ) : (
             <View style={styles.row}>
-              <Text style={styles.rowLabel}>Available to pay</Text>
-              <Text style={styles.rowValueMuted}>Not set</Text>
+              <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Available to pay</Text>
+              <Text style={[styles.rowValueMuted, { color: t.textMuted }]}>Not set</Text>
             </View>
           )}
 
           <View style={styles.row}>
-            <Text style={styles.rowLabel}>Minimum payment</Text>
-            <Text style={styles.rowValue}>{formatPeso(impact.minimumPayment)}</Text>
+            <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Minimum payment</Text>
+            <Text style={[styles.rowValue, { color: t.inputText }]}>{formatPeso(impact.minimumPayment)}</Text>
           </View>
 
           <View style={styles.row}>
-            <Text style={styles.rowLabel}>Credit available after swipe</Text>
-            <Text style={styles.rowValue}>
+            <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Credit available after swipe</Text>
+            <Text style={[styles.rowValue, { color: t.inputText }]}>
               {formatPeso(Math.max(0, card.creditLimit - impact.projectedBalance))}
             </Text>
           </View>
 
           {showCarriedBalance && (
             <>
-              <View style={styles.divider} />
+              <View style={[styles.divider, { backgroundColor: t.border }]} />
               <View style={styles.row}>
-                <Text style={[styles.rowLabel, styles.warningText]}>Carried balance</Text>
-                <Text style={[styles.rowValue, styles.warningText]}>
+                <Text style={[styles.rowLabel, { color: t.risky }]}>Carried balance</Text>
+                <Text style={[styles.rowValue, { color: t.risky }]}>
                   {formatPeso(impact.carriedBalance)}
                 </Text>
               </View>
               <View style={styles.row}>
-                <Text style={[styles.rowLabel, styles.warningText]}>
+                <Text style={[styles.rowLabel, { color: t.risky }]}>
                   Est. monthly interest ({card.interestRate * 100}%)
                 </Text>
-                <Text style={[styles.rowValue, styles.warningText]}>
+                <Text style={[styles.rowValue, { color: t.risky }]}>
                   {formatPeso(impact.monthlyInterest)}
                 </Text>
               </View>
@@ -373,7 +384,7 @@ export default function SwipeImpactScreen() {
         </View>
 
         {impact.netAvailableCash === null && (
-          <Text style={styles.hint}>
+          <Text style={[styles.hint, { color: t.textMuted }]}>
             Set your cash on hand in Settings to see payoff projections.
           </Text>
         )}
@@ -381,9 +392,9 @@ export default function SwipeImpactScreen() {
         {/* Trial CTA — payoff planner entry point */}
         {subscriptionTier === 'free' && (
           <Link href="/pro-paywall" asChild>
-            <Pressable style={styles.trialCta}>
-              <Text style={styles.trialCtaText}>Try Free for 14 Days</Text>
-              <Text style={styles.trialCtaSubtext}>
+            <Pressable style={[styles.trialCta, { backgroundColor: t.accentBg, borderColor: t.accent }]}>
+              <Text style={[styles.trialCtaText, { color: t.accent }]}>Try Free for 14 Days</Text>
+              <Text style={[styles.trialCtaSubtext, { color: t.accent }]}>
                 Unlock payment planning, installment tracking & more
               </Text>
             </Pressable>
@@ -421,13 +432,11 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   badgeText: {
-    color: '#fff',
     fontSize: 13,
     fontWeight: '700',
   },
   reason: {
     fontSize: 13,
-    color: '#666',
     marginBottom: 12,
   },
   balanceRow: {
@@ -438,10 +447,8 @@ const styles = StyleSheet.create({
   },
   balanceTimestamp: {
     fontSize: 12,
-    color: '#999',
   },
   updateButton: {
-    backgroundColor: '#f3f4f6',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
@@ -453,15 +460,12 @@ const styles = StyleSheet.create({
   editButtonText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6366f1',
   },
   updateButtonText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#10b981',
   },
   deleteButton: {
-    backgroundColor: '#fef2f2',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
@@ -469,23 +473,18 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#ef4444',
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#666',
     marginBottom: 8,
   },
   amountInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 14,
     fontSize: 24,
     fontWeight: '700',
-    backgroundColor: '#fafafa',
-    color: '#000',
     textAlign: 'center',
   },
   chipRow: {
@@ -499,26 +498,15 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
     alignItems: 'center',
-    backgroundColor: '#fafafa',
-  },
-  chipActive: {
-    backgroundColor: '#10b981',
-    borderColor: '#10b981',
   },
   chipText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
-  },
-  chipTextActive: {
-    color: '#fff',
   },
   breakdown: {
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
     padding: 16,
     marginBottom: 16,
   },
@@ -535,48 +523,33 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: 14,
-    color: '#555',
     flex: 1,
   },
   rowValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#111',
   },
   rowValueMuted: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#999',
   },
   divider: {
     height: 1,
-    backgroundColor: '#e5e7eb',
     marginVertical: 8,
-  },
-  warningText: {
-    color: '#ef4444',
-  },
-  excludedText: {
-    textDecorationLine: 'line-through',
-    color: '#ccc',
   },
   netCashLabel: {
     fontWeight: '700',
-    color: '#111',
   },
   netCashValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#10b981',
   },
   hint: {
     fontSize: 13,
-    color: '#999',
     textAlign: 'center',
     fontStyle: 'italic',
   },
   warningBanner: {
-    backgroundColor: '#fef3c7',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -585,29 +558,23 @@ const styles = StyleSheet.create({
   warningBannerText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#92400e',
     textAlign: 'center',
   },
   staleBanner: {
-    backgroundColor: '#f3f4f6',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#d1d5db',
   },
   staleBannerText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#6b7280',
     textAlign: 'center',
   },
   trialCta: {
-    backgroundColor: '#eef2ff',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#6366f1',
     padding: 16,
     alignItems: 'center',
     marginTop: 8,
@@ -615,18 +582,14 @@ const styles = StyleSheet.create({
   trialCtaText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#6366f1',
     marginBottom: 4,
   },
   trialCtaSubtext: {
     fontSize: 13,
-    color: '#818cf8',
   },
   readOnlyBanner: {
-    backgroundColor: '#eef2ff',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#6366f1',
     padding: 14,
     marginBottom: 12,
     alignItems: 'center',
@@ -634,6 +597,5 @@ const styles = StyleSheet.create({
   readOnlyBannerText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#6366f1',
   },
 });
