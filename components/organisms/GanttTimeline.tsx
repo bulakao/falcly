@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Pressable } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import type { Card, CardStatus } from '@/types/card';
 import { getCycleDates, calculateCardStatus } from '@/utils/decisionEngine';
@@ -28,7 +28,13 @@ function formatShortDate(date: Date): string {
  * Multi-card Gantt view showing all cards stacked vertically.
  * Sorted by urgency (closest statement close first), color-coded by status.
  */
-export function GanttTimeline({ cards, today }: { cards: Card[]; today?: Date }) {
+interface GanttTimelineProps {
+  cards: Card[];
+  today?: Date;
+  onCardPress?: (cardId: string) => void;
+}
+
+export function GanttTimeline({ cards, today, onCardPress }: GanttTimelineProps) {
   const t = useAppTheme();
   const STATUS_COLORS = getStatusColors(t);
   const now = today ?? new Date();
@@ -83,7 +89,12 @@ export function GanttTimeline({ cards, today }: { cards: Card[]; today?: Date })
         else if (cycle.daysToStatement <= 7) stmtColor = t.caution;
 
         return (
-          <View key={card.id} style={styles.row}>
+          <Pressable
+            key={card.id}
+            style={({ pressed }) => [styles.row, pressed && onCardPress && styles.rowPressed]}
+            onPress={() => onCardPress?.(card.id)}
+            disabled={!onCardPress}
+          >
             {/* Card label */}
             <View style={styles.labelCol}>
               <Text style={styles.bankName} numberOfLines={1}>{card.bankName}</Text>
@@ -116,7 +127,7 @@ export function GanttTimeline({ cards, today }: { cards: Card[]; today?: Date })
                 <Text style={[styles.barDate, { left: `${duePct}%`, color: t.textMuted }]}>{formatShortDate(cycle.dueDate)}</Text>
               </View>
             </View>
-          </View>
+          </Pressable>
         );
       })}
 
@@ -170,6 +181,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 20,
     minHeight: 40,
+  },
+  rowPressed: {
+    opacity: 0.6,
   },
   bankName: {
     fontSize: 13,

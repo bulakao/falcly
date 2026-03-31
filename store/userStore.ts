@@ -12,6 +12,8 @@ interface UserStore {
   analyticsOptOut: boolean;
   setCashOnHand: (amount: number) => void;
   setIncome: (income: number, payday: number) => void;
+  setMonthlyIncome: (income: number) => void;
+  setPayday: (day: number) => void;
   setCommittedExpenses: (amount: number) => void;
   setAnalyticsOptOut: (optOut: boolean) => void;
 }
@@ -30,6 +32,12 @@ export const useUserStore = create<UserStore>()(
       },
       setIncome: (income: number, payday: number) => {
         set({ monthlyIncome: income, payday });
+      },
+      setMonthlyIncome: (income: number) => {
+        set({ monthlyIncome: income });
+      },
+      setPayday: (day: number) => {
+        set({ payday: day });
       },
       setCommittedExpenses: (amount: number) => {
         set({ committedExpenses: amount });

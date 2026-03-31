@@ -1,6 +1,7 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { StyleSheet } from 'react-native';
 import { Link, router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { View } from '@/components/Themed';
 import { AlertBanner } from '@/components/molecules';
@@ -9,11 +10,12 @@ import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useAppTheme } from '@/theme';
-import { calculateBestCard, computeNetAvailableCash } from '@/utils/decisionEngine';
+import { computeNetAvailableCash } from '@/utils/decisionEngine';
 import type { Card } from '@/types/card';
 
 export default function HomeScreen() {
   const t = useAppTheme();
+  const insets = useSafeAreaInsets();
   const cards = useCardStore((s) => s.cards);
   const canAddCard = useSubscriptionStore((s) => s.canAddCard);
   const daysUntilDataDeletion = useSubscriptionStore((s) => s.daysUntilDataDeletion);
@@ -29,14 +31,6 @@ export default function HomeScreen() {
     [cashOnHand, monthlyIncome, payday, committedExpenses],
   );
 
-  // Start on the best card
-  const bestCardIndex = useMemo(() => {
-    if (cards.length === 0) return 0;
-    const best = calculateBestCard(cards, new Date(), getNetAvailableCash);
-    if (!best) return 0;
-    return cards.findIndex((c) => c.id === best.card.id);
-  }, [cards, getNetAvailableCash]);
-
   function handleAddCard() {
     if (canAddCard(cards.length)) {
       router.push('/add-card');
@@ -46,7 +40,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: t.background }]}>
+    <View style={[styles.container, { backgroundColor: t.background, paddingTop: insets.top }]}>
       {daysRemaining !== null && (
         <Link href="/pro-paywall" asChild>
           <AlertBanner
@@ -64,7 +58,7 @@ export default function HomeScreen() {
         cards={cards}
         onAddCard={handleAddCard}
         getNetAvailableCash={getNetAvailableCash}
-        initialIndex={bestCardIndex}
+        initialIndex={0}
       />
     </View>
   );
