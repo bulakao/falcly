@@ -1,10 +1,11 @@
-import { getFirestore, collection, doc } from '@react-native-firebase/firestore';
+import { getApp } from '@react-native-firebase/app';
+import { initializeFirestore, getFirestore, collection, doc } from '@react-native-firebase/firestore';
 
-const db = getFirestore();
+let db = getFirestore();
 
 export async function initFirestore(): Promise<void> {
   try {
-    await db.settings({
+    db = await initializeFirestore(getApp(), {
       persistence: true,
       cacheSizeBytes: -1, // CACHE_SIZE_UNLIMITED
     });
