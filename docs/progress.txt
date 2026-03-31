@@ -11,6 +11,7 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - After adding new route files, Expo regenerates `.expo/types/router.d.ts` — run tsc after to verify
 - Zustand persist with AsyncStorage: use `persist` + `createJSONStorage(() => AsyncStorage)` middleware, store name `falcly-cards`
 - Swipe impact: `calculateSwipeImpact(card, amount, netAvailableCash)` in `utils/decisionEngine.ts` — netAvailableCash is null until CA stories
+- Best card scoring: `scoreCard(card)` and `calculateBestCard(cards)` in `utils/decisionEngine.ts` — lowest score wins; cash penalty stubbed until CA
 - Route params: use `useLocalSearchParams<{ paramName: string }>()` for typed params in Expo Router screens
 
 ---
@@ -53,4 +54,18 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - Expo typed routes regenerate via `npx expo export` — `.expo/types/router.d.ts` is gitignored so new routes need an export/tsc cycle to verify
   - `useLocalSearchParams<{ cardId: string }>()` for typed route params in Expo Router
   - Quick-amount chips use flex:1 in a row for equal sizing without hardcoded widths
+---
+
+## 2026-03-31 - CL-04
+- Added `scoreCard()` and `calculateBestCard()` to decision engine
+- Added `BestCardResult` type
+- Added hero recommendation component to home screen as FlatList header
+- Hero shows best card bank name + SAFE badge; taps through to swipe impact
+- Warning banner shown when no SAFE card available (falls back to lowest-scoring CAUTION)
+- Returns null (no hero) when all cards are RISKY
+- Files changed: `types/card.ts`, `utils/decisionEngine.ts`, `app/(tabs)/index.tsx`
+- **Learnings for future iterations:**
+  - Scoring formula: `utilization×100 + (30 - daysToStatement) + statusPenalty(SAFE=0/CAUTION=50/RISKY=100) + cashPenalty(0 until CA)`
+  - `FlatList.ListHeaderComponent` is the clean way to add a hero above a list without nesting ScrollViews
+  - Cash coverage penalty is stubbed at 0 — will need wiring when CA stories land
 ---

@@ -60,7 +60,7 @@
         "If no SAFE card exists, shows the lowest-scoring CAUTION card with an explicit warning label"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
