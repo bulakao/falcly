@@ -12,6 +12,7 @@ import { useLocalSearchParams, Link } from 'expo-router';
 import { Text, View } from '@/components/Themed';
 import { BillingTimeline } from '@/components/BillingTimeline';
 import { useCardStore } from '@/store/cardStore';
+import { useUserStore } from '@/store/userStore';
 import { calculateSwipeImpact } from '@/utils/decisionEngine';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import type { CardStatus } from '@/types/card';
@@ -42,6 +43,7 @@ function formatPeso(amount: number): string {
 export default function SwipeImpactScreen() {
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
   const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
+  const cashOnHand = useUserStore((s) => s.cashOnHand);
   const [amountText, setAmountText] = useState('');
 
   const proposedAmount = useMemo(() => {
@@ -51,9 +53,8 @@ export default function SwipeImpactScreen() {
 
   const impact = useMemo(() => {
     if (!card) return null;
-    // netAvailableCash is null until CA stories implement cash/income inputs
-    return calculateSwipeImpact(card, proposedAmount, null);
-  }, [card, proposedAmount]);
+    return calculateSwipeImpact(card, proposedAmount, cashOnHand);
+  }, [card, proposedAmount, cashOnHand]);
 
   if (!card || !impact) {
     return (
