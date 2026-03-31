@@ -34,6 +34,7 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Subscription state: `isPaidPro()` = paid subscriber, `isTrialActive()` = trial user, `tier === 'free'` = free user — use these helpers, not raw state checks
 - Read-only cards: `isCardReadOnly(cardIndex)` checks free tier + index >= FREE_CARD_LIMIT — use to gate editing/reminders on expired Pro cards
 - Data retention: `proExpiredAt` tracks when Pro expired; `daysUntilDataDeletion()` returns remaining days of 90-day retention window
+- Network status: `useNetworkStatus()` hook from `hooks/useNetworkStatus.ts` — returns `{ isConnected, isOffline }`; `OfflineChip` component renders automatically in tab headers
 
 ---
 
@@ -373,4 +374,19 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - Read-only cards disable staleness reminders (no "tap to update" since updates are disabled)
   - `borderStyle: 'dashed'` in React Native works for visual read-only indication
   - `daysUntilDataDeletion()` returns null when Pro or no expiry — only shows warning to expired users
+---
+
+## 2026-03-31 - DP-01
+- Core features (SAFE/CAUTION/RISKY, Swipe Impact, best card, Gantt timeline) already function fully offline via Zustand + AsyncStorage local persistence and deterministic client-side calculations
+- Created `hooks/useNetworkStatus.ts` — custom hook wrapping `@react-native-community/netinfo` with `isConnected` and `isOffline` state
+- Created `components/OfflineChip.tsx` — small gray "Offline" chip that renders only when disconnected, non-blocking
+- Integrated OfflineChip into tab layout headers via `headerRight` in `screenOptions` — visible on all tab screens
+- Added Cloud Sync section to Settings screen (Pro users only) — shows "Connected — sync available" or offline message explaining data is saved locally
+- Files changed: `hooks/useNetworkStatus.ts` (new), `components/OfflineChip.tsx` (new), `app/(tabs)/_layout.tsx`, `app/(tabs)/two.tsx`, `package.json`
+- **Learnings for future iterations:**
+  - `@react-native-community/netinfo` provides `addEventListener` for real-time network state changes — returns unsubscribe function for cleanup
+  - `headerRight` in tab `screenOptions` applies to all tab screens at once — no need to set per-screen
+  - `headerRightContainerStyle: { paddingRight: 16 }` adds spacing between chip and screen edge
+  - All core features are inherently offline — no network calls needed for calculations. Only cloud sync (future Pro feature) requires connectivity
+  - Network status hook initializes with `true` (optimistic) — `null` from NetInfo means unknown, treated as connected
 ---

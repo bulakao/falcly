@@ -375,7 +375,7 @@
         "Only cloud sync (Pro feature) requires connectivity; its unavailability is communicated without blocking the app"
       ],
       "priority": 25,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
