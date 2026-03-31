@@ -1,9 +1,11 @@
+import { useCallback } from 'react';
 import { StyleSheet, Pressable, FlatList } from 'react-native';
 import { Link } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { useCardStore } from '@/store/cardStore';
-import { calculateCardStatus, calculateBestCard } from '@/utils/decisionEngine';
+import { useUserStore } from '@/store/userStore';
+import { calculateCardStatus, calculateBestCard, computeNetAvailableCash } from '@/utils/decisionEngine';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import type { Card, CardStatus } from '@/types/card';
 
@@ -19,8 +21,8 @@ const STATUS_ICONS: Record<CardStatus, string> = {
   RISKY: '✕',
 };
 
-function BestCardHero({ cards }: { cards: Card[] }) {
-  const best = calculateBestCard(cards);
+function BestCardHero({ cards, getNetAvailableCash }: { cards: Card[]; getNetAvailableCash: (card: Card) => number | null }) {
+  const best = calculateBestCard(cards, new Date(), getNetAvailableCash);
   if (!best) return null;
 
   const { card, status, warning } = best;
@@ -51,8 +53,8 @@ function BestCardHero({ cards }: { cards: Card[] }) {
   );
 }
 
-function CardItem({ card }: { card: Card }) {
-  const { status, reason } = calculateCardStatus(card);
+function CardItem({ card, netAvailableCash }: { card: Card; netAvailableCash: number | null }) {
+  const { status, reason } = calculateCardStatus(card, new Date(), netAvailableCash);
   const staleness = getStalenessLevel(card.balanceUpdatedAt);
 
   return (
@@ -102,6 +104,15 @@ function CardItem({ card }: { card: Card }) {
 
 export default function HomeScreen() {
   const cards = useCardStore((s) => s.cards);
+  const cashOnHand = useUserStore((s) => s.cashOnHand);
+  const monthlyIncome = useUserStore((s) => s.monthlyIncome);
+  const payday = useUserStore((s) => s.payday);
+  const committedExpenses = useUserStore((s) => s.committedExpenses);
+
+  const getNetAvailableCash = useCallback(
+    (card: Card) => computeNetAvailableCash(cashOnHand, monthlyIncome, payday, card, committedExpenses),
+    [cashOnHand, monthlyIncome, payday, committedExpenses],
+  );
 
   return (
     <View style={styles.container}>
@@ -109,15 +120,15 @@ export default function HomeScreen() {
         <View style={styles.empty}>
           <Text style={styles.emptyTitle}>No cards yet</Text>
           <Text style={styles.emptySubtitle}>
-            Add your first credit card to see if it's safe to swipe.
+            Add your first credit card to see if it&apos;s safe to swipe.
           </Text>
         </View>
       ) : (
         <FlatList
           data={cards}
           keyExtractor={(c) => c.id}
-          renderItem={({ item }) => <CardItem card={item} />}
-          ListHeaderComponent={<BestCardHero cards={cards} />}
+          renderItem={({ item }) => <CardItem card={item} netAvailableCash={getNetAvailableCash(item)} />}
+          ListHeaderComponent={<BestCardHero cards={cards} getNetAvailableCash={getNetAvailableCash} />}
           contentContainerStyle={styles.list}
         />
       )}

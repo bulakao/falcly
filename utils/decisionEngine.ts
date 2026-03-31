@@ -74,12 +74,30 @@ export function utilization(outstandingBalance: number, creditLimit: number): nu
 
 /**
  * Determine SAFE/CAUTION/RISKY status for a card.
- * Simplified for CL-01 — no cash/income inputs yet (those come in CA stories).
+ * netAvailableCash is optional — when provided, enables cash-based RISKY detection.
  */
-export function calculateCardStatus(card: Card, today: Date = new Date()): CardStatusResult {
+export function calculateCardStatus(
+  card: Card,
+  today: Date = new Date(),
+  netAvailableCash: number | null = null,
+): CardStatusResult {
   const days = daysToStatement(card.statementDay, today);
   const util = utilization(card.outstandingBalance, card.creditLimit);
   const utilPct = Math.round(util * 100);
+
+  // RISKY: cash below minimum payment — highest priority (first match wins)
+  if (netAvailableCash !== null) {
+    const minimumPayment = Math.max(
+      card.outstandingBalance * card.minPaymentPct,
+      card.minPaymentFloor,
+    );
+    if (netAvailableCash < minimumPayment) {
+      return {
+        status: 'RISKY',
+        reason: "You won't be able to make the minimum payment",
+      };
+    }
+  }
 
   // RISKY conditions (first match wins)
   if (days <= 2) {
@@ -287,10 +305,14 @@ export function computeNetAvailableCash(
  * Lower score = better card to use.
  * score = utilization×100 + days penalty + status penalty + cash coverage penalty
  */
-export function scoreCard(card: Card, today: Date = new Date()): number {
+export function scoreCard(
+  card: Card,
+  today: Date = new Date(),
+  netAvailableCash: number | null = null,
+): number {
   const util = utilization(card.outstandingBalance, card.creditLimit);
   const days = daysToStatement(card.statementDay, today);
-  const { status } = calculateCardStatus(card, today);
+  const { status } = calculateCardStatus(card, today, netAvailableCash);
 
   // Utilization component: 0–100
   const utilizationScore = util * 100;
@@ -311,14 +333,21 @@ export function scoreCard(card: Card, today: Date = new Date()): number {
  * Find the best card to use today.
  * Picks the lowest-scoring SAFE card; if none, lowest-scoring CAUTION card with warning.
  */
-export function calculateBestCard(cards: Card[], today: Date = new Date()): BestCardResult | null {
+export function calculateBestCard(
+  cards: Card[],
+  today: Date = new Date(),
+  getNetAvailableCash?: (card: Card) => number | null,
+): BestCardResult | null {
   if (cards.length === 0) return null;
 
-  const scored = cards.map((card) => ({
-    card,
-    score: scoreCard(card, today),
-    status: calculateCardStatus(card, today),
-  }));
+  const scored = cards.map((card) => {
+    const nac = getNetAvailableCash ? getNetAvailableCash(card) : null;
+    return {
+      card,
+      score: scoreCard(card, today, nac),
+      status: calculateCardStatus(card, today, nac),
+    };
+  });
 
   // Sort by score ascending (lowest = best)
   scored.sort((a, b) => a.score - b.score);
