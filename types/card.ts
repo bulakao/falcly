@@ -15,6 +15,7 @@ export interface Card {
   annualFeeMonth: number; // month (1–12) when annual fee is charged (0 if none)
   balanceUpdatedAt: number; // timestamp
   createdAt: number;
+  isActive: boolean;
 }
 
 export type CardStatus = 'SAFE' | 'CAUTION' | 'RISKY';

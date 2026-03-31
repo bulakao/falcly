@@ -14,9 +14,10 @@ interface AllCardsOverviewProps {
   cards: Card[];
   getNetAvailableCash: (card: Card) => number | null;
   onGanttCardPress?: (cardId: string) => void;
+  onBannerPress?: () => void;
 }
 
-export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress }: AllCardsOverviewProps) {
+export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress, onBannerPress }: AllCardsOverviewProps) {
   const t = useAppTheme();
   const router = useRouter();
   const bestCard = calculateBestCard(cards, new Date(), getNetAvailableCash);
@@ -42,7 +43,7 @@ export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress 
         </Pressable>
       </View>
 
-      <BestCardBanner bestCard={bestCard} />
+      <BestCardBanner bestCard={bestCard} onPress={onBannerPress} />
 
       <View style={styles.section}>
         <SectionHeader

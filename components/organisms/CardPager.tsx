@@ -23,6 +23,7 @@ interface CardPagerProps {
   onAddCard: () => void;
   getNetAvailableCash: (card: Card) => number | null;
   initialIndex?: number;
+  onBannerPress?: () => void;
 }
 
 export interface CardPagerRef {
@@ -35,7 +36,7 @@ type PageItem =
   | { type: 'empty' };
 
 export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
-  function CardPager({ cards, onAddCard, getNetAvailableCash, initialIndex = 0 }, ref) {
+  function CardPager({ cards, onAddCard, getNetAvailableCash, initialIndex = 0, onBannerPress }, ref) {
     const isCardReadOnly = useSubscriptionStore((s) => s.isCardReadOnly);
     const flatListRef = useRef<FlatList<PageItem>>(null);
 
@@ -77,6 +78,7 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
                 cards={cards}
                 getNetAvailableCash={getNetAvailableCash}
                 onGanttCardPress={handleGanttCardPress}
+                onBannerPress={onBannerPress}
               />
             </ScrollView>
           );
@@ -115,7 +117,7 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
           </ScrollView>
         );
       },
-      [cards, getNetAvailableCash, handleGanttCardPress, isCardReadOnly, onAddCard],
+      [cards, getNetAvailableCash, handleGanttCardPress, isCardReadOnly, onAddCard, onBannerPress],
     );
 
     const keyExtractor = useCallback(

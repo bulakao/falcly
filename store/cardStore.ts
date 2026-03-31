@@ -9,15 +9,18 @@ import {
   DEFAULT_MIN_PAYMENT_FLOOR,
 } from '@/types/card';
 
-type EditableCardFields = Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt'>;
+type EditableCardFields = Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt' | 'isActive'>;
 
 interface CardStore {
   cards: Card[];
   _nextId: number;
-  addCard: (card: Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt' | 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'> & Partial<Pick<Card, 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'>>) => void;
+  addCard: (card: Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt' | 'isActive' | 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'> & Partial<Pick<Card, 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'>>) => void;
   updateCard: (cardId: string, updates: Partial<EditableCardFields>) => void;
   updateBalance: (cardId: string, newBalance: number) => void;
   deleteCard: (cardId: string) => void;
+  toggleCardActive: (cardId: string) => void;
+  reorderCards: (orderedIds: string[]) => void;
+  enforceActiveLimit: (limit: number) => void;
 }
 
 export const useCardStore = create<CardStore>()(
@@ -38,6 +41,7 @@ export const useCardStore = create<CardStore>()(
           id: String(id),
           balanceUpdatedAt: now,
           createdAt: now,
+          isActive: true,
         };
         set((state) => ({
           cards: [...state.cards, card],
@@ -65,15 +69,45 @@ export const useCardStore = create<CardStore>()(
           cards: state.cards.filter((c) => c.id !== cardId),
         }));
       },
+      toggleCardActive: (cardId) => {
+        set((state) => ({
+          cards: state.cards.map((c) =>
+            c.id === cardId ? { ...c, isActive: !c.isActive } : c,
+          ),
+        }));
+      },
+      reorderCards: (orderedIds) => {
+        set((state) => {
+          const cardMap = new Map(state.cards.map((c) => [c.id, c]));
+          const reordered = orderedIds
+            .map((id) => cardMap.get(id))
+            .filter((c): c is Card => c !== undefined);
+          // Append any cards not in the ordered list (safety net)
+          const remaining = state.cards.filter((c) => !orderedIds.includes(c.id));
+          return { cards: [...reordered, ...remaining] };
+        });
+      },
+      enforceActiveLimit: (limit) => {
+        set((state) => {
+          let activeCount = 0;
+          const cards = state.cards.map((c) => {
+            if (c.isActive) {
+              activeCount++;
+              if (activeCount > limit) return { ...c, isActive: false };
+            }
+            return c;
+          });
+          return { cards };
+        });
+      },
     }),
     {
       name: 'falcly-cards',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 1,
+      version: 2,
       migrate: (persisted: unknown, version: number) => {
         const state = persisted as CardStore;
-        if (version === 0) {
-          // Backfill new projected balance fields for existing cards
+        if (version < 1) {
           state.cards = state.cards.map((c) => ({
             ...c,
             pendingTransactions: c.pendingTransactions ?? 0,
@@ -81,6 +115,12 @@ export const useCardStore = create<CardStore>()(
             subscriptionsThisCycle: c.subscriptionsThisCycle ?? 0,
             annualFee: c.annualFee ?? 0,
             annualFeeMonth: c.annualFeeMonth ?? 0,
+          }));
+        }
+        if (version < 2) {
+          state.cards = state.cards.map((c) => ({
+            ...c,
+            isActive: (c as Card).isActive ?? true,
           }));
         }
         return state;

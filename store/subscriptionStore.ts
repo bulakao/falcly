@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCardStore } from '@/store/cardStore';
 
 export type SubscriptionTier = 'free' | 'pro';
 export type PlanType = 'annual' | 'monthly';
@@ -61,6 +62,7 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
         // Only expire trial users (not paid subscribers)
         if (tier === 'pro' && planType === null && trialEndsAt !== null && Date.now() >= trialEndsAt) {
           set({ tier: 'free', proExpiredAt: Date.now() });
+          useCardStore.getState().enforceActiveLimit(FREE_CARD_LIMIT);
         }
       },
       canAddCard: (currentCardCount: number) => {

@@ -1,11 +1,11 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { Link, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { View } from '@/components/Themed';
 import { AlertBanner } from '@/components/molecules';
-import { CardPager } from '@/components/organisms';
+import { CardPager, CardManagerSheet, type CardPagerRef } from '@/components/organisms';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
@@ -25,6 +25,10 @@ export default function HomeScreen() {
   const committedExpenses = useUserStore((s) => s.committedExpenses);
 
   const daysRemaining = daysUntilDataDeletion();
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const pagerRef = useRef<CardPagerRef>(null);
+
+  const activeCards = useMemo(() => cards.filter((c) => c.isActive), [cards]);
 
   const getNetAvailableCash = useCallback(
     (card: Card) => computeNetAvailableCash(cashOnHand, monthlyIncome, payday, card, committedExpenses),
@@ -37,6 +41,12 @@ export default function HomeScreen() {
     } else {
       router.push('/pro-paywall');
     }
+  }
+
+  function handleSheetCardPress(cardId: string) {
+    setSheetVisible(false);
+    // Small delay to let sheet close before scrolling
+    setTimeout(() => pagerRef.current?.scrollToCard(cardId), 300);
   }
 
   return (
@@ -55,10 +65,17 @@ export default function HomeScreen() {
         </Link>
       )}
       <CardPager
-        cards={cards}
+        ref={pagerRef}
+        cards={activeCards}
         onAddCard={handleAddCard}
         getNetAvailableCash={getNetAvailableCash}
         initialIndex={0}
+        onBannerPress={() => setSheetVisible(true)}
+      />
+      <CardManagerSheet
+        visible={sheetVisible}
+        onClose={() => setSheetVisible(false)}
+        onCardPress={handleSheetCardPress}
       />
     </View>
   );
