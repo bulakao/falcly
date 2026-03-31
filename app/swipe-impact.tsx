@@ -11,7 +11,8 @@ import { useLocalSearchParams, Link, useRouter } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { Badge, FormInput, Label } from '@/components/atoms';
-import { BillingTimeline } from '@/components/BillingTimeline';
+import { AlertBanner, BreakdownRow, BreakdownDivider, ChipSelector } from '@/components/molecules';
+import { BillingTimeline } from '@/components/organisms';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
@@ -142,30 +143,17 @@ export default function SwipeImpactScreen() {
         {/* Read-only upgrade banner for expired Pro cards */}
         {readOnly && (
           <Link href="/pro-paywall" asChild>
-            <Pressable style={[styles.readOnlyBanner, { backgroundColor: t.accentBg, borderColor: t.accent }]}>
-              <Text style={[styles.readOnlyBannerText, { color: t.accent }]}>
-                Reactivate Pro to manage all cards
-              </Text>
-            </Pressable>
+            <AlertBanner message="Reactivate Pro to manage all cards" variant="accent" centered />
           </Link>
         )}
 
         {/* Staleness banner at 5+ days — tappable to update balance (disabled for read-only) */}
         {staleness !== 'fresh' && !readOnly && (
           <Link href={{ pathname: '/update-balance', params: { cardId: card.id } }} asChild>
-            <Pressable style={staleness === 'stale'
-              ? [styles.staleBanner, { backgroundColor: t.surface, borderColor: t.border }]
-              : [styles.warningBanner, { backgroundColor: t.cautionBg }]
-            }>
-              <Text style={staleness === 'stale'
-                ? [styles.staleBannerText, { color: t.textMuted }]
-                : [styles.warningBannerText, { color: t.cautionText }]
-              }>
-                {staleness === 'stale'
-                  ? '⚠ Data stale — update before trusting this status'
-                  : '⚠️ Balance may be outdated · Tap to update'}
-              </Text>
-            </Pressable>
+            {staleness === 'stale'
+              ? <AlertBanner message="⚠ Data stale — update before trusting this status" variant="stale" centered />
+              : <AlertBanner message="⚠️ Balance may be outdated · Tap to update" variant="warning" centered />
+            }
           </Link>
         )}
 
@@ -223,29 +211,11 @@ export default function SwipeImpactScreen() {
         />
 
         {/* Quick amount chips */}
-        <View style={styles.chipRow}>
-          {QUICK_AMOUNTS.map((qa) => (
-            <Pressable
-              key={qa.value}
-              style={[
-                styles.chip,
-                { borderColor: t.inputBorder, backgroundColor: t.inputBg },
-                proposedAmount === qa.value && { backgroundColor: t.primary, borderColor: t.primary },
-              ]}
-              onPress={() => handleQuickAmount(qa.value)}
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  { color: t.inputText },
-                  proposedAmount === qa.value && { color: t.textInverse },
-                ]}
-              >
-                {qa.label}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+        <ChipSelector
+          options={QUICK_AMOUNTS}
+          selectedValue={proposedAmount}
+          onSelect={handleQuickAmount}
+        />
 
         {/* Impact breakdown */}
         <View style={[styles.breakdown, { borderColor: t.border }]}>
@@ -253,120 +223,59 @@ export default function SwipeImpactScreen() {
             {proposedAmount > 0 ? 'If you swipe today:' : 'Current status:'}
           </Text>
 
-          <View style={styles.row}>
-            <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Outstanding balance</Text>
-            <Text style={[styles.rowValue, { color: t.inputText }]}>{formatPeso(card.outstandingBalance)}</Text>
-          </View>
+          <BreakdownRow label="Outstanding balance" value={formatPeso(card.outstandingBalance)} />
           {card.pendingTransactions > 0 && (
-            <View style={styles.row}>
-              <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Pending transactions</Text>
-              <Text style={[styles.rowValue, { color: t.inputText }]}>+{formatPeso(card.pendingTransactions)}</Text>
-            </View>
+            <BreakdownRow label="Pending transactions" value={`+${formatPeso(card.pendingTransactions)}`} />
           )}
           {card.installmentsMonthlyAmount > 0 && (
-            <View style={styles.row}>
-              <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Installments</Text>
-              <Text style={[styles.rowValue, { color: t.inputText }]}>+{formatPeso(card.installmentsMonthlyAmount)}</Text>
-            </View>
+            <BreakdownRow label="Installments" value={`+${formatPeso(card.installmentsMonthlyAmount)}`} />
           )}
           {card.subscriptionsThisCycle > 0 && (
-            <View style={styles.row}>
-              <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Subscriptions</Text>
-              <Text style={[styles.rowValue, { color: t.inputText }]}>+{formatPeso(card.subscriptionsThisCycle)}</Text>
-            </View>
+            <BreakdownRow label="Subscriptions" value={`+${formatPeso(card.subscriptionsThisCycle)}`} />
           )}
           {card.annualFee > 0 && card.annualFeeMonth > 0 && (() => {
             const cycle = getCycleDates(card);
             const cycleMonth = cycle.statementClose.getMonth() + 1;
             return cycleMonth === card.annualFeeMonth;
           })() && (
-            <View style={styles.row}>
-              <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Annual fee</Text>
-              <Text style={[styles.rowValue, { color: t.inputText }]}>+{formatPeso(card.annualFee)}</Text>
-            </View>
+            <BreakdownRow label="Annual fee" value={`+${formatPeso(card.annualFee)}`} />
           )}
           {proposedAmount > 0 && (
-            <View style={styles.row}>
-              <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Proposed swipe</Text>
-              <Text style={[styles.rowValue, { color: t.inputText }]}>+{formatPeso(proposedAmount)}</Text>
-            </View>
+            <BreakdownRow label="Proposed swipe" value={`+${formatPeso(proposedAmount)}`} />
           )}
-          <View style={[styles.divider, { backgroundColor: t.border }]} />
-          <View style={styles.row}>
-            <Text style={[styles.rowLabel, { color: t.textSecondary, fontWeight: '700' }]}>Projected statement balance</Text>
-            <Text style={[styles.rowValue, { color: t.inputText, fontWeight: '700' }]}>{formatPeso(impact.projectedBalance)}</Text>
-          </View>
+          <BreakdownDivider />
+          <BreakdownRow label="Projected statement balance" value={formatPeso(impact.projectedBalance)} bold />
 
           {impact.netAvailableCash !== null ? (
             <>
-              <View style={styles.row}>
-                <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Cash on hand</Text>
-                <Text style={[styles.rowValueMuted, { color: t.textMuted }]}>
-                  {cashOnHand !== null ? formatPeso(cashOnHand) : '—'}
-                </Text>
-              </View>
+              <BreakdownRow label="Cash on hand" value={cashOnHand !== null ? formatPeso(cashOnHand) : '—'} valueMuted />
               {monthlyIncome !== null && payday !== null && (
-                <View style={styles.row}>
-                  <Text style={[styles.rowLabel, { color: t.textSecondary }]}>
-                    Monthly income{incomeApplies ? '' : ' (payday after due)'}
-                  </Text>
-                  <Text style={[styles.rowValueMuted, { color: t.textMuted }, !incomeApplies && { textDecorationLine: 'line-through', color: t.border }]}>
-                    {incomeApplies ? `+${formatPeso(monthlyIncome)}` : `+${formatPeso(monthlyIncome)}`}
-                  </Text>
-                </View>
+                <BreakdownRow
+                  label={`Monthly income${incomeApplies ? '' : ' (payday after due)'}`}
+                  value={`+${formatPeso(monthlyIncome)}`}
+                  valueMuted
+                  strikethrough={!incomeApplies}
+                />
               )}
               {committedExpenses !== null && committedExpenses > 0 && (
-                <View style={styles.row}>
-                  <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Committed expenses</Text>
-                  <Text style={[styles.rowValueMuted, { color: t.textMuted }]}>
-                    −{formatPeso(committedExpenses)}
-                  </Text>
-                </View>
+                <BreakdownRow label="Committed expenses" value={`−${formatPeso(committedExpenses)}`} valueMuted />
               )}
-              <View style={[styles.divider, { backgroundColor: t.border }]} />
-              <View style={styles.row}>
-                <Text style={[styles.rowLabel, styles.netCashLabel, { color: t.inputText }]}>Available to pay</Text>
-                <Text style={[styles.netCashValue, { color: t.safe }]}>
-                  {formatPeso(impact.netAvailableCash)}
-                </Text>
-              </View>
+              <BreakdownDivider />
+              <BreakdownRow label="Available to pay" value={formatPeso(impact.netAvailableCash)} bold labelColor={t.inputText} valueColor={t.safe} />
             </>
           ) : (
-            <View style={styles.row}>
-              <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Available to pay</Text>
-              <Text style={[styles.rowValueMuted, { color: t.textMuted }]}>Not set</Text>
-            </View>
+            <BreakdownRow label="Available to pay" value="Not set" valueMuted />
           )}
 
-          <View style={styles.row}>
-            <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Minimum payment</Text>
-            <Text style={[styles.rowValue, { color: t.inputText }]}>{formatPeso(impact.minimumPayment)}</Text>
-          </View>
+          <BreakdownRow label="Minimum payment" value={formatPeso(impact.minimumPayment)} />
 
-          <View style={styles.row}>
-            <Text style={[styles.rowLabel, { color: t.textSecondary }]}>Credit available after swipe</Text>
-            <Text style={[styles.rowValue, { color: t.inputText }]}>
-              {formatPeso(Math.max(0, card.creditLimit - impact.projectedBalance))}
-            </Text>
-          </View>
+          <BreakdownRow label="Credit available after swipe" value={formatPeso(Math.max(0, card.creditLimit - impact.projectedBalance))} />
 
           {showCarriedBalance && (
             <>
-              <View style={[styles.divider, { backgroundColor: t.border }]} />
-              <View style={styles.row}>
-                <Text style={[styles.rowLabel, { color: t.risky }]}>Carried balance</Text>
-                <Text style={[styles.rowValue, { color: t.risky }]}>
-                  {formatPeso(impact.carriedBalance)}
-                </Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={[styles.rowLabel, { color: t.risky }]}>
-                  Est. monthly interest ({card.interestRate * 100}%)
-                </Text>
-                <Text style={[styles.rowValue, { color: t.risky }]}>
-                  {formatPeso(impact.monthlyInterest)}
-                </Text>
-              </View>
+              <BreakdownDivider />
+              <BreakdownRow label="Carried balance" value={formatPeso(impact.carriedBalance)} labelColor={t.risky} valueColor={t.risky} />
+              <BreakdownRow label={`Est. monthly interest (${card.interestRate * 100}%)`} value={formatPeso(impact.monthlyInterest)} labelColor={t.risky} valueColor={t.risky} />
             </>
           )}
         </View>
@@ -453,23 +362,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  chipRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 12,
-    marginBottom: 24,
-  },
-  chip: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  chipText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
   breakdown: {
     borderRadius: 12,
     borderWidth: 1,
@@ -481,62 +373,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 12,
   },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  rowLabel: {
-    fontSize: 14,
-    flex: 1,
-  },
-  rowValue: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  rowValueMuted: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  divider: {
-    height: 1,
-    marginVertical: 8,
-  },
-  netCashLabel: {
-    fontWeight: '700',
-  },
-  netCashValue: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
   hint: {
     fontSize: 13,
     textAlign: 'center',
     fontStyle: 'italic',
-  },
-  warningBanner: {
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginBottom: 12,
-  },
-  warningBannerText: {
-    fontSize: 13,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  staleBanner: {
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginBottom: 12,
-    borderWidth: 1,
-  },
-  staleBannerText: {
-    fontSize: 13,
-    fontWeight: '600',
-    textAlign: 'center',
   },
   trialCta: {
     borderRadius: 12,
@@ -552,16 +392,5 @@ const styles = StyleSheet.create({
   },
   trialCtaSubtext: {
     fontSize: 13,
-  },
-  readOnlyBanner: {
-    borderRadius: 10,
-    borderWidth: 1,
-    padding: 14,
-    marginBottom: 12,
-    alignItems: 'center',
-  },
-  readOnlyBannerText: {
-    fontSize: 14,
-    fontWeight: '700',
   },
 });

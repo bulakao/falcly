@@ -10,7 +10,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
-import { Button, FormInput, Heading, Label } from '@/components/atoms';
+import { Button, Heading } from '@/components/atoms';
+import { FormFieldGroup } from '@/components/molecules';
 
 export default function EditCardScreen() {
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
@@ -91,135 +92,111 @@ export default function EditCardScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <Heading>Edit Card</Heading>
 
-        <View style={styles.fieldGroup}>
-          <Label>Bank Name</Label>
-          <FormInput
-            value={bankName}
-            onChangeText={setBankName}
-            placeholder="e.g. BDO, BPI, Metrobank"
-          />
-        </View>
+        <FormFieldGroup
+          label="Bank Name"
+          value={bankName}
+          onChangeText={setBankName}
+          placeholder="e.g. BDO, BPI, Metrobank"
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Credit Limit</Label>
-          <FormInput
-            value={creditLimit}
-            onChangeText={setCreditLimit}
-            placeholder="e.g. 50000"
-            keyboardType="numeric"
-            selectTextOnFocus
-          />
-        </View>
+        <FormFieldGroup
+          label="Credit Limit"
+          value={creditLimit}
+          onChangeText={setCreditLimit}
+          placeholder="e.g. 50000"
+          keyboardType="numeric"
+          selectTextOnFocus
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Statement Day (1–31)</Label>
-          <FormInput
-            value={statementDay}
-            onChangeText={setStatementDay}
-            placeholder="e.g. 15"
-            keyboardType="numeric"
-            selectTextOnFocus
-          />
-        </View>
+        <FormFieldGroup
+          label="Statement Day (1-31)"
+          value={statementDay}
+          onChangeText={setStatementDay}
+          placeholder="e.g. 15"
+          keyboardType="numeric"
+          selectTextOnFocus
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Due Day Offset (days after statement)</Label>
-          <FormInput
-            value={dueDayOffset}
-            onChangeText={setDueDayOffset}
-            placeholder={String(cardDefaults.dueDayOffset)}
-            keyboardType="numeric"
-            selectTextOnFocus
-          />
-        </View>
+        <FormFieldGroup
+          label="Due Day Offset (days after statement)"
+          value={dueDayOffset}
+          onChangeText={setDueDayOffset}
+          placeholder={String(cardDefaults.dueDayOffset)}
+          keyboardType="numeric"
+          selectTextOnFocus
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Interest Rate (% per month)</Label>
-          <FormInput
-            value={interestRate}
-            onChangeText={setInterestRate}
-            placeholder="2"
-            keyboardType="numeric"
-            selectTextOnFocus
-          />
-        </View>
+        <FormFieldGroup
+          label="Interest Rate (% per month)"
+          value={interestRate}
+          onChangeText={setInterestRate}
+          placeholder="2"
+          keyboardType="numeric"
+          selectTextOnFocus
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Min Payment (%)</Label>
-          <FormInput
-            value={minPaymentPct}
-            onChangeText={setMinPaymentPct}
-            placeholder="5"
-            keyboardType="numeric"
-            selectTextOnFocus
-          />
-        </View>
+        <FormFieldGroup
+          label="Min Payment (%)"
+          value={minPaymentPct}
+          onChangeText={setMinPaymentPct}
+          placeholder="5"
+          keyboardType="numeric"
+          selectTextOnFocus
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Min Payment Floor (₱)</Label>
-          <FormInput
-            value={minPaymentFloor}
-            onChangeText={setMinPaymentFloor}
-            placeholder="500"
-            keyboardType="numeric"
-            selectTextOnFocus
-          />
-        </View>
+        <FormFieldGroup
+          label="Min Payment Floor (PHP)"
+          value={minPaymentFloor}
+          onChangeText={setMinPaymentFloor}
+          placeholder="500"
+          keyboardType="numeric"
+          selectTextOnFocus
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Annual Fee (₱)</Label>
-          <FormInput
-            value={annualFee}
-            onChangeText={setAnnualFee}
-            placeholder="0"
-            keyboardType="numeric"
-            selectTextOnFocus
-          />
-        </View>
+        <FormFieldGroup
+          label="Annual Fee (PHP)"
+          value={annualFee}
+          onChangeText={setAnnualFee}
+          placeholder="0"
+          keyboardType="numeric"
+          selectTextOnFocus
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Annual Fee Month (1–12, 0 = none)</Label>
-          <FormInput
-            value={annualFeeMonth}
-            onChangeText={setAnnualFeeMonth}
-            placeholder="0"
-            keyboardType="numeric"
-            selectTextOnFocus
-          />
-        </View>
+        <FormFieldGroup
+          label="Annual Fee Month (1-12, 0 = none)"
+          value={annualFeeMonth}
+          onChangeText={setAnnualFeeMonth}
+          placeholder="0"
+          keyboardType="numeric"
+          selectTextOnFocus
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Pending Transactions (₱)</Label>
-          <FormInput
-            value={pendingTransactions}
-            onChangeText={setPendingTransactions}
-            placeholder="0"
-            keyboardType="numeric"
-            selectTextOnFocus
-          />
-        </View>
+        <FormFieldGroup
+          label="Pending Transactions (PHP)"
+          value={pendingTransactions}
+          onChangeText={setPendingTransactions}
+          placeholder="0"
+          keyboardType="numeric"
+          selectTextOnFocus
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Monthly Installments (₱)</Label>
-          <FormInput
-            value={installmentsMonthlyAmount}
-            onChangeText={setInstallmentsMonthlyAmount}
-            placeholder="0"
-            keyboardType="numeric"
-            selectTextOnFocus
-          />
-        </View>
+        <FormFieldGroup
+          label="Monthly Installments (PHP)"
+          value={installmentsMonthlyAmount}
+          onChangeText={setInstallmentsMonthlyAmount}
+          placeholder="0"
+          keyboardType="numeric"
+          selectTextOnFocus
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Subscriptions This Cycle (₱)</Label>
-          <FormInput
-            value={subscriptionsThisCycle}
-            onChangeText={setSubscriptionsThisCycle}
-            placeholder="0"
-            keyboardType="numeric"
-            selectTextOnFocus
-          />
-        </View>
+        <FormFieldGroup
+          label="Subscriptions This Cycle (PHP)"
+          value={subscriptionsThisCycle}
+          onChangeText={setSubscriptionsThisCycle}
+          placeholder="0"
+          keyboardType="numeric"
+          selectTextOnFocus
+        />
 
         <View style={styles.buttonWrapper}>
           <Button label="Save Changes" onPress={handleSave} />
@@ -239,9 +216,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 24,
-  },
-  fieldGroup: {
-    marginTop: 16,
   },
   buttonWrapper: {
     marginTop: 32,

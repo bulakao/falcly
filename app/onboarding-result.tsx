@@ -9,8 +9,8 @@ import {
 import { useLocalSearchParams, router } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
-import { Badge, Button, FormInput, Label } from '@/components/atoms';
-import StatusTooltip from '@/components/StatusTooltip';
+import { Badge, Button } from '@/components/atoms';
+import { FormFieldGroup, StatusTooltip } from '@/components/molecules';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { calculateCardStatus } from '@/utils/decisionEngine';
@@ -129,16 +129,16 @@ export default function OnboardingResultScreen() {
           <View style={styles.enrichSection}>
             <Text style={styles.enrichHeading}>Fine-tune your result</Text>
 
-            <Label>Cash on Hand (₱)</Label>
-            <FormInput
+            <FormFieldGroup
+              label="Cash on Hand (PHP)"
               value={cashOnHand}
               onChangeText={setCashInput}
               placeholder="e.g. 25000"
               keyboardType="numeric"
             />
 
-            <Label>Due Day Offset (days after statement)</Label>
-            <FormInput
+            <FormFieldGroup
+              label="Due Day Offset (days after statement)"
               value={dueDayOffset}
               onChangeText={setDueDayOffset}
               placeholder={String(cardDefaults.dueDayOffset)}
@@ -146,8 +146,8 @@ export default function OnboardingResultScreen() {
               selectTextOnFocus
             />
 
-            <Label>Monthly Interest Rate (%)</Label>
-            <FormInput
+            <FormFieldGroup
+              label="Monthly Interest Rate (%)"
               value={interestRate}
               onChangeText={setInterestRate}
               placeholder={String(cardDefaults.interestRate * 100)}

@@ -11,7 +11,8 @@ import { router } from 'expo-router';
 
 import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { trackCardAdded } from '@/utils/analytics';
-import { Button, FormInput, Heading, Label } from '@/components/atoms';
+import { Button, Heading } from '@/components/atoms';
+import { FormFieldGroup } from '@/components/molecules';
 
 export default function AddCardScreen() {
   const addCard = useCardStore((s) => s.addCard);
@@ -65,55 +66,45 @@ export default function AddCardScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <Heading>Add Card</Heading>
 
-        <View style={styles.fieldGroup}>
-          <Label>Bank Name</Label>
-          <FormInput
-            value={bankName}
-            onChangeText={setBankName}
-            placeholder="e.g. BDO, BPI, Metrobank"
-            autoFocus
-          />
-        </View>
+        <FormFieldGroup
+          label="Bank Name"
+          value={bankName}
+          onChangeText={setBankName}
+          placeholder="e.g. BDO, BPI, Metrobank"
+          autoFocus
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Credit Limit</Label>
-          <FormInput
-            value={creditLimit}
-            onChangeText={setCreditLimit}
-            placeholder="e.g. 50000"
-            keyboardType="numeric"
-          />
-        </View>
+        <FormFieldGroup
+          label="Credit Limit"
+          value={creditLimit}
+          onChangeText={setCreditLimit}
+          placeholder="e.g. 50000"
+          keyboardType="numeric"
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Outstanding Balance</Label>
-          <FormInput
-            value={outstandingBalance}
-            onChangeText={setOutstandingBalance}
-            placeholder="0"
-            keyboardType="numeric"
-          />
-        </View>
+        <FormFieldGroup
+          label="Outstanding Balance"
+          value={outstandingBalance}
+          onChangeText={setOutstandingBalance}
+          placeholder="0"
+          keyboardType="numeric"
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Statement Day (1–31)</Label>
-          <FormInput
-            value={statementDay}
-            onChangeText={setStatementDay}
-            placeholder="e.g. 15"
-            keyboardType="numeric"
-          />
-        </View>
+        <FormFieldGroup
+          label="Statement Day (1-31)"
+          value={statementDay}
+          onChangeText={setStatementDay}
+          placeholder="e.g. 15"
+          keyboardType="numeric"
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Due Day Offset (days after statement)</Label>
-          <FormInput
-            value={dueDayOffset}
-            onChangeText={setDueDayOffset}
-            placeholder={String(cardDefaults.dueDayOffset)}
-            keyboardType="numeric"
-          />
-        </View>
+        <FormFieldGroup
+          label="Due Day Offset (days after statement)"
+          value={dueDayOffset}
+          onChangeText={setDueDayOffset}
+          placeholder={String(cardDefaults.dueDayOffset)}
+          keyboardType="numeric"
+        />
 
         <View style={styles.buttonWrapper}>
           <Button label="Add Card" onPress={handleSave} />
@@ -128,9 +119,6 @@ const styles = StyleSheet.create({
   container: {
     padding: 24,
     paddingBottom: 48,
-  },
-  fieldGroup: {
-    marginTop: 16,
   },
   buttonWrapper: {
     marginTop: 32,

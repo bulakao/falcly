@@ -4,7 +4,7 @@ import { Link, router } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { Badge, Caption } from '@/components/atoms';
-import StatusTooltip from '@/components/StatusTooltip';
+import { AlertBanner, EmptyState, StatusTooltip } from '@/components/molecules';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
@@ -40,9 +40,7 @@ function BestCardHero({ cards, getNetAvailableCash }: { cards: Card[]; getNetAva
       <Pressable>
         <View style={[styles.hero, { borderColor: color, backgroundColor: t.surfaceElevated }]}>
           {warning && (
-            <View style={[styles.warningBanner, { backgroundColor: t.cautionBg }]}>
-              <Text style={[styles.warningText, { color: t.cautionText }]}>⚠ {warning}</Text>
-            </View>
+            <AlertBanner message={`⚠ ${warning}`} variant="warning" />
           )}
           <Text style={[styles.heroLabel, { color: t.textMuted }]}>Best card to use today</Text>
           <View style={styles.heroRow}>
@@ -67,11 +65,7 @@ function CardItem({ card, netAvailableCash, readOnly }: { card: Card; netAvailab
         <View style={[styles.card, { borderColor: t.border, backgroundColor: t.surfaceElevated }, readOnly && styles.readOnlyCard]}>
           {readOnly && (
             <Link href="/pro-paywall" asChild>
-              <Pressable style={[styles.readOnlyBanner, { backgroundColor: t.accentBg }]}>
-                <Text style={[styles.readOnlyBannerText, { color: t.accent }]}>
-                  Reactivate Pro to manage all cards
-                </Text>
-              </Pressable>
+              <AlertBanner message="Reactivate Pro to manage all cards" variant="accent" centered />
             </Link>
           )}
           <View style={styles.cardHeader}>
@@ -91,11 +85,7 @@ function CardItem({ card, netAvailableCash, readOnly }: { card: Card; netAvailab
             </Text>
           )}
           {staleness === 'warning' && !readOnly && (
-            <View style={[styles.stalenessWarningRow, { backgroundColor: t.cautionBg }]}>
-              <Text style={[styles.stalenessWarningText, { color: t.cautionText }]}>
-                ⚠️ Balance may be outdated · Tap to update
-              </Text>
-            </View>
+            <AlertBanner message="⚠️ Balance may be outdated · Tap to update" variant="warning" />
           )}
           <Text style={[styles.reason, { color: t.textSecondary }]}>{staleness !== 'stale' ? reason : ''}</Text>
           <View style={styles.cardFooter}>
@@ -154,17 +144,16 @@ export default function HomeScreen() {
   return (
     <View style={[styles.container, { backgroundColor: t.background }]}>
       {cards.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={[styles.emptyTitle, { color: t.textPrimary }]}>No cards yet</Text>
-          <Text style={[styles.emptySubtitle, { color: t.textMuted }]}>
-            Add your first credit card to see if it&apos;s safe to swipe.
-          </Text>
+        <EmptyState
+          title="No cards yet"
+          subtitle="Add your first credit card to see if it's safe to swipe."
+        >
           <Link href="/onboarding" asChild>
             <Pressable style={[styles.onboardingButton, { backgroundColor: t.primary }]}>
               <Text style={[styles.onboardingButtonText, { color: t.textInverse }]}>Get Started</Text>
             </Pressable>
           </Link>
-        </View>
+        </EmptyState>
       ) : (
         <FlatList
           data={cards}
@@ -177,13 +166,15 @@ export default function HomeScreen() {
               <BestCardHero cards={cards} getNetAvailableCash={getNetAvailableCash} />
               {daysRemaining !== null && (
                 <Link href="/pro-paywall" asChild>
-                  <Pressable style={[styles.retentionWarning, { backgroundColor: t.riskyBg, borderColor: t.riskyBorder }]}>
-                    <Text style={[styles.retentionWarningText, { color: t.risky }]}>
-                      {daysRemaining > 0
+                  <AlertBanner
+                    message={
+                      daysRemaining > 0
                         ? `Your Pro card data will be deleted in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}. Reactivate Pro to keep it.`
-                        : 'Your Pro card data is scheduled for deletion. Reactivate Pro to keep it.'}
-                    </Text>
-                  </Pressable>
+                        : 'Your Pro card data is scheduled for deletion. Reactivate Pro to keep it.'
+                    }
+                    variant="info"
+                    centered
+                  />
                 </Link>
               )}
             </>
@@ -241,36 +232,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  stalenessWarningRow: {
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    marginBottom: 6,
-  },
-  stalenessWarningText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
   staleWarning: {
     fontSize: 12,
     fontWeight: '600',
     marginBottom: 4,
     fontStyle: 'italic',
-  },
-  empty: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    textAlign: 'center',
   },
   onboardingButton: {
     marginTop: 20,
@@ -321,41 +287,8 @@ const styles = StyleSheet.create({
   heroReason: {
     fontSize: 14,
   },
-  warningBanner: {
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    marginBottom: 10,
-  },
-  warningText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
   readOnlyCard: {
     opacity: 0.75,
     borderStyle: 'dashed',
-  },
-  readOnlyBanner: {
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginBottom: 8,
-  },
-  readOnlyBannerText: {
-    fontSize: 12,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  retentionWarning: {
-    borderRadius: 10,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginBottom: 12,
-  },
-  retentionWarningText: {
-    fontSize: 13,
-    fontWeight: '600',
-    textAlign: 'center',
   },
 });

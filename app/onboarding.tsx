@@ -13,7 +13,8 @@ import { Text } from '@/components/Themed';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { trackCardAdded } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
-import { Button, FormInput, Heading, Label } from '@/components/atoms';
+import { Button, Heading } from '@/components/atoms';
+import { FormFieldGroup } from '@/components/molecules';
 
 export default function OnboardingScreen() {
   const t = useAppTheme();
@@ -66,36 +67,30 @@ export default function OnboardingScreen() {
           Just 3 fields to see if it&apos;s safe to swipe right now.
         </Text>
 
-        <View style={styles.fieldGroup}>
-          <Label>Statement Day (1–31)</Label>
-          <FormInput
-            value={statementDay}
-            onChangeText={setStatementDay}
-            placeholder="e.g. 15"
-            keyboardType="numeric"
-            autoFocus
-          />
-        </View>
+        <FormFieldGroup
+          label="Statement Day (1-31)"
+          value={statementDay}
+          onChangeText={setStatementDay}
+          placeholder="e.g. 15"
+          keyboardType="numeric"
+          autoFocus
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Credit Limit</Label>
-          <FormInput
-            value={creditLimit}
-            onChangeText={setCreditLimit}
-            placeholder="e.g. 50000"
-            keyboardType="numeric"
-          />
-        </View>
+        <FormFieldGroup
+          label="Credit Limit"
+          value={creditLimit}
+          onChangeText={setCreditLimit}
+          placeholder="e.g. 50000"
+          keyboardType="numeric"
+        />
 
-        <View style={styles.fieldGroup}>
-          <Label>Outstanding Balance</Label>
-          <FormInput
-            value={outstandingBalance}
-            onChangeText={setOutstandingBalance}
-            placeholder="0"
-            keyboardType="numeric"
-          />
-        </View>
+        <FormFieldGroup
+          label="Outstanding Balance"
+          value={outstandingBalance}
+          onChangeText={setOutstandingBalance}
+          placeholder="0"
+          keyboardType="numeric"
+        />
 
         <View style={styles.buttonWrapper}>
           <Button label="See My Status" onPress={handleSave} />
@@ -115,9 +110,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginBottom: 24,
     marginTop: -16,
-  },
-  fieldGroup: {
-    marginTop: 16,
   },
   buttonWrapper: {
     marginTop: 32,

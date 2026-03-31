@@ -19,6 +19,7 @@ import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { exportDataAsCSV } from '@/utils/csvExport';
 import { Button, Badge, FormInput, Heading, SectionHeader, Label } from '@/components/atoms';
+import { SectionCard, AlertBanner } from '@/components/molecules';
 
 export default function SettingsScreen() {
   const t = useAppTheme();
@@ -131,7 +132,7 @@ export default function SettingsScreen() {
 
         {/* Pro Subscription Status */}
         {tier === 'pro' && (
-          <View style={[styles.proSection, { borderColor: t.accent, backgroundColor: t.accentBg }]}>
+          <SectionCard accentBorder={t.accent} accentBg={t.accentBg}>
             <View style={[styles.proBadgeRow, { backgroundColor: 'transparent' }]}>
               <Badge label="PRO" variant="pro" />
               <Text style={[styles.proStatusText, { color: t.accentText }]}>
@@ -155,11 +156,11 @@ export default function SettingsScreen() {
                 {planType === 'annual' ? '₱999/yr' : '₱149/mo'} · Cancel anytime
               </Text>
             )}
-          </View>
+          </SectionCard>
         )}
 
         {/* Cash on Hand */}
-        <View style={[styles.section, { borderColor: t.border, backgroundColor: t.surfaceElevated }]}>
+        <SectionCard>
           <SectionHeader
             title="Cash on Hand"
             subtitle="Your liquid cash available to pay credit card bills."
@@ -215,25 +216,17 @@ export default function SettingsScreen() {
 
               {/* Staleness nudge at 5+ days */}
               {cashStaleness === 'warning' && (
-                <Pressable style={[styles.stalenessWarning, { backgroundColor: t.cautionBg }]} onPress={handleEditCash}>
-                  <Text style={[styles.stalenessWarningText, { color: t.cautionText }]}>
-                    ⚠️ Cash amount may be outdated · Tap to update
-                  </Text>
-                </Pressable>
+                <AlertBanner message="⚠️ Cash amount may be outdated · Tap to update" variant="warning" onPress={handleEditCash} />
               )}
               {cashStaleness === 'stale' && (
-                <Pressable style={[styles.stalenessStale, { backgroundColor: t.surface, borderColor: t.border }]} onPress={handleEditCash}>
-                  <Text style={[styles.stalenessStaleText, { color: t.textMuted }]}>
-                    ⚠ Cash data is stale — update for accurate projections
-                  </Text>
-                </Pressable>
+                <AlertBanner message="⚠ Cash data is stale — update for accurate projections" variant="stale" onPress={handleEditCash} />
               )}
             </View>
           )}
-        </View>
+        </SectionCard>
 
         {/* Monthly Income & Payday */}
-        <View style={[styles.section, { borderColor: t.border, backgroundColor: t.surfaceElevated }]}>
+        <SectionCard>
           <SectionHeader
             title="Monthly Income & Payday"
             subtitle="Your monthly income and the day it arrives. Income is factored into payoff projections only when payday falls before your card due date."
@@ -292,10 +285,10 @@ export default function SettingsScreen() {
               </View>
             </View>
           )}
-        </View>
+        </SectionCard>
 
         {/* Committed Monthly Expenses */}
-        <View style={[styles.section, { borderColor: t.border, backgroundColor: t.surfaceElevated }]}>
+        <SectionCard>
           <SectionHeader
             title="Committed Monthly Expenses"
             subtitle="Your total fixed monthly expenses (rent, utilities, etc.). Deducted from available cash in payoff projections."
@@ -334,10 +327,10 @@ export default function SettingsScreen() {
               </Pressable>
             </View>
           )}
-        </View>
+        </SectionCard>
 
         {/* Export Data */}
-        <View style={[styles.section, { borderColor: t.border, backgroundColor: t.surfaceElevated }]}>
+        <SectionCard>
           <SectionHeader
             title="Export Data"
             subtitle="Export all your cards, installments, subscriptions, and profile data as a CSV file."
@@ -362,28 +355,24 @@ export default function SettingsScreen() {
             }}
             disabled={exporting}
           />
-        </View>
+        </SectionCard>
 
         {/* Cloud Sync Status */}
         {tier === 'pro' && (
-          <View style={[styles.section, { borderColor: t.border, backgroundColor: t.surfaceElevated }]}>
+          <SectionCard>
             <SectionHeader
               title="Cloud Sync"
               subtitle="Pro feature — sync your card data across devices."
             />
             {isOffline ? (
-              <View style={[styles.cloudOffline, { backgroundColor: t.surface, borderColor: t.border }]}>
-                <Text style={[styles.cloudOfflineText, { color: t.textMuted }]}>
-                  Cloud sync unavailable — you are offline. Your data is saved locally and all core features work normally.
-                </Text>
-              </View>
+              <AlertBanner message="Cloud sync unavailable — you are offline. Your data is saved locally and all core features work normally." variant="stale" />
             ) : (
               <Text style={[styles.cloudOnlineText, { color: t.safe }]}>Connected — sync available</Text>
             )}
-          </View>
+          </SectionCard>
         )}
         {/* Component Showcase */}
-        <View style={[styles.section, { borderColor: t.border, backgroundColor: t.surfaceElevated }]}>
+        <SectionCard>
           <SectionHeader
             title="Component Showcase"
             subtitle="Preview all UI components with the falcon premium palette."
@@ -393,10 +382,10 @@ export default function SettingsScreen() {
             onPress={() => router.push('/component-showcase')}
             variant="secondary"
           />
-        </View>
+        </SectionCard>
 
         {/* Analytics Opt-Out */}
-        <View style={[styles.section, { borderColor: t.border, backgroundColor: t.surfaceElevated }]}>
+        <SectionCard>
           <SectionHeader
             title="Analytics"
             subtitle="Anonymous behavioral analytics help us improve Falcly. No personal or financial data is ever tracked."
@@ -409,7 +398,7 @@ export default function SettingsScreen() {
               trackColor={{ true: t.risky }}
             />
           </View>
-        </View>
+        </SectionCard>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -420,12 +409,6 @@ const styles = StyleSheet.create({
   container: {
     padding: 24,
     paddingBottom: 48,
-  },
-  proSection: {
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 16,
-    marginBottom: 16,
   },
   proBadgeRow: {
     flexDirection: 'row',
@@ -439,12 +422,6 @@ const styles = StyleSheet.create({
   trialEndText: {
     fontSize: 13,
     marginTop: 8,
-  },
-  section: {
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 16,
-    marginBottom: 16,
   },
   valueRow: {
     flexDirection: 'row',
@@ -476,39 +453,9 @@ const styles = StyleSheet.create({
   buttonFlex: {
     flex: 1,
   },
-  stalenessWarning: {
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginTop: 10,
-  },
-  stalenessWarningText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  stalenessStale: {
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginTop: 10,
-    borderWidth: 1,
-  },
-  stalenessStaleText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
   paydayLabel: {
     fontSize: 13,
     marginTop: 4,
-  },
-  cloudOffline: {
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderWidth: 1,
-  },
-  cloudOfflineText: {
-    fontSize: 13,
   },
   cloudOnlineText: {
     fontSize: 13,

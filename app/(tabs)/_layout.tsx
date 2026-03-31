@@ -4,7 +4,7 @@ import { Tabs } from 'expo-router';
 
 import Colors from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
-import { OfflineChip } from '@/components/OfflineChip';
+import { OfflineChip } from '@/components/atoms';
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];

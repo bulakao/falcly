@@ -2,8 +2,8 @@ import { useCallback } from 'react';
 import { StyleSheet, ScrollView } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
-import { GanttTimeline } from '@/components/GanttTimeline';
-import { FutureTimeline } from '@/components/FutureTimeline';
+import { EmptyState } from '@/components/molecules';
+import { GanttTimeline, FutureTimeline } from '@/components/organisms';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { useAppTheme } from '@/theme';
@@ -38,12 +38,10 @@ export default function TimelineScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {cards.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={[styles.emptyTitle, { color: t.textPrimary }]}>No cards yet</Text>
-          <Text style={[styles.emptySubtitle, { color: t.textMuted }]}>
-            Add a credit card to see your billing cycle timelines.
-          </Text>
-        </View>
+        <EmptyState
+          title="No cards yet"
+          subtitle="Add a credit card to see your billing cycle timelines."
+        />
       ) : (
         <>
           <Text style={[styles.heading, { color: t.textPrimary }]}>Billing Cycles</Text>
@@ -85,22 +83,6 @@ const styles = StyleSheet.create({
   subheading: {
     fontSize: 13,
     marginBottom: 16,
-  },
-  empty: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 120,
-    paddingHorizontal: 32,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    textAlign: 'center',
   },
   futureSection: {
     marginTop: 24,
