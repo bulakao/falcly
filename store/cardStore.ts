@@ -17,6 +17,7 @@ interface CardStore {
   addCard: (card: Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt' | 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'> & Partial<Pick<Card, 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'>>) => void;
   updateCard: (cardId: string, updates: Partial<EditableCardFields>) => void;
   updateBalance: (cardId: string, newBalance: number) => void;
+  deleteCard: (cardId: string) => void;
 }
 
 export const useCardStore = create<CardStore>()(
@@ -57,6 +58,11 @@ export const useCardStore = create<CardStore>()(
               ? { ...c, outstandingBalance: newBalance, balanceUpdatedAt: Date.now() }
               : c,
           ),
+        }));
+      },
+      deleteCard: (cardId) => {
+        set((state) => ({
+          cards: state.cards.filter((c) => c.id !== cardId),
         }));
       },
     }),

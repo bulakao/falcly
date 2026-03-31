@@ -6,8 +6,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
-import { useLocalSearchParams, Link } from 'expo-router';
+import { useLocalSearchParams, Link, useRouter } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { BillingTimeline } from '@/components/BillingTimeline';
@@ -43,6 +44,8 @@ function formatPeso(amount: number): string {
 export default function SwipeImpactScreen() {
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
   const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
+  const deleteCard = useCardStore((s) => s.deleteCard);
+  const router = useRouter();
   const cashOnHand = useUserStore((s) => s.cashOnHand);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
   const payday = useUserStore((s) => s.payday);
@@ -82,7 +85,28 @@ export default function SwipeImpactScreen() {
     setAmountText(String(value));
   }
 
-  const showCarriedBalance = impact.carriedBalance > 0 && impact.monthlyInterest > 0;
+  const cardBankName = card.bankName;
+  const cardIdForDelete = card.id;
+
+  function handleDeleteCard() {
+    Alert.alert(
+      'Delete Card',
+      `Are you sure you want to delete ${cardBankName}? This action cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            deleteCard(cardIdForDelete);
+            router.back();
+          },
+        },
+      ],
+    );
+  }
+
+  const showCarriedBalance = impact ? impact.carriedBalance > 0 && impact.monthlyInterest > 0 : false;
   const staleness = getStalenessLevel(card.balanceUpdatedAt);
 
   return (
@@ -141,6 +165,9 @@ export default function SwipeImpactScreen() {
                 <Text style={styles.updateButtonText}>Update Balance</Text>
               </Pressable>
             </Link>
+            <Pressable style={styles.deleteButton} onPress={handleDeleteCard}>
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </Pressable>
           </View>
         </View>
 
@@ -381,6 +408,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#10b981',
+  },
+  deleteButton: {
+    backgroundColor: '#fef2f2',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  deleteButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#ef4444',
   },
   label: {
     fontSize: 14,
