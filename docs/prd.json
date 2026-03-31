@@ -270,7 +270,7 @@
         "If the deleted card was a Pro-only card and the user is on Free, the remaining cards still function normally"
       ],
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

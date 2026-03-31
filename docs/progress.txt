@@ -260,3 +260,17 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - The swipe-impact screen is the card detail screen — all card-level actions (update balance, edit, delete) live here
   - `selectTextOnFocus` on pre-filled numeric fields makes editing easier — user can overwrite without manual selection
 ---
+
+## 2026-03-31 - CM-02
+- Added `deleteCard` action to `store/cardStore.ts` — filters card out by ID
+- Added "Delete" button with crimson styling to card detail (swipe-impact) screen action row
+- Confirmation dialog via `Alert.alert` with Cancel/Delete options before deletion
+- On delete: removes card from store and navigates back to home screen via `router.back()`
+- Zustand reactivity ensures card list and best-card hero recalculate immediately after deletion
+- AC3 (Pro-only card on Free tier) is satisfied: `deleteCard` is a simple filter, remaining cards are unaffected
+- Files changed: `store/cardStore.ts`, `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - TypeScript doesn't narrow types inside nested function declarations after a guard — capture narrowed values in consts before the function
+  - `Alert.alert` is the standard React Native pattern for confirmation dialogs — works on both iOS and Android
+  - Delete action follows the same action row pattern as Edit Card and Update Balance on the card detail screen
+---
