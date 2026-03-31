@@ -1,7 +1,7 @@
 const IS_PROD = process.env.APP_ENV === 'production';
 const env = IS_PROD ? 'prod' : 'dev';
 
-export default {
+module.exports = {
   expo: {
     name: IS_PROD ? 'Falcly' : 'Falcly (Dev)',
     slug: 'falcly',
@@ -40,6 +40,17 @@ export default {
       'expo-router',
       '@react-native-firebase/app',
       '@react-native-firebase/crashlytics',
+      [
+        'expo-build-properties',
+        {
+          ios: {
+            useFrameworks: 'static',
+            deploymentTarget: '15.1',
+            forceStaticLinking: ['RNFBApp', 'RNFBCrashlytics', 'RNFBFirestore'],
+          },
+        },
+      ],
+      './plugins/withXcode26Compat',
     ],
     experiments: {
       typedRoutes: true,
