@@ -225,7 +225,7 @@
         "Calculation is deterministic: same inputs always produce the same projected balance"
       ],
       "priority": 15,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

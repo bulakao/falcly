@@ -23,6 +23,8 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Net available cash is per-card: `computeNetAvailableCash(cash, income, payday, card, committedExpenses)` in `utils/decisionEngine.ts` — income included only when payday ≤ card due date, committed expenses deducted
 - `calculateCardStatus()` accepts optional `netAvailableCash` param — pass it to enable cash-based RISKY detection on home screen
 - `scoreCard()` and `calculateBestCard()` also accept net available cash — pass a getter function for per-card computation
+- Projected balance formula: `projectedStatementBalance(card, proposedSwipe, today)` — canonical function, includes pending/installments/subscriptions/annual fee
+- When adding new Card fields: add Zustand persist migration in `store/cardStore.ts` to backfill defaults for existing data
 
 ---
 
@@ -209,4 +211,19 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Files changed: `docs/prd.json` (marked passes: true)
 - **Learnings for future iterations:**
   - CL-01 and CL-05 proactively implemented DE-02/DE-03 thresholds — check for pre-existing logic before starting DE stories
+---
+
+## 2026-03-31 - DE-04
+- Added `pendingTransactions`, `installmentsMonthlyAmount`, `subscriptionsThisCycle`, `annualFee`, `annualFeeMonth` fields to Card type (all default 0)
+- Created `projectedStatementBalance()` helper in decision engine implementing the full formula
+- Updated `calculateSwipeImpact()` to use `projectedStatementBalance()` instead of simple `outstanding + proposed`
+- Annual fee is conditionally added when `annualFeeMonth` matches the current cycle's statement close month
+- Added Zustand persist migration (v0→v1) to backfill new fields on existing cards
+- Swipe Impact screen now shows itemized breakdown: outstanding → pending → installments → subscriptions → annual fee → proposed swipe → total
+- Files changed: `types/card.ts`, `utils/decisionEngine.ts`, `store/cardStore.ts`, `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - When adding new Card fields, always add a Zustand persist migration to backfill defaults for existing data
+  - `projectedStatementBalance()` is the canonical formula — use it anywhere projected balance is needed
+  - Annual fee uses month comparison (1-based) against `statementClose.getMonth() + 1` from `getCycleDates()`
+  - The `addCard` type uses `Omit` + `Partial<Pick>` to make new fields optional with defaults in the store
 ---
