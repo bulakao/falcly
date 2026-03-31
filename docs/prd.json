@@ -1,0 +1,350 @@
+[
+  {
+    "id": 1,
+    "phase": 1,
+    "group": "Core Loop",
+    "story": "As Ria, I want to add a credit card with my statement day and credit limit, so that I can see my billing cycle status immediately.",
+    "acceptanceCriteria": [
+      "Card form accepts: bank name, credit limit, outstanding balance, statement day, due day offset (with sensible defaults)",
+      "After saving, card appears in card list with SAFE/CAUTION/RISKY badge calculated from entered data",
+      "Status is calculated and displayed without requiring an app reload or additional action"
+    ],
+    "passes": false
+  },
+  {
+    "id": 2,
+    "phase": 1,
+    "group": "Core Loop",
+    "story": "As Ria, I want to open the app and instantly see SAFE, CAUTION, or RISKY for each card, so that I know at a glance whether it's safe to swipe today.",
+    "acceptanceCriteria": [
+      "Home screen renders all card statuses within 1 second of app open",
+      "Each card status is displayed with three simultaneous channels: color (emerald/amber/crimson) + icon (✓/⚠/✕) + text label (SAFE/CAUTION/RISKY)",
+      "Each status includes a one-line reason (e.g., '14 days to statement · 28% utilization')"
+    ],
+    "passes": false
+  },
+  {
+    "id": 3,
+    "phase": 1,
+    "group": "Core Loop",
+    "story": "As Ria, I want to enter a proposed spend amount and see how it affects my next statement, so that I can decide whether to swipe or wait.",
+    "acceptanceCriteria": [
+      "Amount input auto-opens numeric keyboard with quick-amount chips (₱500, ₱1K, ₱2K, ₱5K) visible without scrolling",
+      "Status badge, projected statement balance, available cash, and payoff plan update in real time as the amount is typed — no submit button required",
+      "Carried balance amount and estimated monthly interest cost are shown when full payoff is not possible given net available cash"
+    ],
+    "passes": false
+  },
+  {
+    "id": 4,
+    "phase": 1,
+    "group": "Core Loop",
+    "story": "As Ria, I want to see a 'best card to use today' recommendation, so that I don't have to compare cards manually before each purchase.",
+    "acceptanceCriteria": [
+      "Home screen shows a single best-card recommendation as a prominent hero element with bank name and SAFE badge",
+      "Best card is determined by the multi-card scoring algorithm: score = utilization×100 + days penalty + status penalty + cash coverage penalty; lowest-scoring SAFE card wins",
+      "If no SAFE card exists, shows the lowest-scoring CAUTION card with an explicit warning label"
+    ],
+    "passes": false
+  },
+  {
+    "id": 5,
+    "phase": 1,
+    "group": "Core Loop",
+    "story": "As Ria, I want to see a visual timeline of my billing cycle, so that I know exactly how far I am from statement close and due date.",
+    "acceptanceCriteria": [
+      "Timeline strip shows: cycle start → today marker → statement close → due date with labeled date markers",
+      "Statement close marker changes color at ≤7 days (amber) and ≤2 days (crimson) to communicate urgency",
+      "Multi-card Gantt view shows all cards stacked vertically, sorted by urgency (closest statement close first), with color-coded bars by status"
+    ],
+    "passes": false
+  },
+  {
+    "id": 6,
+    "phase": 1,
+    "group": "Core Loop",
+    "story": "As Ria, I want to update my outstanding balance quickly after checking my bank app, so that my status stays accurate.",
+    "acceptanceCriteria": [
+      "'Update balance' action is accessible from the card detail screen and tappable from the staleness warning banner",
+      "Single numeric field accepts the new balance; saves immediately on confirm",
+      "Timestamp is updated to 'just now' and any active staleness warning is cleared after saving"
+    ],
+    "passes": false
+  },
+  {
+    "id": 7,
+    "phase": 1,
+    "group": "Core Loop",
+    "story": "As Ria, I want to see a warning when my balance data is stale, so that I don't trust a SAFE status based on outdated information.",
+    "acceptanceCriteria": [
+      "Each card shows 'Balance updated X days ago' timestamp in secondary text at all times",
+      "At 5+ days since last update: amber ⚠️ inline warning appears on the card with a 'Tap to update' CTA",
+      "At 10+ days since last update: the SAFE/CAUTION/RISKY status badge is replaced by a staleness indicator ('Data stale — update before trusting this status')"
+    ],
+    "passes": false
+  },
+  {
+    "id": 8,
+    "phase": 1,
+    "group": "Cash Awareness",
+    "story": "As Ria, I want to enter how much liquid cash I have available, so that Falcly can calculate whether I can actually pay my bill.",
+    "acceptanceCriteria": [
+      "Cash on hand field is accessible from profile/settings and prompted as an optional step during onboarding",
+      "Net available cash recalculates immediately whenever the cash on hand value is changed",
+      "Field shows timestamp 'Cash updated X days ago' and appears with a staleness nudge after 5+ days without update"
+    ],
+    "passes": false
+  },
+  {
+    "id": 9,
+    "phase": 1,
+    "group": "Cash Awareness",
+    "story": "As Ria, I want to enter my monthly income and the day it arrives, so that Falcly knows whether my paycheck lands before my card due date.",
+    "acceptanceCriteria": [
+      "Profile settings accepts monthly income (number) and payday (day of month, 1–31)",
+      "income_before_due_date flag is computed correctly: true if payday ≤ card due date",
+      "Monthly income is added to net available cash only when payday precedes the card due date; excluded otherwise"
+    ],
+    "passes": false
+  },
+  {
+    "id": 10,
+    "phase": 1,
+    "group": "Cash Awareness",
+    "story": "As Beth, I want to enter my total monthly committed expenses as a single number, so that Falcly deducts them from my available cash before projecting my payoff capacity.",
+    "acceptanceCriteria": [
+      "Single numeric input for total committed monthly expenses (not itemized categories) in profile/settings",
+      "Amount is deducted from net available cash in all Swipe Impact and payoff calculations",
+      "Shown as a labeled line item in the Swipe Impact breakdown: 'Committed expenses: −₱X,XXX'"
+    ],
+    "passes": false
+  },
+  {
+    "id": 11,
+    "phase": 1,
+    "group": "Cash Awareness",
+    "story": "As Ria, I want to see my net available cash figure in the Swipe Impact screen, so that I understand exactly how much I can put toward my card bill this cycle.",
+    "acceptanceCriteria": [
+      "Net available cash is displayed in the Swipe Impact screen as a labeled line: 'Available to pay: ₱X,XXX'",
+      "Formula applied: liquid_cash + (income if payday ≤ due_date) − committed_expenses − auto_payments − subscriptions_this_cycle",
+      "Figure updates in real time when cash on hand, income, or committed expenses change"
+    ],
+    "passes": false
+  },
+  {
+    "id": 12,
+    "phase": 1,
+    "group": "Decision Engine",
+    "story": "As Ria, I want Falcly to show RISKY when my available cash can't cover the minimum payment, so that I'm warned before I get into a situation I can't handle.",
+    "acceptanceCriteria": [
+      "Status is RISKY when net_available_cash < minimum_payment (max(outstanding × min_pct, min_floor))",
+      "Reason shown: 'You won't be able to make the minimum payment'",
+      "This condition takes priority over all other SAFE/CAUTION/RISKY conditions (first match wins)"
+    ],
+    "passes": false
+  },
+  {
+    "id": 13,
+    "phase": 1,
+    "group": "Decision Engine",
+    "story": "As Ria, I want Falcly to show RISKY when my statement closes in 2 days or fewer, so that I don't accidentally add to a bill that's about to be finalized.",
+    "acceptanceCriteria": [
+      "Status is RISKY when days_to_statement ≤ 2",
+      "Reason shown: 'Statement closes in {n} day(s) — charge will hit this bill'",
+      "Condition is evaluated even when no proposed swipe amount is entered"
+    ],
+    "passes": false
+  },
+  {
+    "id": 14,
+    "phase": 1,
+    "group": "Decision Engine",
+    "story": "As Ria, I want Falcly to show CAUTION when my statement closes within 7 days, so that I'm alerted to be careful even before the critical 2-day window.",
+    "acceptanceCriteria": [
+      "Status is CAUTION when days_to_statement ≤ 7 (and not already RISKY from a higher-priority condition)",
+      "Reason shown: '{n} days to statement — charge lands on this bill'",
+      "Statement close marker on the cycle timeline turns amber color at ≤7 days"
+    ],
+    "passes": false
+  },
+  {
+    "id": 15,
+    "phase": 1,
+    "group": "Decision Engine",
+    "story": "As Ria, I want the projected statement balance formula to include my pending transactions and committed installments, so that my status reflects what's actually hitting my next bill.",
+    "acceptanceCriteria": [
+      "projected_statement_balance = outstanding_balance + pending_transactions + installments_monthly_amount + subscriptions_this_cycle + proposed_swipe",
+      "Annual fee is added to the projected balance in the cycle month it is due",
+      "Calculation is deterministic: same inputs always produce the same projected balance"
+    ],
+    "passes": false
+  },
+  {
+    "id": 16,
+    "phase": 1,
+    "group": "Decision Engine",
+    "story": "As Ria, I want the flexible horizon timeline to project future cycles based on known fixed events, so that I can see the impact of my installments over the coming months.",
+    "acceptanceCriteria": [
+      "Future cycle projections are shown for as many cycles as fixed events (installments, subscriptions, annual fees) exist",
+      "Each projected cycle shows: opening balance, known committed items, and a SAFE/CAUTION/RISKY signal",
+      "Cycles beyond the last known fixed event show a signal only (On Track / At Risk / Unknown) — no fabricated numbers"
+    ],
+    "passes": false
+  },
+  {
+    "id": 17,
+    "phase": 1,
+    "group": "Card Management",
+    "story": "As Ria, I want to edit a card's details after I've added it, so that I can correct mistakes or update settings like interest rate and due date offset.",
+    "acceptanceCriteria": [
+      "All card fields (limit, statement day, due day offset, interest rate, min payment, annual fee) are editable from the card detail settings tab",
+      "Saving edits immediately recalculates and updates the card's SAFE/CAUTION/RISKY status",
+      "Edit screen is accessible from the card detail screen with a clearly labeled 'Edit Card' action"
+    ],
+    "passes": false
+  },
+  {
+    "id": 18,
+    "phase": 1,
+    "group": "Card Management",
+    "story": "As Ria, I want to delete a card from Falcly, so that I can remove cards I've cancelled or no longer want to track.",
+    "acceptanceCriteria": [
+      "Delete action is available in the card detail settings tab with a confirmation dialog before deletion",
+      "Deleting a card removes it from the card list and recalculates 'best card today' immediately",
+      "If the deleted card was a Pro-only card and the user is on Free, the remaining cards still function normally"
+    ],
+    "passes": false
+  },
+  {
+    "id": 19,
+    "phase": 1,
+    "group": "Onboarding",
+    "story": "As Ria, I want to add my first card and get an immediate status result with just 3 fields, so that I see Falcly's value before being asked for more information.",
+    "acceptanceCriteria": [
+      "Onboarding card entry requires only: statement day, credit limit, and outstanding balance — all other fields use defaults",
+      "After entering these 3 fields and tapping save, the user lands on their first SAFE/CAUTION/RISKY result screen",
+      "Additional enrichment fields (cash on hand, due day offset, interest rate) are prompted optionally after the first result is shown"
+    ],
+    "passes": false
+  },
+  {
+    "id": 20,
+    "phase": 1,
+    "group": "Onboarding",
+    "story": "As a new user, I want to understand what SAFE, CAUTION, and RISKY mean the first time I see them, so that I can trust and act on the result.",
+    "acceptanceCriteria": [
+      "First status result screen includes a brief one-sentence explanation of what the current status means (not a tutorial — inline, contextual)",
+      "Status is displayed with color + icon + text label from the very first result",
+      "A dismissible info tooltip is available on the status badge explaining the three-tier system"
+    ],
+    "passes": false
+  },
+  {
+    "id": 21,
+    "phase": 1,
+    "group": "Monetization",
+    "story": "As Ria, I want to be prompted to upgrade when I try to add a 3rd card, so that I understand what Pro unlocks before committing.",
+    "acceptanceCriteria": [
+      "Hard paywall screen appears when a Free user attempts to add card #3",
+      "Paywall shows: feature list (unlimited cards, payment planning, installment tracking, AI alerts), annual plan as primary CTA with '₱83/mo, billed ₱999/yr — Save 44%' badge, monthly plan as secondary option",
+      "Existing 2 free cards remain fully accessible and functional; the user is never locked out of already-added data"
+    ],
+    "passes": false
+  },
+  {
+    "id": 22,
+    "phase": 1,
+    "group": "Monetization",
+    "story": "As Ria, I want to start a free 14-day Pro trial without being charged upfront, so that I can experience all Pro features before deciding to subscribe.",
+    "acceptanceCriteria": [
+      "Trial CTA 'Try Free for 14 Days' is available on the card 3 paywall and the payoff planner entry point",
+      "RevenueCat handles trial mechanics; payment method is required at trial start but no charge occurs for 14 days",
+      "Trial end date is shown in the Pro settings screen: 'Your trial ends on [date]'"
+    ],
+    "passes": false
+  },
+  {
+    "id": 23,
+    "phase": 1,
+    "group": "Monetization",
+    "story": "As Ria, I want to upgrade to Pro after my trial ends, so that I can continue managing all my cards with full Pro features.",
+    "acceptanceCriteria": [
+      "Paywall shows annual plan (₱999/yr) as primary pre-selected option; monthly plan (₱149/mo) shown below as secondary",
+      "Price framing includes 'Less than one late payment fee' and 'Cancel anytime' copy",
+      "RevenueCat entitlement 'pro' is granted immediately on purchase and verified on every app launch"
+    ],
+    "passes": false
+  },
+  {
+    "id": 24,
+    "phase": 1,
+    "group": "Monetization",
+    "story": "As Ria, I want my existing card data to remain visible (read-only) if my Pro trial expires before I upgrade, so that I don't lose information I've entered.",
+    "acceptanceCriteria": [
+      "On Pro trial expiry: cards 3 and above become read-only — balance and status are visible but editing and reminders are disabled",
+      "A soft upgrade banner appears on read-only cards: 'Reactivate Pro to manage all cards'",
+      "Card data is preserved for 90 days post-expiry; a warning is shown before any data deletion occurs"
+    ],
+    "passes": false
+  },
+  {
+    "id": 25,
+    "phase": 1,
+    "group": "Data & Privacy",
+    "story": "As Ria, I want to use Falcly's core features without an internet connection, so that I can check my card status even when I have poor mobile data.",
+    "acceptanceCriteria": [
+      "SAFE/CAUTION/RISKY calculation, Swipe Impact, best card recommendation, and Gantt timeline all function fully offline",
+      "Offline state is indicated by a small non-blocking 'Offline' chip in the header — it never blocks any core screen",
+      "Only cloud sync (Pro feature) requires connectivity; its unavailability is communicated without blocking the app"
+    ],
+    "passes": false
+  },
+  {
+    "id": 26,
+    "phase": 1,
+    "group": "Data & Privacy",
+    "story": "As Ria, I want my financial data stored securely on my device, so that my card balances and limits are not accessible to unauthorized parties.",
+    "acceptanceCriteria": [
+      "Local SQLite database is encrypted at rest using SQLCipher with a key stored in Android Keystore / iOS Keychain",
+      "Encryption key is never stored in AsyncStorage or any unprotected location",
+      "Pro cloud sync encrypts card config client-side (AES-256-GCM) before transmission — Supabase stores ciphertext only; balances and transactions never leave the device"
+    ],
+    "passes": false
+  },
+  {
+    "id": 27,
+    "phase": 1,
+    "group": "Data & Privacy",
+    "story": "As Ria, I want to export my card data as a CSV, so that I have a backup of my information independent of the app.",
+    "acceptanceCriteria": [
+      "CSV export is available from the settings screen and exports all cards, installments, subscriptions, and the user profile (income, payday, expenses)",
+      "Export works on both Free and Pro tiers",
+      "CSV format includes column headers and uses ₱ for currency values in PH locale"
+    ],
+    "passes": false
+  },
+  {
+    "id": 28,
+    "phase": 1,
+    "group": "Analytics & Quality",
+    "story": "As a developer, I want behavioral events tracked anonymously via PostHog, so that I can understand which features drive retention and conversion.",
+    "acceptanceCriteria": [
+      "Key events are tracked: card_added, swipe_check_performed (with status and amount tier), pro_conversion_started (with source), pro_trial_started, pro_converted (with plan type), data_staleness_warning_shown",
+      "No PII is tracked: no card numbers, no exact balances, no names — only behavioral events and anonymized tiers",
+      "PostHog is configured on EU region for RA 10173 / GDPR compatibility; analytics opt-out is available in settings"
+    ],
+    "passes": false
+  },
+  {
+    "id": 29,
+    "phase": 1,
+    "group": "Analytics & Quality",
+    "story": "As a developer, I want crash reports sent to Sentry automatically, so that production issues are surfaced without requiring user reports.",
+    "acceptanceCriteria": [
+      "Sentry is initialized on app start with source maps uploaded via Fastlane CI",
+      "beforeSend hook strips any PII from Sentry breadcrumbs before transmission",
+      "Crash reports are visible in Sentry dashboard within 60 seconds of a crash occurring on a user device"
+    ],
+    "passes": false
+  }
+]

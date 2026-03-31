@@ -1,0 +1,40 @@
+{
+  "cards": [
+    {
+      "bank": "BPI Petron",
+      "creditLimit": 256000,
+      "availableCredit": 201318,
+      "outstandingBalance": 6877,
+      "pendingTxns": [
+        {
+          "name": "Travel",
+          "amount": 21810
+        }
+      ],
+      "statementBalance": 3956,
+      "statementDay": 16,
+      "dueDayOffset": 6,
+      "interestRate": 2,
+      "minPaymentPct": 5,
+      "minPaymentFloor": 850,
+      "annualFee": 0,
+      "annualFeeWaived": true
+    },
+    {
+      "bank": "UB Rewards",
+      "creditLimit": 15000,
+      "availableCredit": 7203,
+      "outstandingBalance": 7796,
+      "pendingTxns": [],
+      "statementBalance": 11961,
+      "statementDay": 6,
+      "dueDayOffset": 27,
+      "interestRate": 2,
+      "minPaymentPct": 5,
+      "minPaymentFloor": 500,
+      "annualFee": 0,
+      "annualFeeWaived": false
+    }
+  ],
+  "selectedIndex": 0
+}

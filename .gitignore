@@ -1,0 +1,9 @@
+# Expo app
+falcly/node_modules/
+falcly/.expo/
+falcly/dist/
+falcly/web-build/
+falcly/expo-env.d.ts
+
+# OS
+.DS_Store

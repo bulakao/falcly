@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Falcly</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8f9fa; }
+    .badge-safe { background: #198754; }
+    .badge-caution { background: #ffc107; color: #000; }
+    .badge-risky { background: #dc3545; }
+    .utilization-bar { height: 12px; border-radius: 6px; }
+    .cycle-timeline { position: relative; height: 8px; background: #dee2e6; border-radius: 4px; }
+    .cycle-progress { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #198754, #ffc107, #dc3545); }
+    .cycle-marker { position: absolute; top: -6px; width: 20px; height: 20px; background: #0d6efd; border: 3px solid #fff; border-radius: 50%; transform: translateX(-50%); box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+    .card-item { cursor: pointer; transition: background .15s; }
+    .card-item:hover { background: #e9ecef; }
+    .card-item.active { background: #e2e6ea; border-color: #0d6efd !important; }
+    .forecast-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+    .forecast-row:last-child { border-bottom: none; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .section-header h6 { margin: 0; font-weight: 700; }
+    .gantt-row { display: flex; align-items: center; margin-bottom: 6px; }
+    .gantt-label { width: 90px; font-size: .75rem; font-weight: 600; flex-shrink: 0; }
+    .gantt-track { flex: 1; height: 24px; background: #f0f0f0; border-radius: 4px; position: relative; overflow: hidden; }
+    .gantt-bar { position: absolute; height: 100%; border-radius: 4px; opacity: 0.7; }
+    .gantt-today { position: absolute; top: -4px; bottom: -4px; width: 2px; background: #0d6efd; z-index: 2; }
+    .gantt-today::after { content: ''; position: absolute; top: -4px; left: -3px; width: 8px; height: 8px; background: #0d6efd; border-radius: 50%; }
+
+    /* Credit card styles */
+    .credit-card {
+      border-radius: 12px;
+      padding: 16px;
+      color: #fff;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+      user-select: none;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .credit-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.2); }
+    .credit-card-active { box-shadow: 0 0 0 3px #F5A623, 0 4px 12px rgba(0,0,0,.2); transform: translateY(-2px); }
+    .credit-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .credit-card-bank { font-size: .85rem; font-weight: 700; letter-spacing: .5px; opacity: .95; }
+    .credit-card-nickname { font-size: .7rem; opacity: .7; margin-top: 1px; }
+    .credit-card-network { font-size: .75rem; font-weight: 700; opacity: .85; letter-spacing: 1px; }
+    .credit-card-status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 6px currentColor; }
+    .credit-card-number { font-size: .8rem; letter-spacing: 3px; opacity: .7; margin: 8px 0; font-family: monospace; }
+    .credit-card-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+    .credit-card-label { font-size: .55rem; opacity: .6; letter-spacing: 1px; text-transform: uppercase; }
+    .credit-card-value { font-size: .8rem; font-weight: 700; }
+    .credit-card-actions { display: flex; gap: 6px; }
+    .btn-card-action { background: rgba(255,255,255,.15); border: none; color: #fff; border-radius: 6px; width: 26px; height: 26px; font-size: .75rem; cursor: pointer; transition: background .15s; display: flex; align-items: center; justify-content: center; }
+    .btn-card-action:hover { background: rgba(255,255,255,.3); }
+    .btn-card-action.text-danger { color: #ff6b6b !important; }
+  </style>
+</head>
+<body>
+  <div class="container-fluid p-2">
+    <div class="row g-0">
+      <!-- LEFT: Cards List -->
+      <div class="col-4 rounded-3 bg-white p-4 border" style="height: fit-content;">
+        <div class="section-header">
+          <h6>Cards</h6>
+          <div class="d-flex gap-1">
+            <button class="btn btn-outline-secondary btn-sm" onclick="loadFromFile()" title="Load">&#8593;</button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="saveToFile()" title="Save">&#8595;</button>
+            <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#cardModal">+ Add</button>
+          </div>
+        </div>
+        <div id="cardList" class="d-flex flex-column gap-2 mb-4">
+          <p class="text-muted small">No cards added yet.</p>
+        </div>
+
+        <hr>
+
+        <details class="mt-3">
+          <summary class="small fw-semibold" style="cursor:pointer">How does "Best choice" work?</summary>
+          <div class="small text-muted mt-2">
+            <p>Each card gets a score (lower = better to use). The lowest-scoring SAFE card is the "Best choice."</p>
+            <table class="table table-sm table-borderless mb-2" style="font-size:.8rem">
+              <tr><td>Base score</td><td>Utilization % (0&ndash;100)</td></tr>
+              <tr><td class="text-warning">+50</td><td>&le; 7 days to statement</td></tr>
+              <tr><td class="text-danger">+200</td><td>&le; 2 days to statement</td></tr>
+              <tr><td class="text-warning">+100</td><td>CAUTION status</td></tr>
+              <tr><td class="text-danger">+300</td><td>RISKY status</td></tr>
+            </table>
+            <p class="mb-1"><strong>In short:</strong> use the card with the lowest utilization and the most time before its statement closes.</p>
+            <p class="mb-0">If no card is SAFE, none gets the "Best choice" badge.</p>
+          </div>
+        </details>
+      </div>
+
+      <!-- RIGHT: Dashboard -->
+      <div class="col-8 p-4">
+        <div id="noDashboard" class="text-muted text-center mt-5">
+          <h4>Add a card to get started</h4>
+          <p class="small">Fill in your details on the left to see your dashboard.</p>
+        </div>
+
+        <!-- Recommendation -->
+        <div id="recommendationSection" class="mb-4 d-none">
+          <div id="bestCard" class="p-3 bg-white border rounded-3 mb-3"></div>
+          <div id="ganttChart" class="p-3 bg-white border rounded-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="small fw-semibold">Billing Cycles</span>
+              <div class="d-flex gap-3">
+                <span class="small text-muted d-flex align-items-center gap-1"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0d6efd;opacity:.5"></span> Billing cycle</span>
+                <span class="small text-muted d-flex align-items-center gap-1"><span style="display:inline-block;width:10px;height:2px;background:#dc3545"></span> Due date</span>
+                <span class="small text-muted d-flex align-items-center gap-1"><span style="display:inline-block;width:10px;height:2px;background:#0d6efd"></span> Today</span>
+              </div>
+            </div>
+            <div id="ganttBars"></div>
+          </div>
+        </div>
+
+        <div id="dashboardContent" class="d-none">
+          <!-- Safe to Swipe -->
+          <div class="mb-4">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <h4 class="mb-0 fw-bold" id="selectedBank">&mdash;</h4>
+              <span class="badge fs-6 px-3 py-2" id="statusBadge">&mdash;</span>
+            </div>
+            <p class="small text-muted mb-0" id="statusReason">&mdash;</p>
+          </div>
+
+          <!-- Utilization -->
+          <div class="mb-4 p-3 bg-white border rounded-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="small fw-semibold">Utilization</span>
+              <span class="small fw-bold" id="utilizationPct">0%</span>
+            </div>
+            <div class="progress utilization-bar">
+              <div class="progress-bar" id="utilizationFill" role="progressbar" style="width: 0%"></div>
+            </div>
+            <div class="d-flex justify-content-between mt-1">
+              <span class="small text-muted">&#8369;<span id="availableCredit">0</span> / &#8369;<span id="limitDisplay">0</span></span>
+              <span class="small text-muted">Thresholds: 30% &middot; 50% &middot; 80%</span>
+            </div>
+          </div>
+
+          <!-- Cycle Timeline -->
+          <div class="mb-4 p-3 bg-white border rounded-3">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="small fw-semibold">Billing Cycle</span>
+              <span class="small fw-bold" id="daysRemaining">&mdash; days left</span>
+            </div>
+            <div class="cycle-timeline mb-2">
+              <div class="cycle-progress" id="cycleProgress" style="width: 0%"></div>
+              <div class="cycle-marker" id="cycleMarker" style="left: 0%"></div>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="small text-muted" id="cycleStart">&mdash;</span>
+              <span class="small text-muted" id="cycleEnd">Statement: &mdash;</span>
+            </div>
+          </div>
+
+          <!-- Key Dates -->
+          <div class="mb-4 p-3 bg-white border rounded-3">
+            <span class="small fw-semibold d-block mb-2">Key Dates</span>
+            <div class="forecast-row"><span class="small">Next Statement</span><span class="small fw-bold" id="nextStatement">&mdash;</span></div>
+            <div class="forecast-row"><span class="small">Due Date</span><span class="small fw-bold" id="dueDate">&mdash;</span></div>
+            <div class="forecast-row"><span class="small">Days to Statement</span><span class="small fw-bold" id="daysToStatement">&mdash;</span></div>
+            <div class="forecast-row"><span class="small">Days to Due</span><span class="small fw-bold" id="daysToDue">&mdash;</span></div>
+          </div>
+
+          <!-- Balances & Projections -->
+          <div class="mb-4 p-3 bg-white border rounded-3">
+            <span class="small fw-semibold d-block mb-2">Balances & Projections</span>
+            <div class="forecast-row"><span class="small">Outstanding Balance</span><span class="small fw-bold" id="projectedBalance">&mdash;</span></div>
+            <div class="forecast-row"><span class="small">Pending Transactions</span><span class="small fw-bold" id="pendingDisplay">&mdash;</span></div>
+            <div class="forecast-row"><span class="small">Statement Balance</span><span class="small fw-bold" id="stmtBalanceDisplay">&mdash;</span></div>
+            <div class="forecast-row"><span class="small">Minimum Due</span><span class="small fw-bold" id="minDue">&mdash;</span></div>
+            <div class="forecast-row"><span class="small">Interest if Unpaid</span><span class="small fw-bold text-danger" id="interestCharge">&mdash;</span></div>
+            <div class="forecast-row"><span class="small">Liquid Cash</span><span class="small fw-bold" id="liquidCashDisplay">&mdash;</span></div>
+            <div class="forecast-row"><span class="small">Monthly Income</span><span class="small fw-bold" id="monthlyIncomeDisplay">&mdash;</span></div>
+          </div>
+
+          <!-- Rates & Fees -->
+          <div class="mb-4 p-3 bg-white border rounded-3">
+            <span class="small fw-semibold d-block mb-2">Card Rates & Fees</span>
+            <div class="forecast-row"><span class="small">Monthly Interest Rate</span><span class="small fw-bold" id="displayInterest">&mdash;</span></div>
+            <div class="forecast-row"><span class="small">Min Payment</span><span class="small fw-bold" id="displayMinPay">&mdash;</span></div>
+            <div class="forecast-row"><span class="small">Annual Fee</span><span class="small fw-bold" id="displayAnnualFee">&mdash;</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Card Modal -->
+  <div class="modal fade" id="cardModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h6 class="modal-title fw-bold" id="cardModalLabel">Add Credit Card</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="cardForm">
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label small">Card Nickname</label>
+                <input type="text" class="form-control" id="cardNickname" placeholder="e.g. My BPI Gold">
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Last 4 Digits</label>
+                <input type="text" class="form-control" id="lastFour" maxlength="4" placeholder="e.g. 4321" pattern="\d{4}">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label small">Card Network</label>
+                <select class="form-select" id="cardNetwork">
+                  <option value="">— Select —</option>
+                  <option value="Visa">Visa</option>
+                  <option value="Mastercard">Mastercard</option>
+                  <option value="JCB">JCB</option>
+                  <option value="Amex">Amex</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Card Color</label>
+                <select class="form-select" id="cardColor">
+                  <option value="#1C2B3A">Midnight (default)</option>
+                  <option value="#1a3a6b">Navy Blue</option>
+                  <option value="#1b4332">Forest Green</option>
+                  <option value="#6b1a1a">Deep Red</option>
+                  <option value="#3d1a6b">Royal Purple</option>
+                  <option value="#6b4e1a">Warm Gold</option>
+                  <option value="#1a5e6b">Teal</option>
+                  <option value="#2d2d2d">Charcoal</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small">Bank</label>
+              <input type="text" class="form-control" id="bank" placeholder="e.g. BPI, BDO, Metrobank" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small">Credit Limit</label>
+              <input type="number" class="form-control" id="creditLimit" step="0.01" placeholder="e.g. 50000" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small">Available Credit</label>
+              <input type="number" class="form-control" id="availableCreditInput" step="0.01" placeholder="From your bank app" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small">Outstanding Balance</label>
+              <input type="number" class="form-control" id="outstandingBalance" step="0.01" placeholder="Total you currently owe" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small">Pending Transactions</label>
+              <div id="pendingList" class="d-flex flex-column gap-2 mb-2"></div>
+              <div class="d-flex gap-2">
+                <input type="text" class="form-control form-control-sm" id="pendingName" placeholder="Description">
+                <input type="number" class="form-control form-control-sm" id="pendingAmt" step="0.01" placeholder="Amount" style="max-width:120px">
+                <button type="button" class="btn btn-outline-dark btn-sm" onclick="addPending()">+</button>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small">Statement Balance</label>
+              <input type="number" class="form-control" id="statementBalance" step="0.01" placeholder="Balance on last statement" required>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label small">Statement Day</label>
+                <input type="number" class="form-control" id="statementDay" min="1" max="31" placeholder="e.g. 15" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Payment Due (days after statement)</label>
+                <input type="number" class="form-control" id="dueDayOffset" min="1" max="60" placeholder="e.g. 21" required>
+                <div class="form-text" id="dueDatePreview"></div>
+              </div>
+            </div>
+            <hr>
+            <p class="small text-muted mb-2">Cash Awareness <span class="text-secondary">(optional)</span></p>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label small">Liquid Cash (₱)</label>
+                <input type="number" class="form-control" id="liquidCash" step="0.01" placeholder="e.g. 15000" min="0">
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Monthly Income (₱)</label>
+                <input type="number" class="form-control" id="monthlyIncome" step="0.01" placeholder="e.g. 40000" min="0">
+              </div>
+            </div>
+            <hr>
+            <p class="small text-muted mb-2">Rates & Fees <span class="text-secondary">(pre-filled with PH defaults)</span></p>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label small">Monthly Interest %</label>
+                <input type="number" class="form-control" id="interestRate" step="0.01" value="2" min="0">
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Min Payment %</label>
+                <input type="number" class="form-control" id="minPaymentPct" step="0.01" value="5" min="0">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small">Min Payment Floor (&#8369;)</label>
+              <input type="number" class="form-control" id="minPaymentFloor" step="0.01" value="500" min="0">
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <label class="form-label small mb-0">Annual Fee (&#8369;)</label>
+                <div class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="checkbox" id="annualFeeWaived">
+                  <label class="form-check-label small" for="annualFeeWaived">Waived</label>
+                </div>
+              </div>
+              <input type="number" class="form-control mt-1" id="annualFee" step="0.01" placeholder="e.g. 2500" value="0" min="0">
+            </div>
+            <button type="submit" class="btn btn-dark w-100" id="cardSubmitBtn">Add Card</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    const cards = [];
+    let selectedIndex = -1;
+
+    let unsavedChanges = false;
+
+    function saveData() {
+      unsavedChanges = true;
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch('data.json');
+        const data = await res.json();
+        if (data.cards) cards.push(...data.cards);
+        selectedIndex = data.selectedIndex ?? -1;
+      } catch (e) {}
+    }
+
+    function getPendingTotal(c) {
+      return (c.pendingTxns || []).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    }
+
+    // Decision logic
+    function getStatus(utilization, daysToStatement, cashPosition, projectedBalance) {
+      if (cashPosition != null && projectedBalance != null && cashPosition < projectedBalance) {
+        return { status: 'RISKY', reason: `Your cash on hand (₱${cashPosition.toLocaleString()}) is less than your projected statement balance (₱${projectedBalance.toLocaleString()}).` };
+      }
+      if (utilization > 0.6) return { status: 'RISKY', reason: `Utilization is at ${(utilization * 100).toFixed(0)}% \u2014 above 60% threshold.` };
+      if (daysToStatement <= 2) return { status: 'RISKY', reason: `Only ${daysToStatement} day(s) before statement closes.` };
+      if (utilization > 0.3 || daysToStatement <= 7) {
+        const parts = [];
+        if (utilization > 0.3) parts.push(`Utilization at ${(utilization * 100).toFixed(0)}% (above 30%).`);
+        if (daysToStatement <= 7) parts.push(`${daysToStatement} days to statement.`);
+        return { status: 'CAUTION', reason: parts.join(' ') };
+      }
+      return { status: 'SAFE', reason: 'Low utilization and plenty of time before statement closes.' };
+    }
+
+    function calcDaysTo(targetDay) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      let target = new Date(today.getFullYear(), today.getMonth(), targetDay);
+      if (target <= today) target = new Date(today.getFullYear(), today.getMonth() + 1, targetDay);
+      return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+    }
+    function getNextDate(day) {
+      const today = new Date();
+      let d = new Date(today.getFullYear(), today.getMonth(), day);
+      if (d <= today) d = new Date(today.getFullYear(), today.getMonth() + 1, day);
+      return d;
+    }
+    function formatDate(d) {
+      return d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function getCardScore(c) {
+      const avail = c.availableCredit != null ? c.availableCredit : (c.creditLimit - (c.outstandingBalance || 0) - getPendingTotal(c));
+      const util = (c.creditLimit - avail) / c.creditLimit;
+      const daysToStmt = calcDaysTo(c.statementDay);
+      const { status } = getStatus(util, daysToStmt, c.liquidCash, c.outstandingBalance);
+      // Score: lower is better to use
+      // Heavily penalize risky/caution status
+      let score = util * 100; // 0-100 based on utilization
+      if (daysToStmt <= 2) score += 200;
+      else if (daysToStmt <= 7) score += 50;
+      if (status === 'RISKY') score += 300;
+      else if (status === 'CAUTION') score += 100;
+      return { score, util, daysToStmt, avail, status };
+    }
+
+    function renderRecommendations() {
+      const section = $('recommendationSection');
+      if (cards.length === 0) { section.classList.add('d-none'); return; }
+      section.classList.remove('d-none');
+
+      // Best card
+      const ranked = cards.map((c, i) => ({ card: c, index: i, ...getCardScore(c) }))
+        .sort((a, b) => a.score - b.score);
+      const best = ranked[0];
+      const c = best.card;
+
+      const reasons = [];
+      reasons.push(`${(best.util * 100).toFixed(0)}% utilization`);
+      reasons.push(`${best.daysToStmt} days to statement`);
+      reasons.push(`\u20B1${best.avail.toLocaleString()} available`);
+      if (ranked.length > 1) {
+        const others = ranked.slice(1);
+        others.forEach(o => {
+          if (o.util > best.util) reasons.push(`${o.card.bank} has higher utilization (${(o.util * 100).toFixed(0)}%)`);
+          if (o.daysToStmt < best.daysToStmt) reasons.push(`${o.card.bank} is closer to statement (${o.daysToStmt}d)`);
+        });
+      }
+
+      const colors = { SAFE: 'success', CAUTION: 'warning', RISKY: 'danger' };
+      $('bestCard').innerHTML = `
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div>
+            <span class="small text-muted">Use this card today</span>
+            <h5 class="mb-0 fw-bold">${c.bank} <span class="badge bg-${colors[best.status]} ms-1" style="font-size:.7rem">${best.status}</span></h5>
+          </div>
+          <span class="small text-muted">stmt ${getNextDate(c.statementDay).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}</span>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          ${reasons.map(r => `<span class="badge bg-light text-dark border" style="font-size:.7rem">${r}</span>`).join('')}
+        </div>`;
+
+      // Gantt chart
+      renderGantt();
+    }
+
+    function renderGantt() {
+      const container = $('ganttBars');
+      const today = new Date(); today.setHours(0,0,0,0);
+
+      // Window: 60 days centered around today (30 before, 30 after)
+      const windowStart = new Date(today); windowStart.setDate(windowStart.getDate() - 30);
+      const windowEnd = new Date(today); windowEnd.setDate(windowEnd.getDate() + 30);
+      const totalMs = windowEnd - windowStart;
+
+      const todayPct = ((today - windowStart) / totalMs * 100);
+
+      // Date labels
+      const dateLabelHtml = [0, 15, 30, 45, 60].map(offset => {
+        const d = new Date(windowStart); d.setDate(d.getDate() + offset);
+        const pct = offset / 60 * 100;
+        return `<span class="small text-muted" style="position:absolute;left:${pct}%;transform:translateX(-50%);font-size:.65rem">${d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}</span>`;
+      }).join('');
+
+      let html = '';
+
+      cards.forEach((c, i) => {
+        // Compute the current billing cycle (prevStmt -> nextStmt) and the next one
+        const nextStmt = getNextDate(c.statementDay);
+        const prevStmt = new Date(nextStmt); prevStmt.setMonth(prevStmt.getMonth() - 1);
+        const dueDate = new Date(nextStmt); dueDate.setDate(dueDate.getDate() + c.dueDayOffset);
+
+        // Next cycle
+        const nextStmt2 = new Date(nextStmt); nextStmt2.setMonth(nextStmt2.getMonth() + 1);
+        const dueDate2 = new Date(nextStmt2); dueDate2.setDate(nextStmt2.getDate() + c.dueDayOffset);
+
+        const barColor = i === 0 ? '#198754' : i === 1 ? '#0d6efd' : i === 2 ? '#6f42c1' : '#fd7e14';
+
+        function barHtml(start, end, color, opacity) {
+          const s = Math.max(0, (start - windowStart) / totalMs * 100);
+          const e = Math.min(100, (end - windowStart) / totalMs * 100);
+          if (e <= 0 || s >= 100) return '';
+          return `<div class="gantt-bar" style="left:${s}%;width:${e - s}%;background:${color};opacity:${opacity}"></div>`;
+        }
+
+        function markerHtml(date, label, color) {
+          const pct = (date - windowStart) / totalMs * 100;
+          if (pct < 0 || pct > 100) return '';
+          return `<div style="position:absolute;left:${pct}%;top:-2px;bottom:-2px;width:2px;background:${color};z-index:1" title="${label}"></div>`;
+        }
+
+        html += `
+          <div class="gantt-row">
+            <span class="gantt-label">${c.bank}</span>
+            <div class="gantt-track">
+              ${barHtml(prevStmt, nextStmt, barColor, 0.5)}
+              ${barHtml(nextStmt, nextStmt2, barColor, 0.25)}
+              ${markerHtml(dueDate, 'Due', '#dc3545')}
+              ${markerHtml(dueDate2, 'Due', '#dc3545')}
+              <div class="gantt-today" style="left:${todayPct}%" title="Today"></div>
+            </div>
+          </div>`;
+      });
+
+      // Date axis
+      html += `<div class="gantt-row"><span class="gantt-label"></span><div style="flex:1;position:relative;height:16px">${dateLabelHtml}</div></div>`;
+
+      container.innerHTML = html;
+    }
+
+    function adjustColor(hex, amount) {
+      const num = parseInt(hex.replace('#',''), 16);
+      const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+      const g = Math.min(255, Math.max(0, ((num >> 8) & 0xff) + amount));
+      const b = Math.min(255, Math.max(0, (num & 0xff) + amount));
+      return `#${((r<<16)|(g<<8)|b).toString(16).padStart(6,'0')}`;
+    }
+
+    // Render card list
+    function renderCardList() {
+      const list = $('cardList');
+      if (cards.length === 0) {
+        list.innerHTML = `
+          <div class="text-center py-4">
+            <div style="font-size:2.5rem;margin-bottom:8px">💳</div>
+            <p class="fw-semibold mb-1">No cards yet</p>
+            <p class="text-muted small mb-3">Add your first credit card to see your billing cycle and safe-to-swipe status.</p>
+            <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#cardModal">+ Add your first card</button>
+          </div>`;
+        return;
+      }
+      list.innerHTML = cards.map((c, i) => {
+        const avail = c.availableCredit != null ? c.availableCredit : (c.creditLimit - (c.outstandingBalance || 0) - getPendingTotal(c));
+        const util = (c.creditLimit - avail) / c.creditLimit;
+        const daysToStmt = calcDaysTo(c.statementDay);
+        const { status } = getStatus(util, daysToStmt, c.liquidCash, c.outstandingBalance);
+        const statusColors = { SAFE: '#2ECC71', CAUTION: '#F39C12', RISKY: '#E74C3C' };
+        const statusColor = statusColors[status];
+        const bgColor = c.cardColor || '#1C2B3A';
+        const networkIcon = { Visa: '𝗩𝗜𝗦𝗔', Mastercard: '⬤⬤', JCB: 'JCB', Amex: 'AMEX' }[c.network] || '';
+        const lastFour = c.lastFour ? `•••• ${c.lastFour}` : '';
+        const isActive = i === selectedIndex;
+
+        return `
+          <div class="credit-card ${isActive ? 'credit-card-active' : ''}" onclick="selectCard(${i})" style="background: linear-gradient(135deg, ${bgColor} 0%, ${adjustColor(bgColor, -20)} 100%);">
+            <div class="credit-card-top">
+              <div>
+                <div class="credit-card-bank">${c.bank}</div>
+                ${c.nickname ? `<div class="credit-card-nickname">${c.nickname}</div>` : ''}
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="credit-card-status-dot" style="background:${statusColor}" title="${status}"></span>
+                <span class="credit-card-network">${networkIcon}</span>
+              </div>
+            </div>
+            <div class="credit-card-number">${lastFour || '•••• •••• ••••'}</div>
+            <div class="credit-card-bottom">
+              <div>
+                <div class="credit-card-label">AVAILABLE</div>
+                <div class="credit-card-value">₱${avail.toLocaleString()}</div>
+              </div>
+              <div>
+                <div class="credit-card-label">STATEMENT</div>
+                <div class="credit-card-value">${daysToStmt}d left</div>
+              </div>
+              <div class="credit-card-actions">
+                <button class="btn-card-action" onclick="event.stopPropagation(); editCard(${i})" title="Edit">✎</button>
+                <button class="btn-card-action text-danger" onclick="event.stopPropagation(); removeCard(${i})" title="Remove">✕</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // Actions
+    let editingCardIndex = -1;
+
+    function editCard(i) {
+      editingCardIndex = i;
+      const c = cards[i];
+      $('cardNickname').value = c.nickname || '';
+      $('lastFour').value = c.lastFour || '';
+      $('cardNetwork').value = c.network || '';
+      $('cardColor').value = c.cardColor || '#1C2B3A';
+      $('bank').value = c.bank;
+      $('creditLimit').value = c.creditLimit;
+      $('availableCreditInput').value = c.availableCredit;
+      $('outstandingBalance').value = c.outstandingBalance;
+      pendingTxns = c.pendingTxns ? [...c.pendingTxns] : [];
+      renderPendingList();
+      $('statementBalance').value = c.statementBalance;
+      $('statementDay').value = c.statementDay;
+      $('dueDayOffset').value = c.dueDayOffset;
+      $('interestRate').value = c.interestRate || 2;
+      $('minPaymentPct').value = c.minPaymentPct || 5;
+      $('minPaymentFloor').value = c.minPaymentFloor || 500;
+      $('annualFee').value = c.annualFee || 0;
+      $('annualFee').disabled = c.annualFeeWaived;
+      $('annualFeeWaived').checked = c.annualFeeWaived;
+      $('liquidCash').value = c.liquidCash || '';
+      $('monthlyIncome').value = c.monthlyIncome || '';
+      $('cardModalLabel').textContent = 'Edit Credit Card';
+      $('cardSubmitBtn').textContent = 'Save Changes';
+      cardBsModal.show();
+    }
+
+    function selectCard(i) {
+      selectedIndex = i;
+      saveData();
+      renderCardList();
+      renderDashboard();
+    }
+    function removeCard(i) {
+      cards.splice(i, 1);
+      if (selectedIndex >= cards.length) selectedIndex = cards.length - 1;
+      saveData();
+      renderCardList();
+      renderRecommendations();
+      renderDashboard();
+    }
+
+    // Dashboard
+    function renderDashboard() {
+      const hasCard = selectedIndex >= 0 && selectedIndex < cards.length;
+      $('noDashboard').classList.toggle('d-none', hasCard);
+      $('dashboardContent').classList.toggle('d-none', !hasCard);
+      if (!hasCard) return;
+
+      const c = cards[selectedIndex];
+      const avail = c.availableCredit != null ? c.availableCredit : (c.creditLimit - (c.outstandingBalance || c.currentBalance || 0) - getPendingTotal(c));
+      const utilization = (c.creditLimit - avail) / c.creditLimit;
+      const daysToStmt = calcDaysTo(c.statementDay);
+
+      const nextStmt = getNextDate(c.statementDay);
+      const dueDate = new Date(nextStmt);
+      dueDate.setDate(dueDate.getDate() + c.dueDayOffset);
+
+      const { status, reason } = getStatus(utilization, daysToStmt, c.liquidCash, c.outstandingBalance);
+
+      $('selectedBank').textContent = c.bank;
+      const badge = $('statusBadge');
+      badge.textContent = status;
+      badge.className = `badge fs-6 px-3 py-2 badge-${status.toLowerCase()}`;
+      $('statusReason').textContent = reason;
+
+      const pct = (utilization * 100).toFixed(1);
+      $('utilizationPct').textContent = pct + '%';
+      const fill = $('utilizationFill');
+      fill.style.width = Math.min(pct, 100) + '%';
+      fill.className = `progress-bar ${utilization > 0.6 ? 'bg-danger' : utilization > 0.3 ? 'bg-warning' : 'bg-success'}`;
+      $('availableCredit').textContent = avail.toLocaleString();
+      $('limitDisplay').textContent = c.creditLimit.toLocaleString();
+
+      const prevStmt = new Date(nextStmt);
+      prevStmt.setMonth(prevStmt.getMonth() - 1);
+      const totalDays = Math.ceil((nextStmt - prevStmt) / (1000 * 60 * 60 * 24));
+      const elapsed = totalDays - daysToStmt;
+      const progress = Math.min((elapsed / totalDays) * 100, 100);
+      $('cycleProgress').style.width = progress + '%';
+      $('cycleMarker').style.left = progress + '%';
+      $('daysRemaining').textContent = daysToStmt + ' days left';
+      $('cycleStart').textContent = formatDate(prevStmt);
+      $('cycleEnd').textContent = 'Statement: ' + formatDate(nextStmt);
+
+      const daysToDue = Math.ceil((dueDate - new Date()) / (1000 * 60 * 60 * 24));
+      $('nextStatement').textContent = formatDate(nextStmt);
+      $('dueDate').textContent = formatDate(dueDate);
+      $('daysToStatement').textContent = daysToStmt + ' days';
+      $('daysToDue').textContent = daysToDue + ' days';
+
+      // Rates & fees
+      const rate = c.interestRate || 2;
+      const minPct = c.minPaymentPct || 5;
+      const minFloor = c.minPaymentFloor || 500;
+      const interest = c.statementBalance * (rate / 100);
+      const minDue = Math.max(c.statementBalance * (minPct / 100), minFloor);
+
+      $('projectedBalance').textContent = '\u20B1' + c.outstandingBalance.toLocaleString();
+      const pendingTotal = getPendingTotal(c);
+      const pendingCount = (c.pendingTxns || []).length;
+      $('pendingDisplay').textContent = pendingTotal ? `\u20B1${pendingTotal.toLocaleString()} (${pendingCount})` : '\u20B10';
+      $('stmtBalanceDisplay').textContent = '\u20B1' + c.statementBalance.toLocaleString();
+      $('minDue').textContent = '\u20B1' + minDue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      $('interestCharge').textContent = '\u20B1' + interest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      $('liquidCashDisplay').textContent = c.liquidCash ? '₱' + c.liquidCash.toLocaleString() : 'Not set';
+      $('monthlyIncomeDisplay').textContent = c.monthlyIncome ? '₱' + c.monthlyIncome.toLocaleString() : 'Not set';
+
+      // Card rates display
+      $('displayInterest').textContent = rate + '%';
+      $('displayMinPay').textContent = `${minPct}% or \u20B1${minFloor.toLocaleString()} floor`;
+      $('displayAnnualFee').textContent = c.annualFeeWaived ? 'Waived' : '\u20B1' + (c.annualFee || 0).toLocaleString();
+    }
+
+    // Modal form handlers
+    const cardBsModal = new bootstrap.Modal($('cardModal'));
+
+    let pendingTxns = [];
+
+    function addPending() {
+      const name = $('pendingName').value.trim();
+      const amt = parseFloat($('pendingAmt').value);
+      if (!amt) return;
+      pendingTxns.push({ name: name || 'Pending', amount: amt });
+      $('pendingName').value = '';
+      $('pendingAmt').value = '';
+      renderPendingList();
+    }
+
+    function removePending(i) {
+      pendingTxns.splice(i, 1);
+      renderPendingList();
+    }
+
+    function renderPendingList() {
+      const list = $('pendingList');
+      if (pendingTxns.length === 0) { list.innerHTML = ''; return; }
+      list.innerHTML = pendingTxns.map((t, i) => `
+        <div class="d-flex justify-content-between align-items-center border rounded-2 px-2 py-1">
+          <span class="small">${t.name}</span>
+          <div class="d-flex align-items-center gap-2">
+            <span class="small fw-bold">\u20B1${Math.abs(t.amount).toLocaleString()}</span>
+            <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="removePending(${i})">&times;</button>
+          </div>
+        </div>`).join('');
+    }
+
+    function updateDueDatePreview() {
+      const stmtDay = parseInt($('statementDay').value);
+      const offset = parseInt($('dueDayOffset').value);
+      if (!stmtDay || !offset) { $('dueDatePreview').textContent = ''; return; }
+      const today = new Date(); today.setHours(0,0,0,0);
+      let stmt = new Date(today.getFullYear(), today.getMonth(), stmtDay);
+      if (stmt <= today) stmt = new Date(today.getFullYear(), today.getMonth() + 1, stmtDay);
+      const due = new Date(stmt); due.setDate(due.getDate() + offset);
+      $('dueDatePreview').textContent = `Next due: ${formatDate(due)}`;
+    }
+
+    $('statementDay').addEventListener('input', updateDueDatePreview);
+    $('dueDayOffset').addEventListener('input', updateDueDatePreview);
+
+    $('annualFeeWaived').addEventListener('change', function() {
+      $('annualFee').disabled = this.checked;
+      if (this.checked) $('annualFee').value = '0';
+    });
+
+    $('cardForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const entry = {
+        nickname: $('cardNickname').value.trim() || null,
+        lastFour: $('lastFour').value.trim() || null,
+        network: $('cardNetwork').value || null,
+        cardColor: $('cardColor').value || '#1C2B3A',
+        bank: $('bank').value.trim(),
+        creditLimit: parseFloat($('creditLimit').value),
+        availableCredit: parseFloat($('availableCreditInput').value),
+        outstandingBalance: parseFloat($('outstandingBalance').value),
+        pendingTxns: [...pendingTxns],
+        statementBalance: parseFloat($('statementBalance').value),
+        statementDay: parseInt($('statementDay').value),
+        dueDayOffset: parseInt($('dueDayOffset').value),
+        interestRate: parseFloat($('interestRate').value) || 2,
+        minPaymentPct: parseFloat($('minPaymentPct').value) || 5,
+        minPaymentFloor: parseFloat($('minPaymentFloor').value) || 500,
+        annualFee: $('annualFeeWaived').checked ? 0 : (parseFloat($('annualFee').value) || 0),
+        annualFeeWaived: $('annualFeeWaived').checked,
+        liquidCash: $('liquidCash').value ? parseFloat($('liquidCash').value) : null,
+        monthlyIncome: $('monthlyIncome').value ? parseFloat($('monthlyIncome').value) : null,
+      };
+      if (editingCardIndex >= 0) {
+        cards[editingCardIndex] = entry;
+      } else {
+        cards.push(entry);
+        selectedIndex = cards.length - 1;
+      }
+      saveData();
+      renderCardList();
+      renderRecommendations();
+      renderDashboard();
+      cardBsModal.hide();
+    });
+
+    $('cardModal').addEventListener('hidden.bs.modal', () => {
+      editingCardIndex = -1;
+      $('cardForm').reset();
+      $('cardNickname').value = '';
+      $('lastFour').value = '';
+      $('cardNetwork').value = '';
+      $('cardColor').value = '#1C2B3A';
+      $('interestRate').value = '2';
+      $('minPaymentPct').value = '5';
+      $('minPaymentFloor').value = '500';
+      pendingTxns = [];
+      renderPendingList();
+      $('annualFee').value = '0';
+      $('annualFee').disabled = false;
+      $('annualFeeWaived').checked = false;
+      $('liquidCash').value = '';
+      $('monthlyIncome').value = '';
+      $('dueDatePreview').textContent = '';
+      $('cardModalLabel').textContent = 'Add Credit Card';
+      $('cardSubmitBtn').textContent = 'Add Card';
+    });
+
+    function saveToFile() {
+      const data = JSON.stringify({ cards, selectedIndex }, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'data.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      unsavedChanges = false;
+    }
+
+    function loadFromFile() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = () => {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const data = JSON.parse(reader.result);
+            cards.length = 0;
+            if (data.cards) cards.push(...data.cards);
+            selectedIndex = data.selectedIndex ?? -1;
+            saveData();
+            renderCardList();
+            renderRecommendations();
+            renderDashboard();
+          } catch (e) { alert('Invalid JSON file.'); }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    // Init
+    (async () => {
+      await loadData();
+      renderCardList();
+      renderRecommendations();
+      renderDashboard();
+    })();
+  </script>
+</body>
+</html>
