@@ -13,7 +13,7 @@ import { Text, View } from '@/components/Themed';
 import { BillingTimeline } from '@/components/BillingTimeline';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
-import { calculateSwipeImpact, computeNetAvailableCash } from '@/utils/decisionEngine';
+import { calculateSwipeImpact, computeNetAvailableCash, getCycleDates } from '@/utils/decisionEngine';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import type { CardStatus } from '@/types/card';
 
@@ -58,6 +58,12 @@ export default function SwipeImpactScreen() {
     if (!card) return null;
     return computeNetAvailableCash(cashOnHand, monthlyIncome, payday, card, committedExpenses);
   }, [card, cashOnHand, monthlyIncome, payday, committedExpenses]);
+
+  const incomeApplies = useMemo(() => {
+    if (!card || monthlyIncome === null || payday === null) return false;
+    const { dueDate } = getCycleDates(card);
+    return payday <= dueDate.getDate();
+  }, [card, monthlyIncome, payday]);
 
   const impact = useMemo(() => {
     if (!card) return null;
@@ -180,21 +186,44 @@ export default function SwipeImpactScreen() {
             <Text style={styles.rowValue}>{formatPeso(impact.projectedBalance)}</Text>
           </View>
 
-          <View style={styles.row}>
-            <Text style={styles.rowLabel}>Available to pay</Text>
-            <Text style={styles.rowValueMuted}>
-              {impact.netAvailableCash !== null
-                ? formatPeso(impact.netAvailableCash)
-                : 'Not set'}
-            </Text>
-          </View>
-
-          {committedExpenses !== null && committedExpenses > 0 && (
+          {impact.netAvailableCash !== null ? (
+            <>
+              <View style={styles.row}>
+                <Text style={styles.rowLabel}>Cash on hand</Text>
+                <Text style={styles.rowValueMuted}>
+                  {cashOnHand !== null ? formatPeso(cashOnHand) : '—'}
+                </Text>
+              </View>
+              {monthlyIncome !== null && payday !== null && (
+                <View style={styles.row}>
+                  <Text style={styles.rowLabel}>
+                    Monthly income{incomeApplies ? '' : ' (payday after due)'}
+                  </Text>
+                  <Text style={[styles.rowValueMuted, !incomeApplies && styles.excludedText]}>
+                    {incomeApplies ? `+${formatPeso(monthlyIncome)}` : `+${formatPeso(monthlyIncome)}`}
+                  </Text>
+                </View>
+              )}
+              {committedExpenses !== null && committedExpenses > 0 && (
+                <View style={styles.row}>
+                  <Text style={styles.rowLabel}>Committed expenses</Text>
+                  <Text style={styles.rowValueMuted}>
+                    −{formatPeso(committedExpenses)}
+                  </Text>
+                </View>
+              )}
+              <View style={styles.divider} />
+              <View style={styles.row}>
+                <Text style={[styles.rowLabel, styles.netCashLabel]}>Available to pay</Text>
+                <Text style={styles.netCashValue}>
+                  {formatPeso(impact.netAvailableCash)}
+                </Text>
+              </View>
+            </>
+          ) : (
             <View style={styles.row}>
-              <Text style={styles.rowLabel}>Committed expenses</Text>
-              <Text style={styles.rowValueMuted}>
-                −{formatPeso(committedExpenses)}
-              </Text>
+              <Text style={styles.rowLabel}>Available to pay</Text>
+              <Text style={styles.rowValueMuted}>Not set</Text>
             </View>
           )}
 
@@ -382,6 +411,19 @@ const styles = StyleSheet.create({
   },
   warningText: {
     color: '#ef4444',
+  },
+  excludedText: {
+    textDecorationLine: 'line-through',
+    color: '#ccc',
+  },
+  netCashLabel: {
+    fontWeight: '700',
+    color: '#111',
+  },
+  netCashValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#10b981',
   },
   hint: {
     fontSize: 13,
