@@ -8,6 +8,7 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { initFirestore } from '@/utils/firebase';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -36,6 +37,8 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
+      // Initialize Firestore with offline persistence (encrypted at rest by native SDK)
+      initFirestore();
       // Verify Pro entitlement on app launch (checks trial expiry for trial users)
       useSubscriptionStore.getState().verifyEntitlement();
     }
