@@ -189,3 +189,14 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - `useCallback` for the getter function avoids re-creating on every render — depends on user store values
   - The swipe-impact screen already had the minimum payment RISKY check in `calculateSwipeImpact()` — DE-01 brings parity to the home screen via `calculateCardStatus()`
 ---
+
+## 2026-03-31 - DE-02
+- Already implemented in prior stories — `calculateCardStatus()` has `days <= 2` → RISKY check (line 103) with correct reason message
+- `calculateSwipeImpact()` also has the same check (line 196) for swipe context
+- Home screen calls `calculateCardStatus()` without swipe amount, satisfying AC3 (evaluated without proposed swipe)
+- No code changes needed — marked as passing
+- Files changed: `docs/prd.json` (marked passes: true)
+- **Learnings for future iterations:**
+  - Some DE stories may already be satisfied by earlier CL implementations — check existing logic before writing new code
+  - The decision engine was designed with first-match-wins from CL-01, so RISKY/CAUTION thresholds were baked in early
+---

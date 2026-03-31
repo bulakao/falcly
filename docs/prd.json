@@ -195,7 +195,7 @@
         "Condition is evaluated even when no proposed swipe amount is entered"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
