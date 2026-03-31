@@ -285,7 +285,7 @@
         "Additional enrichment fields (cash on hand, due day offset, interest rate) are prompted optionally after the first result is shown"
       ],
       "priority": 19,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

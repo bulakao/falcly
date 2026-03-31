@@ -26,6 +26,8 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Projected balance formula: `projectedStatementBalance(card, proposedSwipe, today)` — canonical function, includes pending/installments/subscriptions/annual fee
 - When adding new Card fields: add Zustand persist migration in `store/cardStore.ts` to backfill defaults for existing data
 - Future cycle projections: `projectFutureCycles(card, netAvailableCash, today)` in `utils/decisionEngine.ts` — returns array of `FutureCycleProjection` with `isKnown` flag for signal-only cycles
+- Onboarding flow: `app/onboarding.tsx` → `app/onboarding-result.tsx` → home; uses `router.replace()` to prevent back-nav to completed forms
+- STATUS_EXPLANATIONS in `app/onboarding-result.tsx` — contextual one-sentence meaning for each status tier
 
 ---
 
@@ -273,4 +275,19 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - TypeScript doesn't narrow types inside nested function declarations after a guard — capture narrowed values in consts before the function
   - `Alert.alert` is the standard React Native pattern for confirmation dialogs — works on both iOS and Android
   - Delete action follows the same action row pattern as Edit Card and Update Balance on the card detail screen
+---
+
+## 2026-03-31 - OB-01
+- Created `app/onboarding.tsx` — simplified 3-field onboarding screen (statement day, credit limit, outstanding balance) with bank name defaulting to "My Card"
+- Created `app/onboarding-result.tsx` — first status result screen showing SAFE/CAUTION/RISKY badge with contextual explanation and optional enrichment fields (cash on hand, due day offset, interest rate)
+- Updated home screen empty state with "Get Started" button linking to onboarding flow
+- Registered `/onboarding` and `/onboarding-result` routes in root layout (headerShown: false for immersive onboarding)
+- After 3-field save, user sees their first status result immediately; enrichment is expandable and optional
+- Files changed: `app/onboarding.tsx` (new), `app/onboarding-result.tsx` (new), `app/(tabs)/index.tsx`, `app/_layout.tsx`
+- **Learnings for future iterations:**
+  - `router.replace()` is better than `router.push()` for onboarding flow transitions — prevents back-navigating to the entry form after card is already saved
+  - `useCardStore.getState()` gives synchronous access to the store outside of React — useful for reading the newly added card ID right after `addCard()`
+  - `headerShown: false` on Stack.Screen options creates an immersive full-screen experience for onboarding — no navigation chrome
+  - STATUS_EXPLANATIONS map provides contextual one-sentence meanings for each status tier — reusable for OB-02 tooltips
+  - Enrichment fields use inline expand pattern (tap to reveal) rather than a separate screen — keeps the flow lightweight
 ---
