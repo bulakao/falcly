@@ -29,6 +29,8 @@ Started: Tue 31 Mar 2026 14:15:37 PST
 - Onboarding flow: `app/onboarding.tsx` → `app/onboarding-result.tsx` → home; uses `router.replace()` to prevent back-nav to completed forms
 - STATUS_EXPLANATIONS in `app/onboarding-result.tsx` — contextual one-sentence meaning for each status tier
 - `StatusTooltip` component (`components/StatusTooltip.tsx`) — reusable dismissible tooltip for status badge education, uses Modal + backdrop pattern
+- Subscription store: `store/subscriptionStore.ts` with Zustand persist, store name `falcly-subscription` — `canAddCard(count)` checks tier + card limit
+- FREE_CARD_LIMIT = 2 — exported from `store/subscriptionStore.ts`
 
 ---
 
@@ -304,4 +306,18 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - `hitSlop={8}` on small touch targets (like the ⓘ icon) improves usability on mobile
   - StatusTooltip is stateless regarding which status is active — it always shows all three tiers for educational context
   - Most of OB-02 was already satisfied by OB-01 — the only missing piece was the dismissible tooltip (AC3)
+---
+
+## 2026-03-31 - MO-01
+- Created `store/subscriptionStore.ts` — Zustand persisted store tracking subscription tier (free/pro) with `canAddCard()` helper
+- Created `app/pro-paywall.tsx` — paywall screen with feature list (unlimited cards, payment planning, installment tracking, AI alerts), annual plan as primary CTA with "₱83/mo, billed ₱999/yr — Save 44%" badge, monthly plan as secondary option
+- Updated home screen: replaced static `Link` on "+ Add Card" button with `Pressable` that checks `canAddCard(cards.length)` — routes to paywall when Free user has 2+ cards
+- Registered `/pro-paywall` route in root layout as modal
+- Existing free cards remain fully accessible — paywall only blocks adding card #3
+- Files changed: `store/subscriptionStore.ts` (new), `app/pro-paywall.tsx` (new), `app/(tabs)/index.tsx`, `app/_layout.tsx`, `docs/prd.json`
+- **Learnings for future iterations:**
+  - Subscription store uses `partialize` to only persist `tier` and `trialEndsAt`, excluding derived functions from storage
+  - `canAddCard()` is a store method using `get()` for reactive tier checking — MO-02/MO-03 will extend with trial/RevenueCat logic
+  - Paywall plan buttons are placeholder handlers (`router.back()`) — RevenueCat integration comes in MO-02/MO-03
+  - Home screen "Add Card" changed from `Link` to `Pressable` with `router.push()` to support conditional routing
 ---

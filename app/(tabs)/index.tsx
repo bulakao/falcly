@@ -1,11 +1,12 @@
 import { useCallback } from 'react';
 import { StyleSheet, Pressable, FlatList } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import StatusTooltip from '@/components/StatusTooltip';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { calculateCardStatus, calculateBestCard, computeNetAvailableCash } from '@/utils/decisionEngine';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import type { Card, CardStatus } from '@/types/card';
@@ -108,6 +109,7 @@ function CardItem({ card, netAvailableCash }: { card: Card; netAvailableCash: nu
 
 export default function HomeScreen() {
   const cards = useCardStore((s) => s.cards);
+  const canAddCard = useSubscriptionStore((s) => s.canAddCard);
   const cashOnHand = useUserStore((s) => s.cashOnHand);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
   const payday = useUserStore((s) => s.payday);
@@ -117,6 +119,14 @@ export default function HomeScreen() {
     (card: Card) => computeNetAvailableCash(cashOnHand, monthlyIncome, payday, card, committedExpenses),
     [cashOnHand, monthlyIncome, payday, committedExpenses],
   );
+
+  function handleAddCard() {
+    if (canAddCard(cards.length)) {
+      router.push('/add-card');
+    } else {
+      router.push('/pro-paywall');
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -142,11 +152,9 @@ export default function HomeScreen() {
         />
       )}
 
-      <Link href="/add-card" asChild>
-        <Pressable style={styles.addButton}>
-          <Text style={styles.addButtonText}>+ Add Card</Text>
-        </Pressable>
-      </Link>
+      <Pressable style={styles.addButton} onPress={handleAddCard}>
+        <Text style={styles.addButtonText}>+ Add Card</Text>
+      </Pressable>
     </View>
   );
 }

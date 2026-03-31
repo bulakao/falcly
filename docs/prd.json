@@ -315,7 +315,7 @@
         "Existing 2 free cards remain fully accessible and functional; the user is never locked out of already-added data"
       ],
       "priority": 21,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
