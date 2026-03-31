@@ -330,7 +330,7 @@
         "Trial end date is shown in the Pro settings screen: 'Your trial ends on [date]'"
       ],
       "priority": 22,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

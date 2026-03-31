@@ -321,3 +321,19 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - Paywall plan buttons are placeholder handlers (`router.back()`) — RevenueCat integration comes in MO-02/MO-03
   - Home screen "Add Card" changed from `Link` to `Pressable` with `router.push()` to support conditional routing
 ---
+
+## 2026-03-31 - MO-02
+- Added `startTrial()`, `isTrialActive()`, `checkTrialExpiry()`, `getTrialEndDate()` actions to `store/subscriptionStore.ts`
+- Added "Try Free for 14 Days" CTA button to paywall screen (`app/pro-paywall.tsx`) with confirmation dialog simulating payment method requirement
+- Added "Try Free for 14 Days" CTA to swipe-impact screen (payoff planner entry point) for free-tier users, linking to paywall
+- Added Pro subscription status section to Settings screen (`app/(tabs)/two.tsx`) showing PRO badge, "Free Trial" label, and trial end date
+- Added trial expiry check on app launch in `app/_layout.tsx` — reverts to free tier when trial expires
+- Trial CTA hidden on paywall when trial is already active
+- Files changed: `store/subscriptionStore.ts`, `app/pro-paywall.tsx`, `app/swipe-impact.tsx`, `app/(tabs)/two.tsx`, `app/_layout.tsx`
+- **Learnings for future iterations:**
+  - `startTrial()` sets tier to 'pro' and `trialEndsAt` to 14 days from now; `checkTrialExpiry()` reverts to 'free' when expired — called on app launch
+  - `useSubscriptionStore.getState().checkTrialExpiry()` is called from root layout's `useEffect` for synchronous expiry check without hooks
+  - RevenueCat integration is simulated via `Alert.alert` confirmation — real RevenueCat purchase flow comes in MO-03
+  - Trial CTA uses indigo (#6366f1) color to distinguish from the emerald purchase CTAs — visual hierarchy: trial > annual > monthly
+  - `getTrialEndDate()` returns a Date object for formatting; `toLocaleDateString('en-PH', ...)` gives localized date display
+---
