@@ -1,110 +1,21 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { StyleSheet, Pressable, FlatList } from 'react-native';
+import { useCallback, useMemo } from 'react';
+import { StyleSheet } from 'react-native';
 import { Link, router } from 'expo-router';
 
-import { Text, View } from '@/components/Themed';
-import { Badge, Caption } from '@/components/atoms';
-import { AlertBanner, EmptyState, StatusTooltip } from '@/components/molecules';
+import { View } from '@/components/Themed';
+import { AlertBanner } from '@/components/molecules';
+import { CardPager } from '@/components/organisms';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useAppTheme } from '@/theme';
-import { calculateCardStatus, calculateBestCard, computeNetAvailableCash } from '@/utils/decisionEngine';
-import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
-import type { Card, CardStatus } from '@/types/card';
-import { trackDataStalenessWarningShown } from '@/utils/analytics';
-
-const STATUS_ICONS: Record<CardStatus, string> = {
-  SAFE: '✓',
-  CAUTION: '⚠',
-  RISKY: '✕',
-};
-
-const BADGE_VARIANT: Record<CardStatus, 'safe' | 'caution' | 'risky'> = {
-  SAFE: 'safe',
-  CAUTION: 'caution',
-  RISKY: 'risky',
-};
-
-function BestCardHero({ cards, getNetAvailableCash }: { cards: Card[]; getNetAvailableCash: (card: Card) => number | null }) {
-  const t = useAppTheme();
-  const best = calculateBestCard(cards, new Date(), getNetAvailableCash);
-  if (!best) return null;
-
-  const { card, status, warning } = best;
-  const statusColorMap: Record<CardStatus, string> = { SAFE: t.safe, CAUTION: t.caution, RISKY: t.risky };
-  const color = statusColorMap[status.status];
-
-  return (
-    <Link href={{ pathname: '/swipe-impact', params: { cardId: card.id } }} asChild>
-      <Pressable>
-        <View style={[styles.hero, { borderColor: color, backgroundColor: t.surfaceElevated }]}>
-          {warning && (
-            <AlertBanner message={`⚠ ${warning}`} variant="warning" />
-          )}
-          <Text style={[styles.heroLabel, { color: t.textMuted }]}>Best card to use today</Text>
-          <View style={styles.heroRow}>
-            <Text style={[styles.heroBankName, { color: t.textPrimary }]}>{card.bankName}</Text>
-            <Badge label={`${STATUS_ICONS[status.status]} ${status.status}`} variant={BADGE_VARIANT[status.status]} />
-          </View>
-          <Text style={[styles.heroReason, { color: t.textSecondary }]}>{status.reason}</Text>
-        </View>
-      </Pressable>
-    </Link>
-  );
-}
-
-function CardItem({ card, netAvailableCash, readOnly }: { card: Card; netAvailableCash: number | null; readOnly: boolean }) {
-  const t = useAppTheme();
-  const { status, reason } = calculateCardStatus(card, new Date(), netAvailableCash);
-  const staleness = getStalenessLevel(card.balanceUpdatedAt);
-
-  return (
-    <Link href={{ pathname: '/swipe-impact', params: { cardId: card.id } }} asChild>
-      <Pressable>
-        <View style={[styles.card, { borderColor: t.border, backgroundColor: t.surfaceElevated }, readOnly && styles.readOnlyCard]}>
-          {readOnly && (
-            <Link href="/pro-paywall" asChild>
-              <AlertBanner message="Reactivate Pro to manage all cards" variant="accent" centered />
-            </Link>
-          )}
-          <View style={styles.cardHeader}>
-            <Text style={[styles.bankName, { color: t.textPrimary }]}>{card.bankName}</Text>
-            <View style={styles.badgeRow}>
-              {staleness === 'stale' ? (
-                <Badge label="⚠ STALE" variant="stale" />
-              ) : (
-                <Badge label={`${STATUS_ICONS[status]} ${status}`} variant={BADGE_VARIANT[status]} />
-              )}
-              <StatusTooltip />
-            </View>
-          </View>
-          {staleness === 'stale' && !readOnly && (
-            <Text style={[styles.staleWarning, { color: t.textMuted }]}>
-              Data stale — update before trusting this status
-            </Text>
-          )}
-          {staleness === 'warning' && !readOnly && (
-            <AlertBanner message="⚠️ Balance may be outdated · Tap to update" variant="warning" />
-          )}
-          <Text style={[styles.reason, { color: t.textSecondary }]}>{staleness !== 'stale' ? reason : ''}</Text>
-          <View style={styles.cardFooter}>
-            <Text style={[styles.detail, { color: t.textMuted }]}>
-              ₱{card.outstandingBalance.toLocaleString()} / ₱{card.creditLimit.toLocaleString()}
-            </Text>
-            <Caption>Updated {formatUpdatedAgo(card.balanceUpdatedAt)}</Caption>
-          </View>
-        </View>
-      </Pressable>
-    </Link>
-  );
-}
+import { calculateBestCard, computeNetAvailableCash } from '@/utils/decisionEngine';
+import type { Card } from '@/types/card';
 
 export default function HomeScreen() {
   const t = useAppTheme();
   const cards = useCardStore((s) => s.cards);
   const canAddCard = useSubscriptionStore((s) => s.canAddCard);
-  const isCardReadOnly = useSubscriptionStore((s) => s.isCardReadOnly);
   const daysUntilDataDeletion = useSubscriptionStore((s) => s.daysUntilDataDeletion);
   const cashOnHand = useUserStore((s) => s.cashOnHand);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
@@ -118,20 +29,13 @@ export default function HomeScreen() {
     [cashOnHand, monthlyIncome, payday, committedExpenses],
   );
 
-  // Track staleness warning shown once per screen mount
-  const stalenessTrackedRef = useRef(false);
-  useEffect(() => {
-    if (stalenessTrackedRef.current) return;
-    const hasStale = cards.some((c) => getStalenessLevel(c.balanceUpdatedAt) === 'stale');
-    const hasWarning = cards.some((c) => getStalenessLevel(c.balanceUpdatedAt) === 'warning');
-    if (hasStale) {
-      trackDataStalenessWarningShown('stale');
-      stalenessTrackedRef.current = true;
-    } else if (hasWarning) {
-      trackDataStalenessWarningShown('warning');
-      stalenessTrackedRef.current = true;
-    }
-  }, [cards]);
+  // Start on the best card
+  const bestCardIndex = useMemo(() => {
+    if (cards.length === 0) return 0;
+    const best = calculateBestCard(cards, new Date(), getNetAvailableCash);
+    if (!best) return 0;
+    return cards.findIndex((c) => c.id === best.card.id);
+  }, [cards, getNetAvailableCash]);
 
   function handleAddCard() {
     if (canAddCard(cards.length)) {
@@ -143,49 +47,25 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: t.background }]}>
-      {cards.length === 0 ? (
-        <EmptyState
-          title="No cards yet"
-          subtitle="Add your first credit card to see if it's safe to swipe."
-        >
-          <Link href="/onboarding" asChild>
-            <Pressable style={[styles.onboardingButton, { backgroundColor: t.primary }]}>
-              <Text style={[styles.onboardingButtonText, { color: t.textInverse }]}>Get Started</Text>
-            </Pressable>
-          </Link>
-        </EmptyState>
-      ) : (
-        <FlatList
-          data={cards}
-          keyExtractor={(c) => c.id}
-          renderItem={({ item, index }) => (
-            <CardItem card={item} netAvailableCash={getNetAvailableCash(item)} readOnly={isCardReadOnly(index)} />
-          )}
-          ListHeaderComponent={
-            <>
-              <BestCardHero cards={cards} getNetAvailableCash={getNetAvailableCash} />
-              {daysRemaining !== null && (
-                <Link href="/pro-paywall" asChild>
-                  <AlertBanner
-                    message={
-                      daysRemaining > 0
-                        ? `Your Pro card data will be deleted in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}. Reactivate Pro to keep it.`
-                        : 'Your Pro card data is scheduled for deletion. Reactivate Pro to keep it.'
-                    }
-                    variant="info"
-                    centered
-                  />
-                </Link>
-              )}
-            </>
-          }
-          contentContainerStyle={styles.list}
-        />
+      {daysRemaining !== null && (
+        <Link href="/pro-paywall" asChild>
+          <AlertBanner
+            message={
+              daysRemaining > 0
+                ? `Your Pro card data will be deleted in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}. Reactivate Pro to keep it.`
+                : 'Your Pro card data is scheduled for deletion. Reactivate Pro to keep it.'
+            }
+            variant="info"
+            centered
+          />
+        </Link>
       )}
-
-      <Pressable style={[styles.addButton, { backgroundColor: t.primary }]} onPress={handleAddCard}>
-        <Text style={[styles.addButtonText, { color: t.textInverse }]}>+ Add Card</Text>
-      </Pressable>
+      <CardPager
+        cards={cards}
+        onAddCard={handleAddCard}
+        getNetAvailableCash={getNetAvailableCash}
+        initialIndex={bestCardIndex}
+      />
     </View>
   );
 }
@@ -193,102 +73,5 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  list: {
-    paddingTop: 16,
-    paddingBottom: 80,
-  },
-  card: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  bankName: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  reason: {
-    fontSize: 13,
-    marginBottom: 4,
-  },
-  detail: {
-    fontSize: 14,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  staleWarning: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 4,
-    fontStyle: 'italic',
-  },
-  onboardingButton: {
-    marginTop: 20,
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 999,
-  },
-  onboardingButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  addButton: {
-    position: 'absolute',
-    bottom: 24,
-    left: 16,
-    right: 16,
-    paddingVertical: 14,
-    borderRadius: 999,
-    alignItems: 'center',
-  },
-  addButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  hero: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 2,
-  },
-  heroLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 8,
-  },
-  heroRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  heroBankName: {
-    fontSize: 22,
-    fontWeight: '800',
-  },
-  heroReason: {
-    fontSize: 14,
-  },
-  readOnlyCard: {
-    opacity: 0.75,
-    borderStyle: 'dashed',
   },
 });
