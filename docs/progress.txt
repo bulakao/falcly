@@ -161,3 +161,15 @@ Started: Tue 31 Mar 2026 14:15:37 PST
   - Committed expenses is a single number, not itemized — future stories may break it down but for now it's one field
   - CA-04 (net available cash display) needs the full formula including committed expenses — already wired in
 ---
+
+## 2026-03-31 - CA-04
+- Enhanced Swipe Impact screen with full net available cash formula breakdown
+- When cash is set: shows Cash on hand, Monthly income (+/excluded with strikethrough when payday > due date), Committed expenses (−), divider, then bold "Available to pay" total in emerald
+- When cash not set: shows simple "Not set" placeholder with hint to configure in Settings
+- Added `getCycleDates` import for payday vs due date comparison
+- Files changed: `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - `incomeApplies` must be computed per-card since each card has a different due date — use `getCycleDates(card).dueDate.getDate()` to compare with payday
+  - auto_payments and subscriptions_this_cycle are part of the formula spec but have no Phase 1 stories — they're effectively 0 until those features are added
+  - Strikethrough text (`textDecorationLine: 'line-through'`) is a good visual pattern for showing excluded-but-visible formula components
+---

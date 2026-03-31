@@ -165,7 +165,7 @@
         "Figure updates in real time when cash on hand, income, or committed expenses change"
       ],
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
