@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   StyleSheet,
-  TextInput,
   Pressable,
   KeyboardAvoidingView,
   Platform,
@@ -19,6 +18,7 @@ import { useAppTheme } from '@/theme';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { exportDataAsCSV } from '@/utils/csvExport';
+import { Button, Badge, FormInput, Heading, SectionHeader, Label } from '@/components/atoms';
 
 export default function SettingsScreen() {
   const t = useAppTheme();
@@ -127,15 +127,13 @@ export default function SettingsScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={[styles.heading, { color: t.textPrimary }]}>Settings</Text>
+        <Heading>Settings</Heading>
 
         {/* Pro Subscription Status */}
         {tier === 'pro' && (
           <View style={[styles.proSection, { borderColor: t.accent, backgroundColor: t.accentBg }]}>
             <View style={[styles.proBadgeRow, { backgroundColor: 'transparent' }]}>
-              <View style={[styles.proBadge, { backgroundColor: t.accent }]}>
-                <Text style={[styles.proBadgeText, { color: t.textInverse }]}>PRO</Text>
-              </View>
+              <Badge label="PRO" variant="pro" />
               <Text style={[styles.proStatusText, { color: t.accentText }]}>
                 {isPaidPro()
                   ? planType === 'annual' ? 'Annual Plan' : 'Monthly Plan'
@@ -161,31 +159,29 @@ export default function SettingsScreen() {
         )}
 
         {/* Cash on Hand */}
-        <View style={[styles.section, { borderColor: t.border }]}>
-          <Text style={[styles.sectionTitle, { color: t.textPrimary }]}>Cash on Hand</Text>
-          <Text style={[styles.sectionSubtitle, { color: t.textMuted }]}>
-            Your liquid cash available to pay credit card bills.
-          </Text>
+        <View style={[styles.section, { borderColor: t.border, backgroundColor: t.surfaceElevated }]}>
+          <SectionHeader
+            title="Cash on Hand"
+            subtitle="Your liquid cash available to pay credit card bills."
+          />
 
           {editing ? (
             <View>
-              <TextInput
-                style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
+              <FormInput
                 value={cashText}
                 onChangeText={setCashText}
                 placeholder="e.g. 25000"
-                placeholderTextColor={t.placeholder}
                 keyboardType="numeric"
                 autoFocus
                 selectTextOnFocus
               />
               <View style={styles.buttonRow}>
-                <Pressable style={[styles.cancelButton, { borderColor: t.border }]} onPress={handleCancel}>
-                  <Text style={[styles.cancelButtonText, { color: t.textSecondary }]}>Cancel</Text>
-                </Pressable>
-                <Pressable style={[styles.saveButton, { backgroundColor: t.primary }]} onPress={handleSaveCash}>
-                  <Text style={[styles.saveButtonText, { color: t.textInverse }]}>Save</Text>
-                </Pressable>
+                <View style={styles.buttonFlex}>
+                  <Button label="Cancel" onPress={handleCancel} variant="secondary" />
+                </View>
+                <View style={styles.buttonFlex}>
+                  <Button label="Save" onPress={handleSaveCash} />
+                </View>
               </View>
             </View>
           ) : (
@@ -237,42 +233,40 @@ export default function SettingsScreen() {
         </View>
 
         {/* Monthly Income & Payday */}
-        <View style={[styles.section, { borderColor: t.border }]}>
-          <Text style={[styles.sectionTitle, { color: t.textPrimary }]}>Monthly Income & Payday</Text>
-          <Text style={[styles.sectionSubtitle, { color: t.textMuted }]}>
-            Your monthly income and the day it arrives. Income is factored into payoff projections only when payday falls before your card due date.
-          </Text>
+        <View style={[styles.section, { borderColor: t.border, backgroundColor: t.surfaceElevated }]}>
+          <SectionHeader
+            title="Monthly Income & Payday"
+            subtitle="Your monthly income and the day it arrives. Income is factored into payoff projections only when payday falls before your card due date."
+          />
 
           {editingIncome ? (
             <View>
-              <Text style={[styles.fieldLabel, { color: t.textSecondary }]}>Monthly Income</Text>
-              <TextInput
-                style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
+              <Label>Monthly Income</Label>
+              <FormInput
                 value={incomeText}
                 onChangeText={setIncomeText}
                 placeholder="e.g. 40000"
-                placeholderTextColor={t.placeholder}
                 keyboardType="numeric"
                 autoFocus
                 selectTextOnFocus
               />
-              <Text style={[styles.fieldLabel, { color: t.textSecondary, marginTop: 12 }]}>Payday (day of month)</Text>
-              <TextInput
-                style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
+              <View style={{ marginTop: 12 }}>
+                <Label>Payday (day of month)</Label>
+              </View>
+              <FormInput
                 value={paydayText}
                 onChangeText={setPaydayText}
                 placeholder="e.g. 15"
-                placeholderTextColor={t.placeholder}
                 keyboardType="numeric"
                 selectTextOnFocus
               />
               <View style={styles.buttonRow}>
-                <Pressable style={[styles.cancelButton, { borderColor: t.border }]} onPress={handleCancelIncome}>
-                  <Text style={[styles.cancelButtonText, { color: t.textSecondary }]}>Cancel</Text>
-                </Pressable>
-                <Pressable style={[styles.saveButton, { backgroundColor: t.primary }]} onPress={handleSaveIncome}>
-                  <Text style={[styles.saveButtonText, { color: t.textInverse }]}>Save</Text>
-                </Pressable>
+                <View style={styles.buttonFlex}>
+                  <Button label="Cancel" onPress={handleCancelIncome} variant="secondary" />
+                </View>
+                <View style={styles.buttonFlex}>
+                  <Button label="Save" onPress={handleSaveIncome} />
+                </View>
               </View>
             </View>
           ) : (
@@ -301,31 +295,29 @@ export default function SettingsScreen() {
         </View>
 
         {/* Committed Monthly Expenses */}
-        <View style={[styles.section, { borderColor: t.border }]}>
-          <Text style={[styles.sectionTitle, { color: t.textPrimary }]}>Committed Monthly Expenses</Text>
-          <Text style={[styles.sectionSubtitle, { color: t.textMuted }]}>
-            Your total fixed monthly expenses (rent, utilities, etc.). Deducted from available cash in payoff projections.
-          </Text>
+        <View style={[styles.section, { borderColor: t.border, backgroundColor: t.surfaceElevated }]}>
+          <SectionHeader
+            title="Committed Monthly Expenses"
+            subtitle="Your total fixed monthly expenses (rent, utilities, etc.). Deducted from available cash in payoff projections."
+          />
 
           {editingExpenses ? (
             <View>
-              <TextInput
-                style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
+              <FormInput
                 value={expensesText}
                 onChangeText={setExpensesText}
                 placeholder="e.g. 15000"
-                placeholderTextColor={t.placeholder}
                 keyboardType="numeric"
                 autoFocus
                 selectTextOnFocus
               />
               <View style={styles.buttonRow}>
-                <Pressable style={[styles.cancelButton, { borderColor: t.border }]} onPress={handleCancelExpenses}>
-                  <Text style={[styles.cancelButtonText, { color: t.textSecondary }]}>Cancel</Text>
-                </Pressable>
-                <Pressable style={[styles.saveButton, { backgroundColor: t.primary }]} onPress={handleSaveExpenses}>
-                  <Text style={[styles.saveButtonText, { color: t.textInverse }]}>Save</Text>
-                </Pressable>
+                <View style={styles.buttonFlex}>
+                  <Button label="Cancel" onPress={handleCancelExpenses} variant="secondary" />
+                </View>
+                <View style={styles.buttonFlex}>
+                  <Button label="Save" onPress={handleSaveExpenses} />
+                </View>
               </View>
             </View>
           ) : (
@@ -345,44 +337,40 @@ export default function SettingsScreen() {
         </View>
 
         {/* Export Data */}
-        <View style={[styles.section, { borderColor: t.border }]}>
-          <Text style={[styles.sectionTitle, { color: t.textPrimary }]}>Export Data</Text>
-          <Text style={[styles.sectionSubtitle, { color: t.textMuted }]}>
-            Export all your cards, installments, subscriptions, and profile data as a CSV file.
-          </Text>
-          <Pressable
-            style={[styles.exportButton, { backgroundColor: t.primary }, exporting && { opacity: 0.5 }]}
-            onPress={async () => {
+        <View style={[styles.section, { borderColor: t.border, backgroundColor: t.surfaceElevated }]}>
+          <SectionHeader
+            title="Export Data"
+            subtitle="Export all your cards, installments, subscriptions, and profile data as a CSV file."
+          />
+          <Button
+            label={exporting ? 'Exporting...' : 'Export as CSV'}
+            onPress={() => {
               setExporting(true);
-              try {
-                await exportDataAsCSV(cards, {
-                  cashOnHand,
-                  monthlyIncome,
-                  payday,
-                  committedExpenses,
+              exportDataAsCSV(cards, {
+                cashOnHand,
+                monthlyIncome,
+                payday,
+                committedExpenses,
+              })
+                .catch((e: unknown) => {
+                  const message = e instanceof Error ? e.message : 'Export failed';
+                  Alert.alert('Export Error', message);
+                })
+                .finally(() => {
+                  setExporting(false);
                 });
-              } catch (e: unknown) {
-                const message = e instanceof Error ? e.message : 'Export failed';
-                Alert.alert('Export Error', message);
-              } finally {
-                setExporting(false);
-              }
             }}
             disabled={exporting}
-          >
-            <Text style={[styles.exportButtonText, { color: t.textInverse }]}>
-              {exporting ? 'Exporting...' : 'Export as CSV'}
-            </Text>
-          </Pressable>
+          />
         </View>
 
         {/* Cloud Sync Status */}
         {tier === 'pro' && (
-          <View style={[styles.section, { borderColor: t.border }]}>
-            <Text style={[styles.sectionTitle, { color: t.textPrimary }]}>Cloud Sync</Text>
-            <Text style={[styles.sectionSubtitle, { color: t.textMuted }]}>
-              Pro feature — sync your card data across devices.
-            </Text>
+          <View style={[styles.section, { borderColor: t.border, backgroundColor: t.surfaceElevated }]}>
+            <SectionHeader
+              title="Cloud Sync"
+              subtitle="Pro feature — sync your card data across devices."
+            />
             {isOffline ? (
               <View style={[styles.cloudOffline, { backgroundColor: t.surface, borderColor: t.border }]}>
                 <Text style={[styles.cloudOfflineText, { color: t.textMuted }]}>
@@ -395,25 +383,24 @@ export default function SettingsScreen() {
           </View>
         )}
         {/* Component Showcase */}
-        <View style={[styles.section, { borderColor: t.border }]}>
-          <Text style={[styles.sectionTitle, { color: t.textPrimary }]}>Component Showcase</Text>
-          <Text style={[styles.sectionSubtitle, { color: t.textMuted }]}>
-            Preview all UI components with the falcon premium palette.
-          </Text>
-          <Pressable
-            style={[styles.showcaseButton, { backgroundColor: t.textPrimary }]}
+        <View style={[styles.section, { borderColor: t.border, backgroundColor: t.surfaceElevated }]}>
+          <SectionHeader
+            title="Component Showcase"
+            subtitle="Preview all UI components with the falcon premium palette."
+          />
+          <Button
+            label="Open Showcase"
             onPress={() => router.push('/component-showcase')}
-          >
-            <Text style={[styles.showcaseButtonText, { color: t.accent }]}>Open Showcase</Text>
-          </Pressable>
+            variant="secondary"
+          />
         </View>
 
         {/* Analytics Opt-Out */}
-        <View style={[styles.section, { borderColor: t.border }]}>
-          <Text style={[styles.sectionTitle, { color: t.textPrimary }]}>Analytics</Text>
-          <Text style={[styles.sectionSubtitle, { color: t.textMuted }]}>
-            Anonymous behavioral analytics help us improve Falcly. No personal or financial data is ever tracked.
-          </Text>
+        <View style={[styles.section, { borderColor: t.border, backgroundColor: t.surfaceElevated }]}>
+          <SectionHeader
+            title="Analytics"
+            subtitle="Anonymous behavioral analytics help us improve Falcly. No personal or financial data is ever tracked."
+          />
           <View style={styles.valueRow}>
             <Text style={[styles.optOutLabel, { color: t.textPrimary }]}>Opt out of analytics</Text>
             <Switch
@@ -434,11 +421,6 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 48,
   },
-  heading: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 24,
-  },
   proSection: {
     borderRadius: 12,
     borderWidth: 1,
@@ -449,15 +431,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-  },
-  proBadge: {
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  proBadgeText: {
-    fontSize: 13,
-    fontWeight: '700',
   },
   proStatusText: {
     fontSize: 15,
@@ -471,15 +444,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     padding: 16,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  sectionSubtitle: {
-    fontSize: 13,
     marginBottom: 16,
   },
   valueRow: {
@@ -504,39 +468,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 8,
   },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 14,
-    fontSize: 20,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
   buttonRow: {
     flexDirection: 'row',
     gap: 12,
     marginTop: 12,
   },
-  cancelButton: {
+  buttonFlex: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  saveButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
   },
   stalenessWarning: {
     borderRadius: 6,
@@ -559,11 +497,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  fieldLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    marginBottom: 6,
-  },
   paydayLabel: {
     fontSize: 13,
     marginTop: 4,
@@ -584,23 +517,5 @@ const styles = StyleSheet.create({
   optOutLabel: {
     fontSize: 15,
     fontWeight: '600',
-  },
-  exportButton: {
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  exportButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  showcaseButton: {
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  showcaseButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
   },
 });

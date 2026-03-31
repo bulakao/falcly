@@ -6,6 +6,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import type { PlanType } from '@/store/subscriptionStore';
 import { trackProConversionStarted, trackProTrialStarted, trackProConverted } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
+import { Button, Caption } from '@/components/atoms';
 
 const PRO_FEATURES = [
   { icon: '💳', label: 'Unlimited cards' },
@@ -84,9 +85,7 @@ export default function ProPaywallScreen() {
             You have full access to all Pro features.
           </Text>
         </View>
-        <Pressable style={styles.dismissButton} onPress={() => router.back()}>
-          <Text style={[styles.dismissText, { color: t.textMuted }]}>Go back</Text>
-        </Pressable>
+        <Button label="Go back" onPress={() => router.back()} variant="ghost" />
       </ScrollView>
     );
   }
@@ -139,12 +138,10 @@ export default function ProPaywallScreen() {
           <Text style={[styles.monthlyPrice, { color: t.textMuted }]}>₱149/mo</Text>
         </Pressable>
 
-        <Text style={[styles.cancelNote, { color: t.textMuted }]}>Cancel anytime</Text>
+        <Caption>Cancel anytime</Caption>
       </View>
 
-      <Pressable style={styles.dismissButton} onPress={() => router.back()}>
-        <Text style={[styles.dismissText, { color: t.textMuted }]}>Not now</Text>
-      </Pressable>
+      <Button label="Not now" onPress={() => router.back()} variant="ghost" />
     </ScrollView>
   );
 }
@@ -267,16 +264,5 @@ const styles = StyleSheet.create({
   monthlyPrice: {
     fontSize: 15,
     fontWeight: '600',
-  },
-  cancelNote: {
-    fontSize: 13,
-    marginTop: 4,
-  },
-  dismissButton: {
-    marginTop: 24,
-    paddingVertical: 12,
-  },
-  dismissText: {
-    fontSize: 15,
   },
 });

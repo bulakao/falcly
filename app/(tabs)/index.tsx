@@ -3,6 +3,7 @@ import { StyleSheet, Pressable, FlatList } from 'react-native';
 import { Link, router } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
+import { Badge, Caption } from '@/components/atoms';
 import StatusTooltip from '@/components/StatusTooltip';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
@@ -11,7 +12,6 @@ import { useAppTheme } from '@/theme';
 import { calculateCardStatus, calculateBestCard, computeNetAvailableCash } from '@/utils/decisionEngine';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import type { Card, CardStatus } from '@/types/card';
-import type { SemanticTokens } from '@/theme';
 import { trackDataStalenessWarningShown } from '@/utils/analytics';
 
 const STATUS_ICONS: Record<CardStatus, string> = {
@@ -20,14 +20,11 @@ const STATUS_ICONS: Record<CardStatus, string> = {
   RISKY: '✕',
 };
 
-function getStatusColor(status: CardStatus, t: SemanticTokens): string {
-  const map: Record<CardStatus, string> = {
-    SAFE: t.safe,
-    CAUTION: t.caution,
-    RISKY: t.risky,
-  };
-  return map[status];
-}
+const BADGE_VARIANT: Record<CardStatus, 'safe' | 'caution' | 'risky'> = {
+  SAFE: 'safe',
+  CAUTION: 'caution',
+  RISKY: 'risky',
+};
 
 function BestCardHero({ cards, getNetAvailableCash }: { cards: Card[]; getNetAvailableCash: (card: Card) => number | null }) {
   const t = useAppTheme();
@@ -35,12 +32,13 @@ function BestCardHero({ cards, getNetAvailableCash }: { cards: Card[]; getNetAva
   if (!best) return null;
 
   const { card, status, warning } = best;
-  const color = getStatusColor(status.status, t);
+  const statusColorMap: Record<CardStatus, string> = { SAFE: t.safe, CAUTION: t.caution, RISKY: t.risky };
+  const color = statusColorMap[status.status];
 
   return (
     <Link href={{ pathname: '/swipe-impact', params: { cardId: card.id } }} asChild>
       <Pressable>
-        <View style={[styles.hero, { borderColor: color }]}>
+        <View style={[styles.hero, { borderColor: color, backgroundColor: t.surfaceElevated }]}>
           {warning && (
             <View style={[styles.warningBanner, { backgroundColor: t.cautionBg }]}>
               <Text style={[styles.warningText, { color: t.cautionText }]}>⚠ {warning}</Text>
@@ -49,11 +47,7 @@ function BestCardHero({ cards, getNetAvailableCash }: { cards: Card[]; getNetAva
           <Text style={[styles.heroLabel, { color: t.textMuted }]}>Best card to use today</Text>
           <View style={styles.heroRow}>
             <Text style={[styles.heroBankName, { color: t.textPrimary }]}>{card.bankName}</Text>
-            <View style={[styles.badge, { backgroundColor: color }]}>
-              <Text style={[styles.badgeText, { color: t.textInverse }]}>
-                {STATUS_ICONS[status.status]} {status.status}
-              </Text>
-            </View>
+            <Badge label={`${STATUS_ICONS[status.status]} ${status.status}`} variant={BADGE_VARIANT[status.status]} />
           </View>
           <Text style={[styles.heroReason, { color: t.textSecondary }]}>{status.reason}</Text>
         </View>
@@ -70,7 +64,7 @@ function CardItem({ card, netAvailableCash, readOnly }: { card: Card; netAvailab
   return (
     <Link href={{ pathname: '/swipe-impact', params: { cardId: card.id } }} asChild>
       <Pressable>
-        <View style={[styles.card, { borderColor: t.border }, readOnly && styles.readOnlyCard]}>
+        <View style={[styles.card, { borderColor: t.border, backgroundColor: t.surfaceElevated }, readOnly && styles.readOnlyCard]}>
           {readOnly && (
             <Link href="/pro-paywall" asChild>
               <Pressable style={[styles.readOnlyBanner, { backgroundColor: t.accentBg }]}>
@@ -84,15 +78,9 @@ function CardItem({ card, netAvailableCash, readOnly }: { card: Card; netAvailab
             <Text style={[styles.bankName, { color: t.textPrimary }]}>{card.bankName}</Text>
             <View style={styles.badgeRow}>
               {staleness === 'stale' ? (
-                <View style={[styles.badge, { backgroundColor: t.textMuted }]}>
-                  <Text style={[styles.badgeText, { color: t.textInverse }]}>⚠ STALE</Text>
-                </View>
+                <Badge label="⚠ STALE" variant="stale" />
               ) : (
-                <View style={[styles.badge, { backgroundColor: getStatusColor(status, t) }]}>
-                  <Text style={[styles.badgeText, { color: t.textInverse }]}>
-                    {STATUS_ICONS[status]} {status}
-                  </Text>
-                </View>
+                <Badge label={`${STATUS_ICONS[status]} ${status}`} variant={BADGE_VARIANT[status]} />
               )}
               <StatusTooltip />
             </View>
@@ -114,9 +102,7 @@ function CardItem({ card, netAvailableCash, readOnly }: { card: Card; netAvailab
             <Text style={[styles.detail, { color: t.textMuted }]}>
               ₱{card.outstandingBalance.toLocaleString()} / ₱{card.creditLimit.toLocaleString()}
             </Text>
-            <Text style={[styles.updatedAgo, { color: t.textMuted }]}>
-              Updated {formatUpdatedAgo(card.balanceUpdatedAt)}
-            </Text>
+            <Caption>Updated {formatUpdatedAgo(card.balanceUpdatedAt)}</Caption>
           </View>
         </View>
       </Pressable>
@@ -166,7 +152,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: t.background }]}>
       {cards.length === 0 ? (
         <View style={styles.empty}>
           <Text style={[styles.emptyTitle, { color: t.textPrimary }]}>No cards yet</Text>
@@ -243,15 +229,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  badgeText: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
   reason: {
     fontSize: 13,
     marginBottom: 4,
@@ -263,9 +240,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  updatedAgo: {
-    fontSize: 12,
   },
   stalenessWarningRow: {
     borderRadius: 6,
@@ -302,7 +276,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingVertical: 14,
     paddingHorizontal: 32,
-    borderRadius: 10,
+    borderRadius: 999,
   },
   onboardingButtonText: {
     fontSize: 16,
@@ -314,7 +288,7 @@ const styles = StyleSheet.create({
     left: 16,
     right: 16,
     paddingVertical: 14,
-    borderRadius: 10,
+    borderRadius: 999,
     alignItems: 'center',
   },
   addButtonText: {

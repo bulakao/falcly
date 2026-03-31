@@ -20,7 +20,7 @@ export const palette = {
   muted: '#3A3A52',
 
   // Warm neutrals
-  warmWhite: '#FDFBF8',
+  warmWhite: '#F7F7F7',
   surfaceLight: '#F5F3F0',
   borderLight: '#D6D0C8',
   borderDark: '#2E2E44',

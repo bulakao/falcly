@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import {
   StyleSheet,
-  TextInput,
   Pressable,
   KeyboardAvoidingView,
   Platform,
@@ -11,6 +10,7 @@ import {
 import { useLocalSearchParams, Link, useRouter } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
+import { Badge, FormInput, Label } from '@/components/atoms';
 import { BillingTimeline } from '@/components/BillingTimeline';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
@@ -26,6 +26,8 @@ const STATUS_ICONS: Record<CardStatus, string> = {
   CAUTION: '⚠',
   RISKY: '✕',
 };
+
+const BADGE_VARIANT = { SAFE: 'safe', CAUTION: 'caution', RISKY: 'risky' } as const;
 
 const QUICK_AMOUNTS = [
   { label: '₱500', value: 500 },
@@ -54,12 +56,6 @@ export default function SwipeImpactScreen() {
   const isCardReadOnly = useSubscriptionStore((s) => s.isCardReadOnly);
   const readOnly = isCardReadOnly(cardIndex);
   const [amountText, setAmountText] = useState('');
-
-  const STATUS_COLORS: Record<CardStatus, string> = {
-    SAFE: t.safe,
-    CAUTION: t.caution,
-    RISKY: t.risky,
-  };
 
   const proposedAmount = useMemo(() => {
     const n = parseFloat(amountText);
@@ -177,15 +173,9 @@ export default function SwipeImpactScreen() {
         <View style={styles.cardHeader}>
           <Text style={styles.bankName}>{card.bankName}</Text>
           {staleness === 'stale' ? (
-            <View style={[styles.badge, { backgroundColor: t.textMuted }]}>
-              <Text style={[styles.badgeText, { color: t.textInverse }]}>⚠ STALE</Text>
-            </View>
+            <Badge label="⚠ STALE" variant="stale" />
           ) : (
-            <View style={[styles.badge, { backgroundColor: STATUS_COLORS[impact.status] }]}>
-              <Text style={[styles.badgeText, { color: t.textInverse }]}>
-                {STATUS_ICONS[impact.status]} {impact.status}
-              </Text>
-            </View>
+            <Badge label={`${STATUS_ICONS[impact.status]} ${impact.status}`} variant={BADGE_VARIANT[impact.status]} />
           )}
         </View>
         <Text style={[styles.reason, { color: t.textSecondary }]}>{staleness !== 'stale' ? impact.reason : ''}</Text>
@@ -223,13 +213,11 @@ export default function SwipeImpactScreen() {
         <BillingTimeline card={card} />
 
         {/* Amount input */}
-        <Text style={[styles.label, { color: t.textSecondary }]}>How much will you swipe?</Text>
-        <TextInput
-          style={[styles.amountInput, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
+        <Label>How much will you swipe?</Label>
+        <FormInput
           value={amountText}
           onChangeText={setAmountText}
           placeholder="0"
-          placeholderTextColor={t.placeholder}
           keyboardType="numeric"
           autoFocus
         />
@@ -426,15 +414,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
   },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  badgeText: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
   reason: {
     fontSize: 13,
     marginBottom: 12,
@@ -473,19 +452,6 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     fontSize: 12,
     fontWeight: '600',
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  amountInput: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 14,
-    fontSize: 24,
-    fontWeight: '700',
-    textAlign: 'center',
   },
   chipRow: {
     flexDirection: 'row',

@@ -53,9 +53,9 @@ export const lightTheme: SemanticTokens = {
 
 export const darkTheme: SemanticTokens = {
   // Surfaces
-  background: palette.slateCharcoal,
+  background: '#000000',
   surface: palette.deepNavy,
-  surfaceElevated: palette.muted,
+  surfaceElevated: '#080808',
 
   // Text
   textPrimary: palette.paleSilver,

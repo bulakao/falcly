@@ -3,13 +3,13 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  TextInput,
   Switch,
   Appearance,
   useColorScheme,
 } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useAppTheme, palette } from '@/theme';
+import { Button, Badge, FormInput, Heading, SectionHeader, Label, Caption } from '@/components/atoms';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   const t = useAppTheme();
@@ -20,6 +20,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </View>
   );
 }
+
+const noop = () => {};
 
 export default function ComponentShowcase() {
   const t = useAppTheme();
@@ -75,61 +77,45 @@ export default function ComponentShowcase() {
 
       {/* Typography */}
       <Section title="Typography">
-        <Text style={[styles.typeHeading, { color: t.textPrimary }]}>Heading — Bold 24</Text>
-        <Text style={[styles.typeSubheading, { color: t.textPrimary }]}>Subheading — Semibold 18</Text>
+        <Heading>Heading — Bold 24</Heading>
+        <SectionHeader title="Section Header" subtitle="With an optional subtitle below it" />
+        <Label>Label — Semibold 13</Label>
+        <Caption>Caption — Regular 12. Updated 3 hours ago</Caption>
         <Text style={[styles.typeBody, { color: t.textPrimary }]}>
           Body text — Regular 15. Is it safe to swipe right now? Only math can decide.
         </Text>
-        <Text style={[styles.typeCaption, { color: t.textSecondary }]}>Caption — Regular 12. Updated 3 hours ago</Text>
-        <Text style={[styles.typeLabel, { color: t.accent }]}>Accent Label — Bold 13</Text>
       </Section>
 
       {/* Buttons */}
       <Section title="Buttons">
-        <Pressable style={[styles.btnPrimary, { backgroundColor: t.primary }]}>
-          <Text style={[styles.btnPrimaryText, { color: t.primaryText }]}>Primary Action</Text>
-        </Pressable>
-
-        <Pressable style={[styles.btnSecondary, { borderColor: t.primary }]}>
-          <Text style={[styles.btnSecondaryText, { color: t.primary }]}>Secondary Action</Text>
-        </Pressable>
-
-        <Pressable style={[styles.btnDestructive, { backgroundColor: t.risky }]}>
-          <Text style={[styles.btnDestructiveText, { color: t.textInverse }]}>Delete Card</Text>
-        </Pressable>
-
-        <Pressable style={styles.btnGhost}>
-          <Text style={[styles.btnGhostText, { color: t.primary }]}>Ghost / Link</Text>
-        </Pressable>
-
-        <Pressable style={[styles.btnPrimary, { backgroundColor: t.primaryMuted, opacity: 0.6 }]} disabled>
-          <Text style={[styles.btnPrimaryText, { color: t.textMuted }]}>Disabled</Text>
-        </Pressable>
+        <View style={styles.buttonGap}>
+          <Button label="Primary Action" onPress={noop} />
+        </View>
+        <View style={styles.buttonGap}>
+          <Button label="Secondary Action" onPress={noop} variant="secondary" />
+        </View>
+        <View style={styles.buttonGap}>
+          <Button label="Delete Card" onPress={noop} variant="destructive" />
+        </View>
+        <View style={styles.buttonGap}>
+          <Button label="Ghost / Link" onPress={noop} variant="ghost" />
+        </View>
+        <View style={styles.buttonGap}>
+          <Button label="Disabled" onPress={noop} disabled />
+        </View>
       </Section>
 
       {/* Status Badges */}
       <Section title="Status Badges">
         <View style={styles.badgeRow}>
-          <View style={[styles.badge, { backgroundColor: t.safe }]}>
-            <Text style={[styles.badgeText, { color: t.textInverse }]}>✓ SAFE</Text>
-          </View>
-          <View style={[styles.badge, { backgroundColor: t.caution }]}>
-            <Text style={[styles.badgeText, { color: t.primaryText }]}>⚠ CAUTION</Text>
-          </View>
-          <View style={[styles.badge, { backgroundColor: t.risky }]}>
-            <Text style={[styles.badgeText, { color: t.textInverse }]}>✕ RISKY</Text>
-          </View>
+          <Badge label="✓ SAFE" variant="safe" />
+          <Badge label="⚠ CAUTION" variant="caution" />
+          <Badge label="✕ RISKY" variant="risky" />
         </View>
         <View style={[styles.badgeRow, { marginTop: 12 }]}>
-          <View style={[styles.badge, { backgroundColor: t.accent }]}>
-            <Text style={[styles.badgeText, { color: t.primaryText }]}>PRO</Text>
-          </View>
-          <View style={[styles.badgeOutline, { borderColor: t.borderStrong }]}>
-            <Text style={[styles.badgeOutlineText, { color: t.borderStrong }]}>FREE TRIAL</Text>
-          </View>
-          <View style={[styles.badgeOutline, { borderColor: t.textMuted }]}>
-            <Text style={[styles.staleBadgeText, { color: t.textMuted }]}>STALE</Text>
-          </View>
+          <Badge label="PRO" variant="pro" />
+          <Badge label="FREE TRIAL" variant="outline" />
+          <Badge label="⚠ STALE" variant="stale" />
         </View>
       </Section>
 
@@ -138,58 +124,46 @@ export default function ComponentShowcase() {
         <View style={[styles.card, { backgroundColor: t.surfaceElevated, borderColor: t.border }]}>
           <View style={[styles.cardHeader, { backgroundColor: 'transparent' }]}>
             <Text style={[styles.cardTitle, { color: t.textPrimary }]}>BPI Visa Gold</Text>
-            <View style={[styles.badge, { backgroundColor: t.safe }]}>
-              <Text style={[styles.badgeText, { color: t.textInverse }]}>✓ SAFE</Text>
-            </View>
+            <Badge label="✓ SAFE" variant="safe" />
           </View>
           <Text style={[styles.cardBody, { color: t.textSecondary }]}>₱12,450 / ₱80,000 limit</Text>
           <View style={[styles.cardFooter, { backgroundColor: 'transparent', borderTopColor: t.border }]}>
-            <Text style={[styles.cardFooterText, { color: t.textSecondary }]}>Statement closes in 12 days</Text>
+            <Caption>Statement closes in 12 days</Caption>
           </View>
         </View>
 
         <View style={[styles.card, { backgroundColor: t.riskyBg, borderColor: t.risky, borderWidth: 1.5 }]}>
           <View style={[styles.cardHeader, { backgroundColor: 'transparent' }]}>
             <Text style={[styles.cardTitle, { color: t.risky }]}>Metrobank Platinum</Text>
-            <View style={[styles.badge, { backgroundColor: t.risky }]}>
-              <Text style={[styles.badgeText, { color: t.textInverse }]}>✕ RISKY</Text>
-            </View>
+            <Badge label="✕ RISKY" variant="risky" />
           </View>
           <Text style={[styles.cardBody, { color: t.textSecondary }]}>₱147,200 / ₱150,000 limit</Text>
           <View style={[styles.cardFooter, { backgroundColor: 'transparent', borderTopColor: t.riskyBorder }]}>
-            <Text style={[styles.cardFooterText, { color: t.risky }]}>Due in 3 days — minimum ₱7,360</Text>
+            <Caption color={t.risky}>Due in 3 days — minimum ₱7,360</Caption>
           </View>
         </View>
       </Section>
 
       {/* Form Inputs */}
       <Section title="Form Inputs">
-        <Text style={[styles.fieldLabel, { color: t.textSecondary }]}>Amount</Text>
-        <TextInput
-          style={[styles.input, { backgroundColor: t.inputBg, borderColor: t.inputBorder, color: t.inputText }]}
-          placeholder="e.g. 25,000"
-          placeholderTextColor={t.placeholder}
+        <Label>Amount</Label>
+        <FormInput
           value={inputText}
           onChangeText={setInputText}
+          placeholder="e.g. 25,000"
           keyboardType="numeric"
         />
 
-        <Text style={[styles.fieldLabel, { color: t.textSecondary, marginTop: 16 }]}>Focused Input</Text>
-        <TextInput
-          style={[styles.input, { backgroundColor: t.inputBg, borderColor: t.primary, borderWidth: 2, color: t.inputText }]}
-          placeholder="Active state"
-          placeholderTextColor={t.placeholder}
-          value="₱40,000"
-          editable={false}
-        />
+        <View style={{ marginTop: 16 }}>
+          <Label>Focused Input</Label>
+          <FormInput value="₱40,000" focused editable={false} />
+        </View>
 
-        <Text style={[styles.fieldLabel, { color: t.textSecondary, marginTop: 16 }]}>Error Input</Text>
-        <TextInput
-          style={[styles.input, { backgroundColor: t.riskyBg, borderColor: t.risky, borderWidth: 2, color: t.risky }]}
-          value="abc"
-          editable={false}
-        />
-        <Text style={[styles.errorText, { color: t.risky }]}>Enter a valid amount</Text>
+        <View style={{ marginTop: 16 }}>
+          <Label>Error Input</Label>
+          <FormInput value="abc" error editable={false} />
+          <Caption color={t.risky}>Enter a valid amount</Caption>
+        </View>
       </Section>
 
       {/* Toggle / Switch */}
@@ -234,19 +208,23 @@ export default function ComponentShowcase() {
 
       {/* Progress / Timeline Bars */}
       <Section title="Progress Indicators">
-        <Text style={[styles.progressLabel, { color: t.textSecondary }]}>Credit utilization — 15% (SAFE)</Text>
+        <Caption>Credit utilization — 15% (SAFE)</Caption>
         <View style={[styles.progressTrack, { backgroundColor: t.primaryMuted }]}>
           <View style={[styles.progressFill, { width: '15%', backgroundColor: t.safe }]} />
         </View>
 
-        <Text style={[styles.progressLabel, { color: t.textSecondary, marginTop: 16 }]}>Credit utilization — 65% (CAUTION)</Text>
-        <View style={[styles.progressTrack, { backgroundColor: t.primaryMuted }]}>
-          <View style={[styles.progressFill, { width: '65%', backgroundColor: t.caution }]} />
+        <View style={{ marginTop: 16 }}>
+          <Caption>Credit utilization — 65% (CAUTION)</Caption>
+          <View style={[styles.progressTrack, { backgroundColor: t.primaryMuted }]}>
+            <View style={[styles.progressFill, { width: '65%', backgroundColor: t.caution }]} />
+          </View>
         </View>
 
-        <Text style={[styles.progressLabel, { color: t.textSecondary, marginTop: 16 }]}>Credit utilization — 92% (RISKY)</Text>
-        <View style={[styles.progressTrack, { backgroundColor: t.primaryMuted }]}>
-          <View style={[styles.progressFill, { width: '92%', backgroundColor: t.risky }]} />
+        <View style={{ marginTop: 16 }}>
+          <Caption>Credit utilization — 92% (RISKY)</Caption>
+          <View style={[styles.progressTrack, { backgroundColor: t.primaryMuted }]}>
+            <View style={[styles.progressFill, { width: '92%', backgroundColor: t.risky }]} />
+          </View>
         </View>
       </Section>
 
@@ -262,21 +240,21 @@ export default function ComponentShowcase() {
         <Pressable style={[styles.listItem, { borderBottomColor: t.border }]}>
           <View style={styles.listItemContent}>
             <Text style={[styles.listTitle, { color: t.textPrimary }]}>Cash on Hand</Text>
-            <Text style={[styles.listSubtitle, { color: t.textSecondary }]}>Updated 2h ago</Text>
+            <Caption>Updated 2h ago</Caption>
           </View>
           <Text style={[styles.listValue, { color: t.accent }]}>₱25,000</Text>
         </Pressable>
         <Pressable style={[styles.listItem, { borderBottomColor: t.border }]}>
           <View style={styles.listItemContent}>
             <Text style={[styles.listTitle, { color: t.textPrimary }]}>Monthly Income</Text>
-            <Text style={[styles.listSubtitle, { color: t.textSecondary }]}>Payday: 15th</Text>
+            <Caption>Payday: 15th</Caption>
           </View>
           <Text style={[styles.listValue, { color: t.textPrimary }]}>₱40,000</Text>
         </Pressable>
         <Pressable style={[styles.listItem, { borderBottomColor: 'transparent' }]}>
           <View style={styles.listItemContent}>
             <Text style={[styles.listTitle, { color: t.textPrimary }]}>Committed Expenses</Text>
-            <Text style={[styles.listSubtitle, { color: t.textSecondary }]}>Rent, utils, etc.</Text>
+            <Caption>Rent, utils, etc.</Caption>
           </View>
           <Text style={[styles.listValue, { color: t.textPrimary }]}>₱15,000</Text>
         </Pressable>
@@ -313,38 +291,17 @@ const styles = StyleSheet.create({
   swatchLabel: { fontSize: 10, fontWeight: '600', marginTop: 6, textAlign: 'center' },
   swatchHex: { fontSize: 9, marginTop: 2 },
 
-  typeHeading: { fontSize: 24, fontWeight: '700', marginBottom: 8 },
-  typeSubheading: { fontSize: 18, fontWeight: '600', marginBottom: 8 },
   typeBody: { fontSize: 15, lineHeight: 22, marginBottom: 8 },
-  typeCaption: { fontSize: 12, marginBottom: 8 },
-  typeLabel: { fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8 },
 
-  btnPrimary: { paddingVertical: 14, borderRadius: 999, alignItems: 'center', marginBottom: 10 },
-  btnPrimaryText: { fontSize: 15, fontWeight: '700' },
-  btnSecondary: { paddingVertical: 14, borderRadius: 999, alignItems: 'center', borderWidth: 2, marginBottom: 10 },
-  btnSecondaryText: { fontSize: 15, fontWeight: '700' },
-  btnDestructive: { paddingVertical: 14, borderRadius: 999, alignItems: 'center', marginBottom: 10 },
-  btnDestructiveText: { fontSize: 15, fontWeight: '700' },
-  btnGhost: { paddingVertical: 14, alignItems: 'center', marginBottom: 10 },
-  btnGhostText: { fontSize: 15, fontWeight: '600' },
+  buttonGap: { marginBottom: 10 },
 
   badgeRow: { flexDirection: 'row', gap: 10, flexWrap: 'wrap', backgroundColor: 'transparent' },
-  badge: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 6 },
-  badgeText: { fontSize: 12, fontWeight: '700' },
-  badgeOutline: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 6, borderWidth: 1.5 },
-  badgeOutlineText: { fontSize: 12, fontWeight: '700' },
-  staleBadgeText: { fontSize: 12, fontWeight: '700' },
 
   card: { borderRadius: 12, borderWidth: 1, marginBottom: 12, overflow: 'hidden' },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingBottom: 8 },
   cardTitle: { fontSize: 16, fontWeight: '700' },
   cardBody: { fontSize: 14, paddingHorizontal: 16, paddingBottom: 12 },
   cardFooter: { borderTopWidth: 1, padding: 12, paddingHorizontal: 16 },
-  cardFooterText: { fontSize: 12, fontWeight: '600' },
-
-  fieldLabel: { fontSize: 13, fontWeight: '600', marginBottom: 6 },
-  input: { borderWidth: 1, borderRadius: 10, padding: 14, fontSize: 18, fontWeight: '700', textAlign: 'center' },
-  errorText: { fontSize: 12, fontWeight: '600', marginTop: 4 },
 
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, backgroundColor: 'transparent' },
   toggleLabel: { fontSize: 15, fontWeight: '600' },
@@ -352,7 +309,6 @@ const styles = StyleSheet.create({
   alert: { borderWidth: 1, borderRadius: 8, padding: 12, marginBottom: 10 },
   alertText: { fontSize: 13, fontWeight: '600' },
 
-  progressLabel: { fontSize: 12, fontWeight: '600', marginBottom: 6 },
   progressTrack: { height: 8, borderRadius: 4, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: 4 },
 
@@ -363,6 +319,5 @@ const styles = StyleSheet.create({
   listItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, backgroundColor: 'transparent' },
   listItemContent: { backgroundColor: 'transparent', flex: 1 },
   listTitle: { fontSize: 15, fontWeight: '600' },
-  listSubtitle: { fontSize: 12, marginTop: 2 },
   listValue: { fontSize: 18, fontWeight: '700' },
 });

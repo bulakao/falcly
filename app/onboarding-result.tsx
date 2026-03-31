@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   StyleSheet,
-  TextInput,
   Pressable,
   ScrollView,
   KeyboardAvoidingView,
@@ -10,6 +9,7 @@ import {
 import { useLocalSearchParams, router } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
+import { Badge, Button, FormInput, Label } from '@/components/atoms';
 import StatusTooltip from '@/components/StatusTooltip';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
@@ -22,6 +22,8 @@ const STATUS_ICONS: Record<CardStatus, string> = {
   CAUTION: '⚠',
   RISKY: '✕',
 };
+
+const BADGE_VARIANT = { SAFE: 'safe', CAUTION: 'caution', RISKY: 'risky' } as const;
 
 const STATUS_EXPLANATIONS: Record<CardStatus, string> = {
   SAFE: 'Good news — swiping now is unlikely to cause payment stress this cycle.',
@@ -98,11 +100,7 @@ export default function OnboardingResultScreen() {
         {/* Status result */}
         <View style={[styles.statusCard, { borderColor: color }]}>
           <View style={styles.badgeRow}>
-            <View style={[styles.badge, { backgroundColor: color }]}>
-              <Text style={[styles.badgeText, { color: t.textInverse }]}>
-                {STATUS_ICONS[status]} {status}
-              </Text>
-            </View>
+            <Badge label={`${STATUS_ICONS[status]} ${status}`} variant={BADGE_VARIANT[status]} />
             <StatusTooltip />
           </View>
           <Text style={[styles.reason, { color: t.textSecondary }]}>{reason}</Text>
@@ -131,41 +129,33 @@ export default function OnboardingResultScreen() {
           <View style={styles.enrichSection}>
             <Text style={styles.enrichHeading}>Fine-tune your result</Text>
 
-            <Text style={[styles.label, { color: t.textSecondary }]}>Cash on Hand (₱)</Text>
-            <TextInput
-              style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
+            <Label>Cash on Hand (₱)</Label>
+            <FormInput
               value={cashOnHand}
               onChangeText={setCashInput}
               placeholder="e.g. 25000"
-              placeholderTextColor={t.placeholder}
               keyboardType="numeric"
             />
 
-            <Text style={[styles.label, { color: t.textSecondary }]}>Due Day Offset (days after statement)</Text>
-            <TextInput
-              style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
+            <Label>Due Day Offset (days after statement)</Label>
+            <FormInput
               value={dueDayOffset}
               onChangeText={setDueDayOffset}
               placeholder={String(cardDefaults.dueDayOffset)}
-              placeholderTextColor={t.placeholder}
               keyboardType="numeric"
               selectTextOnFocus
             />
 
-            <Text style={[styles.label, { color: t.textSecondary }]}>Monthly Interest Rate (%)</Text>
-            <TextInput
-              style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
+            <Label>Monthly Interest Rate (%)</Label>
+            <FormInput
               value={interestRate}
               onChangeText={setInterestRate}
               placeholder={String(cardDefaults.interestRate * 100)}
-              placeholderTextColor={t.placeholder}
               keyboardType="numeric"
               selectTextOnFocus
             />
 
-            <Pressable style={[styles.saveButton, { backgroundColor: t.primary }]} onPress={handleEnrichmentSave}>
-              <Text style={[styles.saveButtonText, { color: t.textInverse }]}>Save &amp; Continue</Text>
-            </Pressable>
+            <Button label="Save & Continue" onPress={handleEnrichmentSave} />
           </View>
         )}
 

@@ -1,5 +1,5 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -12,7 +12,44 @@ import { useUserStore } from '@/store/userStore';
 import { initFirestore } from '@/utils/firebase';
 import { initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
 import { initCrashReporting } from '@/utils/crashReporting';
-import { AppThemeProvider } from '@/theme';
+import { AppThemeProvider, lightTheme, darkTheme } from '@/theme';
+import type { Theme } from '@react-navigation/native';
+
+const navLight: Theme = {
+  dark: false,
+  colors: {
+    primary: lightTheme.primary,
+    background: lightTheme.background,
+    card: lightTheme.background,
+    text: lightTheme.textPrimary,
+    border: lightTheme.border,
+    notification: lightTheme.risky,
+  },
+  fonts: {
+    regular: { fontFamily: 'System', fontWeight: '400' },
+    medium: { fontFamily: 'System', fontWeight: '500' },
+    bold: { fontFamily: 'System', fontWeight: '700' },
+    heavy: { fontFamily: 'System', fontWeight: '800' },
+  },
+};
+
+const navDark: Theme = {
+  dark: true,
+  colors: {
+    primary: darkTheme.primary,
+    background: darkTheme.background,
+    card: darkTheme.background,
+    text: darkTheme.textPrimary,
+    border: darkTheme.border,
+    notification: darkTheme.risky,
+  },
+  fonts: {
+    regular: { fontFamily: 'System', fontWeight: '400' },
+    medium: { fontFamily: 'System', fontWeight: '500' },
+    bold: { fontFamily: 'System', fontWeight: '700' },
+    heavy: { fontFamily: 'System', fontWeight: '800' },
+  },
+};
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -61,7 +98,7 @@ function RootLayoutNav() {
 
   return (
     <AppThemeProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={colorScheme === 'dark' ? navDark : navLight}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="add-card" options={{ presentation: 'modal', title: 'Add Card' }} />

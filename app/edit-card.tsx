@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import {
   StyleSheet,
-  TextInput,
-  Pressable,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -12,10 +10,9 @@ import { router, useLocalSearchParams } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
-import { useAppTheme } from '@/theme';
+import { Button, FormInput, Heading, Label } from '@/components/atoms';
 
 export default function EditCardScreen() {
-  const t = useAppTheme();
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
   const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
   const updateCard = useCardStore((s) => s.updateCard);
@@ -36,7 +33,7 @@ export default function EditCardScreen() {
   if (!card) {
     return (
       <View style={styles.container}>
-        <Text style={styles.heading}>Card not found</Text>
+        <Text style={styles.notFound}>Card not found</Text>
       </View>
     );
   }
@@ -86,149 +83,147 @@ export default function EditCardScreen() {
     router.back();
   }
 
-  const inputStyle = [styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }];
-
   return (
     <KeyboardAvoidingView
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.heading}>Edit Card</Text>
+        <Heading>Edit Card</Heading>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Bank Name</Text>
-        <TextInput
-          style={inputStyle}
-          value={bankName}
-          onChangeText={setBankName}
-          placeholder="e.g. BDO, BPI, Metrobank"
-          placeholderTextColor={t.placeholder}
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Bank Name</Label>
+          <FormInput
+            value={bankName}
+            onChangeText={setBankName}
+            placeholder="e.g. BDO, BPI, Metrobank"
+          />
+        </View>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Credit Limit</Text>
-        <TextInput
-          style={inputStyle}
-          value={creditLimit}
-          onChangeText={setCreditLimit}
-          placeholder="e.g. 50000"
-          placeholderTextColor={t.placeholder}
-          keyboardType="numeric"
-          selectTextOnFocus
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Credit Limit</Label>
+          <FormInput
+            value={creditLimit}
+            onChangeText={setCreditLimit}
+            placeholder="e.g. 50000"
+            keyboardType="numeric"
+            selectTextOnFocus
+          />
+        </View>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Statement Day (1–31)</Text>
-        <TextInput
-          style={inputStyle}
-          value={statementDay}
-          onChangeText={setStatementDay}
-          placeholder="e.g. 15"
-          placeholderTextColor={t.placeholder}
-          keyboardType="numeric"
-          selectTextOnFocus
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Statement Day (1–31)</Label>
+          <FormInput
+            value={statementDay}
+            onChangeText={setStatementDay}
+            placeholder="e.g. 15"
+            keyboardType="numeric"
+            selectTextOnFocus
+          />
+        </View>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Due Day Offset (days after statement)</Text>
-        <TextInput
-          style={inputStyle}
-          value={dueDayOffset}
-          onChangeText={setDueDayOffset}
-          placeholder={String(cardDefaults.dueDayOffset)}
-          placeholderTextColor={t.placeholder}
-          keyboardType="numeric"
-          selectTextOnFocus
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Due Day Offset (days after statement)</Label>
+          <FormInput
+            value={dueDayOffset}
+            onChangeText={setDueDayOffset}
+            placeholder={String(cardDefaults.dueDayOffset)}
+            keyboardType="numeric"
+            selectTextOnFocus
+          />
+        </View>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Interest Rate (% per month)</Text>
-        <TextInput
-          style={inputStyle}
-          value={interestRate}
-          onChangeText={setInterestRate}
-          placeholder="2"
-          placeholderTextColor={t.placeholder}
-          keyboardType="numeric"
-          selectTextOnFocus
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Interest Rate (% per month)</Label>
+          <FormInput
+            value={interestRate}
+            onChangeText={setInterestRate}
+            placeholder="2"
+            keyboardType="numeric"
+            selectTextOnFocus
+          />
+        </View>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Min Payment (%)</Text>
-        <TextInput
-          style={inputStyle}
-          value={minPaymentPct}
-          onChangeText={setMinPaymentPct}
-          placeholder="5"
-          placeholderTextColor={t.placeholder}
-          keyboardType="numeric"
-          selectTextOnFocus
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Min Payment (%)</Label>
+          <FormInput
+            value={minPaymentPct}
+            onChangeText={setMinPaymentPct}
+            placeholder="5"
+            keyboardType="numeric"
+            selectTextOnFocus
+          />
+        </View>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Min Payment Floor (₱)</Text>
-        <TextInput
-          style={inputStyle}
-          value={minPaymentFloor}
-          onChangeText={setMinPaymentFloor}
-          placeholder="500"
-          placeholderTextColor={t.placeholder}
-          keyboardType="numeric"
-          selectTextOnFocus
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Min Payment Floor (₱)</Label>
+          <FormInput
+            value={minPaymentFloor}
+            onChangeText={setMinPaymentFloor}
+            placeholder="500"
+            keyboardType="numeric"
+            selectTextOnFocus
+          />
+        </View>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Annual Fee (₱)</Text>
-        <TextInput
-          style={inputStyle}
-          value={annualFee}
-          onChangeText={setAnnualFee}
-          placeholder="0"
-          placeholderTextColor={t.placeholder}
-          keyboardType="numeric"
-          selectTextOnFocus
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Annual Fee (₱)</Label>
+          <FormInput
+            value={annualFee}
+            onChangeText={setAnnualFee}
+            placeholder="0"
+            keyboardType="numeric"
+            selectTextOnFocus
+          />
+        </View>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Annual Fee Month (1–12, 0 = none)</Text>
-        <TextInput
-          style={inputStyle}
-          value={annualFeeMonth}
-          onChangeText={setAnnualFeeMonth}
-          placeholder="0"
-          placeholderTextColor={t.placeholder}
-          keyboardType="numeric"
-          selectTextOnFocus
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Annual Fee Month (1–12, 0 = none)</Label>
+          <FormInput
+            value={annualFeeMonth}
+            onChangeText={setAnnualFeeMonth}
+            placeholder="0"
+            keyboardType="numeric"
+            selectTextOnFocus
+          />
+        </View>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Pending Transactions (₱)</Text>
-        <TextInput
-          style={inputStyle}
-          value={pendingTransactions}
-          onChangeText={setPendingTransactions}
-          placeholder="0"
-          placeholderTextColor={t.placeholder}
-          keyboardType="numeric"
-          selectTextOnFocus
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Pending Transactions (₱)</Label>
+          <FormInput
+            value={pendingTransactions}
+            onChangeText={setPendingTransactions}
+            placeholder="0"
+            keyboardType="numeric"
+            selectTextOnFocus
+          />
+        </View>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Monthly Installments (₱)</Text>
-        <TextInput
-          style={inputStyle}
-          value={installmentsMonthlyAmount}
-          onChangeText={setInstallmentsMonthlyAmount}
-          placeholder="0"
-          placeholderTextColor={t.placeholder}
-          keyboardType="numeric"
-          selectTextOnFocus
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Monthly Installments (₱)</Label>
+          <FormInput
+            value={installmentsMonthlyAmount}
+            onChangeText={setInstallmentsMonthlyAmount}
+            placeholder="0"
+            keyboardType="numeric"
+            selectTextOnFocus
+          />
+        </View>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Subscriptions This Cycle (₱)</Text>
-        <TextInput
-          style={inputStyle}
-          value={subscriptionsThisCycle}
-          onChangeText={setSubscriptionsThisCycle}
-          placeholder="0"
-          placeholderTextColor={t.placeholder}
-          keyboardType="numeric"
-          selectTextOnFocus
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Subscriptions This Cycle (₱)</Label>
+          <FormInput
+            value={subscriptionsThisCycle}
+            onChangeText={setSubscriptionsThisCycle}
+            placeholder="0"
+            keyboardType="numeric"
+            selectTextOnFocus
+          />
+        </View>
 
-        <Pressable style={[styles.saveButton, { backgroundColor: t.primary }]} onPress={handleSave}>
-          <Text style={[styles.saveButtonText, { color: t.textInverse }]}>Save Changes</Text>
-        </Pressable>
+        <View style={styles.buttonWrapper}>
+          <Button label="Save Changes" onPress={handleSave} />
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -240,31 +235,15 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 48,
   },
-  heading: {
+  notFound: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 24,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
+  fieldGroup: {
     marginTop: 16,
-    marginBottom: 6,
   },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-  },
-  saveButton: {
+  buttonWrapper: {
     marginTop: 32,
-    paddingVertical: 14,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
   },
 });

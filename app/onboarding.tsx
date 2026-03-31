@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import {
   StyleSheet,
-  TextInput,
-  Pressable,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Alert,
+  View,
 } from 'react-native';
 import { router } from 'expo-router';
 
@@ -14,6 +13,7 @@ import { Text } from '@/components/Themed';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { trackCardAdded } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
+import { Button, FormInput, Heading, Label } from '@/components/atoms';
 
 export default function OnboardingScreen() {
   const t = useAppTheme();
@@ -61,45 +61,45 @@ export default function OnboardingScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.heading}>Add your first card</Text>
+        <Heading>Add your first card</Heading>
         <Text style={[styles.subtitle, { color: t.textSecondary }]}>
           Just 3 fields to see if it&apos;s safe to swipe right now.
         </Text>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Statement Day (1–31)</Text>
-        <TextInput
-          style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
-          value={statementDay}
-          onChangeText={setStatementDay}
-          placeholder="e.g. 15"
-          placeholderTextColor={t.placeholder}
-          keyboardType="numeric"
-          autoFocus
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Statement Day (1–31)</Label>
+          <FormInput
+            value={statementDay}
+            onChangeText={setStatementDay}
+            placeholder="e.g. 15"
+            keyboardType="numeric"
+            autoFocus
+          />
+        </View>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Credit Limit</Text>
-        <TextInput
-          style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
-          value={creditLimit}
-          onChangeText={setCreditLimit}
-          placeholder="e.g. 50000"
-          placeholderTextColor={t.placeholder}
-          keyboardType="numeric"
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Credit Limit</Label>
+          <FormInput
+            value={creditLimit}
+            onChangeText={setCreditLimit}
+            placeholder="e.g. 50000"
+            keyboardType="numeric"
+          />
+        </View>
 
-        <Text style={[styles.label, { color: t.textSecondary }]}>Outstanding Balance</Text>
-        <TextInput
-          style={[styles.input, { borderColor: t.inputBorder, backgroundColor: t.inputBg, color: t.inputText }]}
-          value={outstandingBalance}
-          onChangeText={setOutstandingBalance}
-          placeholder="0"
-          placeholderTextColor={t.placeholder}
-          keyboardType="numeric"
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Outstanding Balance</Label>
+          <FormInput
+            value={outstandingBalance}
+            onChangeText={setOutstandingBalance}
+            placeholder="0"
+            keyboardType="numeric"
+          />
+        </View>
 
-        <Pressable style={[styles.saveButton, { backgroundColor: t.primary }]} onPress={handleSave}>
-          <Text style={[styles.saveButtonText, { color: t.textInverse }]}>See My Status</Text>
-        </Pressable>
+        <View style={styles.buttonWrapper}>
+          <Button label="See My Status" onPress={handleSave} />
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -111,35 +111,15 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 48,
   },
-  heading: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
   subtitle: {
     fontSize: 15,
     marginBottom: 24,
+    marginTop: -16,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
+  fieldGroup: {
     marginTop: 16,
-    marginBottom: 6,
   },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-  },
-  saveButton: {
+  buttonWrapper: {
     marginTop: 32,
-    paddingVertical: 14,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
   },
 });
