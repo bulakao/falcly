@@ -11,9 +11,11 @@ import {
 
 import { Text, View } from '@/components/Themed';
 import { useUserStore } from '@/store/userStore';
+import { useCardStore } from '@/store/cardStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { exportDataAsCSV } from '@/utils/csvExport';
 
 export default function SettingsScreen() {
   const cashOnHand = useUserStore((s) => s.cashOnHand);
@@ -42,7 +44,9 @@ export default function SettingsScreen() {
   const [editingExpenses, setEditingExpenses] = useState(false);
   const [expensesText, setExpensesText] = useState('');
 
+  const cards = useCardStore((s) => s.cards);
   const { isOffline } = useNetworkStatus();
+  const [exporting, setExporting] = useState(false);
 
   const cashStaleness = cashUpdatedAt ? getStalenessLevel(cashUpdatedAt) : null;
 
@@ -331,6 +335,38 @@ export default function SettingsScreen() {
           )}
         </View>
 
+        {/* Export Data */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Export Data</Text>
+          <Text style={styles.sectionSubtitle}>
+            Export all your cards, installments, subscriptions, and profile data as a CSV file.
+          </Text>
+          <Pressable
+            style={[styles.exportButton, exporting && { opacity: 0.5 }]}
+            onPress={async () => {
+              setExporting(true);
+              try {
+                await exportDataAsCSV(cards, {
+                  cashOnHand,
+                  monthlyIncome,
+                  payday,
+                  committedExpenses,
+                });
+              } catch (e: unknown) {
+                const message = e instanceof Error ? e.message : 'Export failed';
+                Alert.alert('Export Error', message);
+              } finally {
+                setExporting(false);
+              }
+            }}
+            disabled={exporting}
+          >
+            <Text style={styles.exportButtonText}>
+              {exporting ? 'Exporting...' : 'Export as CSV'}
+            </Text>
+          </Pressable>
+        </View>
+
         {/* Cloud Sync Status */}
         {tier === 'pro' && (
           <View style={styles.section}>
@@ -536,5 +572,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#10b981',
     fontWeight: '600',
+  },
+  exportButton: {
+    backgroundColor: '#3b82f6',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  exportButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#fff',
   },
 });
