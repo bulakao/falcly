@@ -13,6 +13,7 @@ interface CardStore {
   cards: Card[];
   _nextId: number;
   addCard: (card: Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt'>) => void;
+  updateBalance: (cardId: string, newBalance: number) => void;
 }
 
 export const useCardStore = create<CardStore>()(
@@ -32,6 +33,15 @@ export const useCardStore = create<CardStore>()(
         set((state) => ({
           cards: [...state.cards, card],
           _nextId: state._nextId + 1,
+        }));
+      },
+      updateBalance: (cardId, newBalance) => {
+        set((state) => ({
+          cards: state.cards.map((c) =>
+            c.id === cardId
+              ? { ...c, outstandingBalance: newBalance, balanceUpdatedAt: Date.now() }
+              : c,
+          ),
         }));
       },
     }),

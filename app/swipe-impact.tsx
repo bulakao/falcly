@@ -7,7 +7,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, Link } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { BillingTimeline } from '@/components/BillingTimeline';
@@ -26,6 +26,17 @@ const STATUS_ICONS: Record<CardStatus, string> = {
   CAUTION: '⚠',
   RISKY: '✕',
 };
+
+function formatUpdatedAgo(timestamp: number): string {
+  const diffMs = Date.now() - timestamp;
+  const diffMinutes = Math.floor(diffMs / 60000);
+  if (diffMinutes < 1) return 'just now';
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays}d ago`;
+}
 
 const QUICK_AMOUNTS = [
   { label: '₱500', value: 500 },
@@ -84,6 +95,18 @@ export default function SwipeImpactScreen() {
           </View>
         </View>
         <Text style={styles.reason}>{impact.reason}</Text>
+
+        {/* Balance timestamp + update action */}
+        <View style={styles.balanceRow}>
+          <Text style={styles.balanceTimestamp}>
+            Balance updated {formatUpdatedAgo(card.balanceUpdatedAt)}
+          </Text>
+          <Link href={{ pathname: '/update-balance', params: { cardId: card.id } }} asChild>
+            <Pressable style={styles.updateButton}>
+              <Text style={styles.updateButtonText}>Update Balance</Text>
+            </Pressable>
+          </Link>
+        </View>
 
         {/* Billing cycle timeline */}
         <BillingTimeline card={card} />
@@ -220,7 +243,28 @@ const styles = StyleSheet.create({
   reason: {
     fontSize: 13,
     color: '#666',
-    marginBottom: 24,
+    marginBottom: 12,
+  },
+  balanceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  balanceTimestamp: {
+    fontSize: 12,
+    color: '#999',
+  },
+  updateButton: {
+    backgroundColor: '#f3f4f6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  updateButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#10b981',
   },
   label: {
     fontSize: 14,
