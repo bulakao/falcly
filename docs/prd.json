@@ -210,7 +210,7 @@
         "Statement close marker on the cycle timeline turns amber color at ≤7 days"
       ],
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
