@@ -2,7 +2,7 @@ import 'react-native-gesture-handler';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
@@ -78,8 +78,11 @@ function RootLayout() {
     if (dbError) throw dbError;
   }, [dbError]);
 
-  // Listen for Supabase auth state changes
+  // Check initial session + listen for auth state changes
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      useAuthStore.getState().setUser(session?.user ?? null);
+    });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       useAuthStore.getState().setUser(session?.user ?? null);
     });
@@ -126,23 +129,12 @@ function RootLayoutNav() {
 
   if (authLoading) return null;
 
-  if (!user) {
-    return (
-      <AppThemeProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? navDark : navLight}>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="sign-in" />
-          </Stack>
-        </ThemeProvider>
-      </AppThemeProvider>
-    );
-  }
-
   return (
     <AppThemeProvider>
       <ThemeProvider value={colorScheme === 'dark' ? navDark : navLight}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="sign-in" options={{ headerShown: false }} />
           <Stack.Screen name="add-card" options={{ presentation: 'fullScreenModal', headerShown: false }} />
           <Stack.Screen name="swipe-impact" options={{ presentation: 'modal', title: 'Swipe Impact' }} />
           <Stack.Screen name="update-balance" options={{ presentation: 'modal', title: 'Update Balance' }} />
@@ -154,6 +146,7 @@ function RootLayoutNav() {
           <Stack.Screen name="manage-cards" options={{ presentation: 'fullScreenModal', headerShown: false }} />
           <Stack.Screen name="component-showcase" options={{ presentation: 'modal', title: 'Component Showcase' }} />
         </Stack>
+        {!user && <Redirect href="/sign-in" />}
       </ThemeProvider>
     </AppThemeProvider>
   );
