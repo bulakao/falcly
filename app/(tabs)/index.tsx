@@ -27,6 +27,7 @@ export default function HomeScreen() {
   const daysRemaining = daysUntilDataDeletion();
 
   const activeCards = useMemo(() => cards.filter((c) => c.isActive), [cards]);
+  const hasHiddenCards = cards.length > activeCards.length;
 
   const getNetAvailableCash = useCallback(
     (card: Card) => computeNetAvailableCash(cashOnHand, monthlyIncome, payday, card, committedExpenses),
@@ -62,6 +63,7 @@ export default function HomeScreen() {
         getNetAvailableCash={getNetAvailableCash}
         initialIndex={0}
         onBannerPress={() => router.push('/manage-cards')}
+        hasHiddenCards={hasHiddenCards}
       />
     </View>
   );

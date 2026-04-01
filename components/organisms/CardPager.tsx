@@ -3,15 +3,18 @@ import {
   StyleSheet,
   FlatList,
   ScrollView,
+  Pressable,
   Dimensions,
   Keyboard,
 } from 'react-native';
-import { View } from '@/components/Themed';
+import { router } from 'expo-router';
+import { Text, View } from '@/components/Themed';
 import { CreditCardFace, EmptyCardFace } from '@/components/atoms';
 import { ImpactSkeleton } from '@/components/molecules';
 import { SwipeImpactPanel } from '@/components/organisms/SwipeImpactPanel';
 import { AllCardsOverview } from '@/components/organisms/AllCardsOverview';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { useAppTheme } from '@/theme';
 import type { Card } from '@/types/card';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -24,6 +27,7 @@ interface CardPagerProps {
   getNetAvailableCash: (card: Card) => number | null;
   initialIndex?: number;
   onBannerPress?: () => void;
+  hasHiddenCards?: boolean;
 }
 
 export interface CardPagerRef {
@@ -36,11 +40,12 @@ type PageItem =
   | { type: 'empty' };
 
 export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
-  function CardPager({ cards, onAddCard, getNetAvailableCash, initialIndex = 0, onBannerPress }, ref) {
+  function CardPager({ cards, onAddCard, getNetAvailableCash, initialIndex = 0, onBannerPress, hasHiddenCards = false }, ref) {
+    const t = useAppTheme();
     const isCardReadOnly = useSubscriptionStore((s) => s.isCardReadOnly);
     const flatListRef = useRef<FlatList<PageItem>>(null);
 
-    const hasOverview = cards.length > 0;
+    const hasOverview = cards.length > 0 || hasHiddenCards;
 
     const pages: PageItem[] = [
       ...(hasOverview ? [{ type: 'overview' as const }] : []),
@@ -94,6 +99,11 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
               <View style={styles.cardWrapper}>
                 <EmptyCardFace onPress={onAddCard} />
               </View>
+              {hasHiddenCards && (
+                <Pressable style={styles.manageLink} onPress={() => router.push('/manage-cards')}>
+                  <Text style={[styles.manageLinkText, { color: t.accent }]}>You have hidden cards · Manage Cards</Text>
+                </Pressable>
+              )}
               <ImpactSkeleton />
             </ScrollView>
           );
@@ -117,7 +127,7 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
           </ScrollView>
         );
       },
-      [cards, getNetAvailableCash, handleGanttCardPress, isCardReadOnly, onAddCard, onBannerPress],
+      [cards, getNetAvailableCash, handleGanttCardPress, hasHiddenCards, isCardReadOnly, onAddCard, onBannerPress, t.accent],
     );
 
     const keyExtractor = useCallback(
@@ -169,5 +179,14 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 8,
     paddingBottom: 16,
+  },
+  manageLink: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginBottom: 8,
+  },
+  manageLinkText: {
+    fontSize: 13,
+    fontWeight: '600',
   },
 });

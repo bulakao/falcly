@@ -4,17 +4,23 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Pressable,
   Alert,
   View,
 } from 'react-native';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Text } from '@/components/Themed';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { trackCardAdded } from '@/utils/analytics';
-import { Button, Heading } from '@/components/atoms';
+import { Button } from '@/components/atoms';
 import { FormFieldGroup } from '@/components/molecules';
+import { useAppTheme } from '@/theme';
 
 export default function AddCardScreen() {
+  const t = useAppTheme();
+  const insets = useSafeAreaInsets();
   const addCard = useCardStore((s) => s.addCard);
 
   const [bankName, setBankName] = useState('');
@@ -60,12 +66,21 @@ export default function AddCardScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.flex}
+      style={[styles.flex, { paddingTop: insets.top }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.container}>
-        <Heading>Add Card</Heading>
+      {/* Header: Cancel | Title | Save */}
+      <View style={styles.headerBar}>
+        <Pressable onPress={() => router.back()} hitSlop={8}>
+          <Text style={[styles.headerAction, { color: t.primary }]}>Cancel</Text>
+        </Pressable>
+        <Text style={[styles.headerTitle, { color: t.textPrimary }]}>Add Card</Text>
+        <Pressable onPress={handleSave} hitSlop={8}>
+          <Text style={[styles.headerAction, { color: t.primary }]}>Save</Text>
+        </Pressable>
+      </View>
 
+      <ScrollView contentContainerStyle={styles.container}>
         <FormFieldGroup
           label="Bank Name"
           value={bankName}
@@ -116,6 +131,21 @@ export default function AddCardScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  headerBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  headerAction: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  headerTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+  },
   container: {
     padding: 24,
     paddingBottom: 48,
