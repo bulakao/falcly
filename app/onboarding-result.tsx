@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Pressable,
@@ -13,9 +13,15 @@ import { Badge, Button } from '@/components/atoms';
 import { FormFieldGroup, StatusTooltip } from '@/components/molecules';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
+import { useOnboardingStore } from '@/store/onboardingStore';
 import { calculateCardStatus } from '@/utils/decisionEngine';
 import type { CardStatus } from '@/types/card';
 import { useAppTheme } from '@/theme';
+import {
+  trackOnboardingFirstStatusViewed,
+  trackOnboardingEnrichmentCompleted,
+  trackOnboardingEnrichmentSkipped,
+} from '@/utils/analytics';
 
 const STATUS_ICONS: Record<CardStatus, string> = {
   SAFE: '✓',
@@ -62,6 +68,10 @@ export default function OnboardingResultScreen() {
   const { status, reason } = calculateCardStatus(card, new Date());
   const color = STATUS_COLORS[status];
 
+  useEffect(() => {
+    trackOnboardingFirstStatusViewed(status);
+  }, [status]);
+
   function handleEnrichmentSave() {
     if (!card) return;
 
@@ -84,11 +94,17 @@ export default function OnboardingResultScreen() {
       setCashOnHand(cash);
     }
 
-    router.replace('/');
+    trackOnboardingEnrichmentCompleted(!isNaN(cash) && cash > 0, false);
+    useOnboardingStore.getState().setStep('paywall');
+    router.replace('/onboarding-paywall');
   }
 
   function handleSkip() {
-    router.replace('/');
+    if (showEnrichment) {
+      trackOnboardingEnrichmentSkipped();
+    }
+    useOnboardingStore.getState().setStep('paywall');
+    router.replace('/onboarding-paywall');
   }
 
   return (
