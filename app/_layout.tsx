@@ -8,8 +8,10 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from 'react-native';
+import auth from '@react-native-firebase/auth';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useUserStore } from '@/store/userStore';
+import { useAuthStore } from '@/store/authStore';
 import { initFirestore } from '@/utils/firebase';
 import { initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
 import { initCrashReporting } from '@/utils/crashReporting';
@@ -69,6 +71,14 @@ export default function RootLayout() {
   useEffect(() => {
     if (error) throw error;
   }, [error]);
+
+  // Listen for Firebase auth state changes
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged((user) => {
+      useAuthStore.getState().setUser(user);
+    });
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     if (loaded) {

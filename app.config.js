@@ -50,6 +50,7 @@ module.exports = {
           },
         },
       ],
+      '@react-native-google-signin/google-signin',
       './plugins/withXcode26Compat',
     ],
     experiments: {

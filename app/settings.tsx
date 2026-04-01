@@ -2,9 +2,11 @@ import { useState } from 'react';
 import {
   StyleSheet,
   Pressable,
+  Image,
   ScrollView,
   Alert,
   Switch,
+  View as RNView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -13,6 +15,7 @@ import { Text, View } from '@/components/Themed';
 import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { useAuthStore } from '@/store/authStore';
 import { useAppTheme } from '@/theme';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { exportDataAsCSV } from '@/utils/csvExport';
@@ -21,6 +24,9 @@ import { SectionCard, AlertBanner } from '@/components/molecules';
 
 export default function SettingsScreen() {
   const t = useAppTheme();
+  const user = useAuthStore((s) => s.user);
+  const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
+  const signOut = useAuthStore((s) => s.signOut);
 
   const tier = useSubscriptionStore((s) => s.tier);
   const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
@@ -48,6 +54,36 @@ export default function SettingsScreen() {
         <FontAwesome name="chevron-left" size={16} color={t.textMuted} />
       </Pressable>
       <Heading>Settings</Heading>
+
+      {/* Account */}
+      <SectionCard>
+        <SectionHeader title="Account" />
+        {user ? (
+          <View style={styles.accountRow}>
+            <RNView style={styles.accountAvatar}>
+              {user.photoURL ? (
+                <Image source={{ uri: user.photoURL }} style={styles.accountAvatarImage} />
+              ) : (
+                <FontAwesome name="user" size={18} color={t.textMuted} />
+              )}
+            </RNView>
+            <View style={styles.accountInfo}>
+              <Text style={[styles.accountName, { color: t.textPrimary }]}>{user.displayName ?? 'User'}</Text>
+              <Text style={[styles.accountEmail, { color: t.textMuted }]}>{user.email}</Text>
+            </View>
+            <Button label="Sign Out" onPress={signOut} variant="ghost" fullWidth={false} />
+          </View>
+        ) : (
+          <Button
+            label="Sign in with Google"
+            onPress={() => signInWithGoogle().catch((e: unknown) => {
+              const msg = e instanceof Error ? e.message : 'Sign-in failed';
+              Alert.alert('Sign In Error', msg);
+            })}
+            variant="secondary"
+          />
+        )}
+      </SectionCard>
 
       {/* Pro Subscription Status */}
       {tier === 'pro' && (
@@ -161,6 +197,34 @@ const styles = StyleSheet.create({
   backButton: {
     marginBottom: 8,
     alignSelf: 'flex-start',
+  },
+  accountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  accountAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  accountAvatarImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  accountInfo: {
+    flex: 1,
+  },
+  accountName: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  accountEmail: {
+    fontSize: 12,
   },
   proBadgeRow: {
     flexDirection: 'row',

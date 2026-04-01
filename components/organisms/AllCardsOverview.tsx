@@ -1,10 +1,11 @@
-import { StyleSheet, Pressable, View as RNView } from 'react-native';
+import { StyleSheet, Pressable, Image, View as RNView } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { SectionHeader, OfflineChip, Badge } from '@/components/atoms';
 import { BestCardBanner, FinanceCard } from '@/components/molecules';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { useAuthStore } from '@/store/authStore';
 import { GanttTimeline } from '@/components/organisms/GanttTimeline';
 import { FutureTimeline } from '@/components/organisms/FutureTimeline';
 import { calculateBestCard, getCycleDates } from '@/utils/decisionEngine';
@@ -40,6 +41,7 @@ export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress,
   const router = useRouter();
   const allCards = useCardStore((s) => s.cards);
   const tier = useSubscriptionStore((s) => s.tier);
+  const user = useAuthStore((s) => s.user);
   const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
   const getTrialEndDate = useSubscriptionStore((s) => s.getTrialEndDate);
   const bestCard = cards.length > 0 ? calculateBestCard(cards, new Date(), getNetAvailableCash) : null;
@@ -70,8 +72,12 @@ export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress,
     <View style={styles.container}>
       {/* Top row: avatar + tier badge + offline chip */}
       <View style={styles.topRow}>
-        <Pressable style={[styles.avatar, { backgroundColor: t.primary }]} onPress={() => router.push('/settings')}>
-          <FontAwesome name="user" size={16} color={t.primaryText} />
+        <Pressable style={[styles.avatar, { backgroundColor: user?.photoURL ? undefined : t.primary }]} onPress={() => router.push('/settings')}>
+          {user?.photoURL ? (
+            <Image source={{ uri: user.photoURL }} style={styles.avatarImage} />
+          ) : (
+            <FontAwesome name="user" size={16} color={t.primaryText} />
+          )}
         </Pressable>
         <View style={styles.spacer} />
         <OfflineChip />
@@ -130,6 +136,12 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
   spacer: {
     flex: 1,
