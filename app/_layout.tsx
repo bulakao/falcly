@@ -109,6 +109,7 @@ function RootLayoutNav() {
           <Stack.Screen name="pro-paywall" options={{ presentation: 'modal', title: 'Upgrade to Pro' }} />
           <Stack.Screen name="onboarding" options={{ presentation: 'modal', title: 'Get Started', headerShown: false }} />
           <Stack.Screen name="onboarding-result" options={{ presentation: 'modal', title: 'Your Status', headerShown: false }} />
+          <Stack.Screen name="settings" options={{ presentation: 'fullScreenModal', headerShown: false }} />
           <Stack.Screen name="manage-cards" options={{ presentation: 'fullScreenModal', headerShown: false }} />
           <Stack.Screen name="component-showcase" options={{ presentation: 'modal', title: 'Component Showcase' }} />
         </Stack>

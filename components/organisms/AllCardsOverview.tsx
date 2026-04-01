@@ -1,13 +1,15 @@
-import { StyleSheet, Pressable } from 'react-native';
+import { StyleSheet, Pressable, View as RNView } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { SectionHeader, OfflineChip } from '@/components/atoms';
+import { SectionHeader, OfflineChip, Badge } from '@/components/atoms';
 import { BestCardBanner, FinanceCard } from '@/components/molecules';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { GanttTimeline } from '@/components/organisms/GanttTimeline';
 import { FutureTimeline } from '@/components/organisms/FutureTimeline';
 import { calculateBestCard, getCycleDates } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';
+import { useCardStore } from '@/store/cardStore';
 import type { Card } from '@/types/card';
 
 interface AllCardsOverviewProps {
@@ -17,10 +19,42 @@ interface AllCardsOverviewProps {
   onBannerPress?: () => void;
 }
 
+function GanttSkeleton() {
+  const t = useAppTheme();
+  return (
+    <RNView style={styles.ganttSkeleton}>
+      {[1, 2, 3].map((i) => (
+        <RNView key={i} style={styles.ganttSkeletonRow}>
+          <RNView style={[styles.ganttSkeletonLabel, { backgroundColor: t.border }]} />
+          <RNView style={styles.ganttSkeletonBarArea}>
+            <RNView style={[styles.ganttSkeletonBar, { backgroundColor: t.border, width: `${40 + i * 15}%` }]} />
+          </RNView>
+        </RNView>
+      ))}
+    </RNView>
+  );
+}
+
 export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress, onBannerPress }: AllCardsOverviewProps) {
   const t = useAppTheme();
   const router = useRouter();
-  const bestCard = calculateBestCard(cards, new Date(), getNetAvailableCash);
+  const allCards = useCardStore((s) => s.cards);
+  const tier = useSubscriptionStore((s) => s.tier);
+  const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
+  const getTrialEndDate = useSubscriptionStore((s) => s.getTrialEndDate);
+  const bestCard = cards.length > 0 ? calculateBestCard(cards, new Date(), getNetAvailableCash) : null;
+
+  function getBadgeLabel() {
+    if (tier === 'pro') return 'PRO';
+    if (isTrialActive()) {
+      const endDate = getTrialEndDate();
+      if (endDate) {
+        const days = Math.ceil((endDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+        if (days > 0) return `${days}d trial left`;
+      }
+    }
+    return 'FREE';
+  }
 
   const cardsWithFixedEvents = cards.filter(
     (c) => c.installmentsMonthlyAmount > 0 || c.subscriptionsThisCycle > 0 || (c.annualFee > 0 && c.annualFeeMonth > 0),
@@ -34,23 +68,30 @@ export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress,
 
   return (
     <View style={styles.container}>
-      {/* Top row: offline chip + settings gear */}
+      {/* Top row: avatar + tier badge + offline chip */}
       <View style={styles.topRow}>
-        <OfflineChip />
+        <Pressable style={[styles.avatar, { backgroundColor: t.primary }]} onPress={() => router.push('/settings')}>
+          <FontAwesome name="user" size={16} color={t.primaryText} />
+        </Pressable>
         <View style={styles.spacer} />
-        <Pressable onPress={() => router.push('/two')} hitSlop={8}>
-          <FontAwesome name="cog" size={20} color={t.textMuted} />
+        <OfflineChip />
+        <Pressable onPress={() => router.push('/pro-paywall')}>
+          <Badge label={getBadgeLabel()} variant={tier === 'pro' ? 'pro' : 'outline'} />
         </Pressable>
       </View>
 
-      <BestCardBanner bestCard={bestCard} onPress={onBannerPress} />
+      <BestCardBanner bestCard={bestCard} hasCards={allCards.length > 0} onPress={onBannerPress} />
 
       <View style={styles.section}>
         <SectionHeader
           title="Billing Cycles"
-          subtitle="Sorted by urgency — closest statement close first"
+          subtitle="Tap a card to see its details"
         />
-        <GanttTimeline cards={cards} onCardPress={onGanttCardPress} />
+        {cards.length > 0 ? (
+          <GanttTimeline cards={cards} onCardPress={onGanttCardPress} />
+        ) : (
+          <GanttSkeleton />
+        )}
       </View>
 
       <FinanceCard />
@@ -80,7 +121,15 @@ const styles = StyleSheet.create({
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    gap: 10,
+    marginBottom: 24,
+  },
+  avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   spacer: {
     flex: 1,
@@ -98,5 +147,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     marginBottom: 8,
+  },
+  ganttSkeleton: {
+    opacity: 0.35,
+    paddingTop: 8,
+  },
+  ganttSkeletonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    height: 24,
+  },
+  ganttSkeletonLabel: {
+    width: 60,
+    height: 12,
+    borderRadius: 4,
+    marginRight: 12,
+  },
+  ganttSkeletonBarArea: {
+    flex: 1,
+    height: 16,
+    justifyContent: 'center',
+  },
+  ganttSkeletonBar: {
+    height: 12,
+    borderRadius: 4,
   },
 });

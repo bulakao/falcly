@@ -6,10 +6,11 @@ import type { BestCardResult, CardStatus } from '@/types/card';
 
 interface BestCardBannerProps {
   bestCard: BestCardResult | null;
+  hasCards: boolean;
   onPress?: () => void;
 }
 
-export function BestCardBanner({ bestCard, onPress }: BestCardBannerProps) {
+export function BestCardBanner({ bestCard, hasCards, onPress }: BestCardBannerProps) {
   const t = useAppTheme();
 
   const statusColorMap: Record<CardStatus, string> = {
@@ -18,14 +19,20 @@ export function BestCardBanner({ bestCard, onPress }: BestCardBannerProps) {
     RISKY: t.risky,
   };
 
+  // No active cards — prompt to manage or add
   if (!bestCard) {
     return (
-      <Pressable style={[styles.card, { backgroundColor: t.riskyBg, borderColor: t.riskyBorder }]} onPress={onPress} disabled={!onPress}>
-        <Text style={[styles.label, { color: t.risky }]}>All cards are risky right now</Text>
-        <Text style={[styles.reason, { color: t.textSecondary }]}>
-          Consider holding off on swiping until balances or timing improve.
+      <Pressable style={[styles.card, { backgroundColor: t.surfaceElevated, borderColor: t.border }]} onPress={onPress} disabled={!onPress}>
+        <View style={styles.topLine}>
+          <Text style={[styles.label, { color: t.textMuted }]}>Best card to use</Text>
+          {onPress && <FontAwesome name="chevron-up" size={10} color={t.textMuted} />}
+        </View>
+        <Text style={[styles.bankName, { color: t.textMuted }]}>
+          {hasCards ? 'No active cards' : 'No cards yet'}
         </Text>
-        {onPress && <FontAwesome name="chevron-up" size={10} color={t.risky} style={styles.chevron} />}
+        <Text style={[styles.reason, { color: t.textMuted }]}>
+          {hasCards ? 'Tap to manage your cards' : 'Add a card to get started'}
+        </Text>
       </Pressable>
     );
   }
@@ -94,11 +101,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: 'transparent',
-  },
-  chevron: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
   },
   warning: {
     fontSize: 12,
