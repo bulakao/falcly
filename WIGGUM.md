@@ -74,7 +74,31 @@ Tracking findings, issues, and things to review after wiggum completes.
 6. Manual QA on real devices (iOS + Android)
 7. Review all screens for accessibility (color-only indicators, screen reader support)
 
+## Run 4 (9 commits, OB-03 through OB-09)
+
+### Stories completed
+- OB-03 (Welcome screen with value prop)
+- OB-04 (Separate sign-up and sign-in screens)
+- OB-05 (Bank picker + day picker on card entry)
+- OB-06 (Onboarding state machine + auto-trigger gate)
+- OB-07 (Onboarding trial paywall screen)
+- OB-08 (Push notification permission screen)
+- OB-09 (Onboarding funnel analytics)
+
+### Findings to review
+- Auth still uses Supabase (not @react-native-firebase/auth as CLAUDE.md states) — sign-up screen maps Firebase error codes but actual auth calls go through Supabase; will need migration
+- `expo-notifications` is not in package.json — onboarding-notifications.tsx uses a dynamic require with fallback; install the package before testing notification permissions on device
+- Bank picker uses horizontal ScrollView with colored circle badges — no bank logo assets, uses initial letter as fallback
+- Onboarding state persisted via AsyncStorage (4th Zustand store: onboardingStore) — matches pattern of other stores
+- Sign-in screen "Don't have an account?" links to /welcome (not /sign-up directly) per spec
+- onboarding-result.tsx now routes to /onboarding-paywall instead of / after enrichment save/skip
+- Trial paywall auto-skips for trial/pro/pro_plus users via useEffect check
+
+---
+
 ## TODO
 
 - [ ] Set up RevenueCat project + integrate SDK (replace simulated purchase logic in subscriptionStore)
 - [ ] Set up PostHog project (EU region) + add real API key to analytics.ts
+- [ ] Install expo-notifications package for OB-08 to work on device
+- [ ] Migrate auth from Supabase to @react-native-firebase/auth
