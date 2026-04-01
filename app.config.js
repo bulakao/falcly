@@ -18,7 +18,7 @@ module.exports = {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: IS_PROD ? 'com.bulakao.falcly' : 'com.bulakao.falcly.dev',
+      bundleIdentifier: 'com.bulakao.falcly',
       googleServicesFile: `./firebase/${env}/GoogleService-Info.plist`,
     },
     android: {
