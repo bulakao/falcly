@@ -5,6 +5,7 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { useOnboardingStore } from '@/store/onboardingStore';
 
 GoogleSignin.configure({
   webClientId: '919376331601-3u0ig0ek6gbbmntsbtqsj5c90520u8sg.apps.googleusercontent.com',
@@ -58,6 +59,7 @@ export const useAuthStore = create<AuthStore>()((set) => ({
     useCardStore.getState().reset();
     useUserStore.getState().reset();
     useSubscriptionStore.getState().reset();
+    useOnboardingStore.getState().reset();
   },
   deleteAccount: async () => {
     const { error } = await supabase.rpc('delete_own_account');
@@ -66,10 +68,12 @@ export const useAuthStore = create<AuthStore>()((set) => ({
     useCardStore.getState().reset();
     useUserStore.getState().reset();
     useSubscriptionStore.getState().reset();
+    useOnboardingStore.getState().reset();
   },
   clearLocalData: () => {
     useCardStore.getState().reset();
     useUserStore.getState().reset();
     useSubscriptionStore.getState().reset();
+    useOnboardingStore.getState().reset();
   },
 }));
