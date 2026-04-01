@@ -16,7 +16,7 @@ import { useOnboardingStore } from '@/store/onboardingStore';
 import { supabase } from '@/utils/supabase';
 import { useRunMigrations } from '@/db/migrate';
 import { initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
-import { initCrashReporting } from '@/utils/crashReporting';
+import { initLogger, initCrashHandler, logger, installNetworkLogger, useNavigationLogger } from '@/utils/logger';
 import { AppThemeProvider, lightTheme, darkTheme } from '@/theme';
 import type { Theme } from '@react-navigation/native';
 
@@ -101,8 +101,10 @@ function RootLayout() {
   useEffect(() => {
     if (loaded && dbReady) {
       SplashScreen.hideAsync();
-      // Initialize crash reporting
-      initCrashReporting();
+      // Initialize logger and crash handler
+      initLogger();
+      initCrashHandler(logger);
+      installNetworkLogger();
       // Verify Pro entitlement on app launch
       useSubscriptionStore.getState().verifyEntitlement();
       // Initialize PostHog analytics
@@ -124,6 +126,7 @@ export default RootLayout;
 
 
 function RootLayoutNav() {
+  useNavigationLogger();
   const colorScheme = useColorScheme();
   const user = useAuthStore((s) => s.user);
   const authLoading = useAuthStore((s) => s.loading);
