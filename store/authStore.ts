@@ -8,6 +8,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 
 GoogleSignin.configure({
   webClientId: '919376331601-3u0ig0ek6gbbmntsbtqsj5c90520u8sg.apps.googleusercontent.com',
+  iosClientId: '1043997904657-0pclf8v0b2m2jirs495n4d5nvca2t15g.apps.googleusercontent.com',
 });
 
 interface AuthStore {
