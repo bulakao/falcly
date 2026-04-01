@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import auth, { type FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { useCardStore } from '@/store/cardStore';
+import { useUserStore } from '@/store/userStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 
 GoogleSignin.configure({
   webClientId: '919376331601-3u0ig0ek6gbbmntsbtqsj5c90520u8sg.apps.googleusercontent.com',
@@ -14,6 +17,8 @@ interface AuthStore {
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  deleteAccount: (credential: FirebaseAuthTypes.AuthCredential) => Promise<void>;
+  clearLocalData: () => void;
 }
 
 export const useAuthStore = create<AuthStore>()((set) => ({
@@ -38,5 +43,24 @@ export const useAuthStore = create<AuthStore>()((set) => ({
   signOut: async () => {
     await auth().signOut();
     try { await GoogleSignin.signOut(); } catch { /* not signed in via Google */ }
+    useCardStore.getState().reset();
+    useUserStore.getState().reset();
+    useSubscriptionStore.getState().reset();
+  },
+  deleteAccount: async (credential: FirebaseAuthTypes.AuthCredential) => {
+    const currentUser = auth().currentUser;
+    if (!currentUser) throw new Error('No user signed in');
+    // Re-authenticate first (Firebase requires recent login before delete)
+    await currentUser.reauthenticateWithCredential(credential);
+    await currentUser.delete();
+    try { await GoogleSignin.signOut(); } catch { /* not signed in via Google */ }
+    useCardStore.getState().reset();
+    useUserStore.getState().reset();
+    useSubscriptionStore.getState().reset();
+  },
+  clearLocalData: () => {
+    useCardStore.getState().reset();
+    useUserStore.getState().reset();
+    useSubscriptionStore.getState().reset();
   },
 }));

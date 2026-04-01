@@ -16,6 +16,7 @@ interface UserStore {
   setPayday: (day: number) => void;
   setCommittedExpenses: (amount: number) => void;
   setAnalyticsOptOut: (optOut: boolean) => void;
+  reset: () => void;
 }
 
 export const useUserStore = create<UserStore>()(
@@ -46,6 +47,14 @@ export const useUserStore = create<UserStore>()(
         setAnalyticsOptOut(optOut);
         set({ analyticsOptOut: optOut });
       },
+      reset: () => set({
+        cashOnHand: null,
+        cashUpdatedAt: null,
+        monthlyIncome: null,
+        payday: null,
+        committedExpenses: null,
+        analyticsOptOut: false,
+      }),
     }),
     {
       name: 'falcly-user',

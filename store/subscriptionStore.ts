@@ -29,6 +29,7 @@ interface SubscriptionStore {
   isCardReadOnly: (cardIndex: number) => boolean;
   daysUntilDataDeletion: () => number | null;
   trialDaysRemaining: () => number | null;
+  reset: () => void;
 }
 
 export const useSubscriptionStore = create<SubscriptionStore>()(
@@ -113,6 +114,7 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
         return Math.max(0, remaining);
       },
 
+      reset: () => set({ tier: 'free', trialEndsAt: null, planType: null, proExpiredAt: null }),
       trialDaysRemaining: () => {
         const { tier, trialEndsAt } = get();
         if (tier !== 'trial' || trialEndsAt === null) return null;

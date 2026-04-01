@@ -7,7 +7,9 @@ import {
   ScrollView,
   Alert,
   View,
+  ActivityIndicator,
 } from 'react-native';
+import auth from '@react-native-firebase/auth';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/Themed';
@@ -63,6 +65,20 @@ export default function SignInScreen() {
     }
   }
 
+  async function handleForgotPassword() {
+    if (!email.trim()) {
+      Alert.alert('Enter your email', 'Type your email address above, then tap Forgot Password.');
+      return;
+    }
+    try {
+      await auth().sendPasswordResetEmail(email.trim());
+      Alert.alert('Check your inbox', `A password reset link has been sent to ${email.trim()}.`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Failed to send reset email';
+      Alert.alert('Error', msg);
+    }
+  }
+
   return (
     <KeyboardAvoidingView
       style={[styles.flex, { backgroundColor: t.background }]}
@@ -111,6 +127,14 @@ export default function SignInScreen() {
               </Text>
             </Text>
           </Pressable>
+
+          {!isSignUp && (
+            <Pressable onPress={handleForgotPassword} style={styles.forgotPassword}>
+              <Text style={[styles.forgotPasswordText, { color: t.textMuted }]}>
+                Forgot password?
+              </Text>
+            </Pressable>
+          )}
         </View>
 
         {/* Divider */}
@@ -122,11 +146,15 @@ export default function SignInScreen() {
 
         {/* Google */}
         <Button
-          label="Continue with Google"
+          label={loading ? 'Please wait...' : 'Continue with Google'}
           onPress={handleGoogleSignIn}
           variant="secondary"
           disabled={loading}
         />
+
+        {loading && (
+          <ActivityIndicator style={styles.spinner} color={t.primary} />
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -179,5 +207,15 @@ const styles = StyleSheet.create({
   dividerText: {
     fontSize: 13,
     marginHorizontal: 16,
+  },
+  forgotPassword: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  forgotPasswordText: {
+    fontSize: 13,
+  },
+  spinner: {
+    marginTop: 16,
   },
 });

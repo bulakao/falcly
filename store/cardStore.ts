@@ -21,6 +21,7 @@ interface CardStore {
   toggleCardActive: (cardId: string) => void;
   reorderCards: (orderedIds: string[]) => void;
   enforceActiveLimit: (limit: number) => void;
+  reset: () => void;
 }
 
 export const useCardStore = create<CardStore>()(
@@ -87,6 +88,7 @@ export const useCardStore = create<CardStore>()(
           return { cards: [...reordered, ...remaining] };
         });
       },
+      reset: () => set({ cards: [], _nextId: 1 }),
       enforceActiveLimit: (limit) => {
         set((state) => {
           let activeCount = 0;
