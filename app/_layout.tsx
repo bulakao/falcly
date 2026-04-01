@@ -11,6 +11,7 @@ import { useColorScheme } from 'react-native';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
+import { useTransactionStore } from '@/store/transactionStore';
 import { useAuthStore } from '@/store/authStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
 import { supabase } from '@/utils/supabase';
@@ -94,6 +95,7 @@ function RootLayout() {
   useEffect(() => {
     if (dbReady) {
       useCardStore.getState().loadCards();
+      useTransactionStore.getState().loadTransactions();
       useUserStore.getState().loadProfile();
     }
   }, [dbReady]);
@@ -182,6 +184,9 @@ function RootLayoutNav() {
           <Stack.Screen name="onboarding-notifications" options={{ presentation: 'modal', title: 'Notifications', headerShown: false }} />
           <Stack.Screen name="settings" options={{ presentation: 'fullScreenModal', headerShown: false }} />
           <Stack.Screen name="manage-cards" options={{ presentation: 'fullScreenModal', headerShown: false }} />
+          <Stack.Screen name="log-transaction" options={{ presentation: 'modal', title: 'Log Transaction' }} />
+          <Stack.Screen name="card-transactions" options={{ presentation: 'fullScreenModal', headerShown: false }} />
+          <Stack.Screen name="payment-summary" options={{ presentation: 'modal', title: 'What You Owe' }} />
           <Stack.Screen name="component-showcase" options={{ presentation: 'modal', title: 'Component Showcase' }} />
         </Stack>
       </ThemeProvider>

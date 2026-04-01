@@ -1,4 +1,4 @@
-import { sqliteTable, text, real, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, real, integer, index } from 'drizzle-orm/sqlite-core';
 
 export const cards = sqliteTable('cards', {
   id: text('id').primaryKey(),
@@ -21,6 +21,24 @@ export const cards = sqliteTable('cards', {
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
 });
+
+export const transactions = sqliteTable('transactions', {
+  id: text('id').primaryKey(),
+  cardId: text('card_id').notNull(),
+  amount: real('amount').notNull(),
+  type: text('type').notNull().default('purchase'), // purchase | payment | refund | fee | installment_amortization
+  merchant: text('merchant').notNull().default(''),
+  date: integer('date', { mode: 'timestamp_ms' }).notNull(),
+  cycleLabel: text('cycle_label').notNull().default('current'), // previous | current | next | excluded
+  statementMonth: text('statement_month').notNull(), // YYYY-MM
+  isManual: integer('is_manual', { mode: 'boolean' }).notNull().default(true),
+  notes: text('notes'),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+}, (table) => [
+  index('idx_transactions_card_id').on(table.cardId),
+  index('idx_transactions_card_statement').on(table.cardId, table.statementMonth),
+]);
 
 export const profile = sqliteTable('profile', {
   id: text('id').primaryKey().default('local'),

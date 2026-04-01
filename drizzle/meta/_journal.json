@@ -8,6 +8,13 @@
       "when": 1775042423385,
       "tag": "0000_aberrant_ghost_rider",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1775055312007,
+      "tag": "0001_shallow_power_man",
+      "breakpoints": true
     }
   ]
 }
