@@ -189,7 +189,11 @@ export default function SettingsScreen() {
       </SectionCard>
 
       {/* Sign Out & Delete */}
-      <View style={styles.dangerZone}>
+      <SectionCard>
+        <SectionHeader
+          title="Sign Out"
+          subtitle="Switch to a different account. Your data stays safe."
+        />
         <Button
           label="Sign Out"
           onPress={() => {
@@ -200,32 +204,39 @@ export default function SettingsScreen() {
           }}
           variant="secondary"
         />
+      </SectionCard>
+
+      <SectionCard>
+        <SectionHeader
+          title="Delete Account"
+          subtitle="Permanently remove your account, cards, and all associated data. This cannot be undone."
+        />
         <Button
-        label="Delete Account"
-        variant="destructive-outline"
-        onPress={() => {
-          Alert.alert(
-            'Delete Account',
-            'This will permanently delete your account and all your data. This cannot be undone.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Delete',
-                style: 'destructive',
-                onPress: async () => {
-                  try {
-                    await user?.delete();
-                  } catch (e: unknown) {
-                    const msg = e instanceof Error ? e.message : 'Failed to delete account';
-                    Alert.alert('Error', msg);
-                  }
+          label="Delete Account"
+          variant="destructive-outline"
+          onPress={() => {
+            Alert.alert(
+              'Delete Account',
+              'This will permanently delete your account and all your data. This cannot be undone.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Delete',
+                  style: 'destructive',
+                  onPress: async () => {
+                    try {
+                      await user?.delete();
+                    } catch (e: unknown) {
+                      const msg = e instanceof Error ? e.message : 'Failed to delete account';
+                      Alert.alert('Error', msg);
+                    }
+                  },
                 },
-              },
-            ],
-          );
-        }}
-      />
-      </View>
+              ],
+            );
+          }}
+        />
+      </SectionCard>
     </ScrollView>
   );
 }
@@ -290,8 +301,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   dangerZone: {
-    marginTop: 8,
-    width: '100%',
+    gap: 12,
   },
   optOutLabel: {
     fontSize: 15,
