@@ -1,4 +1,5 @@
 import { Card, CardStatusResult, SwipeImpactResult, BestCardResult, CycleDates, FutureCycleProjection, FutureSignal } from '@/types/card';
+import type { Transaction } from '@/store/transactionStore';
 
 /**
  * Calculate days until statement close from today.
@@ -67,18 +68,24 @@ export function getCycleDates(card: Card, today: Date = new Date()): CycleDates 
 /**
  * Calculate the projected statement balance for a card.
  * Formula: outstanding_balance + pending_transactions + installments_monthly_amount
- *          + subscriptions_this_cycle + proposed_swipe + annual_fee (if due this cycle)
+ *          + subscriptions_this_cycle + proposed_swipe + current_cycle_tx_sum
+ *          + annual_fee (if due this cycle)
+ *
+ * currentCycleTxSum: sum of logged current-cycle transactions (purchases positive,
+ * payments/refunds negative, excluded = 0). Defaults to 0 for backward compat.
  */
 export function projectedStatementBalance(
   card: Card,
   proposedSwipe: number = 0,
   today: Date = new Date(),
+  currentCycleTxSum: number = 0,
 ): number {
   let projected = card.outstandingBalance
     + card.pendingTransactions
     + card.installmentsMonthlyAmount
     + card.subscriptionsThisCycle
-    + proposedSwipe;
+    + proposedSwipe
+    + currentCycleTxSum;
 
   // Add annual fee if it falls in the current cycle month
   if (card.annualFee > 0 && card.annualFeeMonth > 0) {
@@ -486,6 +493,19 @@ export function projectFutureCycles(
   });
 
   return projections;
+}
+
+/**
+ * Compute the net sum of current-cycle transactions for a card.
+ * Purchases/fees add to the balance; payments/refunds subtract.
+ * Excluded transactions are skipped. Returns 0 if no transactions.
+ */
+export function computeCurrentCycleTxSum(currentCycleTxns: Transaction[]): number {
+  return currentCycleTxns.reduce((sum, tx) => {
+    if (tx.cycleLabel === 'excluded') return sum;
+    if (tx.type === 'payment' || tx.type === 'refund') return sum - tx.amount;
+    return sum + tx.amount;
+  }, 0);
 }
 
 function formatPeso(amount: number): string {
