@@ -3,6 +3,7 @@ import {
   StyleSheet,
   SectionList,
   Pressable,
+  Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,7 +15,8 @@ import { useAppTheme } from '@/theme';
 import { useCardStore } from '@/store/cardStore';
 import { useTransactionStore, type Transaction } from '@/store/transactionStore';
 import { getCycleDates } from '@/utils/decisionEngine';
-import { formatCycleDateRange } from '@/utils/cycleUtils';
+import { formatCycleDateRange, classifyTransactionCycle } from '@/utils/cycleUtils';
+import type { Card } from '@/types/card';
 
 function formatPeso(amount: number): string {
   return `₱${Math.round(amount).toLocaleString()}`;
@@ -149,7 +151,7 @@ export default function CardTransactionsScreen() {
             </View>
           )}
           renderItem={({ item }) => (
-            <TransactionRow tx={item} />
+            <TransactionRow tx={item} card={card} />
           )}
           renderSectionFooter={({ section }) => (
             <View style={styles.sectionFooter}>
@@ -172,14 +174,50 @@ export default function CardTransactionsScreen() {
   );
 }
 
-function TransactionRow({ tx }: { tx: Transaction }) {
+function TransactionRow({ tx, card }: { tx: Transaction; card: Card }) {
   const t = useAppTheme();
+  const excludeTransaction = useTransactionStore((s) => s.excludeTransaction);
+  const includeTransaction = useTransactionStore((s) => s.includeTransaction);
+  const deleteTransaction = useTransactionStore((s) => s.deleteTransaction);
   const isPayment = tx.type === 'payment';
   const isRefund = tx.type === 'refund';
   const isExcluded = tx.cycleLabel === 'excluded';
 
+  function handleLongPress() {
+    const options = isExcluded
+      ? [
+          { text: 'Include', onPress: () => {
+            const restoredLabel = classifyTransactionCycle(tx.date, card);
+            includeTransaction(tx.id, restoredLabel);
+          }},
+          { text: 'Delete', style: 'destructive' as const, onPress: () => {
+            Alert.alert('Delete Transaction', 'Are you sure?', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Delete', style: 'destructive', onPress: () => deleteTransaction(tx.id) },
+            ]);
+          }},
+          { text: 'Cancel', style: 'cancel' as const },
+        ]
+      : [
+          { text: 'Exclude', onPress: () => excludeTransaction(tx.id) },
+          { text: 'Delete', style: 'destructive' as const, onPress: () => {
+            Alert.alert('Delete Transaction', 'Are you sure?', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Delete', style: 'destructive', onPress: () => deleteTransaction(tx.id) },
+            ]);
+          }},
+          { text: 'Cancel', style: 'cancel' as const },
+        ];
+
+    Alert.alert(
+      tx.merchant || tx.type,
+      `${formatPeso(tx.amount)} · ${formatTxDate(tx.date)}`,
+      options,
+    );
+  }
+
   return (
-    <View style={[styles.txRow, isExcluded && { opacity: 0.4 }]}>
+    <Pressable onLongPress={handleLongPress} style={[styles.txRow, isExcluded && { opacity: 0.4 }]}>
       <View style={styles.txLeft}>
         <Text style={[styles.txDate, { color: t.textMuted }]}>
           {formatTxDate(tx.date)}
@@ -204,7 +242,7 @@ function TransactionRow({ tx }: { tx: Transaction }) {
           <Text style={[styles.txBadge, { color: t.textMuted }]}>{tx.type}</Text>
         )}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
