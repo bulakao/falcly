@@ -441,6 +441,127 @@
       "notes": ""
     },
     {
+      "id": "TL-01",
+      "title": "Log a transaction",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As Ria, I want to manually log a transaction after I swipe, so that Falcly can track what I've spent this cycle and project my next bill accurately.",
+      "acceptanceCriteria": [
+        "Entry form accepts: amount (required), merchant (optional), date (defaults to today, editable), card (required)",
+        "After saving, transaction appears in cycle view immediately and projected balance updates",
+        "Entry accessible from card detail screen and via global '+' FAB on home screen"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "TL-02",
+      "title": "Cycle auto-classification",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As Ria, I want every logged transaction to show which bill it will land on, so that I never have to guess whether a purchase hits this month's or next month's statement.",
+      "acceptanceCriteria": [
+        "Each transaction shows 'Lands on your [Month YYYY] statement · due [date]' label",
+        "Cycle bucket (Current / Next / Previous) is auto-assigned based on transaction date vs statement close date",
+        "User can override the bucket assignment manually if needed"
+      ],
+      "priority": 31,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "TL-03",
+      "title": "Cycle-grouped transaction view",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As Ria, I want to see my transactions grouped by billing cycle, so that I can quickly see what's already billed vs what's coming on my next statement.",
+      "acceptanceCriteria": [
+        "Default view groups transactions into: Previous Cycle (pay now), Current Cycle (next bill), Next Cycle (bill after that)",
+        "Each group shows a subtotal",
+        "Current Cycle group shows projected statement balance (subtotal + installments + subscriptions)"
+      ],
+      "priority": 32,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "TL-04",
+      "title": "Near-cutoff transaction warning",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As Ria, I want a warning when I log a transaction close to my statement cutoff, so that I can decide whether to wait until the next cycle before swiping.",
+      "acceptanceCriteria": [
+        "When logging a transaction within 3 days of statement close: amber inline warning appears",
+        "Copy: 'This purchase closes in [n] day(s). Consider waiting until [date+1] to keep it off this statement.'",
+        "Warning is informational — does not block the log entry"
+      ],
+      "priority": 33,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "TL-05",
+      "title": "Payment summary screen",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As Ria, I want a clear screen that shows exactly what I owe right now and what my next bill will look like, so that I know when and how much to pay without confusion.",
+      "acceptanceCriteria": [
+        "Screen shows two sections: (1) Current bill due — statement balance + due date, (2) Coming next — projected next statement with line-item breakdown",
+        "Uses plain language: 'Pay ₱X,XXX by [date] to avoid interest'",
+        "Carrying balance shows interest cost in amber; paid in full shows ₱0 interest in green",
+        "If no transactions logged: shows balance-only projection with nudge to log transactions"
+      ],
+      "priority": 34,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "TL-06",
+      "title": "Transaction engine integration",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As a developer, I want logged transactions to feed the decision engine's projected balance, so that SAFE/CAUTION/RISKY status reflects actual current-cycle spend.",
+      "acceptanceCriteria": [
+        "projected_balance includes sum(current_cycle_transactions) in addition to existing fields",
+        "If no transactions logged: formula falls back to existing balance-only model (no breaking change)",
+        "Excluded transactions (refunds, promos) are subtracted from current cycle sum"
+      ],
+      "priority": 35,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "TL-07",
+      "title": "Log a payment",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As Ria, I want to log when I make a payment to my credit card, so that Falcly's projected balance reflects the payment and stays accurate.",
+      "acceptanceCriteria": [
+        "Payment entry available in transaction log (type: payment)",
+        "Payment amount is subtracted from outstanding balance in the engine",
+        "Logged payment shows in Previous Cycle section as 'Payment received · ₱X,XXX'"
+      ],
+      "priority": 36,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "TL-08",
+      "title": "Exclude a transaction",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As Ria, I want to mark a transaction as excluded (e.g., a refund or cashback credit), so that it doesn't inflate my projected balance.",
+      "acceptanceCriteria": [
+        "Long-press or swipe on a transaction reveals 'Exclude' action",
+        "Excluded transactions are visually dimmed and labeled 'Excluded'",
+        "Excluded transactions are not added to projected balance"
+      ],
+      "priority": 37,
+      "passes": false,
+      "notes": ""
+    },
+    {
       "id": "AQ-01",
       "title": "PostHog analytics",
       "phase": 1,

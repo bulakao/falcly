@@ -1,6 +1,6 @@
 # Falcly — Product Requirements Document
 
-> Version: 1.4
+> Version: 1.5
 > Date: 2026-04-01
 > Status: Active
 
@@ -14,9 +14,11 @@
 
 **What Falcly is NOT:**
 - Not a budgeting app (it doesn't track categories or monthly spending)
-- Not an expense tracker (it doesn't log every purchase)
-- Not a bank app (it doesn't connect to bank accounts or initiate payments)
 - Not a rewards optimizer (it doesn't chase points or miles)
+- Not a bank app (it doesn't connect to bank accounts or initiate payments)
+
+**On manual transaction logging:**
+Falcly includes a lightweight cycle-aware transaction log. This is not an expense tracker — there are no categories, no spending charts, no budgets. It exists solely for payment intelligence: knowing which bill a purchase lands on, projecting the next statement balance, and answering "what do I owe and when." Because PH bank apps delay transaction posting by days, a user-entered log is often more accurate than the bank app in real time.
 
 Falcly is a **billing cycle intelligence tool** — it knows where you are in your billing cycle, what you owe, what's coming in, and tells you whether swiping today is safe or risky.
 
@@ -85,11 +87,15 @@ AI serves the engine; it never replaces it. In Phase 2, AI acts as a data extrac
 
 3. **Net available cash calculation:** Not gross income. Not credit limit. What you can actually put toward the bill: liquid cash + income arriving before due date − committed expenses − auto-payments − subscriptions this cycle.
 
-4. **Flexible horizon projection:** Projects as far forward as data is reliable — 6-month installment? Shows 6 months of impact. Annual fee in 4 months? Surfaces it 4 months out. No fabricated projections beyond known events.
+4. **Cycle-aware transaction log (Phase 1.5):** Users manually log transactions (amount, merchant, date, card). Falcly automatically classifies each transaction into one of four buckets: *Previous Cycle* (already billed — pay now), *Current Cycle* (hits next statement), *Next Cycle* (won't bill until statement after next), or *Excluded* (refunds, promos). Logged transactions feed the projected balance engine in real time. Because PH bank apps delay posting by 24–72 hours, Falcly's log is often more accurate than the bank app immediately after a purchase.
 
-5. **Payment intelligence (Phase 2):** Installment tracking tied to billing cycles, subscription-to-cycle mapping, payoff strategy comparison (avalanche vs. snowball vs. minimum), interest cost projections.
+5. **Payment education layer (Phase 1.5):** A dedicated "What to Pay" screen answers two questions clearly: (a) what is due now and by when, (b) what will your next bill look like. Every transaction shows a "Lands on your [Month] statement · due [date]" label. Near-cutoff purchases show a warning: "Consider waiting until [date+1] to keep this off your current bill." Plain language throughout — no banking jargon.
 
-6. **AI as data extractor (Phase 2) and advisor (Phase 3):** Android notification listener auto-detects bank transactions; conversational queries answer "Can I buy this today?" — all grounded in the deterministic engine.
+6. **Flexible horizon projection:** Projects as far forward as data is reliable — 6-month installment? Shows 6 months of impact. Annual fee in 4 months? Surfaces it 4 months out. No fabricated projections beyond known events.
+
+8. **Payment intelligence (Phase 2):** Installment tracking tied to billing cycles, subscription-to-cycle mapping, payoff strategy comparison (avalanche vs. snowball vs. minimum), interest cost projections.
+
+9. **AI as data extractor (Phase 2) and advisor (Phase 3):** Android notification listener auto-detects bank transactions; conversational queries answer "Can I buy this today?" — all grounded in the deterministic engine.
 
 ---
 
@@ -226,6 +232,59 @@ As Ria, I want to be prompted to upgrade when I try to add a 3rd card, so that I
 
 ---
 
+### Transaction Layer (P1.5)
+
+**TL-01: Log a transaction**
+As Ria, I want to manually log a transaction after I swipe, so that Falcly can track what I've spent this cycle and project my next bill accurately.
+- Entry form: amount (required), merchant (optional), date (defaults to today, editable), card (required)
+- After saving, transaction immediately appears in the cycle view and projected balance updates
+- Entry is accessible from the card detail screen and via a global "+" FAB on the home screen
+
+**TL-02: See which cycle a transaction belongs to**
+As Ria, I want every logged transaction to show which bill it will land on, so that I never have to guess whether a purchase hits this month's or next month's statement.
+- Each transaction shows a "Lands on your [Month YYYY] statement · due [date]" label
+- Cycle bucket (Current / Next / Previous) is auto-assigned based on transaction date vs statement close date
+- User can override the bucket assignment manually if needed
+
+**TL-03: See cycle-grouped transaction view**
+As Ria, I want to see my transactions grouped by billing cycle, so that I can quickly see what's already billed vs what's coming on my next statement.
+- Default view groups transactions into: Previous Cycle (pay now), Current Cycle (next bill), Next Cycle (bill after that)
+- Each group shows a subtotal
+- Current Cycle group shows projected statement balance (subtotal + installments + subscriptions)
+
+**TL-04: Near-cutoff transaction warning**
+As Ria, I want a warning when I log a transaction close to my statement cutoff, so that I can decide whether to wait until the next cycle before swiping.
+- When logging a transaction within 3 days of statement close: amber inline warning appears
+- Copy: "This purchase closes in [n] day(s). Consider waiting until [date+1] to keep it off this statement."
+- Warning is informational — does not block the log entry
+
+**TL-05: See payment summary ("What to Pay")**
+As Ria, I want a clear screen that shows exactly what I owe right now and what my next bill will look like, so that I know when and how much to pay without confusion.
+- "What to Pay" screen shows two sections: (1) Current bill due — statement balance + due date, (2) Coming next — projected next statement with line-item breakdown
+- Each section uses plain language: "Pay ₱X,XXX by [date] to avoid interest" (not banking jargon)
+- If carrying balance: shows interest cost explicitly in amber — "₱X at 3%/mo"
+- If no transactions logged: gracefully shows balance-only projection with nudge to log transactions
+
+**TL-06: Transaction engine integration**
+As a developer, I want logged transactions to feed the decision engine's projected balance, so that SAFE/CAUTION/RISKY status reflects actual current-cycle spend, not just the manually entered outstanding balance.
+- `projected_balance` formula updated: `outstanding_balance + sum(current_cycle_transactions) + installments + subscriptions + proposed_swipe`
+- If no transactions logged: formula falls back to existing balance-only model (no breaking change)
+- Excluded transactions (type: refund/promo) are subtracted from current cycle sum
+
+**TL-07: Log a payment**
+As Ria, I want to log when I make a payment to my credit card, so that Falcly's projected balance reflects the payment and stays accurate.
+- Payment entry available in transaction log (type: payment)
+- Payment amount is subtracted from outstanding balance in the engine
+- Logged payment shows in Previous Cycle section as "Payment received · ₱X,XXX"
+
+**TL-08: Mark transaction as excluded**
+As Ria, I want to mark a transaction as excluded (e.g., a refund or cashback credit), so that it doesn't inflate my projected balance.
+- Long-press or swipe on a transaction reveals "Exclude" action
+- Excluded transactions are visually dimmed and labeled "Excluded"
+- Excluded transactions are subtracted from (or not added to) projected balance
+
+---
+
 ### Notifications (P2)
 
 **NO-01: Statement closing reminder**
@@ -344,28 +403,30 @@ Seven core scenarios the engine must handle correctly:
 
 ## 6. MVP Scope
 
-| P1 — Ship (Weeks 1–8) | P2 — Next (Months 3–6) | P3 — Later (Month 6+) |
-|-----------------------|------------------------|----------------------|
-| Manual card entry (up to 2 free, unlimited Pro) | Installment tracking | Conversational NL queries (Gemini Nano) |
-| SAFE/CAUTION/RISKY status engine | Subscription/recurring charge tracking | Spending pattern recognition |
-| Swipe Impact Analysis | Annual fee reminders | Cross-card reward optimization |
-| Net available cash calculation | Payment planning (avalanche/snowball/full/minimum) | Statement date arbitrage advice |
-| Best Card recommendation | Payoff timeline & interest cost visualizer | On-device AI (Gemini Nano / Apple Foundation Models) |
-| Billing cycle Gantt timeline | Android notification listener (bank SMS/push) | US App Store expansion |
-| Data freshness timestamps + staleness warnings | Gmail/email statement parsing | Household/shared card management |
-| Multi-card scoring | OCR receipt / statement scanner | Bank API integration (when available in PH) |
-| Free + Pro IAP via RevenueCat | Local push notifications (Notifee) | iOS widget with AI-powered status |
-| 14-day free trial | Subscription auto-detection from notification history | Web companion app |
-| Hard paywall at card 3 | Payoff coaching advisor | |
-| Cash on hand, income, payday, committed expenses | Subscription committed spend overlay on Gantt | |
-| Onboarding (3-field minimum: statement day, limit, balance) | Multi-card payoff planner view | |
-| Dark mode primary + light mode | Anomaly detection (balance spike, subscription price change) | |
-| PostHog analytics + Sentry crash reporting | PostHog dashboards + A/B paywall experiments | |
-| Basic export (CSV) | Proactive due date + statement notifications | |
+| P1 — Ship (Weeks 1–8) | P1.5 — Transaction Layer (Weeks 9–14) | P2 — Next (Months 3–6) | P3 — Later (Month 6+) |
+|-----------------------|--------------------------------------|------------------------|----------------------|
+| Manual card entry (up to 2 free, unlimited Pro) | Manual transaction log (amount, merchant, date, card) | Installment tracking | Conversational NL queries (Gemini Nano) |
+| SAFE/CAUTION/RISKY status engine | Cycle auto-classification (Current / Next / Previous / Excluded) | Subscription/recurring charge tracking | Spending pattern recognition |
+| Swipe Impact Analysis | "Lands on your [Month] statement" label per transaction | Annual fee reminders | Cross-card reward optimization |
+| Net available cash calculation | Near-cutoff transaction warning (3-day amber alert) | Payment planning (avalanche/snowball/full/minimum) | Statement date arbitrage advice |
+| Best Card recommendation | Cycle-grouped transaction view | Payoff timeline & interest cost visualizer | On-device AI (Gemini Nano / Apple Foundation Models) |
+| Billing cycle Gantt timeline | Payment summary screen ("What to Pay") | Android notification listener (bank SMS/push) | US App Store expansion |
+| Data freshness timestamps + staleness warnings | Transaction engine integration (logged txns feed projected balance) | Gmail/email statement parsing | Household/shared card management |
+| Multi-card scoring | Payment logging (reduces outstanding balance) | OCR receipt / statement scanner | Bank API integration (when available in PH) |
+| Free + Pro IAP via RevenueCat | Exclude transaction (refunds, promos) | Local push notifications (Notifee) | iOS widget with AI-powered status |
+| 30-day free trial | First-transaction education flow | Subscription auto-detection from notification history | Web companion app |
+| Hard paywall at card 3 | | Payoff coaching advisor | |
+| Cash on hand, income, payday, committed expenses | | Subscription committed spend overlay on Gantt | |
+| Onboarding (3-field minimum: statement day, limit, balance) | | Multi-card payoff planner view | |
+| Dark mode primary + light mode | | Anomaly detection (balance spike, subscription price change) | |
+| PostHog analytics + Firebase Crashlytics | | PostHog dashboards + A/B paywall experiments | |
+| Basic export (CSV) | | Proactive due date + statement notifications | |
 
-**Free tier (P1):** 2 cards, SAFE/CAUTION/RISKY, Swipe Impact, billing cycle timeline, best card recommendation, basic reminders, export.
+**Free tier (P1 + P1.5):** 2 cards, SAFE/CAUTION/RISKY, Swipe Impact, billing cycle timeline, best card recommendation, transaction log (last 30 days), cycle view, payment summary screen, export.
 
-**Pro (P1):** Unlimited cards, full multi-month timeline, cash-aware projections. Pro also unlocks all P2 features as they ship.
+**Pro (P1 + P1.5):** Unlimited cards, full multi-month timeline, unlimited transaction history, cash-aware projections. Pro also unlocks all P2 features as they ship.
+
+**Pro+ (P1 + P1.5):** Everything in Pro + AI features (Phase 2+): auto-detect transactions from notifications, NL queries, pattern recognition.
 
 ---
 
@@ -472,6 +533,39 @@ Add to `app.json` plugins: `@react-native-firebase/app`, `@react-native-firebase
 ```typescript
 firestore().settings({ persistence: true, cacheSizeBytes: firestore.CACHE_SIZE_UNLIMITED });
 ```
+
+### Transaction Data Model (Phase 1.5)
+
+```typescript
+interface Transaction {
+  id: string;
+  cardId: string;
+  amount: number;                    // always positive; direction from type
+  type: 'purchase' | 'payment' | 'refund' | 'fee' | 'installment_amortization';
+  merchant: string;                  // optional but encouraged
+  date: number;                      // timestamp; user-entered, defaults to now
+  cycleLabel: 'previous' | 'current' | 'next' | 'excluded'; // auto-assigned, overridable
+  statementMonth: string;            // 'YYYY-MM' — which statement this belongs to
+  isManual: boolean;                 // true = user entered; false = auto-detected (Phase 2)
+  notes?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+```
+
+**Projected balance formula update (Phase 1.5):**
+```
+projected_balance =
+  outstanding_balance
+  + sum(current_cycle_transactions where type = purchase | fee | installment_amortization)
+  - sum(current_cycle_transactions where type = payment | refund)
+  + installments_monthly_amount
+  + subscriptions_this_cycle
+  + proposed_swipe_amount
+  + annual_fee (if due this cycle)
+```
+
+If no transactions are logged, formula falls back to the existing balance-only model — fully backward compatible.
 
 ### Phase 2 Additions
 
@@ -683,9 +777,10 @@ Own: "credit card cutoff date tracker Philippines", "safe to swipe credit card",
 
 | Phase | Timeline | Scope |
 |-------|----------|-------|
-| **Phase 1 — MVP** | Weeks 1–8 | Core loop, SAFE/CAUTION/RISKY engine, Swipe Impact, cash awareness (liquid cash, income, committed expenses), best card recommendation, Gantt timeline, Free + Pro IAP (RevenueCat), 14-day trial, hard paywall at card 3, onboarding (3-field minimum) |
-| **Phase 2 — Intelligence** | Weeks 9–20 (Months 3–6) | Payment planning (avalanche/snowball/fixed/aggressive), installment tracking, subscription tracking, annual fee reminders, payoff timeline visualizer, Android notification listener (BDO/BPI/Metrobank/Maya/GCash), local push notifications (Notifee), data staleness nudges, subscription auto-detection |
-| **Phase 3 — AI + US** | Month 6+ | Conversational AI (Gemini Nano on-device + cloud fallback), spending pattern recognition, cross-card reward optimization, statement date arbitrage advice, US App Store launch, ProductHunt launch |
+| **Phase 1 — MVP** | Weeks 1–8 | Core loop, SAFE/CAUTION/RISKY engine, Swipe Impact, cash awareness, best card recommendation, Gantt timeline, Free/Trial/Pro/Pro+ IAP (RevenueCat), 30-day trial, hard paywall at card 3, onboarding (3-field minimum) |
+| **Phase 1.5 — Transaction Layer** | Weeks 9–14 | Manual transaction log, cycle auto-classification (Current/Next/Previous/Excluded), "Lands on" labels, near-cutoff warnings, cycle-grouped view, payment summary screen ("What to Pay"), transaction engine integration, payment logging, exclude transactions, first-transaction education flow |
+| **Phase 2 — Intelligence** | Weeks 15–26 (Months 4–6) | Payment planning (avalanche/snowball/fixed/aggressive), installment tracking, subscription tracking, annual fee reminders, payoff timeline visualizer, Android notification listener (auto-detect transactions from BDO/BPI/Metrobank/Maya/GCash), local push notifications (Notifee), data staleness nudges, subscription auto-detection |
+| **Phase 3 — AI + US** | Month 6+ | Conversational AI (Gemini Nano on-device + cloud fallback), NL queries over transaction log ("What did I spend on BDO this cycle?"), spending pattern recognition, cross-card reward optimization, statement date arbitrage advice, US App Store launch, ProductHunt launch |
 
 ---
 
@@ -712,5 +807,13 @@ The following decisions need resolution before or during development:
 9. **RevenueCat Entitlement on First Install:** How should the app behave if RevenueCat is unavailable (offline, API error) at launch? Fail open (grant free features) or fail closed (show error)?
 
 10. **Multi-Currency Support:** Beth (OFW) remits in SAR but her cards are PH-issued in PHP. The engine works in one currency. Is there a use case for converting SAR income to PHP for the net cash calculation? Phase 1 answer is no — but clarify for Beth's persona story.
+
+11. **Transaction log vs bank balance source of truth:** The existing `outstandingBalance` field is bank-reported (manually entered). Logged transactions are additive on top. Do we show "bank balance + your logged transactions = projected balance" or ask users to start from ₱0 and log everything? Decision needed before Phase 1.5 build starts.
+
+12. **Payment logging and balance update:** When a user logs a payment (type: 'payment'), does it auto-reduce `outstandingBalance` in the card store? Or does the user need to manually update the balance separately? Needs UX + data model decision.
+
+13. **Installment split on transaction entry:** When logging a large installment purchase (e.g., ₱36,000 laptop on 0% for 12 months), does the user enter the full amount once and Falcly splits it into monthly amortizations, or do they enter ₱3,000/month manually? The existing installment model expects monthly amounts — need to decide if a "split this purchase" flow is added at entry.
+
+14. **Free tier transaction history limit:** 30 days vs 45 days. With a 30-day billing cycle, 30-day history just barely covers one full cycle. 45 days ensures Free users always see at least one complete cycle in history. Recommend 45 days — confirm before shipping.
 
 
