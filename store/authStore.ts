@@ -11,6 +11,8 @@ interface AuthStore {
   loading: boolean;
   setUser: (user: FirebaseAuthTypes.User | null) => void;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -27,8 +29,14 @@ export const useAuthStore = create<AuthStore>()((set) => ({
     const credential = auth.GoogleAuthProvider.credential(response.data.idToken);
     await auth().signInWithCredential(credential);
   },
+  signInWithEmail: async (email: string, password: string) => {
+    await auth().signInWithEmailAndPassword(email, password);
+  },
+  signUpWithEmail: async (email: string, password: string) => {
+    await auth().createUserWithEmailAndPassword(email, password);
+  },
   signOut: async () => {
     await auth().signOut();
-    await GoogleSignin.signOut();
+    try { await GoogleSignin.signOut(); } catch { /* not signed in via Google */ }
   },
 }));

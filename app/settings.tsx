@@ -30,8 +30,10 @@ export default function SettingsScreen() {
 
   const tier = useSubscriptionStore((s) => s.tier);
   const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
-  const isPaidPro = useSubscriptionStore((s) => s.isPaidPro);
+  const isPro = useSubscriptionStore((s) => s.isPro);
+  const isProPlus = useSubscriptionStore((s) => s.isProPlus);
   const planType = useSubscriptionStore((s) => s.planType);
+  const trialDaysRemaining = useSubscriptionStore((s) => s.trialDaysRemaining);
   const getTrialEndDate = useSubscriptionStore((s) => s.getTrialEndDate);
   const trialEndDate = getTrialEndDate();
 
@@ -85,20 +87,24 @@ export default function SettingsScreen() {
         )}
       </SectionCard>
 
-      {/* Pro Subscription Status */}
-      {tier === 'pro' && (
+      {/* Subscription Status */}
+      {(isTrialActive() || isPro() || isProPlus()) && (
         <SectionCard accentBorder={t.accent} accentBg={t.accentBg}>
           <View style={[styles.proBadgeRow, { backgroundColor: 'transparent' }]}>
-            <Badge label="PRO" variant="pro" />
+            <Badge label={isProPlus() ? 'PRO+' : 'PRO'} variant="pro" />
             <Text style={[styles.proStatusText, { color: t.accentText }]}>
-              {isPaidPro()
-                ? planType === 'annual' ? 'Annual Plan' : 'Monthly Plan'
-                : isTrialActive() ? 'Free Trial' : 'Active'}
+              {isTrialActive()
+                ? `Free Trial · ${trialDaysRemaining()} days left`
+                : planType === 'pro_annual' ? 'Pro — Annual'
+                : planType === 'pro_monthly' ? 'Pro — Monthly'
+                : planType === 'pro_plus_annual' ? 'Pro+ — Annual'
+                : planType === 'pro_plus_monthly' ? 'Pro+ — Monthly'
+                : 'Active'}
             </Text>
           </View>
           {isTrialActive() && trialEndDate && (
             <Text style={[styles.trialEndText, { color: t.accent }]}>
-              Your trial ends on{' '}
+              Trial ends{' '}
               {trialEndDate.toLocaleDateString('en-PH', {
                 year: 'numeric',
                 month: 'long',
@@ -106,9 +112,12 @@ export default function SettingsScreen() {
               })}
             </Text>
           )}
-          {isPaidPro() && (
+          {!isTrialActive() && planType && (
             <Text style={[styles.trialEndText, { color: t.accent }]}>
-              {planType === 'annual' ? '₱999/yr' : '₱149/mo'} · Cancel anytime
+              {planType === 'pro_annual' ? '₱999/yr'
+                : planType === 'pro_monthly' ? '₱149/mo'
+                : planType === 'pro_plus_annual' ? '₱1,699/yr'
+                : '₱249/mo'} · Cancel anytime
             </Text>
           )}
         </SectionCard>
@@ -143,7 +152,7 @@ export default function SettingsScreen() {
       </SectionCard>
 
       {/* Cloud Sync Status */}
-      {tier === 'pro' && (
+      {(tier === 'pro' || tier === 'pro_plus') && (
         <SectionCard>
           <SectionHeader
             title="Cloud Sync"

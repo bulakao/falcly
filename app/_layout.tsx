@@ -106,6 +106,22 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const user = useAuthStore((s) => s.user);
+  const authLoading = useAuthStore((s) => s.loading);
+
+  if (authLoading) return null;
+
+  if (!user) {
+    return (
+      <AppThemeProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? navDark : navLight}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="sign-in" />
+          </Stack>
+        </ThemeProvider>
+      </AppThemeProvider>
+    );
+  }
 
   return (
     <AppThemeProvider>

@@ -8,26 +8,32 @@ import { trackProConversionStarted, trackProTrialStarted, trackProConverted } fr
 import { useAppTheme } from '@/theme';
 import { Button, Caption } from '@/components/atoms';
 
-const PRO_FEATURES = [
+const TRIAL_FEATURES = [
   { icon: '💳', label: 'Unlimited cards' },
   { icon: '📊', label: 'Payment planning' },
   { icon: '📅', label: 'Installment tracking' },
+  { icon: '🔔', label: 'Billing cycle alerts' },
+];
+
+const PRO_PLUS_FEATURES = [
   { icon: '🤖', label: 'AI-powered alerts' },
+  { icon: '💬', label: 'Natural language queries' },
+  { icon: '📈', label: 'Smart spending insights' },
 ];
 
 export default function ProPaywallScreen() {
   const t = useAppTheme();
   const startTrial = useSubscriptionStore((s) => s.startTrial);
   const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
-  const purchasePro = useSubscriptionStore((s) => s.purchasePro);
-  const isPaidPro = useSubscriptionStore((s) => s.isPaidPro);
+  const isPro = useSubscriptionStore((s) => s.isPro);
+  const isProPlus = useSubscriptionStore((s) => s.isProPlus);
+  const purchasePlan = useSubscriptionStore((s) => s.purchasePlan);
+  const trialDaysRemaining = useSubscriptionStore((s) => s.trialDaysRemaining);
 
   function handleStartTrial() {
-    // RevenueCat would handle payment method collection here
-    // For now, simulate trial activation
     Alert.alert(
       'Start Free Trial',
-      'In the full app, you would be asked to add a payment method. No charge for 14 days. Start your free trial now?',
+      'Full access for 30 days — no charge until your trial ends. A payment method is required to start.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -43,19 +49,23 @@ export default function ProPaywallScreen() {
   }
 
   function handlePurchase(plan: PlanType) {
-    const planLabel = plan === 'annual' ? 'Annual (₱999/yr)' : 'Monthly (₱149/mo)';
+    const labels: Record<PlanType, string> = {
+      pro_monthly: 'Pro — ₱149/mo',
+      pro_annual: 'Pro — ₱999/yr (₱83/mo)',
+      pro_plus_monthly: 'Pro+ — ₱249/mo',
+      pro_plus_annual: 'Pro+ — ₱1,699/yr (₱142/mo)',
+    };
     trackProConversionStarted('paywall');
-    // RevenueCat would handle the actual purchase flow here
     Alert.alert(
-      'Subscribe to Pro',
-      `You selected the ${planLabel} plan. Less than one late payment fee. Cancel anytime.\n\nIn the full app, RevenueCat handles the purchase.`,
+      'Subscribe',
+      `You selected ${labels[plan]}. Cancel anytime.\n\nIn the full app, RevenueCat handles the purchase.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Subscribe',
           onPress: () => {
             trackProConverted(plan);
-            purchasePro(plan);
+            purchasePlan(plan);
             router.back();
           },
         },
@@ -63,26 +73,18 @@ export default function ProPaywallScreen() {
     );
   }
 
-  function handleAnnual() {
-    handlePurchase('annual');
-  }
-
-  function handleMonthly() {
-    handlePurchase('monthly');
-  }
-
   const trialActive = isTrialActive();
-  const paidPro = isPaidPro();
+  const daysLeft = trialDaysRemaining();
 
-  // If already a paid Pro subscriber, show confirmation instead of paywall
-  if (paidPro) {
+  // Already on Pro+
+  if (isProPlus()) {
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.emoji}>✅</Text>
-          <Text style={styles.title}>You&apos;re on Pro</Text>
+          <Text style={styles.emoji}>✨</Text>
+          <Text style={styles.title}>You&apos;re on Pro+</Text>
           <Text style={[styles.subtitle, { color: t.textSecondary }]}>
-            You have full access to all Pro features.
+            You have full access to all features including AI.
           </Text>
         </View>
         <Button label="Go back" onPress={() => router.back()} variant="ghost" />
@@ -90,40 +92,89 @@ export default function ProPaywallScreen() {
     );
   }
 
+  // On Pro (upsell to Pro+)
+  if (isPro()) {
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.emoji}>🚀</Text>
+          <Text style={styles.title}>Upgrade to Pro+</Text>
+          <Text style={[styles.subtitle, { color: t.textSecondary }]}>
+            You&apos;re on Pro. Upgrade to Pro+ to unlock AI features.
+          </Text>
+        </View>
+        <View style={styles.featureList}>
+          {PRO_PLUS_FEATURES.map((f) => (
+            <View key={f.label} style={[styles.featureRow, { borderBottomColor: t.surface }]}>
+              <Text style={styles.featureIcon}>{f.icon}</Text>
+              <Text style={styles.featureLabel}>{f.label}</Text>
+            </View>
+          ))}
+        </View>
+        <View style={styles.plans}>
+          <Pressable style={[styles.annualPlan, { backgroundColor: t.primary }]} onPress={() => handlePurchase('pro_plus_annual')}>
+            <View style={styles.annualPlanContent}>
+              <View style={styles.planHeader}>
+                <Text style={[styles.annualPlanTitle, { color: t.textInverse }]}>Annual</Text>
+                <View style={[styles.saveBadge, { backgroundColor: t.textInverse }]}>
+                  <Text style={[styles.saveBadgeText, { color: t.primary }]}>Save 43%</Text>
+                </View>
+              </View>
+              <Text style={[styles.annualPrice, { color: t.accentMuted }]}>₱142/mo, billed ₱1,699/yr</Text>
+            </View>
+          </Pressable>
+          <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_plus_monthly')}>
+            <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Monthly</Text>
+            <Text style={[styles.monthlyPrice, { color: t.textMuted }]}>₱249/mo</Text>
+          </Pressable>
+          <Caption>Cancel anytime</Caption>
+        </View>
+        <Button label="Not now" onPress={() => router.back()} variant="ghost" />
+      </ScrollView>
+    );
+  }
+
+  // Free or trial expired — main paywall
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <Text style={styles.emoji}>🔒</Text>
-        <Text style={styles.title}>Upgrade to Pro</Text>
+        <Text style={styles.title}>
+          {trialActive ? `${daysLeft} days left in trial` : 'Upgrade to Pro'}
+        </Text>
         <Text style={[styles.subtitle, { color: t.textSecondary }]}>
-          You&apos;ve reached the 2-card limit on the Free plan. Upgrade to manage all your cards.
+          {trialActive
+            ? 'Subscribe before your trial ends to keep full access.'
+            : 'Start a 30-day free trial or subscribe directly.'}
         </Text>
       </View>
 
       <View style={styles.featureList}>
-        {PRO_FEATURES.map((feature) => (
-          <View key={feature.label} style={[styles.featureRow, { borderBottomColor: t.surface }]}>
-            <Text style={styles.featureIcon}>{feature.icon}</Text>
-            <Text style={styles.featureLabel}>{feature.label}</Text>
+        {TRIAL_FEATURES.map((f) => (
+          <View key={f.label} style={[styles.featureRow, { borderBottomColor: t.surface }]}>
+            <Text style={styles.featureIcon}>{f.icon}</Text>
+            <Text style={styles.featureLabel}>{f.label}</Text>
           </View>
         ))}
       </View>
 
-      {/* Trial CTA */}
+      {/* Trial CTA — only show if not already in trial */}
       {!trialActive && (
         <Pressable style={[styles.trialButton, { backgroundColor: t.primary }]} onPress={handleStartTrial}>
-          <Text style={[styles.trialButtonText, { color: t.textInverse }]}>Try Free for 14 Days</Text>
+          <Text style={[styles.trialButtonText, { color: t.textInverse }]}>Try Free for 30 Days</Text>
           <Text style={[styles.trialSubtext, { color: t.accentMuted }]}>
-            Payment method required. No charge for 14 days.
+            Payment method required. No charge for 30 days.
           </Text>
         </Pressable>
       )}
 
+      {/* Pro plans */}
+      <Text style={[styles.sectionLabel, { color: t.textSecondary }]}>Pro — Full access, no AI</Text>
       <View style={styles.plans}>
-        <Pressable style={[styles.annualPlan, { backgroundColor: t.primary }]} onPress={handleAnnual}>
+        <Pressable style={[styles.annualPlan, { backgroundColor: t.primary }]} onPress={() => handlePurchase('pro_annual')}>
           <View style={styles.annualPlanContent}>
             <View style={styles.planHeader}>
-              <Text style={[styles.annualPlanTitle, { color: t.textInverse }]}>Annual Plan</Text>
+              <Text style={[styles.annualPlanTitle, { color: t.textInverse }]}>Annual</Text>
               <View style={[styles.saveBadge, { backgroundColor: t.textInverse }]}>
                 <Text style={[styles.saveBadgeText, { color: t.primary }]}>Save 44%</Text>
               </View>
@@ -132,12 +183,30 @@ export default function ProPaywallScreen() {
             <Text style={[styles.annualCta, { color: t.accentMuted }]}>Less than one late payment fee</Text>
           </View>
         </Pressable>
-
-        <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={handleMonthly}>
-          <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Monthly Plan</Text>
+        <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_monthly')}>
+          <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Monthly</Text>
           <Text style={[styles.monthlyPrice, { color: t.textMuted }]}>₱149/mo</Text>
         </Pressable>
+      </View>
 
+      {/* Pro+ plans */}
+      <Text style={[styles.sectionLabel, { color: t.textSecondary }]}>Pro+ — Everything + AI</Text>
+      <View style={styles.plans}>
+        <Pressable style={[styles.annualPlan, { backgroundColor: t.primary }]} onPress={() => handlePurchase('pro_plus_annual')}>
+          <View style={styles.annualPlanContent}>
+            <View style={styles.planHeader}>
+              <Text style={[styles.annualPlanTitle, { color: t.textInverse }]}>Annual</Text>
+              <View style={[styles.saveBadge, { backgroundColor: t.textInverse }]}>
+                <Text style={[styles.saveBadgeText, { color: t.primary }]}>Save 43%</Text>
+              </View>
+            </View>
+            <Text style={[styles.annualPrice, { color: t.accentMuted }]}>₱142/mo, billed ₱1,699/yr</Text>
+          </View>
+        </Pressable>
+        <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_plus_monthly')}>
+          <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Monthly</Text>
+          <Text style={[styles.monthlyPrice, { color: t.textMuted }]}>₱249/mo</Text>
+        </Pressable>
         <Caption>Cancel anytime</Caption>
       </View>
 
@@ -190,6 +259,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  sectionLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+    marginTop: 8,
+  },
   trialButton: {
     width: '100%',
     borderRadius: 12,
@@ -208,6 +286,7 @@ const styles = StyleSheet.create({
   plans: {
     width: '100%',
     alignItems: 'center',
+    marginBottom: 16,
   },
   annualPlan: {
     width: '100%',
