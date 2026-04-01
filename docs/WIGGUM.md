@@ -23,8 +23,10 @@
 - [ ] Create `delete_own_account` RPC function
 - [ ] Set JWT expiry to 7 days (mobile offline use case)
 - [ ] Install `@supabase/supabase-js`, `react-native-url-polyfill`
+- [ ] Install `drizzle-orm`, `expo-sqlite`, `drizzle-kit` (dev), `babel-plugin-inline-import` (dev), `expo-drizzle-studio-plugin` (dev)
 - [ ] Create `utils/supabase.ts` with client init, session storage via AsyncStorage, auto-refresh on foreground
 - [ ] Store Supabase URL and anon key in `app.config.js` `extra`
+- [ ] Add `"sql"` to Metro `resolver.sourceExts` in `metro.config.js`
 
 **Acceptance Criteria:**
 - Supabase client initializes without error in dev build and Expo Go
@@ -232,6 +234,107 @@
 
 ---
 
+## Epic: DRIZZLE — Local Database Migration
+
+### DRIZZLE-01: Set up Drizzle + expo-sqlite
+
+**Priority:** P0
+**Phase:** 1.5 (after auth, before sync)
+**Estimate:** 1 day
+**Depends on:** AUTH-01
+
+**Description:** Initialize Drizzle ORM with expo-sqlite as the local database.
+
+**Tasks:**
+- [ ] Create `db/client.ts` — `openDatabaseSync('falcly.db')` + `drizzle(expoDb)`
+- [ ] Create `db/schema/local.ts` — `sqliteTable` definitions for `cards` and `profile`
+- [ ] Create `drizzle.config.ts` — `dialect: 'sqlite'`, `driver: 'expo'`
+- [ ] Generate initial migration: `npx drizzle-kit generate`
+- [ ] Create `db/migrate.ts` — run migrations on app startup via `useMigrations()` or `migrate()`
+- [ ] Add migration runner to `_layout.tsx` boot sequence
+- [ ] Commit `drizzle/` migration output folder
+
+**Acceptance Criteria:**
+- SQLite database creates on first launch
+- Migrations run without error
+- Drizzle Studio plugin shows empty tables in dev
+- Works in Expo Go
+
+---
+
+### DRIZZLE-02: Migrate cardStore to Drizzle
+
+**Priority:** P0
+**Phase:** 1.5
+**Estimate:** 1.5 days
+**Depends on:** DRIZZLE-01
+
+**Description:** Replace AsyncStorage-persisted cardStore with Drizzle SQLite queries.
+
+**Tasks:**
+- [ ] Rewrite `addCard` → `db.insert(cards).values(...)`
+- [ ] Rewrite `updateCard` → `db.update(cards).set(...).where(eq(cards.id, cardId))`
+- [ ] Rewrite `updateBalance` → same pattern with `balanceUpdatedAt: Date.now()`
+- [ ] Rewrite `deleteCard` → `db.delete(cards).where(...)`
+- [ ] Rewrite `toggleCardActive` → `db.update(cards).set({ isActive: !current })`
+- [ ] Rewrite `reorderCards` → update `sortOrder` column per card
+- [ ] Rewrite `enforceActiveLimit` → SQL update with limit
+- [ ] Replace `useCardStore` selectors with `useLiveQuery` from Drizzle for reactive reads
+- [ ] One-time migration: read existing AsyncStorage `falcly-cards` data, insert into SQLite, clear AsyncStorage
+- [ ] Remove `persist` middleware from cardStore (no more AsyncStorage for cards)
+
+**Acceptance Criteria:**
+- All card CRUD operations work via SQLite
+- Card list reactively updates when database changes
+- Existing AsyncStorage data migrates to SQLite on first launch
+- `tsc` and lint pass
+
+---
+
+### DRIZZLE-03: Migrate userStore to Drizzle
+
+**Priority:** P0
+**Phase:** 1.5
+**Estimate:** 0.5 day
+**Depends on:** DRIZZLE-01
+
+**Description:** Replace AsyncStorage-persisted userStore with Drizzle SQLite queries.
+
+**Tasks:**
+- [ ] Read/write `profile` table for cash on hand, income, payday, expenses, analytics opt-out
+- [ ] Replace `setCashOnHand`, `setMonthlyIncome`, `setPayday`, `setCommittedExpenses` with Drizzle updates
+- [ ] One-time migration: read `falcly-user` from AsyncStorage, insert into SQLite `profile` table
+- [ ] Keep `analyticsOptOut` reactive via `useLiveQuery` or Zustand wrapper
+- [ ] Remove `persist` middleware from userStore
+
+**Acceptance Criteria:**
+- FinanceCard reads/writes via SQLite
+- Cash staleness timestamp persists correctly
+- Debounced autosave still works with Drizzle writes
+
+---
+
+### DRIZZLE-04: Create remote Postgres schema
+
+**Priority:** P2
+**Phase:** 4 (with sync)
+**Estimate:** 0.5 day
+**Depends on:** DRIZZLE-01
+
+**Description:** Create the `pgTable` schema mirroring the local SQLite schema for Supabase sync.
+
+**Tasks:**
+- [ ] Create `db/schema/remote.ts` with `pgTable` definitions
+- [ ] Map column types: `real` → `numeric`, `integer` → `smallint`/`integer`, `text` → `text`
+- [ ] Add `user_id` column (not in local schema — added during sync)
+- [ ] Verify schema matches Supabase SQL from migration doc
+
+**Acceptance Criteria:**
+- Remote schema types align with Supabase tables
+- Can be used by sync engine for typed push/pull
+
+---
+
 ## Epic: SYNC — Cloud Sync (Pro/Pro+ only)
 
 ### SYNC-01: Implement sync engine
@@ -239,7 +342,7 @@
 **Priority:** P2
 **Phase:** 4
 **Estimate:** 2 days
-**Depends on:** AUTH-01, CLEANUP-01
+**Depends on:** AUTH-01, DRIZZLE-04, CLEANUP-01
 
 **Description:** Build the push/pull sync engine for Pro/Pro+ users.
 
@@ -369,7 +472,7 @@
 ## Story Dependency Graph
 
 ```
-AUTH-01 (Supabase setup)
+AUTH-01 (Supabase + Drizzle setup)
   ├── AUTH-02 (authStore rewrite)
   │     ├── AUTH-04 (sign-in screen)
   │     ├── AUTH-05 (settings screen)
@@ -377,16 +480,21 @@ AUTH-01 (Supabase setup)
   │     └── AUTH-07 (avatar update)
   ├── AUTH-03 (Apple Sign-In)
   │     └── AUTH-04 (sign-in screen)
-  └── SYNC-01 (sync engine)
-        ├── SYNC-02 (sync hook)
-        │     └── SYNC-03 (sync status UI)
-        └── SYNC-04 (data retention)
+  ├── DRIZZLE-01 (local DB setup)
+  │     ├── DRIZZLE-02 (migrate cardStore)
+  │     ├── DRIZZLE-03 (migrate userStore)
+  │     └── DRIZZLE-04 (remote Postgres schema)
+  │           └── SYNC-01 (sync engine)
+  │                 ├── SYNC-02 (sync hook)
+  │                 │     └── SYNC-03 (sync status UI)
+  │                 └── SYNC-04 (data retention)
+  └── ...
 
 CRASH-01 (Sentry) ← AUTH-06
 
 CLEANUP-01 (remove Firebase) ← AUTH-06 + CRASH-01
 
-VERIFY-01 (testing) ← CLEANUP-01
+VERIFY-01 (testing) ← CLEANUP-01 + DRIZZLE-02 + DRIZZLE-03
 VERIFY-02 (docs) ← VERIFY-01
 ```
 
@@ -395,14 +503,15 @@ VERIFY-02 (docs) ← VERIFY-01
 | Epic | Stories | Estimate |
 |------|---------|----------|
 | AUTH | 7 | 3.75 days |
+| DRIZZLE | 4 | 3.5 days |
 | CRASH | 1 | 1 day |
 | CLEANUP | 1 | 1 day |
 | SYNC | 4 | 4 days |
 | VERIFY | 2 | 1 day |
-| **Total** | **15** | **~10.75 days** |
+| **Total** | **19** | **~14.25 days** |
 
 ## Critical Path
 
-`AUTH-01 → AUTH-02 → AUTH-06 → CRASH-01 → CLEANUP-01 → VERIFY-01`
+`AUTH-01 → DRIZZLE-01 → DRIZZLE-02 + DRIZZLE-03 → AUTH-02 → AUTH-06 → CRASH-01 → CLEANUP-01 → VERIFY-01`
 
-This is the minimum sequence to remove Firebase. SYNC and Apple Sign-In can be deferred without blocking the migration.
+The Drizzle local DB migration is now on the critical path since stores must be rewritten before Firebase removal. SYNC, Apple Sign-In, and remote Postgres schema can be deferred.

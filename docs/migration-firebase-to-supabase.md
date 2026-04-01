@@ -73,42 +73,86 @@ All user data lives **locally** in Zustand stores persisted to AsyncStorage:
 
 ### Design Principles
 
-1. **Local-first remains the default.** Free and trial users never touch the network for data. Zustand + AsyncStorage stays as the primary data layer.
-2. **Cloud sync is a Pro/Pro+ feature.** Only paid users get bidirectional sync to Supabase Postgres.
+1. **Local-first with SQLite.** All user data lives in expo-sqlite via Drizzle ORM. Works offline, no network needed for core features.
+2. **Cloud sync is a Pro/Pro+ feature.** Only paid users get bidirectional sync to Supabase Postgres via Drizzle.
 3. **Auth is the only universal network dependency.** All users authenticate via Supabase Auth.
 4. **No native Firebase modules.** The entire `@react-native-firebase/*` family is removed, eliminating the need for `google-services.json`, `GoogleService-Info.plist`, and `useFrameworks: 'static'` in build config.
+5. **Type-safe data layer.** Drizzle ORM provides typed schemas and queries for both local SQLite and remote Postgres.
 
 ### Component Mapping
 
-| Current (Firebase) | Target (Supabase + alternatives) |
+| Current (Firebase) | Target (Supabase + Drizzle) |
 |---------------------|----------------------------------|
 | Firebase Auth (email/password) | Supabase Auth (email/password) |
 | Firebase Auth (Google via native SDK) | Supabase Auth + `@react-native-google-signin/google-signin` using `signInWithIdToken` |
 | Firebase Auth (future Apple Sign-In) | Supabase Auth + `expo-apple-authentication` using `signInWithIdToken` |
 | Firebase Crashlytics | Sentry (`@sentry/react-native`) |
-| Firestore (initialized but unused) | Supabase Postgres (Pro sync only) |
+| Firestore (initialized but unused) | Supabase Postgres via Drizzle (Pro sync only) |
 | `google-services.json` / `GoogleService-Info.plist` | Supabase project URL + anon key (no native config files) |
+| Zustand + AsyncStorage (card/user data) | Drizzle ORM + expo-sqlite (local), Zustand for ephemeral UI state only |
 
-### Sync Architecture (Pro/Pro+ only)
+### Data Architecture
 
 ```
-+-------------------+       +------------------+       +-------------------+
-|  Zustand Store    | <---> |  Sync Engine     | <---> |  Supabase Postgres|
-|  (AsyncStorage)   |       |  (custom hook)   |       |  (RLS-protected)  |
-+-------------------+       +------------------+       +-------------------+
++---------------------+       +------------------+       +-------------------+
+|  expo-sqlite        | <---> |  Sync Engine     | <---> |  Supabase Postgres|
+|  + Drizzle ORM      |       |  (custom hook)   |       |  + Drizzle ORM    |
+|  (sqliteTable)      |       |                  |       |  (pgTable)        |
++---------------------+       +------------------+       +-------------------+
         |                          |
    Always primary            Only when online
    (offline-first)           + tier = pro/pro_plus
+        |
++---------------------+
+|  Zustand            |
+|  (ephemeral UI      |
+|   state only)       |
++---------------------+
 ```
 
-The sync engine is a lightweight custom hook (`useSyncToSupabase`) that:
-- Watches Zustand store changes
-- Debounces writes (e.g., 2s after last change)
-- Pushes local state to Supabase on change
-- Pulls remote state on app launch (merge strategy: last-write-wins by `updated_at`)
+**Local database (all users):** Drizzle ORM + expo-sqlite replaces AsyncStorage for persistent data (cards, user profile, subscription state). The SQLite database is the single source of truth.
+
+**Remote database (Pro/Pro+ only):** Drizzle ORM + Supabase Postgres (`drizzle-orm/postgres-js` or `@supabase/supabase-js`). Separate `pgTable` schema file mirroring the local `sqliteTable` schema.
+
+**Zustand stays for:** Ephemeral UI state (active card index, modal visibility, form drafts, loading states). No longer persisted to AsyncStorage for card/user data.
+
+**Sync engine:** Custom hook that:
+- Watches local SQLite changes via Drizzle
+- Debounces pushes (2s after last change)
+- Pushes to Supabase Postgres on change
+- Pulls remote on app launch (last-write-wins by `updated_at`)
 - Respects network status via `useNetworkStatus`
 
-**Why not PowerSync/WatermelonDB/RxDB?** Falcly's data model is simple (a handful of cards per user, no collaborative editing). A custom sync hook with last-write-wins is sufficient and avoids adding a heavy sync framework dependency. If conflict resolution needs grow, PowerSync is the recommended upgrade path since it integrates natively with Supabase Postgres.
+**Why Drizzle over raw queries?**
+- Type-safe schemas and queries for both SQLite and Postgres
+- Schema-as-code with generated migrations
+- `useLiveQuery` hook for reactive UI updates from SQLite
+- Same ORM API for local and remote, reducing cognitive overhead
+
+**Why not PowerSync/WatermelonDB/RxDB?** Falcly's data model is simple (a handful of cards per user, no collaborative editing). Drizzle + custom sync is sufficient. If conflict resolution needs grow, PowerSync integrates with both Drizzle and Supabase Postgres.
+
+### Drizzle Setup Requirements
+
+```bash
+# Packages
+drizzle-orm              # ORM core
+expo-sqlite              # Already in Expo SDK
+drizzle-kit              # (devDep) migration generator
+
+# Dev tooling (optional but recommended)
+expo-drizzle-studio-plugin  # (devDep) in-app Drizzle Studio debugger
+babel-plugin-inline-import  # (devDep) bundle .sql migration files
+```
+
+**Metro config:** Add `"sql"` to `resolver.sourceExts` in `metro.config.js`.
+
+**Schema files:** Two separate schemas required (different dialects):
+- `db/schema/local.ts` — uses `sqliteTable` from `drizzle-orm/sqlite-core`
+- `db/schema/remote.ts` — uses `pgTable` from `drizzle-orm/pg-core`
+
+**Migrations:** Generated via `drizzle-kit generate`, bundled with the app, run on startup via `migrate()`. The `drizzle/` output folder is committed to git.
+
+**Expo Go compatibility:** expo-sqlite works in Expo Go. Drizzle + expo-sqlite works in Expo Go. No dev build needed for local database features.
 
 ---
 
@@ -310,21 +354,70 @@ Since the app is not yet in production (v1.0.0), there are no existing Firebase 
 
 ## 4. Data Layer Migration
 
-### 4.1 Current Local-Only Architecture (no change for Free/Trial)
+### 4.1 Local Database: Drizzle + expo-sqlite
 
-```
-User action -> Zustand store.setState() -> AsyncStorage persist -> done
+**Current:** `User action -> Zustand setState() -> AsyncStorage persist`
+**Target:** `User action -> Drizzle insert/update -> expo-sqlite -> UI reactively updates via useLiveQuery`
+
+All persistent data moves from AsyncStorage to SQLite:
+
+```typescript
+// db/client.ts
+import { drizzle } from 'drizzle-orm/expo-sqlite';
+import { openDatabaseSync } from 'expo-sqlite';
+
+const expoDb = openDatabaseSync('falcly.db', { enableChangeListener: true });
+export const db = drizzle(expoDb);
 ```
 
-This stays exactly the same. Free and trial users never interact with Supabase Postgres.
+```typescript
+// db/schema/local.ts
+import { sqliteTable, text, real, integer } from 'drizzle-orm/sqlite-core';
+
+export const cards = sqliteTable('cards', {
+  id: text('id').primaryKey(),
+  bankName: text('bank_name').notNull(),
+  creditLimit: real('credit_limit').notNull(),
+  outstandingBalance: real('outstanding_balance').notNull().default(0),
+  statementDay: integer('statement_day').notNull(),
+  dueDayOffset: integer('due_day_offset').notNull().default(21),
+  interestRate: real('interest_rate').notNull().default(0.02),
+  minPaymentPct: real('min_payment_pct').notNull().default(0.05),
+  minPaymentFloor: real('min_payment_floor').notNull().default(500),
+  pendingTransactions: real('pending_transactions').notNull().default(0),
+  installmentsMonthlyAmount: real('installments_monthly_amount').notNull().default(0),
+  subscriptionsThisCycle: real('subscriptions_this_cycle').notNull().default(0),
+  annualFee: real('annual_fee').notNull().default(0),
+  annualFeeMonth: integer('annual_fee_month').notNull().default(0),
+  balanceUpdatedAt: integer('balance_updated_at', { mode: 'timestamp_ms' }).notNull(),
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+});
+
+export const profile = sqliteTable('profile', {
+  id: text('id').primaryKey().default('local'),
+  cashOnHand: real('cash_on_hand'),
+  cashUpdatedAt: integer('cash_updated_at', { mode: 'timestamp_ms' }),
+  monthlyIncome: real('monthly_income'),
+  payday: integer('payday'),
+  committedExpenses: real('committed_expenses'),
+  analyticsOptOut: integer('analytics_opt_out', { mode: 'boolean' }).notNull().default(false),
+});
+```
+
+**Zustand stores become thin wrappers** that read from and write to SQLite via Drizzle, instead of persisting to AsyncStorage. The `useLiveQuery` hook from Drizzle provides reactive updates when the database changes.
+
+**Migration from AsyncStorage:** On first launch after migration, read existing AsyncStorage data, insert into SQLite, then clear AsyncStorage keys. This is a one-time operation in the app boot sequence.
 
 ### 4.2 Cloud Sync for Pro/Pro+ Users
 
 **Trigger:** When `subscriptionStore.tier` is `'pro'` or `'pro_plus'` AND user is authenticated AND online.
 
-**Sync direction:** Bidirectional with local as authority.
+**Sync direction:** Bidirectional with local SQLite as authority.
 
-**Sync hook (conceptual):**
+**Sync approach:** Custom hook that reads from local Drizzle SQLite and pushes to Supabase Postgres (also via Drizzle or raw `supabase-js`):
 
 ```typescript
 // hooks/useSyncToSupabase.ts
@@ -335,21 +428,14 @@ export function useSyncToSupabase() {
 
   const shouldSync = (tier === 'pro' || tier === 'pro_plus') && user && !isOffline;
 
-  // On app launch: pull remote -> merge into local (last-write-wins by updated_at)
+  // On app launch: pull remote -> merge into local SQLite (last-write-wins by updated_at)
   useEffect(() => {
     if (!shouldSync) return;
-    pullRemoteCards(user.id);
-    pullRemoteProfile(user.id);
+    pullRemoteAndMerge(user.id);
   }, [shouldSync, user?.id]);
 
-  // On local change: debounced push to remote
-  useEffect(() => {
-    if (!shouldSync) return;
-    const unsub = useCardStore.subscribe(
-      debounce((state) => pushCardsToRemote(user.id, state.cards), 2000)
-    );
-    return unsub;
-  }, [shouldSync, user?.id]);
+  // On local SQLite change: debounced push to Supabase Postgres
+  // Uses expo-sqlite change listener via Drizzle's enableChangeListener
 }
 ```
 
@@ -362,7 +448,7 @@ export function useSyncToSupabase() {
 
 Current behavior (from subscriptionStore): When Pro expires, `proExpiredAt` is set, and `daysUntilDataDeletion()` counts down from 90 days. This logic stays local. On downgrade:
 - Stop syncing to Supabase
-- Local data remains accessible (read-only for cards beyond free limit)
+- Local SQLite data remains accessible (read-only for cards beyond free limit)
 - Remote data stays in Supabase for 90 days, then a scheduled Supabase Edge Function or cron job deletes it
 
 ---
@@ -607,17 +693,22 @@ export default Sentry.wrap(function RootLayout() {
 
 | Package | Purpose |
 |---------|---------|
-| `@supabase/supabase-js` | Supabase client (auth, database, realtime) |
+| `@supabase/supabase-js` | Supabase client (auth, remote database) |
 | `react-native-url-polyfill` | Required by supabase-js in React Native |
 | `@sentry/react-native` | Crash reporting + performance monitoring |
 | `expo-apple-authentication` | Native Apple Sign-In on iOS |
+| `drizzle-orm` | Type-safe ORM for SQLite (local) and Postgres (remote) |
+| `expo-sqlite` | Local SQLite database (included in Expo SDK) |
+| `drizzle-kit` | (devDep) Schema migration generator |
+| `babel-plugin-inline-import` | (devDep) Bundle .sql migration files with Metro |
+| `expo-drizzle-studio-plugin` | (devDep) In-app database inspector |
 
 ### Keep (already installed)
 
 | Package | Reason |
 |---------|--------|
 | `@react-native-google-signin/google-signin` | Still used for native Google Sign-In, but token goes to Supabase instead of Firebase |
-| `@react-native-async-storage/async-storage` | Supabase session storage + Zustand persistence |
+| `@react-native-async-storage/async-storage` | Supabase session storage (Zustand no longer persists card/user data) |
 | `posthog-react-native` | Analytics (unchanged) |
 | `@react-native-community/netinfo` | Network status for sync (unchanged) |
 
@@ -625,10 +716,22 @@ export default Sentry.wrap(function RootLayout() {
 
 ```bash
 # Install new dependencies
-npx expo install @supabase/supabase-js react-native-url-polyfill @sentry/react-native expo-apple-authentication
+npx expo install @supabase/supabase-js react-native-url-polyfill @sentry/react-native expo-apple-authentication expo-sqlite drizzle-orm
+npm install -D drizzle-kit babel-plugin-inline-import expo-drizzle-studio-plugin
 
 # Remove Firebase
 npm uninstall @react-native-firebase/app @react-native-firebase/auth @react-native-firebase/crashlytics @react-native-firebase/firestore
+```
+
+### Metro Config Change
+
+Add `"sql"` to source extensions in `metro.config.js`:
+
+```js
+const { getDefaultConfig } = require('expo/metro-config');
+const config = getDefaultConfig(__dirname);
+config.resolver.sourceExts.push('sql');
+module.exports = config;
 ```
 
 ---
