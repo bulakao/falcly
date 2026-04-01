@@ -25,7 +25,6 @@ import { SectionCard, AlertBanner } from '@/components/molecules';
 export default function SettingsScreen() {
   const t = useAppTheme();
   const user = useAuthStore((s) => s.user);
-  const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
   const signOut = useAuthStore((s) => s.signOut);
 
   const tier = useSubscriptionStore((s) => s.tier);
@@ -58,9 +57,9 @@ export default function SettingsScreen() {
       <Heading>Settings</Heading>
 
       {/* Account */}
-      <SectionCard>
-        <SectionHeader title="Account" />
-        {user ? (
+      {user && (
+        <SectionCard>
+          <SectionHeader title="Account" />
           <View style={styles.accountRow}>
             <RNView style={styles.accountAvatar}>
               {user.photoURL ? (
@@ -73,19 +72,9 @@ export default function SettingsScreen() {
               <Text style={[styles.accountName, { color: t.textPrimary }]}>{user.displayName ?? 'User'}</Text>
               <Text style={[styles.accountEmail, { color: t.textMuted }]}>{user.email}</Text>
             </View>
-            <Button label="Sign Out" onPress={signOut} variant="ghost" fullWidth={false} />
           </View>
-        ) : (
-          <Button
-            label="Sign in with Google"
-            onPress={() => signInWithGoogle().catch((e: unknown) => {
-              const msg = e instanceof Error ? e.message : 'Sign-in failed';
-              Alert.alert('Sign In Error', msg);
-            })}
-            variant="secondary"
-          />
-        )}
-      </SectionCard>
+        </SectionCard>
+      )}
 
       {/* Subscription Status */}
       {(isTrialActive() || isPro() || isProPlus()) && (
@@ -194,6 +183,45 @@ export default function SettingsScreen() {
           />
         </View>
       </SectionCard>
+
+      {/* Sign Out */}
+      <Button
+        label="Sign Out"
+        onPress={() => {
+          Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Sign Out', onPress: signOut },
+          ]);
+        }}
+        variant="secondary"
+      />
+
+      {/* Delete Account */}
+      <Button
+        label="Delete Account"
+        variant="destructive"
+        onPress={() => {
+          Alert.alert(
+            'Delete Account',
+            'This will permanently delete your account and all your data. This cannot be undone.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Delete',
+                style: 'destructive',
+                onPress: async () => {
+                  try {
+                    await user?.delete();
+                  } catch (e: unknown) {
+                    const msg = e instanceof Error ? e.message : 'Failed to delete account';
+                    Alert.alert('Error', msg);
+                  }
+                },
+              },
+            ],
+          );
+        }}
+      />
     </ScrollView>
   );
 }
