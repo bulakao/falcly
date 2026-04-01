@@ -5,10 +5,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
   View,
   ActivityIndicator,
 } from 'react-native';
+import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/Themed';
@@ -16,50 +16,59 @@ import { Button, FormInput } from '@/components/atoms';
 import { useAuthStore } from '@/store/authStore';
 import { useAppTheme } from '@/theme';
 
+function mapFirebaseError(code: string): string {
+  switch (code) {
+    case 'auth/user-not-found':
+      return 'No account found with this email.';
+    case 'auth/wrong-password':
+      return 'Incorrect password. Try again or reset it.';
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Please wait a moment.';
+    case 'auth/invalid-email':
+      return 'Check your email format.';
+    default:
+      return 'Sign-in failed. Please try again.';
+  }
+}
+
 export default function SignInScreen() {
   const t = useAppTheme();
   const insets = useSafeAreaInsets();
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
   const signInWithEmail = useAuthStore((s) => s.signInWithEmail);
-  const signUpWithEmail = useAuthStore((s) => s.signUpWithEmail);
   const resetPassword = useAuthStore((s) => s.resetPassword);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [resetSent, setResetSent] = useState(false);
 
   async function handleEmailAuth() {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Required', 'Enter your email and password.');
+      setError('Enter your email and password.');
       return;
     }
-    if (password.length < 6) {
-      Alert.alert('Weak Password', 'Password must be at least 6 characters.');
-      return;
-    }
+    setError('');
     setLoading(true);
     try {
-      if (isSignUp) {
-        await signUpWithEmail(email.trim(), password);
-      } else {
-        await signInWithEmail(email.trim(), password);
-      }
+      await signInWithEmail(email.trim(), password);
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Authentication failed';
-      Alert.alert('Error', msg);
+      const code = (e as { code?: string }).code ?? '';
+      setError(mapFirebaseError(code));
     } finally {
       setLoading(false);
     }
   }
 
   async function handleGoogleSignIn() {
+    setError('');
     setLoading(true);
     try {
       await signInWithGoogle();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Google Sign-In failed';
-      Alert.alert('Error', msg);
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -67,15 +76,16 @@ export default function SignInScreen() {
 
   async function handleForgotPassword() {
     if (!email.trim()) {
-      Alert.alert('Enter your email', 'Type your email address above, then tap Forgot Password.');
+      setError('Type your email address above, then tap Forgot Password.');
       return;
     }
+    setError('');
     try {
       await resetPassword(email.trim());
-      Alert.alert('Check your inbox', `A password reset link has been sent to ${email.trim()}.`);
+      setResetSent(true);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Failed to send reset email';
-      Alert.alert('Error', msg);
+      setError(msg);
     }
   }
 
@@ -88,13 +98,17 @@ export default function SignInScreen() {
         contentContainerStyle={[styles.container, { paddingTop: insets.top + 60 }]}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Header */}
-        <Text style={[styles.title, { color: t.textPrimary }]}>Falcly</Text>
-        <Text style={[styles.subtitle, { color: t.textMuted }]}>
-          Is it safe to swipe right now?
-        </Text>
+        <Text style={[styles.title, { color: t.textPrimary }]}>Welcome back</Text>
 
-        {/* Email + Password */}
+        {error !== '' && (
+          <Text style={[styles.errorText, { color: t.risky }]}>{error}</Text>
+        )}
+        {resetSent && (
+          <Text style={[styles.successText, { color: t.safe }]}>
+            Password reset link sent to {email.trim()}.
+          </Text>
+        )}
+
         <View style={styles.form}>
           <FormInput
             value={email}
@@ -113,38 +127,25 @@ export default function SignInScreen() {
           />
           <View style={styles.buttonWrapper}>
             <Button
-              label={loading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
+              label={loading ? 'Please wait...' : 'Sign In'}
               onPress={handleEmailAuth}
               disabled={loading}
             />
           </View>
 
-          <Pressable onPress={() => setIsSignUp((v) => !v)} style={styles.toggle}>
-            <Text style={[styles.toggleText, { color: t.textMuted }]}>
-              {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-              <Text style={{ color: t.primary, fontWeight: '600' }}>
-                {isSignUp ? 'Sign In' : 'Sign Up'}
-              </Text>
+          <Pressable onPress={handleForgotPassword} style={styles.forgotPassword}>
+            <Text style={[styles.forgotPasswordText, { color: t.textMuted }]}>
+              Forgot password?
             </Text>
           </Pressable>
-
-          {!isSignUp && (
-            <Pressable onPress={handleForgotPassword} style={styles.forgotPassword}>
-              <Text style={[styles.forgotPasswordText, { color: t.textMuted }]}>
-                Forgot password?
-              </Text>
-            </Pressable>
-          )}
         </View>
 
-        {/* Divider */}
         <View style={styles.dividerRow}>
           <View style={[styles.dividerLine, { backgroundColor: t.border }]} />
           <Text style={[styles.dividerText, { color: t.textMuted }]}>or</Text>
           <View style={[styles.dividerLine, { backgroundColor: t.border }]} />
         </View>
 
-        {/* Google */}
         <Button
           label={loading ? 'Please wait...' : 'Continue with Google'}
           onPress={handleGoogleSignIn}
@@ -155,36 +156,44 @@ export default function SignInScreen() {
         {loading && (
           <ActivityIndicator style={styles.spinner} color={t.primary} />
         )}
+
+        <Pressable onPress={() => router.replace('/welcome')} style={styles.toggle}>
+          <Text style={[styles.toggleText, { color: t.textMuted }]}>
+            Don&apos;t have an account?{' '}
+            <Text style={{ color: t.primary, fontWeight: '600' }}>Sign up</Text>
+          </Text>
+        </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
+  flex: { flex: 1 },
   container: {
     padding: 24,
     paddingBottom: 48,
   },
   title: {
-    fontSize: 32,
-    fontWeight: '800',
+    fontSize: 24,
+    fontWeight: '700',
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 24,
   },
-  subtitle: {
-    fontSize: 15,
+  errorText: {
+    fontSize: 14,
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 16,
+  },
+  successText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 16,
   },
   form: {
     marginBottom: 24,
   },
-  spacer: {
-    height: 12,
-  },
+  spacer: { height: 12 },
   buttonWrapper: {
     marginTop: 20,
   },
