@@ -452,7 +452,7 @@
         "PostHog events fired: onboarding_welcome_viewed, onboarding_get_started_tapped"
       ],
       "priority": 20,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -468,7 +468,7 @@
         "PostHog event: onboarding_signup_completed with method: email/google"
       ],
       "priority": 21,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -483,7 +483,7 @@
         "Selected bank name saved as bankName on card"
       ],
       "priority": 22,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -498,7 +498,7 @@
         "After complete(), flag set and onboarding never shown again"
       ],
       "priority": 23,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -514,7 +514,7 @@
         "PostHog events: onboarding_paywall_viewed, onboarding_trial_started, onboarding_paywall_dismissed"
       ],
       "priority": 24,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -530,7 +530,7 @@
         "PostHog events: onboarding_notifications_granted, onboarding_notifications_declined"
       ],
       "priority": 25,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -545,7 +545,7 @@
         "Full funnel visible in PostHog dashboard"
       ],
       "priority": 26,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
