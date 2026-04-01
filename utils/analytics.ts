@@ -77,3 +77,53 @@ export function trackDataStalenessWarningShown(
 ): void {
   posthog?.capture('data_staleness_warning_shown', { level });
 }
+
+// --- Onboarding funnel events ---
+
+export function trackOnboardingWelcomeViewed(): void {
+  posthog?.capture('onboarding_welcome_viewed');
+}
+
+export function trackOnboardingGetStartedTapped(): void {
+  posthog?.capture('onboarding_get_started_tapped');
+}
+
+export function trackOnboardingSignupCompleted(method: 'email' | 'google'): void {
+  posthog?.capture('onboarding_signup_completed', { method });
+}
+
+export function trackOnboardingCardEntryCompleted(bankName: string, hasBalance: boolean): void {
+  posthog?.capture('onboarding_card_entry_completed', { bank_name: bankName, has_balance: hasBalance });
+}
+
+export function trackOnboardingFirstStatusViewed(status: 'SAFE' | 'CAUTION' | 'RISKY'): void {
+  posthog?.capture('onboarding_first_status_viewed', { status });
+}
+
+export function trackOnboardingEnrichmentCompleted(hasCash: boolean, hasPayday: boolean): void {
+  posthog?.capture('onboarding_enrichment_completed', { has_cash: hasCash, has_payday: hasPayday });
+}
+
+export function trackOnboardingEnrichmentSkipped(): void {
+  posthog?.capture('onboarding_enrichment_skipped');
+}
+
+export function trackOnboardingPaywallViewed(): void {
+  posthog?.capture('onboarding_paywall_viewed');
+}
+
+export function trackOnboardingTrialStarted(): void {
+  posthog?.capture('onboarding_trial_started');
+}
+
+export function trackOnboardingPaywallDismissed(): void {
+  posthog?.capture('onboarding_paywall_dismissed');
+}
+
+export function trackOnboardingNotificationsGranted(): void {
+  posthog?.capture('onboarding_notifications_granted');
+}
+
+export function trackOnboardingNotificationsDeclined(): void {
+  posthog?.capture('onboarding_notifications_declined');
+}
