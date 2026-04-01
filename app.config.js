@@ -1,9 +1,6 @@
-const IS_PROD = process.env.APP_ENV === 'production';
-const env = IS_PROD ? 'prod' : 'dev';
-
 module.exports = {
   expo: {
-    name: IS_PROD ? 'Falcly' : 'Falcly (Dev)',
+    name: 'Falcly',
     slug: 'falcly',
     version: '1.0.0',
     orientation: 'portrait',
@@ -19,7 +16,6 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.bulakao.falcly',
-      googleServicesFile: `./firebase/${env}/GoogleService-Info.plist`,
     },
     android: {
       adaptiveIcon: {
@@ -28,8 +24,7 @@ module.exports = {
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
-      package: IS_PROD ? 'com.bulakao.falcly' : 'com.bulakao.falcly.dev',
-      googleServicesFile: `./firebase/${env}/google-services.json`,
+      package: 'com.bulakao.falcly',
     },
     web: {
       bundler: 'metro',
@@ -38,15 +33,12 @@ module.exports = {
     },
     plugins: [
       'expo-router',
-      '@react-native-firebase/app',
-      '@react-native-firebase/crashlytics',
+      '@sentry/react-native/expo',
       [
         'expo-build-properties',
         {
           ios: {
-            useFrameworks: 'static',
             deploymentTarget: '15.1',
-            forceStaticLinking: ['RNFBApp', 'RNFBCrashlytics', 'RNFBFirestore'],
           },
         },
       ],

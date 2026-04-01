@@ -14,6 +14,7 @@ import { useCardStore } from '@/store/cardStore';
 import { useAuthStore } from '@/store/authStore';
 import { supabase } from '@/utils/supabase';
 import { useRunMigrations } from '@/db/migrate';
+import * as Sentry from '@sentry/react-native';
 import { initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
 import { initCrashReporting } from '@/utils/crashReporting';
 import { AppThemeProvider, lightTheme, darkTheme } from '@/theme';
@@ -63,7 +64,7 @@ export {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function RootLayout() {
   const [loaded, error] = useFonts({
     ...FontAwesome.font,
   });
@@ -115,6 +116,8 @@ export default function RootLayout() {
 
   return <RootLayoutNav />;
 }
+
+export default Sentry.wrap(RootLayout);
 
 
 function RootLayoutNav() {
