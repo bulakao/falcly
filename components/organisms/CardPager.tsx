@@ -45,10 +45,8 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
     const isCardReadOnly = useSubscriptionStore((s) => s.isCardReadOnly);
     const flatListRef = useRef<FlatList<PageItem>>(null);
 
-    const hasOverview = cards.length > 0 || hasHiddenCards;
-
     const pages: PageItem[] = [
-      ...(hasOverview ? [{ type: 'overview' as const }] : []),
+      { type: 'overview' as const },
       ...cards.map((card, index) => ({ type: 'card' as const, card, index })),
       { type: 'empty' as const },
     ];
@@ -57,10 +55,10 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
       (cardId: string) => {
         const cardIdx = cards.findIndex((c) => c.id === cardId);
         if (cardIdx === -1) return;
-        const pageIdx = cardIdx + (hasOverview ? 1 : 0);
+        const pageIdx = cardIdx + 1;
         flatListRef.current?.scrollToIndex({ index: pageIdx, animated: true });
       },
-      [cards, hasOverview],
+      [cards],
     );
 
     useImperativeHandle(ref, () => ({ scrollToCard }), [scrollToCard]);
