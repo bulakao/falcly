@@ -72,7 +72,7 @@ export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress,
     <View style={styles.container}>
       {/* Top row: avatar + tier badge + offline chip */}
       <View style={styles.topRow}>
-        <Pressable style={[styles.avatar, { backgroundColor: user?.photoURL ? undefined : t.primary }]} onPress={() => router.navigate('/settings')}>
+        <Pressable style={[styles.avatar, { backgroundColor: user?.photoURL ? undefined : t.primary }]} onPress={() => router.push('/settings')}>
           {user?.photoURL ? (
             <Image source={{ uri: user.photoURL }} style={styles.avatarImage} />
           ) : (
