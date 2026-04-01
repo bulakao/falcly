@@ -85,7 +85,6 @@ All user data lives **locally** in Zustand stores persisted to AsyncStorage:
 |---------------------|----------------------------------|
 | Firebase Auth (email/password) | Supabase Auth (email/password) |
 | Firebase Auth (Google via native SDK) | Supabase Auth + `@react-native-google-signin/google-signin` using `signInWithIdToken` |
-| Firebase Auth (future Apple Sign-In) | Supabase Auth + `expo-apple-authentication` using `signInWithIdToken` |
 | Firebase Crashlytics | Sentry (`@sentry/react-native`) |
 | Firestore (initialized but unused) | Supabase Postgres via Drizzle (Pro sync only) |
 | `google-services.json` / `GoogleService-Info.plist` | Supabase project URL + anon key (no native config files) |
@@ -234,50 +233,7 @@ async function signInWithGoogle() {
 
 **Supabase config required:** Enable Google provider in Supabase Dashboard > Auth > Providers. Enter the Web Client ID and Client Secret from Google Cloud Console.
 
-### 3.4 Apple Sign-In (new -- not yet in app)
-
-Use `expo-apple-authentication` for native iOS sign-in:
-
-```typescript
-import * as AppleAuthentication from 'expo-apple-authentication';
-import { supabase } from '@/utils/supabase';
-
-async function signInWithApple() {
-  const credential = await AppleAuthentication.signInAsync({
-    requestedScopes: [
-      AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-      AppleAuthentication.AppleAuthenticationScope.EMAIL,
-    ],
-  });
-
-  if (!credential.identityToken) throw new Error('No identity token');
-
-  const { data, error } = await supabase.auth.signInWithIdToken({
-    provider: 'apple',
-    token: credential.identityToken,
-  });
-
-  if (error) throw error;
-
-  // Apple only provides name on first sign-in; store it if available
-  if (credential.fullName) {
-    const name = [credential.fullName.givenName, credential.fullName.familyName]
-      .filter(Boolean)
-      .join(' ');
-    if (name) {
-      await supabase.auth.updateUser({ data: { full_name: name } });
-    }
-  }
-
-  return data;
-}
-```
-
-**Gotcha:** Apple's identity token does not include the user's full name in its JWT claims. The name is only provided once (first sign-in). Capture and persist it immediately.
-
-**Supabase config required:** Enable Apple provider in Supabase Dashboard. For native iOS sign-in, you only need the Service ID; no client secret rotation is needed (that is only for web OAuth flow).
-
-### 3.5 Account Deletion
+### 3.4 Account Deletion
 
 Firebase allows client-side `currentUser.delete()` after re-authentication. Supabase's `auth.admin.deleteUser()` requires the service role key, which must never be on the client.
 
@@ -308,7 +264,7 @@ const { error } = await supabase.rpc('delete_own_account');
 
 **Re-authentication:** Supabase does not require re-authentication before deletion like Firebase does. The session JWT is sufficient. If you want to gate it behind re-auth for UX safety, implement a password confirmation step in the UI that calls `supabase.auth.signInWithPassword()` before proceeding.
 
-### 3.6 authStore Rewrite
+### 3.5 authStore Rewrite
 
 The `FirebaseAuthTypes.User` type is replaced with Supabase's `User` type:
 
@@ -325,7 +281,6 @@ interface AuthStore {
   loading: boolean;
   setUser: (user: User | null) => void;
   signInWithGoogle: () => Promise<void>;
-  signInWithApple: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -340,7 +295,7 @@ Key differences from current authStore:
 - User properties change: `user.photoURL` becomes `user.user_metadata.avatar_url`, `user.displayName` becomes `user.user_metadata.full_name`, `user.email` stays `user.email`
 - Provider detection changes: `user.providerData` becomes `user.app_metadata.providers` (string array)
 
-### 3.7 Existing User Migration
+### 3.6 Existing User Migration
 
 Since the app is not yet in production (v1.0.0), there are no existing Firebase Auth users to migrate. If there were, the process would be:
 
@@ -696,7 +651,6 @@ export default Sentry.wrap(function RootLayout() {
 | `@supabase/supabase-js` | Supabase client (auth, remote database) |
 | `react-native-url-polyfill` | Required by supabase-js in React Native |
 | `@sentry/react-native` | Crash reporting + performance monitoring |
-| `expo-apple-authentication` | Native Apple Sign-In on iOS |
 | `drizzle-orm` | Type-safe ORM for SQLite (local) and Postgres (remote) |
 | `expo-sqlite` | Local SQLite database (included in Expo SDK) |
 | `drizzle-kit` | (devDep) Schema migration generator |
@@ -716,7 +670,7 @@ export default Sentry.wrap(function RootLayout() {
 
 ```bash
 # Install new dependencies
-npx expo install @supabase/supabase-js react-native-url-polyfill @sentry/react-native expo-apple-authentication expo-sqlite drizzle-orm
+npx expo install @supabase/supabase-js react-native-url-polyfill @sentry/react-native expo-sqlite drizzle-orm
 npm install -D drizzle-kit babel-plugin-inline-import expo-drizzle-studio-plugin
 
 # Remove Firebase
@@ -742,9 +696,8 @@ module.exports = config;
 
 - [ ] Create Supabase project (choose region closest to PH users -- Singapore)
 - [ ] Run schema SQL (profiles, cards, triggers, RLS policies)
-- [ ] Enable Google and Apple auth providers in Dashboard
+- [ ] Enable Google auth provider in Dashboard
 - [ ] Configure Google OAuth: add Web Client ID + Secret from Google Cloud Console
-- [ ] Configure Apple: add Service ID, Key ID, Team ID
 - [ ] Store Supabase URL and anon key in `app.config.js` `extra` section
 - [ ] Create the `delete_own_account` RPC function
 
@@ -756,14 +709,12 @@ module.exports = config;
   - `signInWithGoogle` -> Google native SDK + `supabase.auth.signInWithIdToken`
   - `signOut` -> `supabase.auth.signOut()`
   - `deleteAccount` -> `supabase.rpc('delete_own_account')`
-- [ ] Add `signInWithApple` to authStore
 - [ ] Update `app/_layout.tsx`:
   - Replace `auth().onAuthStateChanged()` with `supabase.auth.onAuthStateChange()`
   - Remove `initFirestore()` call
   - Replace `initCrashReporting()` with Sentry init
 - [ ] Update `app/sign-in.tsx`:
   - Replace `auth().sendPasswordResetEmail()` with `supabase.auth.resetPasswordForEmail()`
-  - Add Apple Sign-In button (iOS only, using `AppleAuthentication.isAvailableAsync()`)
 - [ ] Update `app/settings.tsx`:
   - Replace `auth.EmailAuthProvider.credential()` re-auth flow with password confirmation + `supabase.auth.signInWithPassword()`
   - Replace Google re-auth flow with Google native SDK + `supabase.auth.signInWithIdToken()`
@@ -807,7 +758,7 @@ module.exports = config;
 ### Phase 5: Cleanup and Verification (1 day)
 
 - [ ] Search entire codebase for any remaining `firebase` references
-- [ ] Verify all auth flows: email sign-up, email sign-in, Google sign-in, Apple sign-in, sign-out, account deletion, password reset
+- [ ] Verify all auth flows: email sign-up, email sign-in, Google sign-in, sign-out, account deletion, password reset
 - [ ] Verify crash reporting sends to Sentry
 - [ ] Verify Pro sync works online and degrades gracefully offline
 - [ ] Verify Free tier works entirely offline
@@ -822,14 +773,13 @@ module.exports = config;
 |---------|---------|-----------|
 | Supabase Auth (email/password) | Works | Works |
 | Supabase Auth (Google via `@react-native-google-signin`) | Does NOT work (native module) | Works |
-| Supabase Auth (Apple via `expo-apple-authentication`) | Works (built into Expo Go on iOS) | Works |
 | Sentry crash reporting | JS errors only (no native crashes) | Full support |
 | Supabase database queries | Works | Works |
 | AsyncStorage | Works | Works |
 
 **Recommendation:** Continue using development builds (`npx expo run:android` / `npx expo run:ios`) as the primary workflow. This is already the case given the CNG workflow and the existing dependency on `@react-native-google-signin/google-signin`.
 
-**Improvement over Firebase:** The current Firebase setup requires a dev build for ALL functionality (including email auth) because `@react-native-firebase/app` is a native module. With Supabase, email auth and Apple sign-in will work in Expo Go, improving the inner dev loop for those flows.
+**Improvement over Firebase:** The current Firebase setup requires a dev build for ALL functionality (including email auth) because `@react-native-firebase/app` is a native module. With Supabase, email auth will work in Expo Go, improving the inner dev loop.
 
 ---
 
@@ -841,7 +791,6 @@ module.exports = config;
 |------|----------|------------|------------|
 | `supabase-js` `ws` module crash in RN | High | Medium | Pin to latest stable version. The `ws` issue (GitHub #1434) affects v2.49.8; check if resolved in current version. Disable realtime if not needed: `createClient(url, key, { realtime: { enabled: false } })` |
 | Google Sign-In token rejected by Supabase | Medium | Low | Test immediately in Phase 1. Ensure the same Web Client ID is configured in both Google Cloud Console and Supabase Dashboard. |
-| Apple secret key rotation (6-month expiry) | Medium | Certain (if using OAuth flow) | Use native `signInWithIdToken` flow instead of OAuth -- no secret rotation needed for native iOS. |
 | Session loss on migration (if app were in production) | High | N/A | Not applicable -- app is pre-launch. For a production migration, you would dual-write auth for a transition period. |
 | Supabase free tier limits | Low | Low | Free tier: 50K monthly active users, 500MB database, 1GB file storage, 2GB bandwidth. More than sufficient for launch. |
 | Offline auth token expiry | Medium | Medium | Supabase JWT expires after 1 hour by default. If offline longer, re-auth is needed on reconnect. Increase JWT expiry to 7 days in Dashboard for mobile use case. |
@@ -859,8 +808,7 @@ Since this is a pre-launch app with no production users:
 1. **`react-native-url-polyfill` must be imported before `createClient`.** Import it at the top of `utils/supabase.ts` or in the app entry point.
 2. **`detectSessionInUrl: false` is required** in Supabase client config for React Native (no `window.location`).
 3. **Supabase merges OAuth identities by email.** If a user signs up with email/password, then later signs in with Google using the same email, Supabase links the identities. This is generally desirable but differs from Firebase's default behavior.
-4. **Apple Sign-In name is only provided once.** Cache `credential.fullName` immediately and write to `user_metadata` -- it will not appear in subsequent sign-ins.
-5. **`expo-build-properties` changes:** After removing Firebase, the `useFrameworks: 'static'` and `forceStaticLinking` config can likely be removed unless another dependency requires it. Test the build after removal.
+4. **`expo-build-properties` changes:** After removing Firebase, the `useFrameworks: 'static'` and `forceStaticLinking` config can likely be removed unless another dependency requires it. Test the build after removal.
 6. **No `Alert.prompt` on Android.** The current account deletion flow uses `Alert.prompt` for password re-entry, which is iOS-only. This is a pre-existing issue, not introduced by migration, but worth fixing while touching that code.
 
 ---
@@ -871,13 +819,11 @@ Since this is a pre-launch app with no production users:
 - [Supabase Auth with React Native](https://supabase.com/docs/guides/auth/quickstarts/react-native)
 - [Using Supabase - Expo Documentation](https://docs.expo.dev/guides/using-supabase/)
 - [Supabase Google Sign-In](https://supabase.com/docs/guides/auth/social-login/auth-google)
-- [Supabase Apple Sign-In](https://supabase.com/docs/guides/auth/social-login/auth-apple)
 - [Migrate Firebase Auth to Supabase](https://supabase.com/docs/guides/platform/migrating-to-supabase/firebase-auth)
 - [Migrate Firebase Firestore to Supabase](https://supabase.com/docs/guides/platform/migrating-to-supabase/firestore-data)
 - [Supabase Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)
 - [Sentry for Expo](https://docs.expo.dev/guides/using-sentry/)
 - [Sentry React Native SDK](https://docs.sentry.io/platforms/react-native/)
-- [expo-apple-authentication](https://docs.expo.dev/versions/latest/sdk/apple-authentication/)
 - [Local-first Architecture with Expo](https://docs.expo.dev/guides/local-first/)
 - [PowerSync + Supabase](https://www.powersync.com/blog/bringing-offline-first-to-supabase)
 - [Offline-first with WatermelonDB + Supabase](https://supabase.com/blog/react-native-offline-first-watermelon-db)

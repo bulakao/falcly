@@ -19,7 +19,6 @@
 - [ ] Create Supabase project (Singapore region)
 - [ ] Run schema SQL: `profiles`, `cards` tables with triggers and RLS
 - [ ] Enable Google provider (Web Client ID + Secret from Google Cloud Console)
-- [ ] Enable Apple provider (Service ID, Key ID, Team ID)
 - [ ] Create `delete_own_account` RPC function
 - [ ] Set JWT expiry to 7 days (mobile offline use case)
 - [ ] Install `@supabase/supabase-js`, `react-native-url-polyfill`
@@ -60,42 +59,18 @@
 
 ---
 
-### AUTH-03: Add Apple Sign-In
-
-**Priority:** P1
-**Phase:** 1
-**Estimate:** 0.5 day
-**Depends on:** AUTH-01
-
-**Description:** Add native Apple Sign-In using `expo-apple-authentication`.
-
-**Tasks:**
-- [ ] Install `expo-apple-authentication`
-- [ ] Add `signInWithApple` to authStore: `AppleAuthentication.signInAsync()` → `supabase.auth.signInWithIdToken({ provider: 'apple', token })`
-- [ ] Capture `credential.fullName` on first sign-in, write to `user_metadata`
-- [ ] Add Apple Sign-In button to sign-in screen (iOS only, guard with `AppleAuthentication.isAvailableAsync()`)
-- [ ] Add `expo-apple-authentication` plugin to `app.config.js`
-
-**Acceptance Criteria:**
-- Apple Sign-In button appears on iOS, hidden on Android
-- Sign-in creates Supabase user with correct email and name
-- Works in Expo Go on iOS (no dev build needed)
-
----
-
-### AUTH-04: Update sign-in screen
+### AUTH-03: Update sign-in screen
 
 **Priority:** P0
 **Phase:** 1
 **Estimate:** 0.5 day
-**Depends on:** AUTH-02, AUTH-03
+**Depends on:** AUTH-02
 
 **Description:** Update `app/sign-in.tsx` to use Supabase auth methods.
 
 **Tasks:**
 - [ ] Replace `auth().sendPasswordResetEmail()` with `supabase.auth.resetPasswordForEmail()`
 - [ ] Remove `import auth from '@react-native-firebase/auth'`
-- [ ] Add Apple Sign-In button below Google button (iOS only)
 - [ ] Verify email/password sign-up, sign-in, and forgot password flows
 
 **Acceptance Criteria:**
@@ -103,12 +78,11 @@
 - Email sign-in works with existing account
 - Forgot password sends reset email via Supabase
 - Google sign-in works (dev build only)
-- Apple sign-in works on iOS
 - No Firebase imports remain in this file
 
 ---
 
-### AUTH-05: Update settings screen
+### AUTH-04: Update settings screen
 
 **Priority:** P0
 **Phase:** 1
@@ -133,7 +107,7 @@
 
 ---
 
-### AUTH-06: Update root layout auth listener
+### AUTH-05: Update root layout auth listener
 
 **Priority:** P0
 **Phase:** 1
@@ -155,7 +129,7 @@
 
 ---
 
-### AUTH-07: Update AllCardsOverview avatar
+### AUTH-06: Update AllCardsOverview avatar
 
 **Priority:** P1
 **Phase:** 1
@@ -166,11 +140,11 @@
 
 **Tasks:**
 - [ ] Replace `user.photoURL` → `user.user_metadata.avatar_url`
-- [ ] Verify avatar renders for Google, Apple, and email users
+- [ ] Verify avatar renders for Google and email users
 
 **Acceptance Criteria:**
 - Google users see their Google profile photo
-- Email/Apple users see the default user icon
+- Email users see the default user icon
 - Tapping avatar opens settings modal
 
 ---
@@ -182,7 +156,7 @@
 **Priority:** P1
 **Phase:** 2
 **Estimate:** 1 day
-**Depends on:** AUTH-06
+**Depends on:** AUTH-05
 
 **Description:** Swap Firebase Crashlytics for Sentry.
 
@@ -210,7 +184,7 @@
 **Priority:** P0
 **Phase:** 3
 **Estimate:** 1 day
-**Depends on:** AUTH-06, CRASH-01
+**Depends on:** AUTH-05, CRASH-01
 
 **Description:** Remove all Firebase dependencies, config files, and build plugins.
 
@@ -444,7 +418,6 @@
 - [ ] Email sign-in with existing account
 - [ ] Email forgot password → reset → sign in with new password
 - [ ] Google sign-in (dev build)
-- [ ] Apple sign-in (iOS)
 - [ ] Sign out → redirects to sign-in screen
 - [ ] Delete account → redirects to sign-in, data removed
 - [ ] Session persistence: kill app → reopen → still signed in
@@ -474,12 +447,10 @@
 ```
 AUTH-01 (Supabase + Drizzle setup)
   ├── AUTH-02 (authStore rewrite)
-  │     ├── AUTH-04 (sign-in screen)
-  │     ├── AUTH-05 (settings screen)
-  │     ├── AUTH-06 (root layout listener)
-  │     └── AUTH-07 (avatar update)
-  ├── AUTH-03 (Apple Sign-In)
-  │     └── AUTH-04 (sign-in screen)
+  │     ├── AUTH-03 (sign-in screen)
+  │     ├── AUTH-04 (settings screen)
+  │     ├── AUTH-05 (root layout listener)
+  │     └── AUTH-06 (avatar update)
   ├── DRIZZLE-01 (local DB setup)
   │     ├── DRIZZLE-02 (migrate cardStore)
   │     ├── DRIZZLE-03 (migrate userStore)
@@ -490,9 +461,10 @@ AUTH-01 (Supabase + Drizzle setup)
   │                 └── SYNC-04 (data retention)
   └── ...
 
-CRASH-01 (Sentry) ← AUTH-06
+CRASH-01 (Sentry) ← AUTH-05
 
-CLEANUP-01 (remove Firebase) ← AUTH-06 + CRASH-01
+CLEANUP-01 (remove Firebase) ← AUTH-05 + CRASH-01
+
 
 VERIFY-01 (testing) ← CLEANUP-01 + DRIZZLE-02 + DRIZZLE-03
 VERIFY-02 (docs) ← VERIFY-01
@@ -502,16 +474,16 @@ VERIFY-02 (docs) ← VERIFY-01
 
 | Epic | Stories | Estimate |
 |------|---------|----------|
-| AUTH | 7 | 3.75 days |
+| AUTH | 6 | 3.25 days |
 | DRIZZLE | 4 | 3.5 days |
 | CRASH | 1 | 1 day |
 | CLEANUP | 1 | 1 day |
 | SYNC | 4 | 4 days |
 | VERIFY | 2 | 1 day |
-| **Total** | **19** | **~14.25 days** |
+| **Total** | **18** | **~13.75 days** |
 
 ## Critical Path
 
-`AUTH-01 → DRIZZLE-01 → DRIZZLE-02 + DRIZZLE-03 → AUTH-02 → AUTH-06 → CRASH-01 → CLEANUP-01 → VERIFY-01`
+`AUTH-01 → DRIZZLE-01 → DRIZZLE-02 + DRIZZLE-03 → AUTH-02 → AUTH-05 → CRASH-01 → CLEANUP-01 → VERIFY-01`
 
-The Drizzle local DB migration is now on the critical path since stores must be rewritten before Firebase removal. SYNC, Apple Sign-In, and remote Postgres schema can be deferred.
+The Drizzle local DB migration is now on the critical path since stores must be rewritten before Firebase removal. SYNC and remote Postgres schema can be deferred.
