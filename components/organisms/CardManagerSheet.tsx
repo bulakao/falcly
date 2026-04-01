@@ -1,21 +1,30 @@
-import { StyleSheet, Modal, Pressable, Switch, View as RNView } from 'react-native';
+import { StyleSheet, Modal, Pressable, Switch, View as RNView, useWindowDimensions } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import DraggableFlatList, { ScaleDecorator, type RenderItemParams } from 'react-native-draggable-flatlist';
 import { Text, View } from '@/components/Themed';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useCardStore } from '@/store/cardStore';
 import { useSubscriptionStore, FREE_CARD_LIMIT } from '@/store/subscriptionStore';
 import { calculateCardStatus } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';
-import type { CardStatus } from '@/types/card';
+import type { Card, CardStatus } from '@/types/card';
 import { router } from 'expo-router';
+
+const ROW_HEIGHT = 56;
+const HEADER_HEIGHT = 80; // handle + header
+const BUTTON_HEIGHT = 70; // add card button + margin
+const SHEET_PADDING = 60; // top + bottom padding
 
 interface CardManagerSheetProps {
   visible: boolean;
   onClose: () => void;
   onCardPress: (cardId: string) => void;
+  onAddCard: () => void;
 }
 
-export function CardManagerSheet({ visible, onClose, onCardPress }: CardManagerSheetProps) {
+export function CardManagerSheet({ visible, onClose, onCardPress, onAddCard }: CardManagerSheetProps) {
   const t = useAppTheme();
+  const { height: screenHeight } = useWindowDimensions();
   const cards = useCardStore((s) => s.cards);
   const toggleCardActive = useCardStore((s) => s.toggleCardActive);
   const reorderCards = useCardStore((s) => s.reorderCards);
@@ -29,6 +38,12 @@ export function CardManagerSheet({ visible, onClose, onCardPress }: CardManagerS
 
   const activeCount = cards.filter((c) => c.isActive).length;
 
+  // Calculate list height: fit content or cap at available space
+  const maxSheetHeight = screenHeight * 0.75;
+  const listContentHeight = cards.length * ROW_HEIGHT;
+  const availableForList = maxSheetHeight - HEADER_HEIGHT - BUTTON_HEIGHT - SHEET_PADDING;
+  const listHeight = Math.min(listContentHeight, availableForList);
+
   function handleToggle(cardId: string, currentlyActive: boolean) {
     if (!currentlyActive && tier === 'free' && activeCount >= FREE_CARD_LIMIT) {
       router.push('/pro-paywall');
@@ -38,19 +53,69 @@ export function CardManagerSheet({ visible, onClose, onCardPress }: CardManagerS
     toggleCardActive(cardId);
   }
 
-  function handleMove(cardId: string, direction: 'up' | 'down') {
-    const idx = cards.findIndex((c) => c.id === cardId);
-    if (idx === -1) return;
-    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
-    if (targetIdx < 0 || targetIdx >= cards.length) return;
-    const ids = cards.map((c) => c.id);
-    [ids[idx], ids[targetIdx]] = [ids[targetIdx], ids[idx]];
-    reorderCards(ids);
-  }
-
   function handleCardTap(cardId: string) {
     onCardPress(cardId);
     onClose();
+  }
+
+  function handleDragEnd({ data }: { data: Card[] }) {
+    reorderCards(data.map((c) => c.id));
+  }
+
+  function handleAddCard() {
+    onClose();
+    onAddCard();
+  }
+
+  function renderItem({ item: card, drag, isActive }: RenderItemParams<Card>) {
+    const { status } = calculateCardStatus(card, new Date());
+    const accentColor = statusColorMap[status];
+
+    return (
+      <ScaleDecorator>
+        <Pressable
+          onLongPress={drag}
+          onPress={() => handleCardTap(card.id)}
+          delayLongPress={150}
+          style={[
+            styles.row,
+            { borderBottomColor: t.border, height: ROW_HEIGHT },
+            isActive && [styles.rowDragging, { backgroundColor: t.surface, shadowColor: t.textPrimary }],
+          ]}
+        >
+          {/* Drag handle */}
+          <View style={styles.dragHandle}>
+            <FontAwesome name="bars" size={14} color={isActive ? t.primary : t.border} />
+          </View>
+
+          {/* Card info */}
+          <View style={styles.cardInfo}>
+            <RNView
+              style={[
+                styles.dot,
+                { backgroundColor: accentColor, shadowColor: accentColor },
+                !card.isActive && styles.dotInactive,
+              ]}
+            />
+            <View style={styles.cardText}>
+              <Text style={[styles.bankName, { color: card.isActive ? t.textPrimary : t.textMuted }]} numberOfLines={1}>
+                {card.bankName}
+              </Text>
+              <Text style={[styles.balance, { color: t.textMuted }]}>
+                ₱{card.outstandingBalance.toLocaleString()} / ₱{card.creditLimit.toLocaleString()}
+              </Text>
+            </View>
+          </View>
+
+          {/* Toggle */}
+          <Switch
+            value={card.isActive}
+            onValueChange={() => handleToggle(card.id, card.isActive)}
+            trackColor={{ true: t.safe, false: t.border }}
+          />
+        </Pressable>
+      </ScaleDecorator>
+    );
   }
 
   return (
@@ -61,67 +126,36 @@ export function CardManagerSheet({ visible, onClose, onCardPress }: CardManagerS
       onRequestClose={onClose}
     >
       <Pressable style={[styles.overlay, { backgroundColor: t.overlay }]} onPress={onClose}>
-        <Pressable style={[styles.sheet, { backgroundColor: t.surfaceElevated, borderColor: t.border }]} onPress={(e) => e.stopPropagation()}>
+        <Pressable style={[styles.sheet, { backgroundColor: t.background }]} onPress={(e) => e.stopPropagation()}>
+          {/* Handle */}
           <View style={styles.handle}>
             <RNView style={[styles.handleBar, { backgroundColor: t.border }]} />
           </View>
 
-          <Text style={[styles.title, { color: t.textPrimary }]}>Manage Cards</Text>
-          {tier === 'free' && (
-            <Text style={[styles.limitHint, { color: t.textMuted }]}>
-              Free plan — {activeCount}/{FREE_CARD_LIMIT} active cards
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={[styles.title, { color: t.textPrimary }]}>Manage Cards</Text>
+            <Text style={[styles.subtitle, { color: t.textMuted }]}>
+              {tier === 'free'
+                ? `${activeCount}/${FREE_CARD_LIMIT} active · Free plan`
+                : `${activeCount} active · Pro`}
             </Text>
-          )}
+          </View>
 
-          {cards.map((card, idx) => {
-            const { status } = calculateCardStatus(card, new Date());
-            const accentColor = statusColorMap[status];
+          {/* Draggable list with explicit height */}
+          <GestureHandlerRootView style={{ height: listHeight }}>
+            <DraggableFlatList
+              data={cards}
+              keyExtractor={(item) => item.id}
+              renderItem={renderItem}
+              onDragEnd={handleDragEnd}
+            />
+          </GestureHandlerRootView>
 
-            return (
-              <View key={card.id} style={[styles.row, { borderBottomColor: t.border }]}>
-                {/* Reorder arrows */}
-                <View style={styles.arrows}>
-                  <Pressable
-                    onPress={() => handleMove(card.id, 'up')}
-                    disabled={idx === 0}
-                    hitSlop={4}
-                  >
-                    <FontAwesome name="chevron-up" size={10} color={idx === 0 ? t.border : t.textMuted} />
-                  </Pressable>
-                  <Pressable
-                    onPress={() => handleMove(card.id, 'down')}
-                    disabled={idx === cards.length - 1}
-                    hitSlop={4}
-                  >
-                    <FontAwesome name="chevron-down" size={10} color={idx === cards.length - 1 ? t.border : t.textMuted} />
-                  </Pressable>
-                </View>
-
-                {/* Card info — tappable */}
-                <Pressable style={styles.cardInfo} onPress={() => handleCardTap(card.id)}>
-                  <RNView style={[styles.dot, { backgroundColor: accentColor, shadowColor: accentColor }]} />
-                  <View style={styles.cardText}>
-                    <Text style={[styles.bankName, { color: card.isActive ? t.textPrimary : t.textMuted }]} numberOfLines={1}>
-                      {card.bankName}
-                    </Text>
-                    <Text style={[styles.balance, { color: t.textMuted }]}>
-                      ₱{card.outstandingBalance.toLocaleString()}
-                    </Text>
-                  </View>
-                </Pressable>
-
-                {/* Active toggle */}
-                <Switch
-                  value={card.isActive}
-                  onValueChange={() => handleToggle(card.id, card.isActive)}
-                  trackColor={{ true: t.safe, false: t.border }}
-                />
-              </View>
-            );
-          })}
-
-          <Pressable style={[styles.closeButton, { borderColor: t.primary }]} onPress={onClose}>
-            <Text style={[styles.closeText, { color: t.primary }]}>Done</Text>
+          {/* Add Card */}
+          <Pressable style={[styles.addButton, { backgroundColor: t.primary }]} onPress={handleAddCard}>
+            <FontAwesome name="plus" size={14} color={t.primaryText} style={styles.addIcon} />
+            <Text style={[styles.addText, { color: t.primaryText }]}>Add Card</Text>
           </Pressable>
         </Pressable>
       </Pressable>
@@ -137,41 +171,48 @@ const styles = StyleSheet.create({
   sheet: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    borderWidth: 1,
-    borderBottomWidth: 0,
     padding: 20,
     paddingBottom: 40,
-    maxHeight: '70%',
   },
   handle: {
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   handleBar: {
     width: 36,
     height: 4,
     borderRadius: 2,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: '800',
-    marginBottom: 4,
+  header: {
+    marginBottom: 12,
   },
-  limitHint: {
+  title: {
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 2,
+  },
+  subtitle: {
     fontSize: 13,
-    marginBottom: 16,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingHorizontal: 4,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  arrows: {
-    width: 24,
+  rowDragging: {
+    borderRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderBottomWidth: 0,
+  },
+  dragHandle: {
+    width: 28,
     alignItems: 'center',
-    gap: 6,
-    marginRight: 8,
+    justifyContent: 'center',
+    marginRight: 10,
   },
   cardInfo: {
     flex: 1,
@@ -188,6 +229,10 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
+  dotInactive: {
+    opacity: 0.35,
+    shadowOpacity: 0,
+  },
   cardText: {
     flex: 1,
     backgroundColor: 'transparent',
@@ -198,15 +243,20 @@ const styles = StyleSheet.create({
   },
   balance: {
     fontSize: 12,
+    marginTop: 1,
   },
-  closeButton: {
+  addButton: {
     marginTop: 20,
     paddingVertical: 14,
     borderRadius: 999,
-    borderWidth: 2,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  closeText: {
+  addIcon: {
+    marginRight: 8,
+  },
+  addText: {
     fontSize: 15,
     fontWeight: '700',
   },

@@ -76,6 +76,7 @@ export default function HomeScreen() {
         visible={sheetVisible}
         onClose={() => setSheetVisible(false)}
         onCardPress={handleSheetCardPress}
+        onAddCard={handleAddCard}
       />
     </View>
   );

@@ -25,7 +25,7 @@ export function BestCardBanner({ bestCard, onPress }: BestCardBannerProps) {
         <Text style={[styles.reason, { color: t.textSecondary }]}>
           Consider holding off on swiping until balances or timing improve.
         </Text>
-        {onPress && <FontAwesome name="chevron-right" size={10} color={t.risky} style={styles.chevron} />}
+        {onPress && <FontAwesome name="chevron-up" size={10} color={t.risky} style={styles.chevron} />}
       </Pressable>
     );
   }
@@ -37,7 +37,7 @@ export function BestCardBanner({ bestCard, onPress }: BestCardBannerProps) {
     <Pressable style={[styles.card, { backgroundColor: t.surfaceElevated, borderColor: t.border }]} onPress={onPress} disabled={!onPress}>
       <View style={styles.topLine}>
         <Text style={[styles.label, { color: t.textMuted }]}>Best card to use</Text>
-        {onPress && <FontAwesome name="chevron-right" size={10} color={t.textMuted} />}
+        {onPress && <FontAwesome name="chevron-up" size={10} color={t.textMuted} />}
       </View>
       <View style={styles.nameRow}>
         <RNView style={[styles.dot, { backgroundColor: accentColor, shadowColor: accentColor }]} />
