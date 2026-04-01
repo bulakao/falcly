@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import auth, { type FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { type User } from '@supabase/supabase-js';
+import { supabase } from '@/utils/supabase';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
@@ -10,14 +11,15 @@ GoogleSignin.configure({
 });
 
 interface AuthStore {
-  user: FirebaseAuthTypes.User | null;
+  user: User | null;
   loading: boolean;
-  setUser: (user: FirebaseAuthTypes.User | null) => void;
+  setUser: (user: User | null) => void;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
-  deleteAccount: (credential: FirebaseAuthTypes.AuthCredential) => Promise<void>;
+  deleteAccount: () => Promise<void>;
   clearLocalData: () => void;
 }
 
@@ -31,28 +33,34 @@ export const useAuthStore = create<AuthStore>()((set) => ({
     if (!response.data?.idToken) {
       throw new Error('Google Sign-In failed: no ID token');
     }
-    const credential = auth.GoogleAuthProvider.credential(response.data.idToken);
-    await auth().signInWithCredential(credential);
+    const { error } = await supabase.auth.signInWithIdToken({
+      provider: 'google',
+      token: response.data.idToken,
+    });
+    if (error) throw error;
   },
   signInWithEmail: async (email: string, password: string) => {
-    await auth().signInWithEmailAndPassword(email, password);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
   },
   signUpWithEmail: async (email: string, password: string) => {
-    await auth().createUserWithEmailAndPassword(email, password);
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) throw error;
+  },
+  resetPassword: async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if (error) throw error;
   },
   signOut: async () => {
-    await auth().signOut();
+    await supabase.auth.signOut();
     try { await GoogleSignin.signOut(); } catch { /* not signed in via Google */ }
     useCardStore.getState().reset();
     useUserStore.getState().reset();
     useSubscriptionStore.getState().reset();
   },
-  deleteAccount: async (credential: FirebaseAuthTypes.AuthCredential) => {
-    const currentUser = auth().currentUser;
-    if (!currentUser) throw new Error('No user signed in');
-    // Re-authenticate first (Firebase requires recent login before delete)
-    await currentUser.reauthenticateWithCredential(credential);
-    await currentUser.delete();
+  deleteAccount: async () => {
+    const { error } = await supabase.rpc('delete_own_account');
+    if (error) throw error;
     try { await GoogleSignin.signOut(); } catch { /* not signed in via Google */ }
     useCardStore.getState().reset();
     useUserStore.getState().reset();

@@ -7,9 +7,7 @@ import {
   Alert,
   Switch,
   View as RNView,
-  TextInput,
 } from 'react-native';
-import auth from '@react-native-firebase/auth';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -65,14 +63,14 @@ export default function SettingsScreen() {
           <SectionHeader title="Account" />
           <View style={styles.accountRow}>
             <RNView style={styles.accountAvatar}>
-              {user.photoURL ? (
-                <Image source={{ uri: user.photoURL }} style={styles.accountAvatarImage} />
+              {user.user_metadata?.avatar_url ? (
+                <Image source={{ uri: user.user_metadata.avatar_url }} style={styles.accountAvatarImage} />
               ) : (
                 <FontAwesome name="user" size={18} color={t.textMuted} />
               )}
             </RNView>
             <View style={styles.accountInfo}>
-              <Text style={[styles.accountName, { color: t.textPrimary }]}>{user.displayName ?? 'User'}</Text>
+              <Text style={[styles.accountName, { color: t.textPrimary }]}>{user.user_metadata?.full_name ?? 'User'}</Text>
               <Text style={[styles.accountEmail, { color: t.textMuted }]}>{user.email}</Text>
             </View>
           </View>
@@ -230,71 +228,20 @@ export default function SettingsScreen() {
           label="Delete Account"
           variant="destructive-outline"
           onPress={() => {
-            // Step 1: confirm intent
             Alert.alert(
               'Delete Account',
               'This will permanently delete your account and all your data. This cannot be undone.',
               [
                 { text: 'Cancel', style: 'cancel' },
                 {
-                  text: 'Continue',
+                  text: 'Delete',
                   style: 'destructive',
-                  onPress: () => {
-                    // Step 2: determine re-auth method
-                    const providerData = user?.providerData ?? [];
-                    const isGoogle = providerData.some((p) => p.providerId === 'google.com');
-                    const isEmail = providerData.some((p) => p.providerId === 'password');
-
-                    if (isGoogle) {
-                      // Re-auth via Google
-                      Alert.alert(
-                        'Confirm with Google',
-                        'You need to re-authenticate with Google to delete your account.',
-                        [
-                          { text: 'Cancel', style: 'cancel' },
-                          {
-                            text: 'Continue with Google',
-                            onPress: async () => {
-                              try {
-                                const { GoogleSignin } = await import('@react-native-google-signin/google-signin');
-                                await GoogleSignin.hasPlayServices();
-                                const response = await GoogleSignin.signIn();
-                                if (!response.data?.idToken) throw new Error('No ID token');
-                                const { default: firebaseAuth } = await import('@react-native-firebase/auth');
-                                const credential = firebaseAuth.GoogleAuthProvider.credential(response.data.idToken);
-                                await deleteAccount(credential);
-                                // auth guard handles redirect
-                              } catch (e: unknown) {
-                                const msg = e instanceof Error ? e.message : 'Failed to delete account';
-                                Alert.alert('Error', msg);
-                              }
-                            },
-                          },
-                        ],
-                      );
-                    } else if (isEmail) {
-                      // Re-auth via password prompt
-                      let passwordInput = '';
-                      Alert.prompt(
-                        'Confirm Password',
-                        'Enter your password to confirm account deletion.',
-                        async (password) => {
-                          if (!password) return;
-                          try {
-                            const emailAddr = user?.email ?? '';
-                            const credential = auth.EmailAuthProvider.credential(emailAddr, password);
-                            await deleteAccount(credential);
-                            // auth guard handles redirect
-                          } catch (e: unknown) {
-                            const msg = e instanceof Error ? e.message : 'Failed to delete account';
-                            Alert.alert('Error', msg);
-                          }
-                        },
-                        'secure-text',
-                      );
-                      void passwordInput;
-                    } else {
-                      Alert.alert('Error', 'Unable to determine sign-in method. Please sign out and sign back in before deleting your account.');
+                  onPress: async () => {
+                    try {
+                      await deleteAccount();
+                    } catch (e: unknown) {
+                      const msg = e instanceof Error ? e.message : 'Failed to delete account';
+                      Alert.alert('Error', msg);
                     }
                   },
                 },

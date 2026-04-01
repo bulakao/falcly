@@ -9,7 +9,6 @@ import {
   View,
   ActivityIndicator,
 } from 'react-native';
-import auth from '@react-native-firebase/auth';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/Themed';
@@ -23,6 +22,7 @@ export default function SignInScreen() {
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
   const signInWithEmail = useAuthStore((s) => s.signInWithEmail);
   const signUpWithEmail = useAuthStore((s) => s.signUpWithEmail);
+  const resetPassword = useAuthStore((s) => s.resetPassword);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -71,7 +71,7 @@ export default function SignInScreen() {
       return;
     }
     try {
-      await auth().sendPasswordResetEmail(email.trim());
+      await resetPassword(email.trim());
       Alert.alert('Check your inbox', `A password reset link has been sent to ${email.trim()}.`);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Failed to send reset email';

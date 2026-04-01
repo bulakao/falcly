@@ -1,0 +1,33 @@
+import { sqliteTable, text, real, integer } from 'drizzle-orm/sqlite-core';
+
+export const cards = sqliteTable('cards', {
+  id: text('id').primaryKey(),
+  bankName: text('bank_name').notNull(),
+  creditLimit: real('credit_limit').notNull(),
+  outstandingBalance: real('outstanding_balance').notNull().default(0),
+  statementDay: integer('statement_day').notNull(),
+  dueDayOffset: integer('due_day_offset').notNull().default(21),
+  interestRate: real('interest_rate').notNull().default(0.02),
+  minPaymentPct: real('min_payment_pct').notNull().default(0.05),
+  minPaymentFloor: real('min_payment_floor').notNull().default(500),
+  pendingTransactions: real('pending_transactions').notNull().default(0),
+  installmentsMonthlyAmount: real('installments_monthly_amount').notNull().default(0),
+  subscriptionsThisCycle: real('subscriptions_this_cycle').notNull().default(0),
+  annualFee: real('annual_fee').notNull().default(0),
+  annualFeeMonth: integer('annual_fee_month').notNull().default(0),
+  balanceUpdatedAt: integer('balance_updated_at', { mode: 'timestamp_ms' }).notNull(),
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+});
+
+export const profile = sqliteTable('profile', {
+  id: text('id').primaryKey().default('local'),
+  cashOnHand: real('cash_on_hand'),
+  cashUpdatedAt: integer('cash_updated_at', { mode: 'timestamp_ms' }),
+  monthlyIncome: real('monthly_income'),
+  payday: integer('payday'),
+  committedExpenses: real('committed_expenses'),
+  analyticsOptOut: integer('analytics_opt_out', { mode: 'boolean' }).notNull().default(false),
+});
