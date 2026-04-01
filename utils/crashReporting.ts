@@ -1,41 +1,28 @@
-import * as Sentry from '@sentry/react-native';
 import { redactSensitive } from '@/utils/secureLogger';
 
 export function initCrashReporting(): void {
-  Sentry.init({
-    dsn: '', // TODO: Add Sentry DSN from project settings
-    tracesSampleRate: 0.2,
-    beforeSend(event) {
-      // Sanitize error messages before sending
-      if (event.exception?.values) {
-        event.exception.values.forEach((ex) => {
-          if (ex.value) {
-            ex.value = sanitizeErrorMessage(ex.value);
-          }
-        });
-      }
-      return event;
-    },
+  const defaultHandler = ErrorUtils.getGlobalHandler();
+
+  ErrorUtils.setGlobalHandler((error: Error, isFatal?: boolean) => {
+    const sanitized = sanitizeErrorMessage(error.message);
+    console.error(`[${isFatal ? 'FATAL' : 'ERROR'}] ${sanitized}`);
+
+    if (defaultHandler) {
+      defaultHandler(error, isFatal);
+    }
   });
 }
 
 export function recordSafeError(error: Error, context?: string): void {
   const sanitized = sanitizeErrorMessage(error.message);
-  const safeError = new Error(sanitized);
-  safeError.name = error.name;
-  safeError.stack = error.stack;
-
-  Sentry.captureException(safeError, {
-    tags: { context },
-  });
+  console.error(`[${context ?? 'Error'}] ${sanitized}`);
 }
 
 export function logBreadcrumb(message: string, data?: Record<string, unknown>): void {
-  Sentry.addBreadcrumb({
-    message,
-    data: data ? redactSensitive(data) : undefined,
-    level: 'info',
-  });
+  if (__DEV__) {
+    const safe = data ? redactSensitive(data) : undefined;
+    console.log(`[Breadcrumb] ${message}`, safe ?? '');
+  }
 }
 
 function sanitizeErrorMessage(message: string): string {

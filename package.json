@@ -15,7 +15,6 @@
     "@react-native-community/netinfo": "^11.5.2",
     "@react-native-google-signin/google-signin": "^16.1.2",
     "@react-navigation/native": "^7.1.8",
-    "@sentry/react-native": "^8.6.0",
     "@supabase/supabase-js": "^2.101.1",
     "drizzle-orm": "^0.45.2",
     "expo": "~54.0.33",
@@ -45,7 +44,7 @@
   "devDependencies": {
     "@types/react": "~19.1.0",
     "babel-plugin-inline-import": "^3.0.0",
-    "drizzle-kit": "^0.18.1",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~10.0.0",
     "typescript": "~5.9.2"

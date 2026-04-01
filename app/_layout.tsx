@@ -14,7 +14,6 @@ import { useCardStore } from '@/store/cardStore';
 import { useAuthStore } from '@/store/authStore';
 import { supabase } from '@/utils/supabase';
 import { useRunMigrations } from '@/db/migrate';
-import * as Sentry from '@sentry/react-native';
 import { initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
 import { initCrashReporting } from '@/utils/crashReporting';
 import { AppThemeProvider, lightTheme, darkTheme } from '@/theme';
@@ -117,7 +116,7 @@ function RootLayout() {
   return <RootLayoutNav />;
 }
 
-export default Sentry.wrap(RootLayout);
+export default RootLayout;
 
 
 function RootLayoutNav() {

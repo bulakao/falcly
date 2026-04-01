@@ -33,7 +33,6 @@ module.exports = {
     },
     plugins: [
       'expo-router',
-      '@sentry/react-native/expo',
       [
         'expo-build-properties',
         {
