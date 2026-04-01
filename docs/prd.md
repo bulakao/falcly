@@ -1,6 +1,6 @@
 # Falcly — Product Requirements Document
 
-> Version: 1.5
+> Version: 1.6
 > Date: 2026-04-01
 > Status: Active
 
@@ -194,6 +194,56 @@ As Ria, I want to see my net available cash figure, so that I know exactly how m
 - Net available cash is shown in the Swipe Impact screen and card detail view
 - Formula: liquid cash + (income if payday before due date) − committed expenses − auto-payments − subscriptions this cycle
 - Labeled clearly as "Available to pay" — not "income" or "balance"
+
+---
+
+### Onboarding — Extended (P1)
+
+**OB-03: Welcome screen with value prop**
+As a new user, I want to see what Falcly does before being asked to sign up, so that I understand the value before committing to an account.
+- Welcome screen shows headline ("Know before you swipe."), subheadline, and 3 benefit chips (SAFE/CAUTION/RISKY · Cycle clarity · What to pay)
+- Primary CTA: [Get Started] → sign-up screen
+- Secondary: "Already have an account? Sign in" → sign-in screen
+- PostHog events: `onboarding_welcome_viewed`, `onboarding_get_started_tapped`
+
+**OB-04: Separate sign-up and sign-in screens**
+As a new user, I want a dedicated sign-up screen, and as a returning user, I want a dedicated sign-in screen, so that I'm never confused about which action to take.
+- Sign-up: email + password + Google, ToS/Privacy fine print, "Already have an account?" link
+- Sign-in: email + password + Google, forgot password, "Don't have an account?" link
+- Firebase auth errors shown inline — not just Alert: wrong password, user not found, too many requests, invalid email
+- PostHog event: `onboarding_signup_completed` (with method: email/google)
+
+**OB-05: Bank picker and day picker on card entry**
+As Ria, I want to select my bank from a list and pick my statement day from a picker, so that card setup is fast and error-free.
+- Bank picker shows: BDO, BPI, Metrobank, RCBC, UnionBank, Security Bank, Chinabank, EastWest, Other — each with colored initial badge
+- Statement day uses a wheel/drum picker (1–31) — not a free-text number field
+- Selected bank saved as `bankName` on the card
+
+**OB-06: Onboarding auto-triggered for new users**
+As a developer, I want new users automatically routed through onboarding after sign-up, so that no new user lands on an empty home screen.
+- Auth guard checks: authenticated AND `onboardingStore.isComplete === false` → route to `/onboarding`
+- Onboarding state persisted via AsyncStorage — resumes at last completed step if app is closed mid-flow
+- After `complete()`, flag is set and onboarding never shown again
+
+**OB-07: Onboarding trial paywall after first status**
+As a new user who just saw their first status, I want to be offered a free trial at the moment I understand Falcly's value, so that I can make an informed decision about upgrading.
+- Trial paywall shown as Step 6 of onboarding (after first status + optional enrichment)
+- Shows free tier summary + [Start Free Trial] primary CTA + [Continue with Free] ghost button
+- Trial/Pro/Pro+ users skip this screen entirely
+- Fine print: "Payment method required. No charge for 30 days. Cancel anytime."
+- PostHog events: `onboarding_paywall_viewed`, `onboarding_trial_started`, `onboarding_paywall_dismissed`
+
+**OB-08: Push notification permission request**
+As a new user, I want to be asked for notification permission after I've seen Falcly's value, so that I understand why notifications are useful before granting access.
+- Custom pre-permission screen: 🔔 icon, "Never miss a payment" title, benefit copy, [Turn on Notifications] + [Not now]
+- [Turn on Notifications] triggers native OS permission dialog
+- If declined: preference stored, surface again in settings after 7 days
+- PostHog events: `onboarding_notifications_granted`, `onboarding_notifications_declined`
+
+**OB-09: Onboarding funnel analytics**
+As a developer, I want PostHog events at every onboarding step, so that I can identify and optimize drop-off points.
+- Events tracked at each step: welcome_viewed, get_started_tapped, signup_completed, card_entry_completed, first_status_viewed, enrichment_completed/skipped, paywall_viewed, trial_started/dismissed, notifications_granted/declined
+- No PII tracked — method (email/google), bank_name, has_balance (bool), status (SAFE/CAUTION/RISKY) only
 
 ---
 
@@ -632,20 +682,28 @@ Never color alone — 8% of males have red-green colorblindness (deuteranopia).
 
 ### Onboarding Flow
 
-**Goal:** Show value in 60 seconds — demo first, card setup second.
+**Goal:** Show value in 60 seconds — value moment first, commitment second.
+
+> Full spec in `discovery/20-onboarding.md`
 
 ```
-1. Splash:       "Know before you swipe." → [Get Started]
-2. Card Entry:   Bank name (picker) + statement day + credit limit
-3. Balance:      "What's your current balance?" (approximate is fine)
-4. First Answer: Full-screen SAFE/CAUTION/RISKY — value delivered immediately
-5. Enrichment:   "Add cash on hand for a more accurate picture" (skippable)
+Screen 1: Welcome         "Know before you swipe." + 3 benefit chips → [Get Started]
+Screen 2: Sign Up         Email/Google → create account
+Screen 3: Card Entry      Bank picker + statement day picker + limit + balance
+Screen 4: First Status    Full-screen SAFE/CAUTION/RISKY — value moment
+Screen 5: Enrichment      Cash on hand + payday (optional, skippable)
+Screen 6: Trial Paywall   Free tier summary + [Start Free Trial] + [Continue with Free]
+Screen 7: Notifications   Pre-permission screen → native OS dialog
 ```
 
 **Rules:**
-- Paywall does NOT appear during onboarding — value moment must come first
+- Welcome screen shown before sign-up — value before commitment
+- Paywall shown AFTER value moment (Screen 6), not before — ~50% of trial starts happen here (RevenueCat data)
+- Trial/Pro/Pro+ users skip Screen 6
+- `[Continue with Free]` always available on Screen 6 — never trap users
 - 3 fields minimum to get first answer (statement day + credit limit + balance)
-- Everything else (due date offset, interest rate, installments, cash on hand) captured progressively
+- Onboarding state persisted — resumes at last step if app is closed mid-flow
+- Push notification ask is last — after user has seen value and made subscription decision
 
 ---
 

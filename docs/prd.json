@@ -441,6 +441,114 @@
       "notes": ""
     },
     {
+      "id": "OB-03",
+      "title": "Welcome screen with value prop",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As a new user, I want to see what Falcly does before being asked to sign up, so that I understand the value before committing to an account.",
+      "acceptanceCriteria": [
+        "Welcome screen shows headline, subheadline, and 3 benefit chips before any auth screen",
+        "Primary CTA [Get Started] leads to sign-up; secondary 'Sign in' leads to sign-in",
+        "PostHog events fired: onboarding_welcome_viewed, onboarding_get_started_tapped"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "OB-04",
+      "title": "Separate sign-up and sign-in screens",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As a user, I want dedicated sign-up and sign-in screens so I'm never confused about which action to take.",
+      "acceptanceCriteria": [
+        "Sign-up screen: email + password + Google, ToS fine print, link to sign-in",
+        "Sign-in screen: email + password + Google, forgot password, link to sign-up",
+        "Firebase auth errors shown inline (not Alert): wrong password, user not found, too many requests, invalid email",
+        "PostHog event: onboarding_signup_completed with method: email/google"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "OB-05",
+      "title": "Bank picker and day picker on card entry",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As Ria, I want to select my bank from a list and pick my statement day from a picker, so that card setup is fast and error-free.",
+      "acceptanceCriteria": [
+        "Bank picker shows BDO, BPI, Metrobank, RCBC, UnionBank, Security Bank, Chinabank, EastWest, Other with colored badges",
+        "Statement day uses wheel/drum picker (1–31) instead of free-text",
+        "Selected bank name saved as bankName on card"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "OB-06",
+      "title": "Onboarding auto-triggered for new users",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As a developer, I want new users automatically routed through onboarding after sign-up so no user lands on an empty home screen.",
+      "acceptanceCriteria": [
+        "Auth guard routes to /onboarding if authenticated AND onboardingStore.isComplete === false",
+        "Onboarding state persisted via AsyncStorage — resumes at last step if app closed mid-flow",
+        "After complete(), flag set and onboarding never shown again"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "OB-07",
+      "title": "Onboarding trial paywall after first status",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As a new user who just saw their first status, I want to be offered a free trial at peak motivation, so that I can make an informed upgrade decision.",
+      "acceptanceCriteria": [
+        "Trial paywall shown as Step 6 of onboarding (after first status + enrichment)",
+        "Shows free tier summary + [Start Free Trial] primary + [Continue with Free] ghost",
+        "Trial/Pro/Pro+ users skip this screen",
+        "PostHog events: onboarding_paywall_viewed, onboarding_trial_started, onboarding_paywall_dismissed"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "OB-08",
+      "title": "Push notification permission request",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As a new user, I want to be asked for notification permission after seeing Falcly's value, so that I understand why notifications are useful.",
+      "acceptanceCriteria": [
+        "Custom pre-permission screen shown as final onboarding step: icon, title, benefit copy, [Turn on Notifications] + [Not now]",
+        "[Turn on Notifications] triggers native OS permission dialog",
+        "Declined preference stored, resurface in settings after 7 days",
+        "PostHog events: onboarding_notifications_granted, onboarding_notifications_declined"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "OB-09",
+      "title": "Onboarding funnel analytics",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As a developer, I want PostHog events at every onboarding step so I can identify and optimize drop-off points.",
+      "acceptanceCriteria": [
+        "Events tracked at each step: welcome_viewed, get_started_tapped, signup_completed, card_entry_completed, first_status_viewed, enrichment_completed/skipped, paywall_viewed, trial_started/dismissed, notifications_granted/declined",
+        "No PII: method (email/google), bank_name, has_balance (bool), status (SAFE/CAUTION/RISKY) only",
+        "Full funnel visible in PostHog dashboard"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": ""
+    },
+    {
       "id": "TL-01",
       "title": "Log a transaction",
       "phase": 1.5,
