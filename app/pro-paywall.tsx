@@ -51,8 +51,10 @@ export default function ProPaywallScreen() {
   function handlePurchase(plan: PlanType) {
     const labels: Record<PlanType, string> = {
       pro_monthly: 'Pro — ₱149/mo',
+      pro_quarterly: 'Pro — ₱399/qtr (₱133/mo)',
       pro_annual: 'Pro — ₱999/yr (₱83/mo)',
       pro_plus_monthly: 'Pro+ — ₱249/mo',
+      pro_plus_quarterly: 'Pro+ — ₱649/qtr (₱216/mo)',
       pro_plus_annual: 'Pro+ — ₱1,699/yr (₱142/mo)',
     };
     trackProConversionStarted('paywall');
@@ -117,11 +119,18 @@ export default function ProPaywallScreen() {
               <View style={styles.planHeader}>
                 <Text style={[styles.annualPlanTitle, { color: t.textInverse }]}>Annual</Text>
                 <View style={[styles.saveBadge, { backgroundColor: t.textInverse }]}>
-                  <Text style={[styles.saveBadgeText, { color: t.primary }]}>Save 43%</Text>
+                  <Text style={[styles.saveBadgeText, { color: t.primary }]}>Best Value · Save 43%</Text>
                 </View>
               </View>
               <Text style={[styles.annualPrice, { color: t.accentMuted }]}>₱142/mo, billed ₱1,699/yr</Text>
             </View>
+          </Pressable>
+          <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_plus_quarterly')}>
+            <View>
+              <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Quarterly</Text>
+              <Text style={[styles.planBadgeText, { color: t.textMuted }]}>Most Flexible</Text>
+            </View>
+            <Text style={[styles.monthlyPrice, { color: t.textMuted }]}>₱649/qtr</Text>
           </Pressable>
           <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_plus_monthly')}>
             <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Monthly</Text>
@@ -176,12 +185,19 @@ export default function ProPaywallScreen() {
             <View style={styles.planHeader}>
               <Text style={[styles.annualPlanTitle, { color: t.textInverse }]}>Annual</Text>
               <View style={[styles.saveBadge, { backgroundColor: t.textInverse }]}>
-                <Text style={[styles.saveBadgeText, { color: t.primary }]}>Save 44%</Text>
+                <Text style={[styles.saveBadgeText, { color: t.primary }]}>Best Value · Save 44%</Text>
               </View>
             </View>
             <Text style={[styles.annualPrice, { color: t.accentMuted }]}>₱83/mo, billed ₱999/yr</Text>
             <Text style={[styles.annualCta, { color: t.accentMuted }]}>Less than one late payment fee</Text>
           </View>
+        </Pressable>
+        <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_quarterly')}>
+          <View>
+            <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Quarterly</Text>
+            <Text style={[styles.planBadgeText, { color: t.textMuted }]}>Most Flexible</Text>
+          </View>
+          <Text style={[styles.monthlyPrice, { color: t.textMuted }]}>₱399/qtr</Text>
         </Pressable>
         <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_monthly')}>
           <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Monthly</Text>
@@ -197,11 +213,18 @@ export default function ProPaywallScreen() {
             <View style={styles.planHeader}>
               <Text style={[styles.annualPlanTitle, { color: t.textInverse }]}>Annual</Text>
               <View style={[styles.saveBadge, { backgroundColor: t.textInverse }]}>
-                <Text style={[styles.saveBadgeText, { color: t.primary }]}>Save 43%</Text>
+                <Text style={[styles.saveBadgeText, { color: t.primary }]}>Best Value · Save 43%</Text>
               </View>
             </View>
             <Text style={[styles.annualPrice, { color: t.accentMuted }]}>₱142/mo, billed ₱1,699/yr</Text>
           </View>
+        </Pressable>
+        <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_plus_quarterly')}>
+          <View>
+            <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Quarterly</Text>
+            <Text style={[styles.planBadgeText, { color: t.textMuted }]}>Most Flexible</Text>
+          </View>
+          <Text style={[styles.monthlyPrice, { color: t.textMuted }]}>₱649/qtr</Text>
         </Pressable>
         <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_plus_monthly')}>
           <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Monthly</Text>
@@ -343,5 +366,10 @@ const styles = StyleSheet.create({
   monthlyPrice: {
     fontSize: 15,
     fontWeight: '600',
+  },
+  planBadgeText: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 1,
   },
 });

@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCardStore } from '@/store/cardStore';
 
 export type SubscriptionTier = 'free' | 'trial' | 'pro' | 'pro_plus';
-export type PlanType = 'pro_monthly' | 'pro_annual' | 'pro_plus_monthly' | 'pro_plus_annual';
+export type PlanType = 'pro_monthly' | 'pro_quarterly' | 'pro_annual' | 'pro_plus_monthly' | 'pro_plus_quarterly' | 'pro_plus_annual';
 
 const FREE_CARD_LIMIT = 2;
 const TRIAL_DURATION_DAYS = 30;

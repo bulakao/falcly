@@ -68,7 +68,7 @@ export function trackProTrialStarted(): void {
   posthog?.capture('pro_trial_started');
 }
 
-export function trackProConverted(planType: 'pro_monthly' | 'pro_annual' | 'pro_plus_monthly' | 'pro_plus_annual'): void {
+export function trackProConverted(planType: 'pro_monthly' | 'pro_quarterly' | 'pro_annual' | 'pro_plus_monthly' | 'pro_plus_quarterly' | 'pro_plus_annual'): void {
   posthog?.capture('pro_converted', { plan_type: planType });
 }
 

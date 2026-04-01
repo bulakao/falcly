@@ -409,6 +409,38 @@
       "notes": ""
     },
     {
+      "id": "MO-05",
+      "title": "Quarterly billing option",
+      "phase": 1,
+      "group": "Monetization",
+      "description": "As Ria, I want to subscribe quarterly, so that I can commit to more than one month without paying for a full year upfront.",
+      "acceptanceCriteria": [
+        "Paywall shows three billing options per tier: Annual (Best Value), Quarterly (Most Flexible), Monthly — in that order",
+        "Pro quarterly: ₱399/qtr (₱133/mo effective, ~11% off monthly); Pro+ quarterly: ₱649/qtr (₱216/mo effective, ~13% off monthly)",
+        "RevenueCat planType values 'pro_quarterly' and 'pro_plus_quarterly' are granted the correct entitlement on purchase",
+        "Settings screen displays 'Quarterly' plan label and correct price (₱399/qtr or ₱649/qtr)"
+      ],
+      "priority": 25,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "MO-06",
+      "title": "Pro+ tier with AI access",
+      "phase": 1,
+      "group": "Monetization",
+      "description": "As Marcus, I want to subscribe to Pro+ to access AI features, so that I can use natural language queries and smart alerts in addition to all Pro features.",
+      "acceptanceCriteria": [
+        "Pro+ is shown as a distinct tier on the paywall with AI features listed (AI-powered alerts, NL queries, spending insights)",
+        "Pro+ monthly: ₱249/mo · quarterly: ₱649/qtr · annual: ₱1,699/yr (₱142/mo)",
+        "hasAIAccess() returns true only for pro_plus tier; all AI feature entry points check this before rendering",
+        "Pro users see an upsell-only screen (not the full paywall) when navigating to pro-paywall"
+      ],
+      "priority": 26,
+      "passes": true,
+      "notes": ""
+    },
+    {
       "id": "AQ-01",
       "title": "PostHog analytics",
       "phase": 1,

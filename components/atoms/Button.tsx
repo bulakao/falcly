@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { useAppTheme, type SemanticTokens } from '@/theme';
 
-type ButtonVariant = 'primary' | 'secondary' | 'destructive' | 'ghost';
+type ButtonVariant = 'primary' | 'secondary' | 'destructive' | 'destructive-outline' | 'ghost';
 
 interface ButtonProps {
   label: string;
@@ -28,6 +28,8 @@ function getVariantStyles(variant: ButtonVariant, t: SemanticTokens, disabled: b
       return { bg: 'transparent', text: t.primary, border: t.primary, borderWidth: 2 };
     case 'destructive':
       return { bg: t.risky, text: t.textInverse, border: 'transparent', borderWidth: 0 };
+    case 'destructive-outline':
+      return { bg: 'transparent', text: t.risky, border: t.risky, borderWidth: 2 };
     case 'ghost':
       return { bg: 'transparent', text: t.primary, border: 'transparent', borderWidth: 0 };
   }

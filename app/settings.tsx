@@ -85,8 +85,10 @@ export default function SettingsScreen() {
               {isTrialActive()
                 ? `Free Trial · ${trialDaysRemaining()} days left`
                 : planType === 'pro_annual' ? 'Pro — Annual'
+                : planType === 'pro_quarterly' ? 'Pro — Quarterly'
                 : planType === 'pro_monthly' ? 'Pro — Monthly'
                 : planType === 'pro_plus_annual' ? 'Pro+ — Annual'
+                : planType === 'pro_plus_quarterly' ? 'Pro+ — Quarterly'
                 : planType === 'pro_plus_monthly' ? 'Pro+ — Monthly'
                 : 'Active'}
             </Text>
@@ -104,8 +106,10 @@ export default function SettingsScreen() {
           {!isTrialActive() && planType && (
             <Text style={[styles.trialEndText, { color: t.accent }]}>
               {planType === 'pro_annual' ? '₱999/yr'
+                : planType === 'pro_quarterly' ? '₱399/qtr'
                 : planType === 'pro_monthly' ? '₱149/mo'
                 : planType === 'pro_plus_annual' ? '₱1,699/yr'
+                : planType === 'pro_plus_quarterly' ? '₱649/qtr'
                 : '₱249/mo'} · Cancel anytime
             </Text>
           )}
@@ -184,22 +188,21 @@ export default function SettingsScreen() {
         </View>
       </SectionCard>
 
-      {/* Sign Out */}
-      <Button
-        label="Sign Out"
-        onPress={() => {
-          Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Sign Out', onPress: signOut },
-          ]);
-        }}
-        variant="secondary"
-      />
-
-      {/* Delete Account */}
-      <Button
+      {/* Sign Out & Delete */}
+      <View style={styles.dangerZone}>
+        <Button
+          label="Sign Out"
+          onPress={() => {
+            Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Sign Out', onPress: signOut },
+            ]);
+          }}
+          variant="secondary"
+        />
+        <Button
         label="Delete Account"
-        variant="destructive"
+        variant="destructive-outline"
         onPress={() => {
           Alert.alert(
             'Delete Account',
@@ -222,6 +225,7 @@ export default function SettingsScreen() {
           );
         }}
       />
+      </View>
     </ScrollView>
   );
 }
@@ -284,6 +288,10 @@ const styles = StyleSheet.create({
   cloudOnlineText: {
     fontSize: 13,
     fontWeight: '600',
+  },
+  dangerZone: {
+    marginTop: 8,
+    width: '100%',
   },
   optOutLabel: {
     fontSize: 15,
