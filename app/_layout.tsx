@@ -10,8 +10,10 @@ import 'react-native-reanimated';
 import { useColorScheme } from 'react-native';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useUserStore } from '@/store/userStore';
+import { useCardStore } from '@/store/cardStore';
 import { useAuthStore } from '@/store/authStore';
 import { supabase } from '@/utils/supabase';
+import { useRunMigrations } from '@/db/migrate';
 import { initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
 import { initCrashReporting } from '@/utils/crashReporting';
 import { AppThemeProvider, lightTheme, darkTheme } from '@/theme';
@@ -65,11 +67,16 @@ export default function RootLayout() {
   const [loaded, error] = useFonts({
     ...FontAwesome.font,
   });
+  const { success: dbReady, error: dbError } = useRunMigrations();
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
+
+  useEffect(() => {
+    if (dbError) throw dbError;
+  }, [dbError]);
 
   // Listen for Supabase auth state changes
   useEffect(() => {
@@ -79,22 +86,30 @@ export default function RootLayout() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Load data from SQLite once migrations complete
   useEffect(() => {
-    if (loaded) {
+    if (dbReady) {
+      useCardStore.getState().loadCards();
+      useUserStore.getState().loadProfile();
+    }
+  }, [dbReady]);
+
+  useEffect(() => {
+    if (loaded && dbReady) {
       SplashScreen.hideAsync();
       // Initialize crash reporting
       initCrashReporting();
-      // Verify Pro entitlement on app launch (checks trial expiry for trial users)
+      // Verify Pro entitlement on app launch
       useSubscriptionStore.getState().verifyEntitlement();
-      // Initialize PostHog analytics (EU region)
+      // Initialize PostHog analytics
       initAnalytics();
-      // Restore opt-out preference from persisted store
+      // Restore opt-out preference
       const optOut = useUserStore.getState().analyticsOptOut;
       if (optOut) setAnalyticsOptOut(true);
     }
-  }, [loaded]);
+  }, [loaded, dbReady]);
 
-  if (!loaded) {
+  if (!loaded || !dbReady) {
     return null;
   }
 
