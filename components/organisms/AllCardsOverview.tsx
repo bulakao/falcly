@@ -91,7 +91,7 @@ export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress,
         </Pressable>
       </View>
 
-      <BestCardBanner bestCard={bestCard} hasCards={allCards.length > 0} onPress={onBannerPress} />
+      <BestCardBanner bestCard={bestCard} hasCards={allCards.length > 0} hasActiveCards={cards.length > 0} onPress={onBannerPress} />
 
       <View style={styles.section}>
         <SectionHeader

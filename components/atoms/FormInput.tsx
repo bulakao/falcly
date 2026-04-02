@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { StyleSheet, TextInput, type TextInputProps } from 'react-native';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
@@ -7,8 +8,20 @@ interface FormInputProps extends Omit<TextInputProps, 'style' | 'placeholderText
   focused?: boolean;
 }
 
-export function FormInput({ error = false, focused = false, ...props }: FormInputProps) {
+export function FormInput({ error = false, focused: focusedProp = false, placeholder, onFocus, onBlur, ...props }: FormInputProps) {
   const t = useAppTheme();
+  const [isFocused, setIsFocused] = useState(false);
+  const active = focusedProp || isFocused;
+
+  const handleFocus = useCallback((e: any) => {
+    setIsFocused(true);
+    onFocus?.(e);
+  }, [onFocus]);
+
+  const handleBlur = useCallback((e: any) => {
+    setIsFocused(false);
+    onBlur?.(e);
+  }, [onBlur]);
 
   return (
     <TextInput
@@ -16,12 +29,15 @@ export function FormInput({ error = false, focused = false, ...props }: FormInpu
         styles.input,
         {
           backgroundColor: error ? t.riskyBg : t.inputBg,
-          borderColor: error ? t.risky : focused ? t.primary : t.inputBorder,
-          borderWidth: error || focused ? 2 : 1,
+          borderColor: error ? t.risky : active ? t.primary : t.inputBorder,
+          borderWidth: error || active ? 2 : 1,
           color: error ? t.risky : t.inputText,
         },
       ]}
+      placeholder={isFocused ? undefined : placeholder}
       placeholderTextColor={t.placeholder}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       {...props}
     />
   );

@@ -1,17 +1,19 @@
 import { StyleSheet, Text, Pressable, View as RNView } from 'react-native';
 import { View } from '@/components/Themed';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { ChevronRight } from 'lucide-react-native';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
+import StatusTooltip from '@/components/molecules/StatusTooltip';
 import type { BestCardResult, CardStatus } from '@/types/card';
 
 interface BestCardBannerProps {
   bestCard: BestCardResult | null;
   hasCards: boolean;
+  hasActiveCards: boolean;
   onPress?: () => void;
 }
 
-export function BestCardBanner({ bestCard, hasCards, onPress }: BestCardBannerProps) {
+export function BestCardBanner({ bestCard, hasCards, hasActiveCards, onPress }: BestCardBannerProps) {
   const t = useAppTheme();
 
   const statusColorMap: Record<CardStatus, string> = {
@@ -23,18 +25,35 @@ export function BestCardBanner({ bestCard, hasCards, onPress }: BestCardBannerPr
   // No active cards — prompt to manage or add
   if (!bestCard) {
     return (
-      <Pressable style={[styles.card, { backgroundColor: t.surfaceElevated, borderColor: t.border }]} onPress={onPress} disabled={!onPress}>
-        <View style={styles.topLine}>
-          <Text style={[styles.label, { color: t.textMuted }]}>Best card to use</Text>
-          {onPress && <FontAwesome name="chevron-up" size={10} color={t.textMuted} />}
-        </View>
-        <Text style={[styles.bankName, { color: t.textMuted }]}>
-          {hasCards ? 'No active cards' : 'No cards yet'}
-        </Text>
-        <Text style={[styles.reason, { color: t.textMuted }]}>
-          {hasCards ? 'Tap to manage your cards' : 'Add a card to get started'}
-        </Text>
-      </Pressable>
+      <RNView style={[styles.card, { backgroundColor: t.surfaceElevated, borderColor: t.border }]}>
+        <RNView style={styles.cardRow}>
+          <View style={styles.cardContent}>
+            <View style={styles.topLine}>
+              <Text style={[styles.label, { color: t.textMuted }]}>Best card to use</Text>
+            </View>
+            <Text style={[styles.bankName, { color: hasActiveCards ? t.risky : t.textMuted }]}>
+              {!hasCards ? 'No cards yet' : !hasActiveCards ? 'No active cards' : 'All cards are risky'}
+            </Text>
+            <Text style={[styles.reason, { color: t.textMuted }]}>
+              {!hasCards ? 'Add a card to get started' : !hasActiveCards ? 'Tap to manage your cards' : 'Hold off on swiping if you can'}
+            </Text>
+          </View>
+        </RNView>
+        {onPress && (
+          <>
+            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+            <RNView style={styles.manageRow}>
+              <StatusTooltip>
+                <Text style={[styles.manageText, { color: t.textMuted }]}>WHY?</Text>
+              </StatusTooltip>
+              <Pressable style={styles.manageButton} onPress={onPress}>
+                <Text style={[styles.manageText, { color: t.primary }]}>MANAGE</Text>
+                <ChevronRight size={14} color={t.primary} />
+              </Pressable>
+            </RNView>
+          </>
+        )}
+      </RNView>
     );
   }
 
@@ -42,20 +61,35 @@ export function BestCardBanner({ bestCard, hasCards, onPress }: BestCardBannerPr
   const accentColor = statusColorMap[status.status];
 
   return (
-    <Pressable style={[styles.card, { backgroundColor: t.surfaceElevated, borderColor: t.border }]} onPress={onPress} disabled={!onPress}>
-      <View style={styles.topLine}>
-        <Text style={[styles.label, { color: t.textMuted }]}>Best card to use</Text>
-        {onPress && <FontAwesome name="chevron-up" size={10} color={t.textMuted} />}
+    <RNView style={[styles.card, { backgroundColor: t.surfaceElevated, borderColor: t.border }]}>
+      <View style={styles.cardContent}>
+        <View style={styles.topLine}>
+          <Text style={[styles.label, { color: t.textMuted }]}>Best card to use</Text>
+        </View>
+        <View style={styles.nameRow}>
+          <RNView style={[styles.dot, { backgroundColor: accentColor, shadowColor: accentColor }]} />
+          <Text style={[styles.bankName, { color: t.textPrimary }]}>{card.bankName}</Text>
+        </View>
+        <Text style={[styles.reason, { color: t.textSecondary }]}>{status.reason}</Text>
+        {warning && (
+          <Text style={[styles.warning, { color: t.caution }]}>⚠ {warning}</Text>
+        )}
       </View>
-      <View style={styles.nameRow}>
-        <RNView style={[styles.dot, { backgroundColor: accentColor, shadowColor: accentColor }]} />
-        <Text style={[styles.bankName, { color: t.textPrimary }]}>{card.bankName}</Text>
-      </View>
-      <Text style={[styles.reason, { color: t.textSecondary }]}>{status.reason}</Text>
-      {warning && (
-        <Text style={[styles.warning, { color: t.caution }]}>⚠ {warning}</Text>
+      {onPress && (
+        <>
+          <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+          <RNView style={styles.manageRow}>
+            <StatusTooltip>
+              <Text style={[styles.manageText, { color: t.textMuted }]}>WHY?</Text>
+            </StatusTooltip>
+            <Pressable style={styles.manageButton} onPress={onPress}>
+              <Text style={[styles.manageText, { color: t.primary }]}>MANAGE</Text>
+              <ChevronRight size={14} color={t.primary} />
+            </Pressable>
+          </RNView>
+        </>
       )}
-    </Pressable>
+    </RNView>
   );
 }
 
@@ -107,5 +141,34 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: fonts.interSemiBold,
     marginTop: 6,
+  },
+  cardRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  cardContent: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  divider: {
+    height: 1,
+    marginTop: 12,
+  },
+  manageRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 12,
+  },
+  manageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    gap: 2,
+  },
+  manageText: {
+    fontSize: 12,
+    fontFamily: fonts.interSemiBold,
   },
 });

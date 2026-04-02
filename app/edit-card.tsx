@@ -97,14 +97,14 @@ export default function EditCardScreen() {
           label="Bank Name"
           value={bankName}
           onChangeText={setBankName}
-          placeholder="e.g. BDO, BPI, Metrobank"
+          placeholder="BDO, BPI, Metrobank"
         />
 
         <FormFieldGroup
           label="Credit Limit"
           value={creditLimit}
           onChangeText={setCreditLimit}
-          placeholder="e.g. 50000"
+          placeholder="50,000"
           keyboardType="numeric"
           selectTextOnFocus
         />
@@ -113,7 +113,7 @@ export default function EditCardScreen() {
           label="Statement Day (1-31)"
           value={statementDay}
           onChangeText={setStatementDay}
-          placeholder="e.g. 15"
+          placeholder="15"
           keyboardType="numeric"
           selectTextOnFocus
         />

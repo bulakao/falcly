@@ -5,15 +5,18 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  View as RNView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ChevronDown } from 'lucide-react-native';
 
 import { Text, View } from '@/components/Themed';
 import { Badge, Button } from '@/components/atoms';
 import { FormFieldGroup, StatusTooltip } from '@/components/molecules';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
-import { calculateCardStatus } from '@/utils/decisionEngine';
+import { calculateCardStatus, utilization, daysToStatement } from '@/utils/decisionEngine';
 import type { CardStatus } from '@/types/card';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
@@ -39,6 +42,7 @@ const STATUS_EXPLANATIONS: Record<CardStatus, string> = {
 
 export default function OnboardingResultScreen() {
   const t = useAppTheme();
+  const insets = useSafeAreaInsets();
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
   const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
   const updateCard = useCardStore((s) => s.updateCard);
@@ -56,6 +60,9 @@ export default function OnboardingResultScreen() {
   );
 
   const statusResult = card ? calculateCardStatus(card, new Date()) : null;
+  const util = card ? utilization(card.outstandingBalance, card.creditLimit) : 0;
+  const utilPct = Math.round(util * 100);
+  const daysLeft = card ? daysToStatement(card.statementDay, new Date()) : 0;
 
   useEffect(() => {
     if (statusResult) trackOnboardingFirstStatusViewed(statusResult.status);
@@ -109,66 +116,97 @@ export default function OnboardingResultScreen() {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 56 }]}>
         {/* Status result */}
         <View style={[styles.statusCard, { borderColor: color }]}>
           <View style={styles.badgeRow}>
             <Badge label={`${STATUS_ICONS[status]} ${status}`} variant={BADGE_VARIANT[status]} />
             <StatusTooltip />
           </View>
-          <Text style={[styles.reason, { color: t.textSecondary }]}>{reason}</Text>
-          <Text style={[styles.explanation, { color: t.textMuted }]}>{STATUS_EXPLANATIONS[status]}</Text>
+          <Text style={[styles.explanation, { color: t.textSecondary }]}>{STATUS_EXPLANATIONS[status]}</Text>
         </View>
 
         <Text style={styles.cardName}>{card.bankName}</Text>
-        <Text style={[styles.balanceDetail, { color: t.textMuted }]}>
-          ₱{card.outstandingBalance.toLocaleString()} / ₱{card.creditLimit.toLocaleString()}
+
+        {/* Credit usage bar */}
+        <RNView style={styles.usageSection}>
+          <RNView style={styles.usageHeader}>
+            <Text style={[styles.usageLabel, { color: t.textSecondary }]}>Credit Used</Text>
+            <Text style={[styles.usagePct, { color: t.textPrimary }]}>{utilPct}%</Text>
+          </RNView>
+          <RNView style={[styles.progressTrack, { backgroundColor: t.surface }]}>
+            <RNView
+              style={[
+                styles.progressFill,
+                {
+                  width: `${Math.min(utilPct, 100)}%`,
+                  backgroundColor: color,
+                },
+              ]}
+            />
+          </RNView>
+          <RNView style={styles.usageFooter}>
+            <Text style={[styles.usageAmount, { color: t.textMuted }]}>
+              {card.outstandingBalance.toLocaleString()} / {card.creditLimit.toLocaleString()}
+            </Text>
+          </RNView>
+        </RNView>
+
+        <Text style={[styles.cycleSummary, { color: t.textMuted }]}>
+          {daysLeft} days to statement · {utilPct}% utilization
         </Text>
 
         {/* Enrichment section */}
-        {!showEnrichment ? (
+        <RNView style={[styles.enrichContainer, { backgroundColor: t.surface, borderColor: t.border }]}>
           <Pressable
-            style={[styles.enrichButton, { borderColor: t.border }]}
-            onPress={() => setShowEnrichment(true)}
+            style={styles.enrichToggle}
+            onPress={() => setShowEnrichment(!showEnrichment)}
           >
-            <Text style={[styles.enrichButtonText, { color: t.accent }]}>
-              Improve accuracy (optional)
-            </Text>
-            <Text style={[styles.enrichHint, { color: t.textMuted }]}>
-              Add your due date or interest rate
-            </Text>
+            <RNView style={styles.enrichTextWrap}>
+              <Text style={[styles.enrichButtonText, { color: t.accent }]}>
+                Fine-tune your result (optional)
+              </Text>
+              <Text style={[styles.enrichHint, { color: t.textMuted }]}>
+                Add your due date or interest rate
+              </Text>
+            </RNView>
+            <RNView style={{ transform: [{ rotate: showEnrichment ? '180deg' : '0deg' }] }}>
+              <ChevronDown size={20} color={t.textSecondary} />
+            </RNView>
           </Pressable>
-        ) : (
-          <View style={styles.enrichSection}>
-            <Text style={styles.enrichHeading}>Fine-tune your result</Text>
+          {showEnrichment && (
+            <RNView style={[styles.enrichSection, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border }]}>
+              <FormFieldGroup
+                label="Due Date (day of month)"
+                value={dueDay}
+                onChangeText={setDueDay}
+                placeholder="15"
+                keyboardType="numeric"
+              />
 
-            <FormFieldGroup
-              label="Due Date (day of month)"
-              value={dueDay}
-              onChangeText={setDueDay}
-              placeholder="e.g. 15"
-              keyboardType="numeric"
-            />
-
-            <FormFieldGroup
-              label="Monthly Interest Rate (%)"
-              value={interestRate}
-              onChangeText={setInterestRate}
-              placeholder={String(cardDefaults.interestRate * 100)}
-              keyboardType="numeric"
-              selectTextOnFocus
-            />
-
-            <Button label="Save & Continue" onPress={handleEnrichmentSave} />
-          </View>
-        )}
-
-        <Pressable style={styles.skipButton} onPress={handleSkip}>
-          <Text style={[styles.skipButtonText, { color: t.textMuted }]}>
-            {showEnrichment ? 'Skip for now' : 'Go to Dashboard'}
-          </Text>
-        </Pressable>
+              <FormFieldGroup
+                label="Monthly Interest Rate (%)"
+                value={interestRate}
+                onChangeText={setInterestRate}
+                placeholder={String(cardDefaults.interestRate * 100)}
+                keyboardType="numeric"
+                selectTextOnFocus
+              />
+            </RNView>
+          )}
+        </RNView>
       </ScrollView>
+
+      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
+        {showEnrichment ? (
+          <>
+            <Button label="Save & Continue" onPress={handleEnrichmentSave} />
+            <Button label="Skip for now" variant="ghost" onPress={handleSkip} />
+          </>
+        ) : (
+          <Button label="Go to Dashboard" variant="secondary" onPress={handleSkip} />
+        )}
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -176,8 +214,13 @@ export default function OnboardingResultScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   container: {
-    padding: 24,
-    paddingBottom: 48,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  bottomBar: {
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    gap: 4,
   },
   statusCard: {
     borderWidth: 2,
@@ -189,6 +232,8 @@ const styles = StyleSheet.create({
   badgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
     marginBottom: 12,
   },
   badge: {
@@ -214,19 +259,60 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: fonts.interBold,
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 16,
   },
-  balanceDetail: {
-    fontSize: 14,
+  usageSection: {
+    marginBottom: 16,
+  },
+  usageHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  usageLabel: {
+    fontSize: 13,
+    fontFamily: fonts.interMedium,
+  },
+  usagePct: {
+    fontSize: 13,
+    fontFamily: fonts.interBold,
+  },
+  progressTrack: {
+    height: 8,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  usageFooter: {
+    marginTop: 6,
+  },
+  usageAmount: {
+    fontSize: 12,
+    fontFamily: fonts.interRegular,
+  },
+  cycleSummary: {
+    fontSize: 13,
+    fontFamily: fonts.interMedium,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
-  enrichButton: {
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 16,
-    alignItems: 'center',
+  enrichContainer: {
+    borderRadius: 16,
     marginBottom: 12,
+    overflow: 'hidden',
+  },
+  enrichToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    gap: 12,
+  },
+  enrichTextWrap: {
+    flex: 1,
   },
   enrichButtonText: {
     fontSize: 15,
@@ -237,7 +323,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   enrichSection: {
-    marginBottom: 12,
+    padding: 16,
+    paddingTop: 8,
   },
   enrichHeading: {
     fontSize: 16,

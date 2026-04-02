@@ -150,7 +150,7 @@ export default function ComponentShowcase() {
         <FormInput
           value={inputText}
           onChangeText={setInputText}
-          placeholder="e.g. 25,000"
+          placeholder="25,000"
           keyboardType="numeric"
         />
 

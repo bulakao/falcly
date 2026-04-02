@@ -7,7 +7,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { useSubscriptionStore, FREE_CARD_LIMIT } from '@/store/subscriptionStore';
 import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
 import { useTransactionStore } from '@/store/transactionStore';
@@ -100,6 +100,11 @@ function RootLayout() {
       useCardStore.getState().loadCards();
       useTransactionStore.getState().loadTransactions();
       useUserStore.getState().loadProfile();
+      // Enforce free-tier active card limit on load
+      const { tier } = useSubscriptionStore.getState();
+      if (tier === 'free') {
+        useCardStore.getState().enforceActiveLimit(FREE_CARD_LIMIT);
+      }
     }
   }, [dbReady]);
 
@@ -162,10 +167,10 @@ function RootLayoutNav() {
           <Stack.Screen name="update-balance" options={{ presentation: 'modal', title: 'Update Balance' }} />
           <Stack.Screen name="edit-card" options={{ presentation: 'modal', title: 'Edit Card' }} />
           <Stack.Screen name="pro-paywall" options={{ presentation: 'modal', title: 'Upgrade to Pro' }} />
-          <Stack.Screen name="onboarding" options={{ headerShown: false, animation: 'slide_from_right' }} />
-          <Stack.Screen name="onboarding-result" options={{ headerShown: false, animation: 'slide_from_right' }} />
+          <Stack.Screen name="onboarding" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_right' }} />
+          <Stack.Screen name="onboarding-result" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_right' }} />
           <Stack.Screen name="settings" options={{ presentation: 'fullScreenModal', headerShown: false }} />
-          <Stack.Screen name="manage-cards" options={{ presentation: 'fullScreenModal', headerShown: false }} />
+          <Stack.Screen name="manage-cards" options={{ presentation: 'card', title: '', headerTransparent: true, headerBackTitle: 'Back', headerLeftContainerStyle: { paddingLeft: 8 }, headerRightContainerStyle: { paddingRight: 8 } }} />
           <Stack.Screen name="log-transaction" options={{ presentation: 'modal', title: 'Log Transaction' }} />
           <Stack.Screen name="card-transactions" options={{ presentation: 'fullScreenModal', headerShown: false }} />
           <Stack.Screen name="payment-summary" options={{ presentation: 'modal', title: 'What You Owe' }} />

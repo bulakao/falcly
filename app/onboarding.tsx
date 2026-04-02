@@ -9,6 +9,8 @@ import {
   Pressable,
 } from 'react-native';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ChevronDown } from 'lucide-react-native';
 
 import { Text } from '@/components/Themed';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
@@ -19,150 +21,176 @@ import { fonts } from '@/theme/fonts';
 import { Button, Heading } from '@/components/atoms';
 import { FormFieldGroup } from '@/components/molecules';
 
-const BANKS = [
-  { slug: 'bdo', name: 'BDO', color: '#003087' },
-  { slug: 'bpi', name: 'BPI', color: '#D42027' },
-  { slug: 'metrobank', name: 'Metrobank', color: '#003366' },
-  { slug: 'rcbc', name: 'RCBC', color: '#008744' },
-  { slug: 'unionbank', name: 'UnionBank', color: '#F7941D' },
-  { slug: 'security_bank', name: 'Security Bank', color: '#E31837' },
-  { slug: 'chinabank', name: 'Chinabank', color: '#CC0000' },
-  { slug: 'eastwest', name: 'EastWest', color: '#002855' },
-  { slug: 'other', name: 'Other', color: '#888888' },
-];
+const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
+
+function formatMoney(raw: string): string {
+  const cleaned = raw.replace(/[^0-9.]/g, '');
+  const parts = cleaned.split('.');
+  if (parts.length > 2) return parts[0] + '.' + parts.slice(1).join('');
+  const intPart = parts[0].replace(/^0+(?=\d)/, '');
+  const formatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return parts.length === 2 ? formatted + '.' + parts[1] : formatted;
+}
+
+function parseMoney(formatted: string): number {
+  return parseFloat(formatted.replace(/,/g, '')) || 0;
+}
 
 export default function OnboardingScreen() {
   const t = useAppTheme();
+  const insets = useSafeAreaInsets();
   const addCard = useCardStore((s) => s.addCard);
+  const updateCard = useCardStore((s) => s.updateCard);
 
-  const [selectedBank, setSelectedBank] = useState<string | null>(null);
+  const [onboardingCardId, setOnboardingCardId] = useState<string | null>(null);
+  const [accountName, setAccountName] = useState('');
   const [statementDay, setStatementDay] = useState<number | null>(null);
+  const [showDayPicker, setShowDayPicker] = useState(false);
   const [creditLimit, setCreditLimit] = useState('');
   const [outstandingBalance, setOutstandingBalance] = useState('');
 
+  function handleCreditLimitChange(text: string) {
+    setCreditLimit(formatMoney(text));
+  }
+
+  function handleOutstandingBalanceChange(text: string) {
+    setOutstandingBalance(formatMoney(text));
+  }
+
   function handleSave() {
-    if (!selectedBank) {
-      Alert.alert('Required', 'Select your bank.');
+    if (!accountName.trim()) {
+      Alert.alert('Required', 'Enter an account name.');
       return;
     }
     if (statementDay === null) {
       Alert.alert('Required', 'Select your statement day.');
       return;
     }
-    const limit = parseFloat(creditLimit);
-    const balance = parseFloat(outstandingBalance) || 0;
+    const limit = parseMoney(creditLimit);
 
-    if (isNaN(limit) || limit <= 0) {
+    if (limit <= 0) {
       Alert.alert('Required', 'Enter a valid credit limit.');
       return;
     }
 
-    const bank = BANKS.find((b) => b.slug === selectedBank);
+    const balance = parseMoney(outstandingBalance);
 
-    addCard({
-      bankName: bank?.name ?? 'My Card',
-      creditLimit: limit,
-      outstandingBalance: balance,
-      statementDay,
-      dueDayOffset: cardDefaults.dueDayOffset,
-      interestRate: cardDefaults.interestRate,
-      minPaymentPct: cardDefaults.minPaymentPct,
-      minPaymentFloor: cardDefaults.minPaymentFloor,
-    });
-    trackCardAdded('onboarding');
-    trackOnboardingCardEntryCompleted(bank?.name ?? 'Other', balance > 0);
+    let cardId = onboardingCardId;
 
+    if (cardId) {
+      // Update existing onboarding card instead of creating a duplicate
+      updateCard(cardId, {
+        bankName: accountName.trim(),
+        creditLimit: limit,
+        outstandingBalance: balance,
+        statementDay,
+      });
+    } else {
+      addCard({
+        bankName: accountName.trim(),
+        creditLimit: limit,
+        outstandingBalance: balance,
+        statementDay,
+        dueDayOffset: cardDefaults.dueDayOffset,
+        interestRate: cardDefaults.interestRate,
+        minPaymentPct: cardDefaults.minPaymentPct,
+        minPaymentFloor: cardDefaults.minPaymentFloor,
+      });
+      const cards = useCardStore.getState().cards;
+      cardId = cards[cards.length - 1].id;
+      setOnboardingCardId(cardId);
+      trackCardAdded('onboarding');
+    }
+
+    trackOnboardingCardEntryCompleted(accountName.trim(), balance > 0);
     useOnboardingStore.getState().setStep('first_status');
-
-    const cards = useCardStore.getState().cards;
-    const newCard = cards[cards.length - 1];
-    router.replace({ pathname: '/onboarding-result', params: { cardId: newCard.id } });
+    router.push({ pathname: '/onboarding-result', params: { cardId } });
   }
 
   return (
     <KeyboardAvoidingView
-      style={styles.flex}
+      style={[styles.flex, { backgroundColor: t.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 56 }]} keyboardShouldPersistTaps="handled">
         <Heading>Add your first card</Heading>
         <Text style={[styles.subtitle, { color: t.textSecondary }]}>
-          We just need 3 things to see if it&apos;s safe to swipe.
+          We just need a few details to see if it&apos;s safe to swipe.
         </Text>
 
-        {/* Bank Picker */}
-        <Text style={[styles.sectionLabel, { color: t.textSecondary }]}>Bank</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.bankRow} contentContainerStyle={styles.bankRowContent}>
-          {BANKS.map((bank) => {
-            const isSelected = selectedBank === bank.slug;
-            return (
-              <Pressable key={bank.slug} onPress={() => setSelectedBank(bank.slug)} style={styles.bankItem}>
-                <View
-                  style={[
-                    styles.bankBadge,
-                    { backgroundColor: bank.color },
-                    isSelected && { borderColor: t.primary, borderWidth: 3 },
-                  ]}
-                >
-                  <Text style={styles.bankInitial}>
-                    {isSelected ? '✓' : bank.name.charAt(0)}
-                  </Text>
-                </View>
-                <Text style={[styles.bankName, { color: isSelected ? t.textPrimary : t.textMuted }]} numberOfLines={1}>
-                  {bank.name}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        {/* Account Name */}
+        <FormFieldGroup
+          label="Account Name"
+          value={accountName}
+          onChangeText={setAccountName}
+          placeholder="My BDO Card"
+          autoCapitalize="words"
+        />
 
-        {/* Statement Day Picker */}
-        <Text style={[styles.sectionLabel, { color: t.textSecondary }]}>Statement Day</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dayRow} contentContainerStyle={styles.dayRowContent}>
-          {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => {
-            const isSelected = statementDay === day;
-            return (
-              <Pressable
-                key={day}
-                onPress={() => setStatementDay(day)}
-                style={[
-                  styles.dayButton,
-                  { backgroundColor: isSelected ? t.primary : t.surface, borderColor: isSelected ? t.primary : t.border },
-                ]}
-              >
-                <Text style={[styles.dayText, { color: isSelected ? t.primaryText : t.textPrimary }]}>
-                  {day}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        {/* Statement Day Dropdown */}
+        <View style={styles.fieldGroup}>
+          <Text style={[styles.sectionLabel, { color: t.textSecondary }]}>Statement Day</Text>
+          <Pressable
+            onPress={() => setShowDayPicker(!showDayPicker)}
+            style={[styles.dropdown, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}
+          >
+            <Text style={[styles.dropdownText, { color: statementDay ? t.inputText : t.placeholder }]}>
+              {statementDay ? `Day ${statementDay}` : 'Select day'}
+            </Text>
+            <ChevronDown size={18} color={t.textSecondary} />
+          </Pressable>
+          {showDayPicker && (
+            <>
+              <Pressable style={styles.dayOverlayBackdrop} onPress={() => setShowDayPicker(false)} />
+              <View style={[styles.dayGrid, { backgroundColor: t.surface, borderColor: t.border }]}>
+                {DAYS.map((day) => {
+                  const isSelected = statementDay === day;
+                  return (
+                    <Pressable
+                      key={day}
+                      onPress={() => { setStatementDay(day); setShowDayPicker(false); }}
+                      style={[
+                        styles.dayButton,
+                        { backgroundColor: isSelected ? t.primary : 'transparent' },
+                      ]}
+                    >
+                      <Text style={[styles.dayText, { color: isSelected ? t.primaryText : t.textPrimary }]}>
+                        {day}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </>
+          )}
+        </View>
 
         {/* Credit Limit */}
         <FormFieldGroup
-          label="Credit Limit (₱)"
+          label="Credit Limit"
           value={creditLimit}
-          onChangeText={setCreditLimit}
-          placeholder="e.g. 50000"
-          keyboardType="numeric"
+          onChangeText={handleCreditLimitChange}
+          placeholder="50,000"
+          keyboardType="decimal-pad"
         />
 
         {/* Outstanding Balance */}
         <FormFieldGroup
-          label="Outstanding Balance (₱)"
+          label="Outstanding Balance"
           value={outstandingBalance}
-          onChangeText={setOutstandingBalance}
+          onChangeText={handleOutstandingBalanceChange}
           placeholder="0"
-          keyboardType="numeric"
+          keyboardType="decimal-pad"
         />
         <Text style={[styles.hint, { color: t.textMuted }]}>
           Approximate is fine — you can update anytime.
         </Text>
 
-        <View style={styles.buttonWrapper}>
-          <Button label="See My Status →" onPress={handleSave} />
-        </View>
       </ScrollView>
+
+      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
+        <Button label="See My Status" onPress={handleSave} />
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -170,7 +198,7 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   container: {
-    padding: 24,
+    paddingHorizontal: 24,
     paddingBottom: 48,
   },
   subtitle: {
@@ -178,46 +206,48 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     marginTop: -16,
   },
+  fieldGroup: {
+    marginTop: 16,
+    zIndex: 10,
+  },
   sectionLabel: {
     fontSize: 13,
     fontFamily: fonts.interSemiBold,
     marginBottom: 8,
-    marginTop: 16,
   },
-  bankRow: {
-    marginBottom: 8,
-  },
-  bankRowContent: {
-    gap: 12,
-    paddingRight: 12,
-  },
-  bankItem: {
+  dropdown: {
+    flexDirection: 'row',
     alignItems: 'center',
-    width: 64,
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
   },
-  bankBadge: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
+  dropdownText: {
+    fontSize: 15,
+    fontFamily: fonts.interRegular,
   },
-  bankInitial: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontFamily: fonts.nunitoBold,
+  dayOverlayBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: -24,
+    right: -24,
+    bottom: -1000,
+    zIndex: 11,
   },
-  bankName: {
-    fontSize: 11,
-    textAlign: 'center',
-  },
-  dayRow: {
-    marginBottom: 8,
-  },
-  dayRowContent: {
-    gap: 8,
-    paddingRight: 12,
+  dayGrid: {
+    position: 'absolute',
+    top: 76,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 8,
+    gap: 4,
+    zIndex: 12,
   },
   dayButton: {
     width: 40,
@@ -225,7 +255,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
   },
   dayText: {
     fontSize: 14,
@@ -235,7 +264,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
-  buttonWrapper: {
-    marginTop: 32,
+  bottomBar: {
+    paddingHorizontal: 24,
+    paddingTop: 12,
   },
 });

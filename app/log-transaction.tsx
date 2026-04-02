@@ -132,7 +132,7 @@ export default function LogTransactionScreen() {
         <FormInput
           value={merchant}
           onChangeText={setMerchant}
-          placeholder="e.g. Grab Food, Watsons"
+          placeholder="Grab Food, Watsons"
           keyboardType="default"
         />
 

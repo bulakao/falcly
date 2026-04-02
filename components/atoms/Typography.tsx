@@ -70,5 +70,6 @@ const styles = StyleSheet.create({
   caption: {
     fontFamily: fonts.interRegular,
     fontSize: 12,
+    marginBottom: 8,
   },
 });

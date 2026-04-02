@@ -86,7 +86,7 @@ export default function AddCardScreen() {
           label="Bank Name"
           value={bankName}
           onChangeText={setBankName}
-          placeholder="e.g. BDO, BPI, Metrobank"
+          placeholder="BDO, BPI, Metrobank"
           autoFocus
         />
 
@@ -94,7 +94,7 @@ export default function AddCardScreen() {
           label="Credit Limit"
           value={creditLimit}
           onChangeText={setCreditLimit}
-          placeholder="e.g. 50000"
+          placeholder="50,000"
           keyboardType="numeric"
         />
 
@@ -110,7 +110,7 @@ export default function AddCardScreen() {
           label="Statement Day (1-31)"
           value={statementDay}
           onChangeText={setStatementDay}
-          placeholder="e.g. 15"
+          placeholder="15"
           keyboardType="numeric"
         />
 

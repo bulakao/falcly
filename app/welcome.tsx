@@ -32,7 +32,7 @@ export default function WelcomeScreen() {
 
   function handleGetStarted() {
     trackOnboardingGetStartedTapped();
-    router.replace('/onboarding');
+    router.push('/onboarding');
   }
 
   return (

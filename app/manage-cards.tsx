@@ -1,5 +1,4 @@
-import { StyleSheet, Pressable, View as RNView } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StyleSheet, Pressable, View as RNView, Alert } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import DraggableFlatList, { ScaleDecorator, type RenderItemParams } from 'react-native-draggable-flatlist';
 import { Text } from '@/components/Themed';
@@ -10,15 +9,17 @@ import { calculateCardStatus } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import type { Card, CardStatus } from '@/types/card';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const ROW_HEIGHT = 56;
+const ROW_HEIGHT = 68;
 
 export default function ManageCardsScreen() {
   const t = useAppTheme();
   const insets = useSafeAreaInsets();
   const cards = useCardStore((s) => s.cards);
   const toggleCardActive = useCardStore((s) => s.toggleCardActive);
+  const deleteCard = useCardStore((s) => s.deleteCard);
   const reorderCards = useCardStore((s) => s.reorderCards);
   const tier = useSubscriptionStore((s) => s.tier);
   const canAddCard = useSubscriptionStore((s) => s.canAddCard);
@@ -33,7 +34,14 @@ export default function ManageCardsScreen() {
 
   function handleToggle(cardId: string, currentlyActive: boolean) {
     if (!currentlyActive && tier === 'free' && activeCount >= FREE_CARD_LIMIT) {
-      router.push('/pro-paywall');
+      Alert.alert(
+        'Free Plan Limit',
+        `You can only have ${FREE_CARD_LIMIT} active cards on the free plan. Disable another card first, or upgrade to Pro.`,
+        [
+          { text: 'OK', style: 'cancel' },
+          { text: 'Upgrade', onPress: () => router.push('/pro-paywall') },
+        ],
+      );
       return;
     }
     toggleCardActive(cardId);
@@ -62,12 +70,12 @@ export default function ManageCardsScreen() {
           delayLongPress={150}
           style={[
             styles.row,
-            { borderBottomColor: t.border, height: ROW_HEIGHT },
+            { height: ROW_HEIGHT },
             isActive && [styles.rowDragging, { backgroundColor: t.surface, shadowColor: t.textPrimary }],
           ]}
         >
           <RNView style={styles.dragHandle}>
-            <FontAwesome name="bars" size={14} color={isActive ? t.primary : t.border} />
+            <FontAwesome name="bars" size={14} color={isActive ? t.primary : t.textMuted} />
           </RNView>
 
           <RNView style={styles.cardInfo}>
@@ -88,37 +96,48 @@ export default function ManageCardsScreen() {
             </RNView>
           </RNView>
 
-          <Pressable onPress={() => handleToggle(card.id, card.isActive)} hitSlop={8}>
-            <FontAwesome
-              name={card.isActive ? 'eye' : 'eye-slash'}
-              size={18}
-              color={card.isActive ? t.textMuted : t.border}
-            />
-          </Pressable>
+          <RNView style={styles.rowActions}>
+            <Pressable onPress={() => handleToggle(card.id, card.isActive)} hitSlop={8}>
+              <FontAwesome
+                name={card.isActive ? 'eye' : 'eye-slash'}
+                size={18}
+                color={card.isActive ? t.textMuted : t.border}
+              />
+            </Pressable>
+            <Pressable
+              onPress={() =>
+                Alert.alert('Delete Card', `Remove ${card.bankName}?`, [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Delete', style: 'destructive', onPress: () => deleteCard(card.id) },
+                ])
+              }
+              hitSlop={8}
+            >
+              <FontAwesome name="trash-o" size={18} color={t.risky} />
+            </Pressable>
+          </RNView>
         </Pressable>
       </ScaleDecorator>
     );
   }
 
   return (
-    <GestureHandlerRootView style={[styles.container, { backgroundColor: t.background, paddingTop: insets.top }]}>
-      {/* Header: Cancel | Title | Add */}
-      <RNView style={styles.headerBar}>
-        <Pressable onPress={() => router.back()} hitSlop={8}>
-          <Text style={[styles.headerAction, { color: t.primary }]}>Cancel</Text>
-        </Pressable>
-        <RNView style={styles.headerCenter}>
-          <Text style={[styles.title, { color: t.textPrimary }]}>Manage Cards</Text>
-          <Text style={[styles.subtitle, { color: t.textMuted }]}>
-            {tier === 'free'
-              ? `${activeCount}/${FREE_CARD_LIMIT} active · Free plan`
-              : `${activeCount} active · Pro`}
-          </Text>
-        </RNView>
-        <Pressable onPress={handleAddCard} hitSlop={8}>
-          <Text style={[styles.headerAction, { color: t.primary }]}>Add</Text>
-        </Pressable>
-      </RNView>
+    <GestureHandlerRootView style={[styles.container, { backgroundColor: t.background, paddingTop: insets.top + 56 }]}>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <Pressable onPress={handleAddCard} hitSlop={8} style={{ paddingLeft: 12, marginRight: 12 }}>
+              <Text style={{ color: t.primary, fontSize: 16, fontFamily: fonts.interSemiBold }}>Add Card</Text>
+            </Pressable>
+          ),
+        }}
+      />
+      <Text style={[styles.title, { color: t.textPrimary }]}>Manage Cards</Text>
+      <Text style={[styles.subtitle, { color: t.textMuted }]}>
+        {tier === 'free'
+          ? `${activeCount}/${FREE_CARD_LIMIT} active · Free plan`
+          : `${activeCount} active · Pro`}
+      </Text>
 
       {/* Draggable list */}
       <DraggableFlatList
@@ -127,7 +146,11 @@ export default function ManageCardsScreen() {
         renderItem={renderItem}
         onDragEnd={handleDragEnd}
         contentContainerStyle={styles.listContent}
+        ItemSeparatorComponent={() => (
+          <RNView style={[styles.separator, { backgroundColor: t.border }]} />
+        )}
       />
+
     </GestureHandlerRootView>
   );
 }
@@ -136,28 +159,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  headerBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  headerCenter: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  headerAction: {
-    fontSize: 16,
-    fontFamily: fonts.interSemiBold,
-  },
   title: {
-    fontSize: 17,
-    fontFamily: fonts.interBold,
+    fontSize: 28,
+    fontFamily: fonts.nunitoBold,
+    paddingHorizontal: 20,
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 12,
-    marginTop: 1,
+    fontSize: 13,
+    paddingHorizontal: 20,
+    marginBottom: 12,
   },
   listContent: {
     paddingBottom: 40,
@@ -166,7 +177,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   rowDragging: {
     borderRadius: 12,
@@ -180,6 +190,7 @@ const styles = StyleSheet.create({
     width: 28,
     alignItems: 'center',
     justifyContent: 'center',
+    marginLeft: -8,
     marginRight: 10,
   },
   cardInfo: {
@@ -211,5 +222,18 @@ const styles = StyleSheet.create({
   balance: {
     fontSize: 12,
     marginTop: 1,
+  },
+  rowActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 24,
+  },
+  headerAction: {
+    fontSize: 16,
+    fontFamily: fonts.interSemiBold,
+  },
+  separator: {
+    height: 1,
+    marginHorizontal: 20,
   },
 });

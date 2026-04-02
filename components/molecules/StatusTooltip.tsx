@@ -26,7 +26,7 @@ export default function StatusTooltip({ children }: StatusTooltipProps) {
         onPress={() => setVisible(true)}
         hitSlop={8}
       >
-        {children ?? <Text style={[styles.infoIcon, { color: t.textMuted }]}>ⓘ</Text>}
+        {children ?? <Text style={[styles.infoIcon, { color: t.textSecondary }]}>ⓘ</Text>}
       </Pressable>
 
       <Modal
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   infoIcon: {
-    fontSize: 16,
+    fontSize: 18,
   },
   overlay: {
     flex: 1,

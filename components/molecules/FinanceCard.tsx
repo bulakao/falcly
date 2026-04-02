@@ -1,16 +1,32 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, Pressable, View as RNView } from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { ChevronDown } from 'lucide-react-native';
 
 import { Text } from '@/components/Themed';
 import { FormInput, Label, Caption } from '@/components/atoms';
 import { AlertBanner } from './AlertBanner';
-import { SectionCard } from './SectionCard';
 import { useUserStore } from '@/store/userStore';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
+
+function formatMoney(raw: string): string {
+  const cleaned = raw.replace(/[^0-9.]/g, '');
+  const parts = cleaned.split('.');
+  if (parts.length > 2) return parts[0] + '.' + parts.slice(1).join('');
+  const intPart = parts[0].replace(/^0+(?=\d)/, '');
+  const formatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return parts.length === 2 ? formatted + '.' + parts[1] : formatted;
+}
+
+function parseMoney(formatted: string): number {
+  return parseFloat(formatted.replace(/,/g, '')) || 0;
+}
+
+function formatInt(raw: string): string {
+  return raw.replace(/[^0-9]/g, '');
+}
 
 function Divider() {
   const t = useAppTheme();
@@ -30,13 +46,14 @@ export function FinanceCard() {
   const setCommittedExpenses = useUserStore((s) => s.setCommittedExpenses);
 
   const cashStaleness = cashUpdatedAt ? getStalenessLevel(cashUpdatedAt) : null;
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
-  // Local state
-  const [cashText, setCashText] = useState(cashOnHand !== null ? String(cashOnHand) : '');
-  const [incomeText, setIncomeText] = useState(monthlyIncome !== null ? String(monthlyIncome) : '');
-  const [paydayText, setPaydayText] = useState(payday !== null ? String(payday) : '');
-  const [expensesText, setExpensesText] = useState(committedExpenses !== null ? String(committedExpenses) : '');
+  // Local state — show empty string for null/zero so placeholder is visible
+  const initMoney = (v: number | null) => (v != null && v > 0 ? formatMoney(String(v)) : '');
+  const [cashText, setCashText] = useState(initMoney(cashOnHand));
+  const [incomeText, setIncomeText] = useState(initMoney(monthlyIncome));
+  const [paydayText, setPaydayText] = useState(payday !== null && payday > 0 ? String(payday) : '');
+  const [expensesText, setExpensesText] = useState(initMoney(committedExpenses));
 
   // Focus tracking
   const [cashFocused, setCashFocused] = useState(false);
@@ -46,122 +63,137 @@ export function FinanceCard() {
 
   // Sync store → local when not focused
   useEffect(() => {
-    if (!cashFocused) setCashText(cashOnHand !== null ? String(cashOnHand) : '');
+    if (!cashFocused) setCashText(initMoney(cashOnHand));
   }, [cashOnHand, cashFocused]);
   useEffect(() => {
-    if (!incomeFocused) setIncomeText(monthlyIncome !== null ? String(monthlyIncome) : '');
+    if (!incomeFocused) setIncomeText(initMoney(monthlyIncome));
   }, [monthlyIncome, incomeFocused]);
   useEffect(() => {
-    if (!paydayFocused) setPaydayText(payday !== null ? String(payday) : '');
+    if (!paydayFocused) setPaydayText(payday !== null && payday > 0 ? String(payday) : '');
   }, [payday, paydayFocused]);
   useEffect(() => {
-    if (!expensesFocused) setExpensesText(committedExpenses !== null ? String(committedExpenses) : '');
+    if (!expensesFocused) setExpensesText(initMoney(committedExpenses));
   }, [committedExpenses, expensesFocused]);
+
+  // Formatted change handlers
+  const handleCashChange = (v: string) => setCashText(formatMoney(v));
+  const handleIncomeChange = (v: string) => setIncomeText(formatMoney(v));
+  const handlePaydayChange = (v: string) => {
+    const cleaned = formatInt(v);
+    if (cleaned === '') { setPaydayText(''); return; }
+    const n = parseInt(cleaned, 10);
+    if (n >= 1 && n <= 31) setPaydayText(String(n));
+  };
+  const handleExpensesChange = (v: string) => setExpensesText(formatMoney(v));
 
   // Debounced saves
   useDebouncedSave(cashText, (v) => {
-    const n = parseFloat(v);
-    if (!isNaN(n) && n >= 0) setCashOnHand(n);
+    const n = parseMoney(v);
+    if (n >= 0) setCashOnHand(n);
   });
   useDebouncedSave(incomeText, (v) => {
-    const n = parseFloat(v);
-    if (!isNaN(n) && n >= 0) setMonthlyIncome(n);
+    const n = parseMoney(v);
+    if (n >= 0) setMonthlyIncome(n);
   });
   useDebouncedSave(paydayText, (v) => {
     const n = parseInt(v, 10);
     if (!isNaN(n) && n >= 1 && n <= 31) setPayday(n);
   });
   useDebouncedSave(expensesText, (v) => {
-    const n = parseFloat(v);
-    if (!isNaN(n) && n >= 0) setCommittedExpenses(n);
+    const n = parseMoney(v);
+    if (n >= 0) setCommittedExpenses(n);
   });
 
   return (
-    <SectionCard>
-      <Pressable style={styles.header} onPress={() => setExpanded((v) => !v)}>
-        <RNView style={styles.headerText}>
-          <Text style={[styles.title, { color: t.textPrimary }]}>Your Finances</Text>
-          <Text style={[styles.subtitle, { color: t.textMuted }]}>
+    <RNView style={[styles.enrichContainer, { backgroundColor: t.surface, borderColor: t.border }]}>
+      <Pressable style={styles.enrichToggle} onPress={() => setExpanded((v) => !v)}>
+        <RNView style={styles.enrichTextWrap}>
+          <Text style={[styles.enrichTitle, { color: t.accent }]}>Your Finances</Text>
+          <Text style={[styles.enrichHint, { color: t.textMuted }]}>
             Used to calculate if you can safely pay off your statement balance.
           </Text>
         </RNView>
-        <FontAwesome name={expanded ? 'chevron-up' : 'chevron-down'} size={12} color={t.textMuted} />
+        <RNView style={{ transform: [{ rotate: expanded ? '180deg' : '0deg' }] }}>
+          <ChevronDown size={20} color={t.textSecondary} />
+        </RNView>
       </Pressable>
 
-      {!expanded ? null : (<>
-      {/* Cash on Hand */}
-      <Label>Cash on Hand</Label>
-      <Caption color={t.textMuted}>Liquid cash available to pay credit card bills.</Caption>
-      <FormInput
-        value={cashText}
-        onChangeText={setCashText}
-        placeholder="e.g. 25000"
-        keyboardType="numeric"
-        onFocus={() => setCashFocused(true)}
-        onBlur={() => setCashFocused(false)}
-      />
-      {cashUpdatedAt !== null && (
-        <Text
-          style={[
-            styles.timestamp,
-            { color: t.textMuted },
-            cashStaleness === 'warning' && { color: t.caution },
-            cashStaleness === 'stale' && { color: t.textMuted, fontFamily: fonts.interSemiBold },
-          ]}
-        >
-          Updated {formatUpdatedAgo(cashUpdatedAt)}
-        </Text>
+      {expanded && (
+        <RNView style={[styles.enrichSection, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border }]}>
+          {/* Cash on Hand */}
+          <Label>Cash on Hand</Label>
+          <Caption color={t.textMuted}>Liquid cash available to pay credit card bills.</Caption>
+          <FormInput
+            value={cashText}
+            onChangeText={handleCashChange}
+            placeholder="25000"
+            keyboardType="numeric"
+            onFocus={() => setCashFocused(true)}
+            onBlur={() => setCashFocused(false)}
+          />
+          {cashUpdatedAt !== null && (
+            <Text
+              style={[
+                styles.timestamp,
+                { color: t.textMuted },
+                cashStaleness === 'warning' && { color: t.caution },
+                cashStaleness === 'stale' && { color: t.textMuted, fontFamily: fonts.interSemiBold },
+              ]}
+            >
+              Updated {formatUpdatedAgo(cashUpdatedAt)}
+            </Text>
+          )}
+          {cashStaleness === 'warning' && (
+            <AlertBanner message="⚠️ Cash amount may be outdated" variant="warning" />
+          )}
+          {cashStaleness === 'stale' && (
+            <AlertBanner message="⚠ Cash data is stale" variant="stale" />
+          )}
+
+          <Divider />
+
+          {/* Monthly Income */}
+          <Label>Monthly Income</Label>
+          <Caption color={t.textMuted}>Factored into projections only when payday falls before your due date.</Caption>
+          <FormInput
+            value={incomeText}
+            onChangeText={handleIncomeChange}
+            placeholder="40000"
+            keyboardType="numeric"
+            onFocus={() => setIncomeFocused(true)}
+            onBlur={() => setIncomeFocused(false)}
+          />
+
+          <Divider />
+
+          {/* Payday */}
+          <Label>Payday (day of month)</Label>
+          <Caption color={t.textMuted}>The day your salary arrives each month (1–31).</Caption>
+          <FormInput
+            value={paydayText}
+            onChangeText={handlePaydayChange}
+            placeholder="15"
+            keyboardType="numeric"
+            onFocus={() => setPaydayFocused(true)}
+            onBlur={() => setPaydayFocused(false)}
+          />
+
+          <Divider />
+
+          {/* Committed Expenses */}
+          <Label>Committed Monthly Expenses</Label>
+          <Caption color={t.textMuted}>Fixed expenses (rent, utilities, etc.) deducted from available cash.</Caption>
+          <FormInput
+            value={expensesText}
+            onChangeText={handleExpensesChange}
+            placeholder="15000"
+            keyboardType="numeric"
+            onFocus={() => setExpensesFocused(true)}
+            onBlur={() => setExpensesFocused(false)}
+          />
+        </RNView>
       )}
-      {cashStaleness === 'warning' && (
-        <AlertBanner message="⚠️ Cash amount may be outdated" variant="warning" />
-      )}
-      {cashStaleness === 'stale' && (
-        <AlertBanner message="⚠ Cash data is stale" variant="stale" />
-      )}
-
-      <Divider />
-
-      {/* Monthly Income */}
-      <Label>Monthly Income</Label>
-      <Caption color={t.textMuted}>Factored into projections only when payday falls before your due date.</Caption>
-      <FormInput
-        value={incomeText}
-        onChangeText={setIncomeText}
-        placeholder="e.g. 40000"
-        keyboardType="numeric"
-        onFocus={() => setIncomeFocused(true)}
-        onBlur={() => setIncomeFocused(false)}
-      />
-
-      <Divider />
-
-      {/* Payday */}
-      <Label>Payday (day of month)</Label>
-      <Caption color={t.textMuted}>The day your salary arrives each month (1–31).</Caption>
-      <FormInput
-        value={paydayText}
-        onChangeText={setPaydayText}
-        placeholder="e.g. 15"
-        keyboardType="numeric"
-        onFocus={() => setPaydayFocused(true)}
-        onBlur={() => setPaydayFocused(false)}
-      />
-
-      <Divider />
-
-      {/* Committed Expenses */}
-      <Label>Committed Monthly Expenses</Label>
-      <Caption color={t.textMuted}>Fixed expenses (rent, utilities, etc.) deducted from available cash.</Caption>
-      <FormInput
-        value={expensesText}
-        onChangeText={setExpensesText}
-        placeholder="e.g. 15000"
-        keyboardType="numeric"
-        onFocus={() => setExpensesFocused(true)}
-        onBlur={() => setExpensesFocused(false)}
-      />
-      </>)}
-    </SectionCard>
+    </RNView>
   );
 }
 
@@ -171,25 +203,35 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginBottom: 4,
   },
-  header: {
+  enrichContainer: {
+    borderRadius: 16,
+    marginBottom: 12,
+    overflow: 'hidden',
+  },
+  enrichToggle: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    gap: 12,
   },
-  headerText: {
+  enrichTextWrap: {
     flex: 1,
-    marginRight: 12,
   },
-  title: {
-    fontSize: 16,
-    fontFamily: fonts.interBold,
-    marginBottom: 2,
+  enrichTitle: {
+    fontSize: 15,
+    fontFamily: fonts.interSemiBold,
+    marginBottom: 4,
   },
-  subtitle: {
-    fontSize: 13,
+  enrichHint: {
+    fontSize: 12,
+  },
+  enrichSection: {
+    padding: 16,
+    paddingTop: 8,
   },
   divider: {
-    height: StyleSheet.hairlineWidth,
-    marginVertical: 16,
+    height: 1,
+    marginVertical: 20,
   },
 });
