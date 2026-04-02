@@ -26,7 +26,10 @@ export default function OnboardingScreen() {
   const addCard = useCardStore((s) => s.addCard);
   const updateCard = useCardStore((s) => s.updateCard);
 
-  const [onboardingCardId, setOnboardingCardId] = useState<string | null>(null);
+  const existingCards = useCardStore((s) => s.cards);
+  const [onboardingCardId, setOnboardingCardId] = useState<string | null>(
+    existingCards.length > 0 ? existingCards[existingCards.length - 1].id : null,
+  );
   const [accountName, setAccountName] = useState('');
   const [statementDay, setStatementDay] = useState('');
   const [dueDate, setDueDate] = useState('');
