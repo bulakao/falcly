@@ -14,7 +14,7 @@ import {
   trackOnboardingGetStartedTapped,
 } from '@/utils/analytics';
 
-const falclyLogo = require('@/assets/images/falcon-icon-ios.png');
+const falclyLogo = require('@/assets/images/icon.png');
 
 const BENEFITS = [
   { Icon: ShieldCheck, label: 'Know if it\'s safe to swipe each card' },
@@ -48,7 +48,7 @@ export default function WelcomeScreen() {
     >
       <View style={styles.hero}>
         <View style={styles.logoContainer}>
-          <Image source={falclyLogo} style={styles.logo} resizeMode="cover" />
+          <Image source={falclyLogo} style={styles.logo} resizeMode="contain" />
         </View>
 
         <Text style={[styles.headline, { color: t.textPrimary }]}>
@@ -107,8 +107,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   logo: {
-    width: 116,
-    height: 116,
+    width: 96,
+    height: 96,
   },
   headline: {
     fontSize: 34,
