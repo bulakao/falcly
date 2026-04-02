@@ -49,6 +49,13 @@ export default function AddCardScreen() {
     }
 
     const offset = parseInt(dueDayOffset, 10);
+    if (!isNaN(offset) && offset < 20) {
+      Alert.alert(
+        'Due Date Too Soon',
+        'BSP regulations require at least 20 days between your statement date and payment due date. Please enter 20 or more.',
+      );
+      return;
+    }
 
     addCard({
       bankName: bankName.trim(),
@@ -112,6 +119,7 @@ export default function AddCardScreen() {
           onChangeText={setDueDayOffset}
           placeholder={String(cardDefaults.dueDayOffset)}
           keyboardType="numeric"
+          hint="Minimum 20 days (BSP regulation). Most PH banks use 20–25 days."
         />
 
         <View style={styles.buttonWrapper}>
