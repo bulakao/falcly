@@ -9,18 +9,33 @@ module.exports = {
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     splash: {
-      image: './assets/images/splash-icon.png',
+      image: './assets/images/falcon-mascot.png',
       resizeMode: 'contain',
-      backgroundColor: '#ffffff',
+      backgroundColor: '#F8F9FA',
     },
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.bulakao.falcly',
+      splash: {
+        image: './assets/images/falcon-mascot.png',
+        resizeMode: 'contain',
+        backgroundColor: '#F8F9FA',
+        dark: {
+          image: './assets/images/falcon-mascot.png',
+          resizeMode: 'contain',
+          backgroundColor: '#0A0A0A',
+        },
+      },
     },
     android: {
       adaptiveIcon: {
         foregroundImage: './assets/images/adaptive-icon.png',
         backgroundColor: '#ffffff',
+      },
+      splash: {
+        image: './assets/images/falcon-mascot.png',
+        resizeMode: 'contain',
+        backgroundColor: '#0A0A0A',
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
