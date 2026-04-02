@@ -23,7 +23,7 @@ module.exports = {
         dark: {
           image: './assets/images/splash-icon.png',
           resizeMode: 'contain',
-          backgroundColor: '#0A0A0A',
+          backgroundColor: '#1e2a40',
         },
       },
     },
@@ -35,7 +35,7 @@ module.exports = {
       splash: {
         image: './assets/images/splash-icon.png',
         resizeMode: 'contain',
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#1e2a40',
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
