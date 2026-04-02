@@ -49,4 +49,14 @@ export const profile = sqliteTable('profile', {
   committedExpenses: real('committed_expenses'),
   analyticsOptOut: integer('analytics_opt_out', { mode: 'boolean' }).notNull().default(false),
   themePreference: text('theme_preference').notNull().default('system'), // system | light | dark
+  // Notifications
+  notifyStatementReminder: integer('notify_statement_reminder', { mode: 'boolean' }).notNull().default(true),
+  notifyDueReminder: integer('notify_due_reminder', { mode: 'boolean' }).notNull().default(true),
+  notifyHighUtilization: integer('notify_high_utilization', { mode: 'boolean' }).notNull().default(false),
+  // Currency
+  currencySymbol: text('currency_symbol').notNull().default('₱'),
+  // Defaults
+  defaultInterestRate: real('default_interest_rate').notNull().default(0.02),
+  defaultMinPaymentPct: real('default_min_payment_pct').notNull().default(0.05),
+  defaultMinPaymentFloor: real('default_min_payment_floor').notNull().default(500),
 });

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   StyleSheet,
   Pressable,
@@ -45,6 +45,20 @@ export default function SettingsScreen() {
   const setAnalyticsOptOutStore = useUserStore((s) => s.setAnalyticsOptOut);
   const themePreference = useUserStore((s) => s.themePreference);
   const setThemePreference = useUserStore((s) => s.setThemePreference);
+  const notifyStatementReminder = useUserStore((s) => s.notifyStatementReminder);
+  const setNotifyStatementReminder = useUserStore((s) => s.setNotifyStatementReminder);
+  const notifyDueReminder = useUserStore((s) => s.notifyDueReminder);
+  const setNotifyDueReminder = useUserStore((s) => s.setNotifyDueReminder);
+  const notifyHighUtilization = useUserStore((s) => s.notifyHighUtilization);
+  const setNotifyHighUtilization = useUserStore((s) => s.setNotifyHighUtilization);
+  const currencySymbol = useUserStore((s) => s.currencySymbol);
+  const setCurrencySymbol = useUserStore((s) => s.setCurrencySymbol);
+  const defaultInterestRate = useUserStore((s) => s.defaultInterestRate);
+  const setDefaultInterestRate = useUserStore((s) => s.setDefaultInterestRate);
+  const defaultMinPaymentPct = useUserStore((s) => s.defaultMinPaymentPct);
+  const setDefaultMinPaymentPct = useUserStore((s) => s.setDefaultMinPaymentPct);
+  const defaultMinPaymentFloor = useUserStore((s) => s.defaultMinPaymentFloor);
+  const setDefaultMinPaymentFloor = useUserStore((s) => s.setDefaultMinPaymentFloor);
   const cashOnHand = useUserStore((s) => s.cashOnHand);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
   const payday = useUserStore((s) => s.payday);
@@ -56,22 +70,6 @@ export default function SettingsScreen() {
   const { isOffline } = useNetworkStatus();
   const [exporting, setExporting] = useState(false);
 
-  // DEBUG — remove after diagnosis
-  useEffect(() => {
-    if (__DEV__) {
-      console.log('[DEBUG] profile:', JSON.stringify({ cashOnHand, monthlyIncome, payday, committedExpenses }));
-      console.log('[DEBUG] cards:', JSON.stringify(cards.map((c) => ({
-        bankName: c.bankName,
-        creditLimit: c.creditLimit,
-        outstandingBalance: c.outstandingBalance,
-        statementDay: c.statementDay,
-        dueDayOffset: c.dueDayOffset,
-        minPaymentPct: c.minPaymentPct,
-        minPaymentFloor: c.minPaymentFloor,
-        isActive: c.isActive,
-      }))));
-    }
-  }, [cards, cashOnHand, monthlyIncome, payday, committedExpenses]);
 
   return (
     <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 56 }]}>
@@ -194,6 +192,116 @@ export default function SettingsScreen() {
             trackColor={{ true: t.risky }}
           />
         </RNView>
+      </SurfaceCard>
+
+      {/* ── Notifications ── */}
+      <Text style={[styles.groupLabel, { color: t.textMuted }]}>Notifications</Text>
+      <SurfaceCard>
+        <RNView style={styles.valueRow}>
+          <RNView style={{ flex: 1 }}>
+            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Statement reminder</Text>
+            <Text style={[styles.itemHint, { color: t.textMuted }]}>3 days before statement closes</Text>
+          </RNView>
+          <Switch value={notifyStatementReminder} onValueChange={setNotifyStatementReminder} />
+        </RNView>
+
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        <RNView style={styles.valueRow}>
+          <RNView style={{ flex: 1 }}>
+            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Due date reminder</Text>
+            <Text style={[styles.itemHint, { color: t.textMuted }]}>3 days before payment is due</Text>
+          </RNView>
+          <Switch value={notifyDueReminder} onValueChange={setNotifyDueReminder} />
+        </RNView>
+
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        <RNView style={styles.valueRow}>
+          <RNView style={{ flex: 1 }}>
+            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>High utilization alert</Text>
+            <Text style={[styles.itemHint, { color: t.textMuted }]}>When any card exceeds 80% usage</Text>
+          </RNView>
+          <Switch value={notifyHighUtilization} onValueChange={setNotifyHighUtilization} />
+        </RNView>
+      </SurfaceCard>
+
+      {/* ── Currency ── */}
+      <Text style={[styles.groupLabel, { color: t.textMuted }]}>Currency</Text>
+      <SurfaceCard>
+        <RNView style={styles.themeRow}>
+          {['₱', '$', '€', '¥', '£'].map((sym) => (
+            <Pressable
+              key={sym}
+              onPress={() => setCurrencySymbol(sym)}
+              style={[
+                styles.themeOption,
+                { borderColor: currencySymbol === sym ? t.primary : t.border, backgroundColor: currencySymbol === sym ? t.accentBg : 'transparent' },
+              ]}
+            >
+              <Text style={[styles.currencyText, { color: currencySymbol === sym ? t.primary : t.textPrimary }]}>
+                {sym}
+              </Text>
+            </Pressable>
+          ))}
+        </RNView>
+      </SurfaceCard>
+
+      {/* ── Card Defaults ── */}
+      <Text style={[styles.groupLabel, { color: t.textMuted }]}>Card Defaults</Text>
+      <SurfaceCard>
+        <Text style={[styles.itemHint, { color: t.textMuted, marginBottom: 12 }]}>
+          Applied when adding new cards. Existing cards are not affected.
+        </Text>
+
+        <RNView style={styles.defaultRow}>
+          <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Interest rate</Text>
+          <Text style={[styles.defaultValue, { color: t.textSecondary }]}>{(defaultInterestRate * 100).toFixed(1)}%</Text>
+        </RNView>
+
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        <RNView style={styles.defaultRow}>
+          <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Min. payment</Text>
+          <Text style={[styles.defaultValue, { color: t.textSecondary }]}>{(defaultMinPaymentPct * 100).toFixed(0)}%</Text>
+        </RNView>
+
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        <RNView style={styles.defaultRow}>
+          <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Min. payment floor</Text>
+          <Text style={[styles.defaultValue, { color: t.textSecondary }]}>{currencySymbol}{defaultMinPaymentFloor.toLocaleString()}</Text>
+        </RNView>
+      </SurfaceCard>
+
+      {/* ── About ── */}
+      <Text style={[styles.groupLabel, { color: t.textMuted }]}>About</Text>
+      <SurfaceCard>
+        <RNView style={styles.defaultRow}>
+          <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Version</Text>
+          <Text style={[styles.defaultValue, { color: t.textMuted }]}>1.0.0</Text>
+        </RNView>
+
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        <Pressable style={styles.defaultRow}>
+          <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Terms of Service</Text>
+          <FontAwesome name="chevron-right" size={12} color={t.textMuted} />
+        </Pressable>
+
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        <Pressable style={styles.defaultRow}>
+          <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Privacy Policy</Text>
+          <FontAwesome name="chevron-right" size={12} color={t.textMuted} />
+        </Pressable>
+
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        <Pressable style={styles.defaultRow}>
+          <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Send Feedback</Text>
+          <FontAwesome name="chevron-right" size={12} color={t.textMuted} />
+        </Pressable>
       </SurfaceCard>
 
       {/* ── Data ── */}
@@ -435,11 +543,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: fonts.interSemiBold,
   },
-  dangerZone: {
-    gap: 12,
+  currencyText: {
+    fontSize: 18,
+    fontFamily: fonts.interBold,
   },
-  optOutLabel: {
-    fontSize: 15,
+  defaultRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 2,
+  },
+  defaultValue: {
+    fontSize: 14,
     fontFamily: fonts.interSemiBold,
   },
   themeRow: {
