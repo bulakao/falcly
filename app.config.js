@@ -8,6 +8,7 @@ module.exports = {
     scheme: 'falcly',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
+    backgroundColor: '#1e2a40',
     splash: {
       image: './assets/images/splash-icon.png',
       resizeMode: 'contain',
