@@ -8,7 +8,7 @@ import {
   Switch,
   View as RNView,
 } from 'react-native';
-import Clipboard from '@react-native-clipboard/clipboard';
+import { Share } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -206,7 +206,7 @@ export default function SettingsScreen() {
             subtitle="Debug only — not visible in production."
           />
           <Button
-            label="Copy Store State"
+            label="Share Store State"
             variant="secondary"
             onPress={() => {
               const state = {
@@ -226,8 +226,7 @@ export default function SettingsScreen() {
                   subscriptionsThisCycle: c.subscriptionsThisCycle,
                 })),
               };
-              Clipboard.setString(JSON.stringify(state, null, 2));
-              Alert.alert('Copied!', 'Store state copied to clipboard.');
+              Share.share({ message: JSON.stringify(state, null, 2) });
             }}
           />
           <Button
