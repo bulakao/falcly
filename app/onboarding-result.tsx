@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   StyleSheet,
-  Pressable,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -9,23 +8,18 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronDown } from 'lucide-react-native';
 
 import { Text, View } from '@/components/Themed';
 import { Badge, Button } from '@/components/atoms';
-import { PercentInput, StatusTooltip, SurfaceCard } from '@/components/molecules';
+import { StatusTooltip, SurfaceCard } from '@/components/molecules';
 import { BillingTimeline } from '@/components/organisms';
-import { useCardStore, cardDefaults } from '@/store/cardStore';
+import { useCardStore } from '@/store/cardStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
 import { calculateCardStatus, utilization } from '@/utils/decisionEngine';
 import type { CardStatus } from '@/types/card';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
-import {
-  trackOnboardingFirstStatusViewed,
-  trackOnboardingEnrichmentCompleted,
-  trackOnboardingEnrichmentSkipped,
-} from '@/utils/analytics';
+import { trackOnboardingFirstStatusViewed } from '@/utils/analytics';
 
 const STATUS_ICONS: Record<CardStatus, string> = {
   SAFE: '✓',
@@ -46,27 +40,12 @@ export default function OnboardingResultScreen() {
   const insets = useSafeAreaInsets();
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
   const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
-  const updateCard = useCardStore((s) => s.updateCard);
 
   const STATUS_COLORS: Record<CardStatus, string> = {
     SAFE: t.safe,
     CAUTION: t.caution,
     RISKY: t.risky,
   };
-
-  const [showEnrichment, setShowEnrichment] = useState(false);
-  const [interestRate, setInterestRate] = useState(
-    String(cardDefaults.interestRate * 100),
-  );
-
-  function handleInterestRateChange(text: string) {
-    setInterestRate(text);
-    if (!card) return;
-    const rate = parseFloat(text);
-    if (!isNaN(rate) && rate > 0) {
-      updateCard(card.id, { interestRate: rate / 100 });
-    }
-  }
 
   const statusResult = card ? calculateCardStatus(card, new Date()) : null;
   const util = card ? utilization(card.outstandingBalance, card.creditLimit) : 0;
@@ -84,19 +63,10 @@ export default function OnboardingResultScreen() {
     );
   }
 
-  const { status, reason } = statusResult;
+  const { status } = statusResult;
   const color = STATUS_COLORS[status];
 
-  function handleEnrichmentSave() {
-    trackOnboardingEnrichmentCompleted(false, false);
-    useOnboardingStore.getState().complete();
-    router.replace('/');
-  }
-
-  function handleSkip() {
-    if (showEnrichment) {
-      trackOnboardingEnrichmentSkipped();
-    }
+  function handleContinue() {
     useOnboardingStore.getState().complete();
     router.replace('/');
   }
@@ -150,46 +120,10 @@ export default function OnboardingResultScreen() {
           <BillingTimeline card={card} />
         </SurfaceCard>
 
-        {/* Enrichment section */}
-        <SurfaceCard>
-          <Pressable
-            style={styles.enrichToggle}
-            onPress={() => setShowEnrichment(!showEnrichment)}
-          >
-            <RNView style={styles.enrichTextWrap}>
-              <Text style={[styles.enrichButtonText, { color: t.accent }]}>
-                Fine-tune your result (optional)
-              </Text>
-              <Text style={[styles.enrichHint, { color: t.textMuted }]}>
-                Add your interest rate
-              </Text>
-            </RNView>
-            <RNView style={{ transform: [{ rotate: showEnrichment ? '180deg' : '0deg' }] }}>
-              <ChevronDown size={20} color={t.textSecondary} />
-            </RNView>
-          </Pressable>
-          {showEnrichment && (
-            <RNView style={[styles.enrichSection, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border }]}>
-              <PercentInput
-                label="Monthly Interest Rate (%)"
-                value={interestRate}
-                onChangeText={handleInterestRateChange}
-                placeholder={String(cardDefaults.interestRate * 100)}
-              />
-            </RNView>
-          )}
-        </SurfaceCard>
       </ScrollView>
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
-        {showEnrichment ? (
-          <>
-            <Button label="Save & Continue" onPress={handleEnrichmentSave} />
-            <Button label="Skip for now" variant="ghost" onPress={handleSkip} />
-          </>
-        ) : (
-          <Button label="Go to Dashboard" variant="secondary" onPress={handleSkip} />
-        )}
+        <Button label="Go to Dashboard" onPress={handleContinue} />
       </View>
     </KeyboardAvoidingView>
   );
@@ -219,20 +153,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
     marginBottom: 12,
-  },
-  badge: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  badgeText: {
-    fontSize: 18,
-    fontFamily: fonts.nunitoBold,
-  },
-  reason: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 8,
   },
   explanation: {
     fontSize: 13,
@@ -279,61 +199,5 @@ const styles = StyleSheet.create({
   usageAmount: {
     fontSize: 12,
     fontFamily: fonts.interRegular,
-  },
-  enrichToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  enrichTextWrap: {
-    flex: 1,
-  },
-  enrichButtonText: {
-    fontSize: 15,
-    fontFamily: fonts.interSemiBold,
-    marginBottom: 4,
-  },
-  enrichHint: {
-    fontSize: 12,
-  },
-  enrichSection: {
-    marginTop: 12,
-    paddingTop: 12,
-  },
-  enrichHeading: {
-    fontSize: 16,
-    fontFamily: fonts.interBold,
-    marginBottom: 8,
-  },
-  label: {
-    fontSize: 14,
-    fontFamily: fonts.interSemiBold,
-    marginTop: 14,
-    marginBottom: 6,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-  },
-  saveButton: {
-    marginTop: 20,
-    paddingVertical: 14,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontFamily: fonts.interBold,
-  },
-  skipButton: {
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  skipButtonText: {
-    fontSize: 15,
-    fontFamily: fonts.interSemiBold,
   },
 });
