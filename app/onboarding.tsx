@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Picker } from '@react-native-picker/picker';
 
 import { Text } from '@/components/Themed';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
@@ -20,7 +19,6 @@ import { fonts } from '@/theme/fonts';
 import { Button, Heading } from '@/components/atoms';
 import { FormFieldGroup } from '@/components/molecules';
 
-const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
 function formatMoney(raw: string): string {
   const cleaned = raw.replace(/[^0-9.]/g, '');
@@ -43,7 +41,7 @@ export default function OnboardingScreen() {
 
   const [onboardingCardId, setOnboardingCardId] = useState<string | null>(null);
   const [accountName, setAccountName] = useState('');
-  const [statementDay, setStatementDay] = useState<number | null>(null);
+  const [statementDay, setStatementDay] = useState('');
   const [creditLimit, setCreditLimit] = useState('');
   const [outstandingBalance, setOutstandingBalance] = useState('');
 
@@ -60,8 +58,9 @@ export default function OnboardingScreen() {
       Alert.alert('Required', 'Enter an account name.');
       return;
     }
-    if (statementDay === null) {
-      Alert.alert('Required', 'Select your statement day.');
+    const stmtDay = parseInt(statementDay, 10);
+    if (isNaN(stmtDay) || stmtDay < 1 || stmtDay > 31) {
+      Alert.alert('Required', 'Enter a valid statement day (1–31).');
       return;
     }
     const limit = parseMoney(creditLimit);
@@ -81,14 +80,14 @@ export default function OnboardingScreen() {
         bankName: accountName.trim(),
         creditLimit: limit,
         outstandingBalance: balance,
-        statementDay,
+        statementDay: stmtDay,
       });
     } else {
       addCard({
         bankName: accountName.trim(),
         creditLimit: limit,
         outstandingBalance: balance,
-        statementDay,
+        statementDay: stmtDay,
         dueDayOffset: cardDefaults.dueDayOffset,
         interestRate: cardDefaults.interestRate,
         minPaymentPct: cardDefaults.minPaymentPct,
@@ -125,20 +124,20 @@ export default function OnboardingScreen() {
           autoCapitalize="words"
         />
 
-        {/* Statement Day Picker */}
-        <View style={styles.fieldGroup}>
-          <Text style={[styles.sectionLabel, { color: t.textSecondary }]}>Statement Day</Text>
-          <Picker
-            selectedValue={statementDay}
-            onValueChange={(value) => setStatementDay(value)}
-            style={{ color: t.textPrimary }}
-          >
-            <Picker.Item label="Select day" value={null} color={t.placeholder} />
-            {DAYS.map((day) => (
-              <Picker.Item key={day} label={`Day ${day}`} value={day} color={t.textPrimary} />
-            ))}
-          </Picker>
-        </View>
+        {/* Statement Day */}
+        <FormFieldGroup
+          label="Statement Day (1–31)"
+          value={statementDay}
+          onChangeText={(text) => {
+            const cleaned = text.replace(/[^0-9]/g, '');
+            if (cleaned === '') { setStatementDay(''); return; }
+            const num = parseInt(cleaned, 10);
+            if (num <= 31) setStatementDay(String(num));
+          }}
+          placeholder="15"
+          keyboardType="number-pad"
+          maxLength={2}
+        />
 
         {/* Credit Limit */}
         <FormFieldGroup
@@ -166,6 +165,7 @@ export default function OnboardingScreen() {
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
         <Button label="See My Status" onPress={handleSave} />
       </View>
+
     </KeyboardAvoidingView>
   );
 }
@@ -180,14 +180,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginBottom: 24,
     marginTop: -16,
-  },
-  fieldGroup: {
-    marginTop: 16,
-  },
-  sectionLabel: {
-    fontSize: 13,
-    fontFamily: fonts.interSemiBold,
-    marginBottom: 8,
   },
   hint: {
     fontSize: 12,
