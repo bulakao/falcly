@@ -169,7 +169,7 @@ function RootLayoutNav() {
           <Stack.Screen name="pro-paywall" options={{ presentation: 'modal', title: 'Upgrade to Pro' }} />
           <Stack.Screen name="onboarding" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_right' }} />
           <Stack.Screen name="onboarding-result" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_right' }} />
-          <Stack.Screen name="settings" options={{ presentation: 'fullScreenModal', headerShown: false }} />
+          <Stack.Screen name="settings" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_left' }} />
           <Stack.Screen name="manage-cards" options={{ presentation: 'card', title: '', headerTransparent: true, headerBackTitle: 'Back', headerLeftContainerStyle: { paddingLeft: 8 }, headerRightContainerStyle: { paddingRight: 8 } }} />
           <Stack.Screen name="log-transaction" options={{ presentation: 'modal', title: 'Log Transaction' }} />
           <Stack.Screen name="card-transactions" options={{ presentation: 'fullScreenModal', headerShown: false }} />

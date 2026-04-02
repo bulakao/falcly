@@ -9,10 +9,10 @@ import {
   View as RNView,
 } from 'react-native';
 import { Share } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Text, View } from '@/components/Themed';
+import { Text } from '@/components/Themed';
 import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
@@ -21,11 +21,12 @@ import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { exportDataAsCSV } from '@/utils/csvExport';
-import { Button, Badge, Heading, SectionHeader } from '@/components/atoms';
-import { SectionCard, AlertBanner } from '@/components/molecules';
+import { Button, Badge } from '@/components/atoms';
+import { AlertBanner, SurfaceCard } from '@/components/molecules';
 
 export default function SettingsScreen() {
   const t = useAppTheme();
+  const insets = useSafeAreaInsets();
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
   const deleteAccount = useAuthStore((s) => s.deleteAccount);
@@ -51,7 +52,7 @@ export default function SettingsScreen() {
 
   const cards = useCardStore((s) => s.cards);
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+
   const { isOffline } = useNetworkStatus();
   const [exporting, setExporting] = useState(false);
 
@@ -73,17 +74,13 @@ export default function SettingsScreen() {
   }, [cards, cashOnHand, monthlyIncome, payday, committedExpenses]);
 
   return (
-    <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 8 }]}>
-      <Pressable style={styles.backButton} onPress={() => router.back()} hitSlop={8}>
-        <FontAwesome name="chevron-left" size={16} color={t.textMuted} />
-      </Pressable>
-      <Heading>Settings</Heading>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 56 }]}>
 
-      {/* Account */}
-      {user ? (
-        <SectionCard>
-          <SectionHeader title="Account" />
-          <View style={styles.accountRow}>
+      {/* ── Account & Subscription ── */}
+      <Text style={[styles.groupLabel, { color: t.textMuted }]}>Account</Text>
+      <SurfaceCard>
+        {user ? (
+          <RNView style={styles.accountRow}>
             <RNView style={styles.accountAvatar}>
               {user.user_metadata?.avatar_url ? (
                 <Image source={{ uri: user.user_metadata.avatar_url }} style={styles.accountAvatarImage} />
@@ -91,78 +88,124 @@ export default function SettingsScreen() {
                 <FontAwesome name="user" size={18} color={t.textMuted} />
               )}
             </RNView>
-            <View style={styles.accountInfo}>
+            <RNView style={styles.accountInfo}>
               <Text style={[styles.accountName, { color: t.textPrimary }]}>{user.user_metadata?.full_name ?? 'User'}</Text>
               <Text style={[styles.accountEmail, { color: t.textMuted }]}>{user.email}</Text>
-            </View>
-          </View>
-        </SectionCard>
-      ) : (
-        <SectionCard accentBorder={t.primary}>
-          <View style={styles.accountPromptRow}>
-            <FontAwesome name="shield" size={24} color={t.primary} />
-            <View style={styles.accountPromptText}>
-              <Text style={[styles.accountName, { color: t.textPrimary }]}>Back up your data</Text>
-              <Text style={[styles.accountPromptSubtitle, { color: t.textSecondary }]}>
-                Create a free account to sync across devices and keep your data safe.
+            </RNView>
+          </RNView>
+        ) : (
+          <>
+            <RNView style={styles.accountPromptRow}>
+              <FontAwesome name="shield" size={24} color={t.primary} />
+              <RNView style={styles.accountPromptText}>
+                <Text style={[styles.accountName, { color: t.textPrimary }]}>Back up your data</Text>
+                <Text style={[styles.accountPromptSubtitle, { color: t.textSecondary }]}>
+                  Create a free account to sync across devices and keep your data safe.
+                </Text>
+              </RNView>
+            </RNView>
+            <RNView style={styles.accountPromptButtons}>
+              <Button label="Create Account" onPress={() => router.push({ pathname: '/sign-in', params: { mode: 'signup' } })} />
+              <Button label="Sign In" variant="secondary" onPress={() => router.push('/sign-in')} />
+            </RNView>
+          </>
+        )}
+
+        {/* Subscription — inline if active */}
+        {(isTrialActive() || isPro() || isProPlus()) && (
+          <>
+            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+            <RNView style={styles.proBadgeRow}>
+              <Badge label={isProPlus() ? 'PRO+' : 'PRO'} variant="pro" />
+              <Text style={[styles.proStatusText, { color: t.accentText }]}>
+                {isTrialActive()
+                  ? `Free Trial · ${trialDaysRemaining()} days left`
+                  : planType === 'pro_annual' ? 'Pro — Annual'
+                  : planType === 'pro_quarterly' ? 'Pro — Quarterly'
+                  : planType === 'pro_monthly' ? 'Pro — Monthly'
+                  : planType === 'pro_plus_annual' ? 'Pro+ — Annual'
+                  : planType === 'pro_plus_quarterly' ? 'Pro+ — Quarterly'
+                  : planType === 'pro_plus_monthly' ? 'Pro+ — Monthly'
+                  : 'Active'}
               </Text>
-            </View>
-          </View>
-          <View style={styles.accountPromptButtons}>
-            <Button label="Create Account" onPress={() => router.push({ pathname: '/sign-in', params: { mode: 'signup' } })} />
-            <Button label="Sign In" variant="secondary" onPress={() => router.push('/sign-in')} />
-          </View>
-        </SectionCard>
-      )}
+            </RNView>
+            {isTrialActive() && trialEndDate && (
+              <Text style={[styles.trialEndText, { color: t.accent }]}>
+                Trial ends{' '}
+                {trialEndDate.toLocaleDateString('en-PH', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </Text>
+            )}
+            {!isTrialActive() && planType && (
+              <Text style={[styles.trialEndText, { color: t.accent }]}>
+                {planType === 'pro_annual' ? '₱999/yr'
+                  : planType === 'pro_quarterly' ? '₱399/qtr'
+                  : planType === 'pro_monthly' ? '₱149/mo'
+                  : planType === 'pro_plus_annual' ? '₱1,699/yr'
+                  : planType === 'pro_plus_quarterly' ? '₱649/qtr'
+                  : '₱249/mo'} · Cancel anytime
+              </Text>
+            )}
+          </>
+        )}
+      </SurfaceCard>
 
-      {/* Subscription Status */}
-      {(isTrialActive() || isPro() || isProPlus()) && (
-        <SectionCard accentBorder={t.accent} accentBg={t.accentBg}>
-          <View style={[styles.proBadgeRow, { backgroundColor: 'transparent' }]}>
-            <Badge label={isProPlus() ? 'PRO+' : 'PRO'} variant="pro" />
-            <Text style={[styles.proStatusText, { color: t.accentText }]}>
-              {isTrialActive()
-                ? `Free Trial · ${trialDaysRemaining()} days left`
-                : planType === 'pro_annual' ? 'Pro — Annual'
-                : planType === 'pro_quarterly' ? 'Pro — Quarterly'
-                : planType === 'pro_monthly' ? 'Pro — Monthly'
-                : planType === 'pro_plus_annual' ? 'Pro+ — Annual'
-                : planType === 'pro_plus_quarterly' ? 'Pro+ — Quarterly'
-                : planType === 'pro_plus_monthly' ? 'Pro+ — Monthly'
-                : 'Active'}
-            </Text>
-          </View>
-          {isTrialActive() && trialEndDate && (
-            <Text style={[styles.trialEndText, { color: t.accent }]}>
-              Trial ends{' '}
-              {trialEndDate.toLocaleDateString('en-PH', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </Text>
-          )}
-          {!isTrialActive() && planType && (
-            <Text style={[styles.trialEndText, { color: t.accent }]}>
-              {planType === 'pro_annual' ? '₱999/yr'
-                : planType === 'pro_quarterly' ? '₱399/qtr'
-                : planType === 'pro_monthly' ? '₱149/mo'
-                : planType === 'pro_plus_annual' ? '₱1,699/yr'
-                : planType === 'pro_plus_quarterly' ? '₱649/qtr'
-                : '₱249/mo'} · Cancel anytime
-            </Text>
-          )}
-        </SectionCard>
-      )}
+      {/* ── Preferences ── */}
+      <Text style={[styles.groupLabel, { color: t.textMuted }]}>Preferences</Text>
+      <SurfaceCard>
+        <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Appearance</Text>
+        <RNView style={styles.themeRow}>
+          {(['system', 'light', 'dark'] as const).map((option) => (
+            <Pressable
+              key={option}
+              onPress={() => setThemePreference(option)}
+              style={[
+                styles.themeOption,
+                { borderColor: themePreference === option ? t.primary : t.border, backgroundColor: themePreference === option ? t.accentBg : 'transparent' },
+              ]}
+            >
+              <FontAwesome
+                name={option === 'system' ? 'adjust' : option === 'light' ? 'sun-o' : 'moon-o'}
+                size={16}
+                color={themePreference === option ? t.primary : t.textMuted}
+              />
+              <Text style={[styles.themeOptionText, { color: themePreference === option ? t.primary : t.textPrimary }]}>
+                {option.charAt(0).toUpperCase() + option.slice(1)}
+              </Text>
+            </Pressable>
+          ))}
+        </RNView>
 
-      {/* Export Data */}
-      <SectionCard>
-        <SectionHeader
-          title="Export Data"
-          subtitle="Export all your cards, installments, subscriptions, and profile data as a CSV file."
-        />
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        <RNView style={styles.valueRow}>
+          <RNView style={{ flex: 1 }}>
+            <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Analytics</Text>
+            <Text style={[styles.itemHint, { color: t.textMuted }]}>
+              Anonymous usage data to improve Falcly
+            </Text>
+          </RNView>
+          <Switch
+            value={analyticsOptOut}
+            onValueChange={setAnalyticsOptOutStore}
+            trackColor={{ true: t.risky }}
+          />
+        </RNView>
+      </SurfaceCard>
+
+      {/* ── Data ── */}
+      <Text style={[styles.groupLabel, { color: t.textMuted }]}>Data</Text>
+      <SurfaceCard>
+        <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Export</Text>
+        <Text style={[styles.itemHint, { color: t.textMuted, marginBottom: 12 }]}>
+          Cards, installments, subscriptions, and profile as CSV.
+        </Text>
         <Button
           label={exporting ? 'Exporting...' : 'Export as CSV'}
+          variant="secondary"
           onPress={() => {
             setExporting(true);
             exportDataAsCSV(cards, {
@@ -181,156 +224,87 @@ export default function SettingsScreen() {
           }}
           disabled={exporting}
         />
-      </SectionCard>
 
-      {/* Cloud Sync Status */}
-      {(tier === 'pro' || tier === 'pro_plus') && (
-        <SectionCard>
-          <SectionHeader
-            title="Cloud Sync"
-            subtitle="Pro feature — sync your card data across devices."
-          />
-          {isOffline ? (
-            <AlertBanner message="Cloud sync unavailable — you are offline. Your data is saved locally and all core features work normally." variant="stale" />
-          ) : (
-            <Text style={[styles.cloudOnlineText, { color: t.safe }]}>Connected — sync available</Text>
-          )}
-        </SectionCard>
-      )}
+        {(tier === 'pro' || tier === 'pro_plus') && (
+          <>
+            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+            <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Cloud Sync</Text>
+            {isOffline ? (
+              <AlertBanner message="You are offline. Data is saved locally." variant="stale" />
+            ) : (
+              <Text style={[styles.cloudOnlineText, { color: t.safe }]}>Connected — sync available</Text>
+            )}
+          </>
+        )}
+      </SurfaceCard>
 
-      {/* Dev Tools */}
+      {/* ── Dev / Showcase ── */}
       {__DEV__ && (
-        <SectionCard accentBorder={t.caution}>
-          <SectionHeader
-            title="Dev Tools"
-            subtitle="Debug only — not visible in production."
-          />
-          <Button
-            label="Share Store State"
-            variant="secondary"
-            onPress={() => {
-              const state = {
-                profile: { cashOnHand, monthlyIncome, payday, committedExpenses },
-                cards: cards.map((c) => ({
-                  id: c.id,
-                  bankName: c.bankName,
-                  creditLimit: c.creditLimit,
-                  outstandingBalance: c.outstandingBalance,
-                  statementDay: c.statementDay,
-                  dueDayOffset: c.dueDayOffset,
-                  minPaymentPct: c.minPaymentPct,
-                  minPaymentFloor: c.minPaymentFloor,
-                  isActive: c.isActive,
-                  pendingTransactions: c.pendingTransactions,
-                  installmentsMonthlyAmount: c.installmentsMonthlyAmount,
-                  subscriptionsThisCycle: c.subscriptionsThisCycle,
-                })),
-              };
-              Share.share({ message: JSON.stringify(state, null, 2) });
-            }}
-          />
-          <Button
-            label="Open Showcase"
-            onPress={() => router.push('/component-showcase')}
-            variant="secondary"
-          />
-        </SectionCard>
+        <>
+          <Text style={[styles.groupLabel, { color: t.textMuted }]}>Developer</Text>
+          <SurfaceCard>
+            <Button
+              label="Share Store State"
+              variant="secondary"
+              onPress={() => {
+                const state = {
+                  profile: { cashOnHand, monthlyIncome, payday, committedExpenses },
+                  cards: cards.map((c) => ({
+                    id: c.id,
+                    bankName: c.bankName,
+                    creditLimit: c.creditLimit,
+                    outstandingBalance: c.outstandingBalance,
+                    statementDay: c.statementDay,
+                    dueDayOffset: c.dueDayOffset,
+                    minPaymentPct: c.minPaymentPct,
+                    minPaymentFloor: c.minPaymentFloor,
+                    isActive: c.isActive,
+                    pendingTransactions: c.pendingTransactions,
+                    installmentsMonthlyAmount: c.installmentsMonthlyAmount,
+                    subscriptionsThisCycle: c.subscriptionsThisCycle,
+                  })),
+                };
+                Share.share({ message: JSON.stringify(state, null, 2) });
+              }}
+            />
+            <RNView style={{ height: 8 }} />
+            <Button
+              label="Open Showcase"
+              onPress={() => router.push('/component-showcase')}
+              variant="secondary"
+            />
+          </SurfaceCard>
+        </>
       )}
 
-      {/* Component Showcase */}
-      {!__DEV__ && (
-        <SectionCard>
-          <SectionHeader
-            title="Component Showcase"
-            subtitle="Preview all UI components with the falcon premium palette."
-          />
-          <Button
-            label="Open Showcase"
-            onPress={() => router.push('/component-showcase')}
-            variant="secondary"
-          />
-        </SectionCard>
-      )}
-
-      {/* Appearance */}
-      <SectionCard>
-        <SectionHeader title="Appearance" />
-        <View style={styles.themeRow}>
-          {(['system', 'light', 'dark'] as const).map((option) => (
-            <Pressable
-              key={option}
-              onPress={() => setThemePreference(option)}
-              style={[
-                styles.themeOption,
-                { borderColor: themePreference === option ? t.primary : t.border, backgroundColor: themePreference === option ? t.accentBg : t.surface },
-              ]}
-            >
-              <FontAwesome
-                name={option === 'system' ? 'adjust' : option === 'light' ? 'sun-o' : 'moon-o'}
-                size={16}
-                color={themePreference === option ? t.primary : t.textMuted}
-              />
-              <Text style={[styles.themeOptionText, { color: themePreference === option ? t.primary : t.textPrimary }]}>
-                {option.charAt(0).toUpperCase() + option.slice(1)}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-      </SectionCard>
-
-      {/* Analytics Opt-Out */}
-      <SectionCard>
-        <SectionHeader
-          title="Analytics"
-          subtitle="Anonymous behavioral analytics help us improve Falcly. No personal or financial data is ever tracked."
-        />
-        <View style={styles.valueRow}>
-          <Text style={[styles.optOutLabel, { color: t.textPrimary }]}>Opt out of analytics</Text>
-          <Switch
-            value={analyticsOptOut}
-            onValueChange={setAnalyticsOptOutStore}
-            trackColor={{ true: t.risky }}
-          />
-        </View>
-      </SectionCard>
-
-      {/* Sign Out */}
-      {user && <SectionCard>
-        <SectionHeader
-          title="Sign Out"
-          subtitle="Switch to a different account. Your local data stays on this device."
-        />
-        <Button
-          label="Sign Out"
-          onPress={() => {
-            Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-              { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Sign Out',
-                onPress: async () => {
-                  try {
-                    await signOut();
-                    // _layout.tsx auth guard handles redirect to /sign-in
-                  } catch (e: unknown) {
-                    const msg = e instanceof Error ? e.message : 'Sign out failed';
-                    Alert.alert('Error', msg);
-                  }
-                },
-              },
-            ]);
-          }}
-          variant="secondary"
-        />
-      </SectionCard>}
-
-      {/* Delete Account / Clear Data */}
-      <SectionCard>
-        <SectionHeader
-          title={user ? 'Delete Account' : 'Clear All Data'}
-          subtitle={user
-            ? 'Permanently removes your account, all cards, and associated data. This cannot be undone.'
-            : 'Erase all cards, finances, and settings from this device. This cannot be undone.'}
-        />
+      {/* ── Danger Zone ── */}
+      <Text style={[styles.groupLabel, { color: t.textMuted }]}>Danger Zone</Text>
+      <SurfaceCard>
+        {user && (
+          <>
+            <Button
+              label="Sign Out"
+              onPress={() => {
+                Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Sign Out',
+                    onPress: async () => {
+                      try {
+                        await signOut();
+                      } catch (e: unknown) {
+                        const msg = e instanceof Error ? e.message : 'Sign out failed';
+                        Alert.alert('Error', msg);
+                      }
+                    },
+                  },
+                ]);
+              }}
+              variant="secondary"
+            />
+            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+          </>
+        )}
         <Button
           label={user ? 'Delete Account' : 'Clear All Data'}
           variant="destructive-outline"
@@ -363,7 +337,7 @@ export default function SettingsScreen() {
             );
           }}
         />
-      </SectionCard>
+      </SurfaceCard>
     </ScrollView>
   );
 }
@@ -373,9 +347,26 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 48,
   },
-  backButton: {
+  groupLabel: {
+    fontSize: 13,
+    fontFamily: fonts.interSemiBold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginBottom: 8,
-    alignSelf: 'flex-start',
+    marginTop: 8,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    marginVertical: 14,
+  },
+  itemLabel: {
+    fontSize: 13,
+    fontFamily: fonts.interSemiBold,
+    marginBottom: 4,
+  },
+  itemHint: {
+    fontSize: 12,
+    lineHeight: 17,
   },
   accountRow: {
     flexDirection: 'row',
