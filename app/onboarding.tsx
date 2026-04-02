@@ -17,21 +17,8 @@ import { trackCardAdded, trackOnboardingCardEntryCompleted } from '@/utils/analy
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { Button, Heading } from '@/components/atoms';
-import { FormFieldGroup } from '@/components/molecules';
+import { DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
 
-
-function formatMoney(raw: string): string {
-  const cleaned = raw.replace(/[^0-9.]/g, '');
-  const parts = cleaned.split('.');
-  if (parts.length > 2) return parts[0] + '.' + parts.slice(1).join('');
-  const intPart = parts[0].replace(/^0+(?=\d)/, '');
-  const formatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  return parts.length === 2 ? formatted + '.' + parts[1] : formatted;
-}
-
-function parseMoney(formatted: string): number {
-  return parseFloat(formatted.replace(/,/g, '')) || 0;
-}
 
 export default function OnboardingScreen() {
   const t = useAppTheme();
@@ -45,13 +32,6 @@ export default function OnboardingScreen() {
   const [creditLimit, setCreditLimit] = useState('');
   const [outstandingBalance, setOutstandingBalance] = useState('');
 
-  function handleCreditLimitChange(text: string) {
-    setCreditLimit(formatMoney(text));
-  }
-
-  function handleOutstandingBalanceChange(text: string) {
-    setOutstandingBalance(formatMoney(text));
-  }
 
   function handleSave() {
     if (!accountName.trim()) {
@@ -120,41 +100,27 @@ export default function OnboardingScreen() {
           label="Account Name"
           value={accountName}
           onChangeText={setAccountName}
-          placeholder="My BDO Card"
+          placeholder="My Credit Card"
           autoCapitalize="words"
         />
 
         {/* Statement Day */}
-        <FormFieldGroup
-          label="Statement Day (1–31)"
-          value={statementDay}
-          onChangeText={(text) => {
-            const cleaned = text.replace(/[^0-9]/g, '');
-            if (cleaned === '') { setStatementDay(''); return; }
-            const num = parseInt(cleaned, 10);
-            if (num <= 31) setStatementDay(String(num));
-          }}
-          placeholder="15"
-          keyboardType="number-pad"
-          maxLength={2}
-        />
+        <DayInput value={statementDay} onChangeText={setStatementDay} />
 
         {/* Credit Limit */}
-        <FormFieldGroup
+        <MoneyInput
           label="Credit Limit"
           value={creditLimit}
-          onChangeText={handleCreditLimitChange}
+          onChangeText={setCreditLimit}
           placeholder="50,000"
-          keyboardType="decimal-pad"
         />
 
         {/* Outstanding Balance */}
-        <FormFieldGroup
+        <MoneyInput
           label="Outstanding Balance"
           value={outstandingBalance}
-          onChangeText={handleOutstandingBalanceChange}
-          placeholder="0"
-          keyboardType="decimal-pad"
+          onChangeText={setOutstandingBalance}
+          placeholder="1,000"
         />
         <Text style={[styles.hint, { color: t.textMuted }]}>
           Approximate is fine — you can update anytime.

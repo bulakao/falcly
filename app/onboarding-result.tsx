@@ -13,10 +13,11 @@ import { ChevronDown } from 'lucide-react-native';
 
 import { Text, View } from '@/components/Themed';
 import { Badge, Button } from '@/components/atoms';
-import { FormFieldGroup, StatusTooltip } from '@/components/molecules';
+import { FormFieldGroup, StatusTooltip, SurfaceCard } from '@/components/molecules';
+import { BillingTimeline } from '@/components/organisms';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
-import { calculateCardStatus, utilization, daysToStatement } from '@/utils/decisionEngine';
+import { calculateCardStatus, utilization } from '@/utils/decisionEngine';
 import type { CardStatus } from '@/types/card';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
@@ -62,7 +63,6 @@ export default function OnboardingResultScreen() {
   const statusResult = card ? calculateCardStatus(card, new Date()) : null;
   const util = card ? utilization(card.outstandingBalance, card.creditLimit) : 0;
   const utilPct = Math.round(util * 100);
-  const daysLeft = card ? daysToStatement(card.statementDay, new Date()) : 0;
 
   useEffect(() => {
     if (statusResult) trackOnboardingFirstStatusViewed(statusResult.status);
@@ -126,38 +126,42 @@ export default function OnboardingResultScreen() {
           <Text style={[styles.explanation, { color: t.textSecondary }]}>{STATUS_EXPLANATIONS[status]}</Text>
         </View>
 
-        <Text style={styles.cardName}>{card.bankName}</Text>
+        <SurfaceCard>
+          <Text style={styles.cardName}>{card.bankName}</Text>
+          <RNView style={[styles.divider, { backgroundColor: t.border }]} />
 
-        {/* Credit usage bar */}
-        <RNView style={styles.usageSection}>
-          <RNView style={styles.usageHeader}>
-            <Text style={[styles.usageLabel, { color: t.textSecondary }]}>Credit Used</Text>
-            <Text style={[styles.usagePct, { color: t.textPrimary }]}>{utilPct}%</Text>
+          {/* Credit usage bar */}
+          <RNView style={styles.usageSection}>
+            <RNView style={styles.usageHeader}>
+              <Text style={[styles.usageLabel, { color: t.textSecondary }]}>Credit Used</Text>
+              <Text style={[styles.usagePct, { color: t.textPrimary }]}>{utilPct}%</Text>
+            </RNView>
+            <RNView style={[styles.progressTrack, { backgroundColor: t.border }]}>
+              <RNView
+                style={[
+                  styles.progressFill,
+                  {
+                    width: `${Math.min(utilPct, 100)}%`,
+                    backgroundColor: color,
+                  },
+                ]}
+              />
+            </RNView>
+            <RNView style={styles.usageFooter}>
+              <Text style={[styles.usageAmount, { color: t.textMuted }]}>
+                {card.outstandingBalance.toLocaleString()} / {card.creditLimit.toLocaleString()}
+              </Text>
+            </RNView>
           </RNView>
-          <RNView style={[styles.progressTrack, { backgroundColor: t.surface }]}>
-            <RNView
-              style={[
-                styles.progressFill,
-                {
-                  width: `${Math.min(utilPct, 100)}%`,
-                  backgroundColor: color,
-                },
-              ]}
-            />
-          </RNView>
-          <RNView style={styles.usageFooter}>
-            <Text style={[styles.usageAmount, { color: t.textMuted }]}>
-              {card.outstandingBalance.toLocaleString()} / {card.creditLimit.toLocaleString()}
-            </Text>
-          </RNView>
-        </RNView>
+        </SurfaceCard>
 
-        <Text style={[styles.cycleSummary, { color: t.textMuted }]}>
-          {daysLeft} days to statement · {utilPct}% utilization
-        </Text>
+        {/* Billing cycle timeline */}
+        <SurfaceCard>
+          <BillingTimeline card={card} />
+        </SurfaceCard>
 
         {/* Enrichment section */}
-        <RNView style={[styles.enrichContainer, { backgroundColor: t.surface, borderColor: t.border }]}>
+        <SurfaceCard>
           <Pressable
             style={styles.enrichToggle}
             onPress={() => setShowEnrichment(!showEnrichment)}
@@ -194,7 +198,7 @@ export default function OnboardingResultScreen() {
               />
             </RNView>
           )}
-        </RNView>
+        </SurfaceCard>
       </ScrollView>
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
@@ -259,11 +263,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: fonts.interBold,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
-  usageSection: {
-    marginBottom: 16,
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    marginBottom: 12,
   },
+  usageSection: {},
   usageHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -292,17 +298,6 @@ const styles = StyleSheet.create({
   usageAmount: {
     fontSize: 12,
     fontFamily: fonts.interRegular,
-  },
-  cycleSummary: {
-    fontSize: 13,
-    fontFamily: fonts.interMedium,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  enrichContainer: {
-    borderRadius: 16,
-    marginBottom: 12,
-    overflow: 'hidden',
   },
   enrichToggle: {
     flexDirection: 'row',

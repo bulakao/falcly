@@ -1,5 +1,5 @@
-import { StyleSheet } from 'react-native';
-import { Text, View } from '@/components/Themed';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/Themed';
 import type { Card } from '@/types/card';
 import { getCycleDates } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';
@@ -38,6 +38,13 @@ export function BillingTimeline({ card, today }: { card: Card; today?: Date }) {
     <View style={styles.container}>
       <Text style={[styles.title, { color: t.textMuted }]}>Billing Cycle</Text>
 
+      {/* Today label above track */}
+      <View style={styles.todayLabelRow}>
+        <View style={[styles.labelPositioned, { left: `${todayPct}%` }]}>
+          <Text style={[styles.labelDate, styles.todayLabel, { color: t.accent }]}>Today</Text>
+        </View>
+      </View>
+
       {/* Track */}
       <View style={[styles.track, { backgroundColor: t.border }]}>
         {/* Progress fill up to today */}
@@ -50,14 +57,11 @@ export function BillingTimeline({ card, today }: { card: Card; today?: Date }) {
         <View style={[styles.marker, styles.todayMarker, { left: `${todayPct}%`, backgroundColor: t.accent, borderColor: t.textInverse }]} />
       </View>
 
-      {/* Labels row */}
+      {/* Labels row below track */}
       <View style={styles.labels}>
         <View style={styles.labelStart}>
           <Text style={[styles.labelDate, { color: t.textSecondary }]}>{formatShortDate(cycle.cycleStart)}</Text>
           <Text style={[styles.labelName, { color: t.textMuted }]}>Start</Text>
-        </View>
-        <View style={[styles.labelPositioned, { left: `${todayPct}%` }]}>
-          <Text style={[styles.labelDate, styles.todayLabel, { color: t.accent }]}>Today</Text>
         </View>
         <View style={[styles.labelPositioned, { left: `${statementPct}%` }]}>
           <Text style={[styles.labelDate, { color: statementColor }]}>{formatShortDate(cycle.statementClose)}</Text>
@@ -82,15 +86,16 @@ export function BillingTimeline({ card, today }: { card: Card; today?: Date }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-  },
+  container: {},
   title: {
     fontSize: 13,
-    fontFamily: fonts.interSemiBold,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+    fontFamily: fonts.interMedium,
     marginBottom: 12,
+  },
+  todayLabelRow: {
+    position: 'relative',
+    height: 18,
+    marginBottom: 4,
   },
   track: {
     height: 8,

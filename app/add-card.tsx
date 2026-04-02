@@ -15,7 +15,7 @@ import { Text } from '@/components/Themed';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { trackCardAdded } from '@/utils/analytics';
 import { Button } from '@/components/atoms';
-import { FormFieldGroup } from '@/components/molecules';
+import { DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 
@@ -31,8 +31,8 @@ export default function AddCardScreen() {
   const [dueDayOffset, setDueDayOffset] = useState(String(cardDefaults.dueDayOffset));
 
   function handleSave() {
-    const limit = parseFloat(creditLimit);
-    const balance = parseFloat(outstandingBalance) || 0;
+    const limit = parseMoney(creditLimit);
+    const balance = parseMoney(outstandingBalance);
     const stmtDay = parseInt(statementDay, 10);
 
     if (!bankName.trim()) {
@@ -90,29 +90,21 @@ export default function AddCardScreen() {
           autoFocus
         />
 
-        <FormFieldGroup
+        <MoneyInput
           label="Credit Limit"
           value={creditLimit}
           onChangeText={setCreditLimit}
           placeholder="50,000"
-          keyboardType="numeric"
         />
 
-        <FormFieldGroup
+        <MoneyInput
           label="Outstanding Balance"
           value={outstandingBalance}
           onChangeText={setOutstandingBalance}
-          placeholder="0"
-          keyboardType="numeric"
+          placeholder="1,000"
         />
 
-        <FormFieldGroup
-          label="Statement Day (1-31)"
-          value={statementDay}
-          onChangeText={setStatementDay}
-          placeholder="15"
-          keyboardType="numeric"
-        />
+        <DayInput value={statementDay} onChangeText={setStatementDay} />
 
         <FormFieldGroup
           label="Due Day Offset (days after statement)"
