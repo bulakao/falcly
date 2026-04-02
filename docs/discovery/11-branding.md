@@ -118,16 +118,18 @@ One focal point. The amber eye on black. Recognizable at notification icon size 
 
 | Use | Typeface | Why |
 |-----|----------|-----|
-| Headlines | **DM Sans** | Sharp, geometric, modern — matches the premium black aesthetic |
+| Headlines | **Nunito** | Rounded, friendly, warm — pairs well with the mascot while staying clean |
 | Body | **Inter** | Highly legible at small sizes — essential for mobile |
 | Card numbers / data | **JetBrains Mono** (or system monospace) | Tabular alignment, fintech credibility |
 
+Both Nunito and Inter are free on Google Fonts.
+
 ### Type Scale (Mobile)
-- Screen title: DM Sans Bold, 24px
-- Section header: DM Sans SemiBold, 18px
+- Screen title: Nunito Bold, 24px
+- Section header: Nunito SemiBold, 18px
 - Body: Inter Regular, 14px
 - Caption/label: Inter Regular, 12px
-- Status badge (SAFE/CAUTION/RISKY): DM Sans Bold, 13px — caps, tight tracking
+- Status badge (SAFE/CAUTION/RISKY): Nunito Bold, 13px — caps, tight tracking
 
 ---
 
