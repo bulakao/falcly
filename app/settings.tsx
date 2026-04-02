@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Pressable,
@@ -54,6 +54,23 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { isOffline } = useNetworkStatus();
   const [exporting, setExporting] = useState(false);
+
+  // DEBUG — remove after diagnosis
+  useEffect(() => {
+    if (__DEV__) {
+      console.log('[DEBUG] profile:', JSON.stringify({ cashOnHand, monthlyIncome, payday, committedExpenses }));
+      console.log('[DEBUG] cards:', JSON.stringify(cards.map((c) => ({
+        bankName: c.bankName,
+        creditLimit: c.creditLimit,
+        outstandingBalance: c.outstandingBalance,
+        statementDay: c.statementDay,
+        dueDayOffset: c.dueDayOffset,
+        minPaymentPct: c.minPaymentPct,
+        minPaymentFloor: c.minPaymentFloor,
+        isActive: c.isActive,
+      }))));
+    }
+  }, [cards, cashOnHand, monthlyIncome, payday, committedExpenses]);
 
   return (
     <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 8 }]}>
