@@ -96,6 +96,40 @@ Tracking findings, issues, and things to review after wiggum completes.
 
 ---
 
+## Run 5 (6 commits, TL-01 through TL-08)
+
+### Stories completed
+- TL-01 (Log a transaction — store, schema, migration, modal screen)
+- TL-02 (Cycle auto-classification + "Lands on" label)
+- TL-03 (Cycle-grouped transaction view)
+- TL-04 (Near-cutoff transaction warning)
+- TL-05 (Payment summary screen — "What You Owe")
+- TL-06 (Transaction engine integration — projected balance now includes current-cycle tx sum)
+- TL-07 (Log a payment — type selector, auto-assign to previous cycle)
+- TL-08 (Exclude a transaction — long-press Alert with Exclude/Include/Delete)
+
+### New files created
+- `store/transactionStore.ts` — Zustand + Drizzle/SQLite persistence for transactions
+- `utils/cycleUtils.ts` — classifyTransactionCycle, getLandsOnLabel, getStatementMonth, daysUntilClose, formatCycleDateRange
+- `app/log-transaction.tsx` — modal screen for logging purchases/payments/refunds
+- `app/card-transactions.tsx` — full-screen cycle-grouped transaction list
+- `app/payment-summary.tsx` — modal showing current bill due + projected next bill
+- `db/schema/local.ts` — added `transactions` table with card_id + statement_month indexes
+- `drizzle/0001_shallow_power_man.sql` — migration for transactions table
+
+### Modified files
+- `utils/decisionEngine.ts` — added `currentCycleTxSum` param to `projectedStatementBalance()` (defaults to 0 for backward compat) + `computeCurrentCycleTxSum()` helper
+- `app/_layout.tsx` — registered 3 new routes + loads transactions on boot
+
+### Findings to review
+- Transaction store uses Drizzle/SQLite (5th Zustand store), consistent with cardStore pattern
+- `projectedStatementBalance()` accepts optional `currentCycleTxSum` param — callers (SwipeImpactPanel, CardPager, etc.) currently pass 0 implicitly; integrate with UI when ready
+- Payment type auto-assigns `cycleLabel: 'previous'` — correct for most cases but edge case when payment is for future cycle is not handled
+- No entry points added to home screen or card detail yet — screens are registered but need navigation buttons wired in
+- "Lands on" label uses `getCycleDates()` from decisionEngine which determines cycle based on the transaction date context — verify edge cases around month boundaries
+
+---
+
 ## TODO
 
 - [ ] Set up RevenueCat project + integrate SDK (replace simulated purchase logic in subscriptionStore)
