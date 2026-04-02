@@ -6,11 +6,10 @@ import {
   ScrollView,
   Alert,
   View,
-  Pressable,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronDown } from 'lucide-react-native';
+import { Picker } from '@react-native-picker/picker';
 
 import { Text } from '@/components/Themed';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
@@ -45,7 +44,6 @@ export default function OnboardingScreen() {
   const [onboardingCardId, setOnboardingCardId] = useState<string | null>(null);
   const [accountName, setAccountName] = useState('');
   const [statementDay, setStatementDay] = useState<number | null>(null);
-  const [showDayPicker, setShowDayPicker] = useState(false);
   const [creditLimit, setCreditLimit] = useState('');
   const [outstandingBalance, setOutstandingBalance] = useState('');
 
@@ -127,42 +125,19 @@ export default function OnboardingScreen() {
           autoCapitalize="words"
         />
 
-        {/* Statement Day Dropdown */}
+        {/* Statement Day Picker */}
         <View style={styles.fieldGroup}>
           <Text style={[styles.sectionLabel, { color: t.textSecondary }]}>Statement Day</Text>
-          <Pressable
-            onPress={() => setShowDayPicker(!showDayPicker)}
-            style={[styles.dropdown, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}
+          <Picker
+            selectedValue={statementDay}
+            onValueChange={(value) => setStatementDay(value)}
+            style={{ color: t.textPrimary }}
           >
-            <Text style={[styles.dropdownText, { color: statementDay ? t.inputText : t.placeholder }]}>
-              {statementDay ? `Day ${statementDay}` : 'Select day'}
-            </Text>
-            <ChevronDown size={18} color={t.textSecondary} />
-          </Pressable>
-          {showDayPicker && (
-            <>
-              <Pressable style={styles.dayOverlayBackdrop} onPress={() => setShowDayPicker(false)} />
-              <View style={[styles.dayGrid, { backgroundColor: t.surface, borderColor: t.border }]}>
-                {DAYS.map((day) => {
-                  const isSelected = statementDay === day;
-                  return (
-                    <Pressable
-                      key={day}
-                      onPress={() => { setStatementDay(day); setShowDayPicker(false); }}
-                      style={[
-                        styles.dayButton,
-                        { backgroundColor: isSelected ? t.primary : 'transparent' },
-                      ]}
-                    >
-                      <Text style={[styles.dayText, { color: isSelected ? t.primaryText : t.textPrimary }]}>
-                        {day}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </>
-          )}
+            <Picker.Item label="Select day" value={null} color={t.placeholder} />
+            {DAYS.map((day) => (
+              <Picker.Item key={day} label={`Day ${day}`} value={day} color={t.textPrimary} />
+            ))}
+          </Picker>
         </View>
 
         {/* Credit Limit */}
@@ -208,57 +183,11 @@ const styles = StyleSheet.create({
   },
   fieldGroup: {
     marginTop: 16,
-    zIndex: 10,
   },
   sectionLabel: {
     fontSize: 13,
     fontFamily: fonts.interSemiBold,
     marginBottom: 8,
-  },
-  dropdown: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  dropdownText: {
-    fontSize: 15,
-    fontFamily: fonts.interRegular,
-  },
-  dayOverlayBackdrop: {
-    position: 'absolute',
-    top: 0,
-    left: -24,
-    right: -24,
-    bottom: -1000,
-    zIndex: 11,
-  },
-  dayGrid: {
-    position: 'absolute',
-    top: 76,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 8,
-    gap: 4,
-    zIndex: 12,
-  },
-  dayButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dayText: {
-    fontSize: 14,
-    fontFamily: fonts.interBold,
   },
   hint: {
     fontSize: 12,
