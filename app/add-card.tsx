@@ -52,7 +52,7 @@ export default function AddCardScreen() {
     if (!isNaN(offset) && offset < 20) {
       Alert.alert(
         'Due Date Too Soon',
-        'BSP regulations require at least 20 days between your statement date and payment due date. Please enter 20 or more.',
+        'Due date must be at least 20 days after your statement date.',
       );
       return;
     }

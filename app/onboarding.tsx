@@ -29,6 +29,7 @@ export default function OnboardingScreen() {
   const [onboardingCardId, setOnboardingCardId] = useState<string | null>(null);
   const [accountName, setAccountName] = useState('');
   const [statementDay, setStatementDay] = useState('');
+  const [dueDate, setDueDate] = useState('');
   const [creditLimit, setCreditLimit] = useState('');
   const [outstandingBalance, setOutstandingBalance] = useState('');
 
@@ -43,6 +44,19 @@ export default function OnboardingScreen() {
       Alert.alert('Required', 'Enter a valid statement day (1–31).');
       return;
     }
+    const dueDayNum = parseInt(dueDate, 10);
+    let offset: number = cardDefaults.dueDayOffset;
+    if (!isNaN(dueDayNum) && dueDayNum >= 1 && dueDayNum <= 31) {
+      offset = (dueDayNum - stmtDay + 30) % 30 || 30;
+      if (offset < 20) {
+        Alert.alert(
+          'Due Date Too Soon',
+          'Due date must be at least 20 days after your statement date.',
+        );
+        return;
+      }
+    }
+
     const limit = parseMoney(creditLimit);
 
     if (limit <= 0) {
@@ -61,6 +75,7 @@ export default function OnboardingScreen() {
         creditLimit: limit,
         outstandingBalance: balance,
         statementDay: stmtDay,
+        dueDayOffset: offset,
       });
     } else {
       addCard({
@@ -68,7 +83,7 @@ export default function OnboardingScreen() {
         creditLimit: limit,
         outstandingBalance: balance,
         statementDay: stmtDay,
-        dueDayOffset: cardDefaults.dueDayOffset,
+        dueDayOffset: offset,
         interestRate: cardDefaults.interestRate,
         minPaymentPct: cardDefaults.minPaymentPct,
         minPaymentFloor: cardDefaults.minPaymentFloor,
@@ -104,9 +119,6 @@ export default function OnboardingScreen() {
           autoCapitalize="words"
         />
 
-        {/* Statement Day */}
-        <DayInput value={statementDay} onChangeText={setStatementDay} />
-
         {/* Credit Limit */}
         <MoneyInput
           label="Credit Limit"
@@ -125,6 +137,16 @@ export default function OnboardingScreen() {
         <Text style={[styles.hint, { color: t.textMuted }]}>
           Approximate is fine — you can update anytime.
         </Text>
+
+        {/* Statement Day & Due Date */}
+        <View style={styles.row}>
+          <View style={styles.rowHalf}>
+            <DayInput value={statementDay} onChangeText={setStatementDay} />
+          </View>
+          <View style={styles.rowHalf}>
+            <DayInput label="Due Date (1–31)" value={dueDate} onChangeText={setDueDate} placeholder="21" />
+          </View>
+        </View>
 
       </ScrollView>
 
@@ -145,6 +167,15 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 15,
     marginBottom: 24,
+    marginTop: -16,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+  },
+  rowHalf: {
+    flex: 1,
     marginTop: -16,
   },
   hint: {

@@ -2,6 +2,7 @@ export { DayInput } from './DayInput';
 export { FormFieldGroup } from './FormFieldGroup';
 export { SurfaceCard } from './SurfaceCard';
 export { MoneyInput, parseMoney } from './MoneyInput';
+export { PercentInput } from './PercentInput';
 export { SectionCard } from './SectionCard';
 export { AlertBanner } from './AlertBanner';
 export { BreakdownRow, BreakdownDivider } from './BreakdownRow';

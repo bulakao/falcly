@@ -7,7 +7,7 @@ interface DayInputProps {
   placeholder?: string;
 }
 
-export function DayInput({ label = 'Statement Day (1–31)', value, onChangeText, placeholder = '15' }: DayInputProps) {
+export function DayInput({ label = 'Statement Day (1–31)', value, onChangeText, placeholder = '1' }: DayInputProps) {
   return (
     <FormFieldGroup
       label={label}

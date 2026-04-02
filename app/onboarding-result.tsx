@@ -13,7 +13,7 @@ import { ChevronDown } from 'lucide-react-native';
 
 import { Text, View } from '@/components/Themed';
 import { Badge, Button } from '@/components/atoms';
-import { FormFieldGroup, StatusTooltip, SurfaceCard } from '@/components/molecules';
+import { PercentInput, StatusTooltip, SurfaceCard } from '@/components/molecules';
 import { BillingTimeline } from '@/components/organisms';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
@@ -55,10 +55,18 @@ export default function OnboardingResultScreen() {
   };
 
   const [showEnrichment, setShowEnrichment] = useState(false);
-  const [dueDay, setDueDay] = useState('');
   const [interestRate, setInterestRate] = useState(
     String(cardDefaults.interestRate * 100),
   );
+
+  function handleInterestRateChange(text: string) {
+    setInterestRate(text);
+    if (!card) return;
+    const rate = parseFloat(text);
+    if (!isNaN(rate) && rate > 0) {
+      updateCard(card.id, { interestRate: rate / 100 });
+    }
+  }
 
   const statusResult = card ? calculateCardStatus(card, new Date()) : null;
   const util = card ? utilization(card.outstandingBalance, card.creditLimit) : 0;
@@ -80,24 +88,6 @@ export default function OnboardingResultScreen() {
   const color = STATUS_COLORS[status];
 
   function handleEnrichmentSave() {
-    if (!card) return;
-
-    const dueDayNum = parseInt(dueDay, 10);
-    const rate = parseFloat(interestRate);
-
-    const updates: Record<string, number> = {};
-    if (!isNaN(dueDayNum) && dueDayNum >= 1 && dueDayNum <= 31) {
-      // Calculate offset from statement day to due day
-      const offset = (dueDayNum - card.statementDay + 30) % 30 || 30;
-      updates.dueDayOffset = offset;
-    }
-    if (!isNaN(rate) && rate > 0) {
-      updates.interestRate = rate / 100;
-    }
-    if (Object.keys(updates).length > 0) {
-      updateCard(card.id, updates);
-    }
-
     trackOnboardingEnrichmentCompleted(false, false);
     useOnboardingStore.getState().complete();
     router.replace('/');
@@ -171,7 +161,7 @@ export default function OnboardingResultScreen() {
                 Fine-tune your result (optional)
               </Text>
               <Text style={[styles.enrichHint, { color: t.textMuted }]}>
-                Add your due date or interest rate
+                Add your interest rate
               </Text>
             </RNView>
             <RNView style={{ transform: [{ rotate: showEnrichment ? '180deg' : '0deg' }] }}>
@@ -180,21 +170,11 @@ export default function OnboardingResultScreen() {
           </Pressable>
           {showEnrichment && (
             <RNView style={[styles.enrichSection, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border }]}>
-              <FormFieldGroup
-                label="Due Date (day of month)"
-                value={dueDay}
-                onChangeText={setDueDay}
-                placeholder="15"
-                keyboardType="numeric"
-              />
-
-              <FormFieldGroup
+              <PercentInput
                 label="Monthly Interest Rate (%)"
                 value={interestRate}
-                onChangeText={setInterestRate}
+                onChangeText={handleInterestRateChange}
                 placeholder={String(cardDefaults.interestRate * 100)}
-                keyboardType="numeric"
-                selectTextOnFocus
               />
             </RNView>
           )}
@@ -267,6 +247,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
+    marginTop: 4,
     marginBottom: 12,
   },
   usageSection: {},
@@ -303,7 +284,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
     gap: 12,
   },
   enrichTextWrap: {
@@ -318,8 +298,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   enrichSection: {
-    padding: 16,
-    paddingTop: 8,
+    marginTop: 12,
+    paddingTop: 12,
   },
   enrichHeading: {
     fontSize: 16,
