@@ -9,7 +9,7 @@ module.exports = {
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     splash: {
-      image: './assets/images/falcon-mascot.png',
+      image: './assets/images/splash-icon.png',
       resizeMode: 'contain',
       backgroundColor: '#F8F9FA',
     },
@@ -17,11 +17,11 @@ module.exports = {
       supportsTablet: true,
       bundleIdentifier: 'com.bulakao.falcly',
       splash: {
-        image: './assets/images/falcon-mascot.png',
+        image: './assets/images/splash-icon.png',
         resizeMode: 'contain',
         backgroundColor: '#F8F9FA',
         dark: {
-          image: './assets/images/falcon-mascot.png',
+          image: './assets/images/splash-icon.png',
           resizeMode: 'contain',
           backgroundColor: '#0A0A0A',
         },
@@ -33,7 +33,7 @@ module.exports = {
         backgroundColor: '#ffffff',
       },
       splash: {
-        image: './assets/images/falcon-mascot.png',
+        image: './assets/images/splash-icon.png',
         resizeMode: 'contain',
         backgroundColor: '#0A0A0A',
       },
