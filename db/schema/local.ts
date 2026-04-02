@@ -48,4 +48,5 @@ export const profile = sqliteTable('profile', {
   payday: integer('payday'),
   committedExpenses: real('committed_expenses'),
   analyticsOptOut: integer('analytics_opt_out', { mode: 'boolean' }).notNull().default(false),
+  themePreference: text('theme_preference').notNull().default('system'), // system | light | dark
 });

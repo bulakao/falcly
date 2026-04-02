@@ -40,6 +40,8 @@ export default function SettingsScreen() {
 
   const analyticsOptOut = useUserStore((s) => s.analyticsOptOut);
   const setAnalyticsOptOutStore = useUserStore((s) => s.setAnalyticsOptOut);
+  const themePreference = useUserStore((s) => s.themePreference);
+  const setThemePreference = useUserStore((s) => s.setThemePreference);
   const cashOnHand = useUserStore((s) => s.cashOnHand);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
   const payday = useUserStore((s) => s.payday);
@@ -188,6 +190,32 @@ export default function SettingsScreen() {
           onPress={() => router.push('/component-showcase')}
           variant="secondary"
         />
+      </SectionCard>
+
+      {/* Appearance */}
+      <SectionCard>
+        <SectionHeader title="Appearance" />
+        <View style={styles.themeRow}>
+          {(['system', 'light', 'dark'] as const).map((option) => (
+            <Pressable
+              key={option}
+              onPress={() => setThemePreference(option)}
+              style={[
+                styles.themeOption,
+                { borderColor: themePreference === option ? t.primary : t.border, backgroundColor: themePreference === option ? t.accentBg : t.surface },
+              ]}
+            >
+              <FontAwesome
+                name={option === 'system' ? 'adjust' : option === 'light' ? 'sun-o' : 'moon-o'}
+                size={16}
+                color={themePreference === option ? t.primary : t.textMuted}
+              />
+              <Text style={[styles.themeOptionText, { color: themePreference === option ? t.primary : t.textPrimary }]}>
+                {option.charAt(0).toUpperCase() + option.slice(1)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
       </SectionCard>
 
       {/* Analytics Opt-Out */}
@@ -361,6 +389,24 @@ const styles = StyleSheet.create({
   },
   optOutLabel: {
     fontSize: 15,
+    fontWeight: '600',
+  },
+  themeRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  themeOption: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1.5,
+  },
+  themeOptionText: {
+    fontSize: 13,
     fontWeight: '600',
   },
 });

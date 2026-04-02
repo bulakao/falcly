@@ -5,10 +5,9 @@ import {
   Pressable,
   Switch,
   Appearance,
-  useColorScheme,
 } from 'react-native';
 import { Text, View } from '@/components/Themed';
-import { useAppTheme, palette } from '@/theme';
+import { useAppTheme, useEffectiveColorScheme, palette } from '@/theme';
 import { Button, Badge, FormInput, Heading, SectionHeader, Label, Caption } from '@/components/atoms';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -25,7 +24,7 @@ const noop = () => {};
 
 export default function ComponentShowcase() {
   const t = useAppTheme();
-  const scheme = useColorScheme();
+  const scheme = useEffectiveColorScheme();
   const dark = scheme === 'dark';
 
   const [switchVal, setSwitchVal] = useState(true);

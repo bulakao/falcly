@@ -7,7 +7,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from 'react-native';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
@@ -18,7 +17,7 @@ import { supabase } from '@/utils/supabase';
 import { useRunMigrations } from '@/db/migrate';
 import { initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
 import { initLogger, initCrashHandler, logger, installNetworkLogger, useNavigationLogger } from '@/utils/logger';
-import { AppThemeProvider, lightTheme, darkTheme } from '@/theme';
+import { AppThemeProvider, useEffectiveColorScheme, lightTheme, darkTheme } from '@/theme';
 import type { Theme } from '@react-navigation/native';
 
 const navLight: Theme = {
@@ -129,7 +128,7 @@ export default RootLayout;
 
 function RootLayoutNav() {
   useNavigationLogger();
-  const colorScheme = useColorScheme();
+  const colorScheme = useEffectiveColorScheme();
   const isOnboardingComplete = useOnboardingStore((s) => s.isComplete);
   const segments = useSegments();
   const router = useRouter();

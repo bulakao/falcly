@@ -1,3 +1,3 @@
 export { palette, type SemanticTokens } from './tokens';
 export { lightTheme, darkTheme } from './themes';
-export { AppThemeProvider, useAppTheme } from './ThemeContext';
+export { AppThemeProvider, useAppTheme, useEffectiveColorScheme } from './ThemeContext';

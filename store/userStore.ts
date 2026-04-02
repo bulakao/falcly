@@ -6,6 +6,8 @@ import { setAnalyticsOptOut } from '@/utils/analytics';
 
 const PROFILE_ID = 'local';
 
+type ThemePreference = 'system' | 'light' | 'dark';
+
 interface UserStore {
   cashOnHand: number | null;
   cashUpdatedAt: number | null;
@@ -13,6 +15,7 @@ interface UserStore {
   payday: number | null;
   committedExpenses: number | null;
   analyticsOptOut: boolean;
+  themePreference: ThemePreference;
   _initialized: boolean;
   loadProfile: () => void;
   setCashOnHand: (amount: number) => void;
@@ -21,6 +24,7 @@ interface UserStore {
   setPayday: (day: number) => void;
   setCommittedExpenses: (amount: number) => void;
   setAnalyticsOptOut: (optOut: boolean) => void;
+  setThemePreference: (pref: ThemePreference) => void;
   reset: () => void;
 }
 
@@ -43,6 +47,7 @@ export const useUserStore = create<UserStore>()((set) => ({
   payday: null,
   committedExpenses: null,
   analyticsOptOut: false,
+  themePreference: 'system' as ThemePreference,
   _initialized: false,
 
   loadProfile: () => {
@@ -57,6 +62,7 @@ export const useUserStore = create<UserStore>()((set) => ({
           payday: row.payday,
           committedExpenses: row.committedExpenses,
           analyticsOptOut: row.analyticsOptOut,
+          themePreference: (row.themePreference as ThemePreference) ?? 'system',
           _initialized: true,
         });
       } else {
@@ -93,6 +99,10 @@ export const useUserStore = create<UserStore>()((set) => ({
     updateProfile({ analyticsOptOut: optOut });
     set({ analyticsOptOut: optOut });
   },
+  setThemePreference: (pref: ThemePreference) => {
+    updateProfile({ themePreference: pref });
+    set({ themePreference: pref });
+  },
   reset: () => {
     db.delete(profileTable).where(eq(profileTable.id, PROFILE_ID)).run();
     set({
@@ -102,6 +112,7 @@ export const useUserStore = create<UserStore>()((set) => ({
       payday: null,
       committedExpenses: null,
       analyticsOptOut: false,
+      themePreference: 'system',
     });
   },
 }));
