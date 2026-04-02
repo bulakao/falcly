@@ -8,6 +8,7 @@ import { useCardStore } from '@/store/cardStore';
 import { useSubscriptionStore, FREE_CARD_LIMIT } from '@/store/subscriptionStore';
 import { calculateCardStatus } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import type { Card, CardStatus } from '@/types/card';
 import { router } from 'expo-router';
 
@@ -148,11 +149,11 @@ const styles = StyleSheet.create({
   },
   headerAction: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   title: {
     fontSize: 17,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   subtitle: {
     fontSize: 12,
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
   },
   bankName: {
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   balance: {
     fontSize: 12,

@@ -11,6 +11,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Text, View } from '@/components/Themed';
 import { Button, FormInput, Label, Caption } from '@/components/atoms';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';
 import { useTransactionStore } from '@/store/transactionStore';
 import type { TransactionType } from '@/store/transactionStore';
@@ -266,7 +267,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     marginBottom: 20,
   },
   amountRow: {
@@ -277,7 +278,7 @@ const styles = StyleSheet.create({
   },
   currencyPrefix: {
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   dateRow: {
     flexDirection: 'row',
@@ -293,7 +294,7 @@ const styles = StyleSheet.create({
   },
   dateChipText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   landsOnBox: {
     borderRadius: 8,
@@ -302,7 +303,7 @@ const styles = StyleSheet.create({
   },
   landsOnText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontFamily: fonts.interMedium,
   },
   warningBox: {
     borderRadius: 8,
@@ -311,7 +312,7 @@ const styles = StyleSheet.create({
   },
   warningText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontFamily: fonts.interMedium,
   },
   typeRow: {
     flexDirection: 'row',
@@ -328,7 +329,7 @@ const styles = StyleSheet.create({
   },
   typeChipText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   buttonWrapper: {
     marginTop: 8,

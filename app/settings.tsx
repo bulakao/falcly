@@ -17,6 +17,7 @@ import { useCardStore } from '@/store/cardStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useAuthStore } from '@/store/authStore';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { exportDataAsCSV } from '@/utils/csvExport';
 import { Button, Badge, Heading, SectionHeader } from '@/components/atoms';
@@ -357,7 +358,7 @@ const styles = StyleSheet.create({
   },
   accountName: {
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   accountEmail: {
     fontSize: 12,
@@ -369,7 +370,7 @@ const styles = StyleSheet.create({
   },
   proStatusText: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   trialEndText: {
     fontSize: 13,
@@ -382,14 +383,14 @@ const styles = StyleSheet.create({
   },
   cloudOnlineText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   dangerZone: {
     gap: 12,
   },
   optOutLabel: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   themeRow: {
     flexDirection: 'row',
@@ -407,6 +408,6 @@ const styles = StyleSheet.create({
   },
   themeOptionText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
 });

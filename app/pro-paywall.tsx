@@ -6,6 +6,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import type { PlanType } from '@/store/subscriptionStore';
 import { trackProConversionStarted, trackProTrialStarted, trackProConverted } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import { Button, Caption } from '@/components/atoms';
 
 const TRIAL_FEATURES = [
@@ -255,7 +256,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '800',
+    fontFamily: fonts.nunitoBold,
     marginBottom: 8,
   },
   subtitle: {
@@ -280,11 +281,11 @@ const styles = StyleSheet.create({
   },
   featureLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   sectionLabel: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     alignSelf: 'flex-start',
@@ -300,7 +301,7 @@ const styles = StyleSheet.create({
   },
   trialButtonText: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     marginBottom: 4,
   },
   trialSubtext: {
@@ -328,7 +329,7 @@ const styles = StyleSheet.create({
   },
   annualPlanTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   saveBadge: {
     borderRadius: 6,
@@ -338,11 +339,11 @@ const styles = StyleSheet.create({
   },
   saveBadgeText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   annualPrice: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
     marginBottom: 4,
   },
   annualCta: {
@@ -361,15 +362,15 @@ const styles = StyleSheet.create({
   },
   monthlyPlanTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   monthlyPrice: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   planBadgeText: {
     fontSize: 11,
-    fontWeight: '500',
+    fontFamily: fonts.interMedium,
     marginTop: 1,
   },
 });

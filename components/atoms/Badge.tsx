@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useAppTheme, type SemanticTokens } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 type BadgeVariant = 'safe' | 'caution' | 'risky' | 'stale' | 'pro' | 'outline';
 
@@ -44,6 +45,6 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
 });

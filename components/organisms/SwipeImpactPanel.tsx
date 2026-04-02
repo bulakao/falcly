@@ -14,6 +14,7 @@ import { getStalenessLevel } from '@/utils/staleness';
 import type { Card } from '@/types/card';
 import { trackSwipeCheckPerformed, trackDataStalenessWarningShown } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 const QUICK_AMOUNTS = [
   { label: '₱500', value: 500 },
@@ -270,7 +271,7 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   breakdown: {
     borderRadius: 12,
@@ -280,7 +281,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     marginBottom: 12,
   },
   hint: {
@@ -297,7 +298,7 @@ const styles = StyleSheet.create({
   },
   trialCtaText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     marginBottom: 4,
   },
   trialCtaSubtext: {

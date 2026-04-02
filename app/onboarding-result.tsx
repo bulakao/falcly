@@ -16,6 +16,7 @@ import { useOnboardingStore } from '@/store/onboardingStore';
 import { calculateCardStatus } from '@/utils/decisionEngine';
 import type { CardStatus } from '@/types/card';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import {
   trackOnboardingFirstStatusViewed,
   trackOnboardingEnrichmentCompleted,
@@ -197,7 +198,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: fonts.nunitoBold,
   },
   reason: {
     fontSize: 14,
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
   },
   cardName: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     textAlign: 'center',
     marginBottom: 4,
   },
@@ -229,7 +230,7 @@ const styles = StyleSheet.create({
   },
   enrichButtonText: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
     marginBottom: 4,
   },
   enrichHint: {
@@ -240,12 +241,12 @@ const styles = StyleSheet.create({
   },
   enrichHeading: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     marginBottom: 8,
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
     marginTop: 14,
     marginBottom: 6,
   },
@@ -263,7 +264,7 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   skipButton: {
     paddingVertical: 14,
@@ -271,6 +272,6 @@ const styles = StyleSheet.create({
   },
   skipButtonText: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
 });

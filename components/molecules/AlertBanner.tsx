@@ -1,5 +1,6 @@
 import { StyleSheet, Pressable, Text, type PressableProps } from 'react-native';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 type AlertVariant = 'warning' | 'stale' | 'info' | 'accent';
 
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   centered: {
     alignItems: 'center',

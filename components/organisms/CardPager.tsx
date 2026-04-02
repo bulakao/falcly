@@ -15,6 +15,7 @@ import { SwipeImpactPanel } from '@/components/organisms/SwipeImpactPanel';
 import { AllCardsOverview } from '@/components/organisms/AllCardsOverview';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import type { Card } from '@/types/card';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -185,6 +186,6 @@ const styles = StyleSheet.create({
   },
   manageLinkText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
 });

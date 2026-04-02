@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/components/Themed';
 import { Button } from '@/components/atoms';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import {
   trackOnboardingWelcomeViewed,
   trackOnboardingGetStartedTapped,
@@ -69,13 +70,13 @@ const styles = StyleSheet.create({
   },
   brand: {
     fontSize: 20,
-    fontWeight: '800',
+    fontFamily: fonts.nunitoBold,
     marginBottom: 32,
     letterSpacing: 1,
   },
   headline: {
     fontSize: 32,
-    fontWeight: '800',
+    fontFamily: fonts.nunitoBold,
     textAlign: 'center',
     marginBottom: 12,
   },
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
   },
   chipLabel: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
     flex: 1,
   },
   cta: {

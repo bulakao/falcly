@@ -10,6 +10,7 @@ import { GanttTimeline } from '@/components/organisms/GanttTimeline';
 import { FutureTimeline } from '@/components/organisms/FutureTimeline';
 import { calculateBestCard, getCycleDates } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';
 import type { Card } from '@/types/card';
 
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
   },
   cardName: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     marginBottom: 8,
   },
   ganttSkeleton: {

@@ -12,6 +12,7 @@ import { Text, View } from '@/components/Themed';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { Button, Heading } from '@/components/atoms';
 import { FormFieldGroup } from '@/components/molecules';
+import { fonts } from '@/theme/fonts';
 
 export default function EditCardScreen() {
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
   },
   notFound: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: fonts.interBold,
     marginBottom: 24,
   },
   buttonWrapper: {

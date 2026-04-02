@@ -1,5 +1,6 @@
 import { StyleSheet, TextInput, type TextInputProps } from 'react-native';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 interface FormInputProps extends Omit<TextInputProps, 'style' | 'placeholderTextColor'> {
   error?: boolean;
@@ -31,7 +32,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 14,
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     textAlign: 'center',
   },
 });

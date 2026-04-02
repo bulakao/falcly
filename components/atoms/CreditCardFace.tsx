@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import { Caption } from './Typography';
 import StatusTooltip from '@/components/molecules/StatusTooltip';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
@@ -123,12 +124,13 @@ const styles = StyleSheet.create({
   },
   bankName: {
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: fonts.nunitoBold,
     flex: 1,
     marginRight: 8,
   },
   reason: {
     fontSize: 12,
+    fontFamily: fonts.interRegular,
     marginTop: 2,
   },
   balanceArea: {
@@ -136,12 +138,12 @@ const styles = StyleSheet.create({
   },
   balance: {
     fontSize: 26,
-    fontWeight: '800',
+    fontFamily: fonts.nunitoBold,
     letterSpacing: -0.5,
   },
   limit: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
     marginTop: 2,
   },
   utilizationTrack: {
@@ -160,6 +162,6 @@ const styles = StyleSheet.create({
   },
   statementDay: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
 });

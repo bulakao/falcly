@@ -3,6 +3,7 @@ import { Text, View } from '@/components/Themed';
 import type { Card } from '@/types/card';
 import { getCycleDates } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 function formatShortDate(date: Date): string {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 12,
@@ -142,17 +143,17 @@ const styles = StyleSheet.create({
   },
   labelDate: {
     fontSize: 11,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   labelName: {
     fontSize: 10,
   },
   todayLabel: {
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   urgency: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
     textAlign: 'center',
     marginTop: 4,
   },

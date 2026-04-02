@@ -2,6 +2,7 @@ import { StyleSheet, Text, Pressable, View as RNView } from 'react-native';
 import { View } from '@/components/Themed';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import type { BestCardResult, CardStatus } from '@/types/card';
 
 interface BestCardBannerProps {
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 8,
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
   },
   bankName: {
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: fonts.interBold,
   },
   reason: {
     fontSize: 13,
@@ -104,7 +105,7 @@ const styles = StyleSheet.create({
   },
   warning: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
     marginTop: 6,
   },
 });

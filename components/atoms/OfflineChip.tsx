@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 export function OfflineChip() {
   const { isOffline } = useNetworkStatus();
@@ -24,6 +25,6 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
 });

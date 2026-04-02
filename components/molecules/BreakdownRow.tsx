@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 interface BreakdownRowProps {
   label: string;
@@ -66,10 +67,10 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   bold: {
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   boldValue: {
     fontSize: 16,

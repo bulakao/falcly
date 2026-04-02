@@ -15,6 +15,7 @@ import { useCardStore, cardDefaults } from '@/store/cardStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
 import { trackCardAdded, trackOnboardingCardEntryCompleted } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import { Button, Heading } from '@/components/atoms';
 import { FormFieldGroup } from '@/components/molecules';
 
@@ -179,7 +180,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
     marginBottom: 8,
     marginTop: 16,
   },
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
   bankInitial: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: fonts.nunitoBold,
   },
   bankName: {
     fontSize: 11,
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
   },
   dayText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   hint: {
     fontSize: 12,

@@ -15,6 +15,7 @@ import { Text } from '@/components/Themed';
 import { Button, FormInput } from '@/components/atoms';
 import { useAuthStore } from '@/store/authStore';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 function mapAuthError(message: string): string {
   const lower = message.toLowerCase();
@@ -187,7 +188,7 @@ export default function SignInScreen() {
         >
           <Text style={[styles.toggleText, { color: t.textMuted }]}>
             {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-            <Text style={{ color: t.primary, fontWeight: '600' }}>
+            <Text style={{ color: t.primary, fontFamily: fonts.interSemiBold }}>
               {isSignUp ? 'Sign In' : 'Create Account'}
             </Text>
           </Text>
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     textAlign: 'center',
     marginBottom: 8,
   },

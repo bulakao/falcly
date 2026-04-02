@@ -7,6 +7,7 @@ import { Button, Caption } from '@/components/atoms';
 import { SectionCard } from '@/components/molecules';
 import { BreakdownRow, BreakdownDivider } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';
 import { useTransactionStore, type Transaction } from '@/store/transactionStore';
 import { getCycleDates } from '@/utils/decisionEngine';
@@ -202,17 +203,17 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     marginBottom: 20,
   },
   bigAmount: {
     fontSize: 32,
-    fontWeight: '800',
+    fontFamily: fonts.nunitoBold,
     marginVertical: 4,
   },
   projectedAmount: {
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     marginTop: 4,
     marginBottom: 12,
   },
@@ -221,14 +222,14 @@ const styles = StyleSheet.create({
   },
   interestText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontFamily: fonts.interMedium,
   },
   paymentNote: {
     marginTop: 8,
   },
   paymentText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   breakdownSection: {
     marginTop: 4,

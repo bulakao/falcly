@@ -9,6 +9,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Text, View } from '@/components/Themed';
 import { useCardStore } from '@/store/cardStore';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import { Button, FormInput, Caption } from '@/components/atoms';
 
 export default function UpdateBalanceScreen() {
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     marginBottom: 4,
   },
   subtitle: {

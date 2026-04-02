@@ -18,7 +18,15 @@ import { useRunMigrations } from '@/db/migrate';
 import { initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
 import { initLogger, initCrashHandler, logger, installNetworkLogger, useNavigationLogger } from '@/utils/logger';
 import { AppThemeProvider, useEffectiveColorScheme, lightTheme, darkTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import type { Theme } from '@react-navigation/native';
+
+const navFonts: Theme['fonts'] = {
+  regular: { fontFamily: fonts.interRegular, fontWeight: '400' },
+  medium: { fontFamily: fonts.interMedium, fontWeight: '500' },
+  bold: { fontFamily: fonts.interBold, fontWeight: '700' },
+  heavy: { fontFamily: fonts.interBold, fontWeight: '800' },
+};
 
 const navLight: Theme = {
   dark: false,
@@ -30,12 +38,7 @@ const navLight: Theme = {
     border: lightTheme.border,
     notification: lightTheme.risky,
   },
-  fonts: {
-    regular: { fontFamily: 'System', fontWeight: '400' },
-    medium: { fontFamily: 'System', fontWeight: '500' },
-    bold: { fontFamily: 'System', fontWeight: '700' },
-    heavy: { fontFamily: 'System', fontWeight: '800' },
-  },
+  fonts: navFonts,
 };
 
 const navDark: Theme = {
@@ -48,12 +51,7 @@ const navDark: Theme = {
     border: darkTheme.border,
     notification: darkTheme.risky,
   },
-  fonts: {
-    regular: { fontFamily: 'System', fontWeight: '400' },
-    medium: { fontFamily: 'System', fontWeight: '500' },
-    bold: { fontFamily: 'System', fontWeight: '700' },
-    heavy: { fontFamily: 'System', fontWeight: '800' },
-  },
+  fonts: navFonts,
 };
 
 export {
@@ -67,6 +65,12 @@ SplashScreen.preventAutoHideAsync();
 function RootLayout() {
   const [loaded, error] = useFonts({
     ...FontAwesome.font,
+    [fonts.nunitoBold]: require('@/assets/fonts/Nunito-Bold.ttf'),
+    [fonts.nunitoSemiBold]: require('@/assets/fonts/Nunito-SemiBold.ttf'),
+    [fonts.interRegular]: require('@/assets/fonts/Inter-Regular.ttf'),
+    [fonts.interMedium]: require('@/assets/fonts/Inter-Medium.ttf'),
+    [fonts.interSemiBold]: require('@/assets/fonts/Inter-SemiBold.ttf'),
+    [fonts.interBold]: require('@/assets/fonts/Inter-Bold.ttf'),
   });
   const { success: dbReady, error: dbError } = useRunMigrations();
 

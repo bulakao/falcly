@@ -8,6 +8,7 @@ import { AlertBanner } from './AlertBanner';
 import { SectionCard } from './SectionCard';
 import { useUserStore } from '@/store/userStore';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
 
@@ -105,7 +106,7 @@ export function FinanceCard() {
             styles.timestamp,
             { color: t.textMuted },
             cashStaleness === 'warning' && { color: t.caution },
-            cashStaleness === 'stale' && { color: t.textMuted, fontWeight: '600' },
+            cashStaleness === 'stale' && { color: t.textMuted, fontFamily: fonts.interSemiBold },
           ]}
         >
           Updated {formatUpdatedAgo(cashUpdatedAt)}
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     marginBottom: 2,
   },
   subtitle: {

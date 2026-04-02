@@ -13,6 +13,7 @@ import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { computeNetAvailableCash } from '@/utils/decisionEngine';
+import { fonts } from '@/theme/fonts';
 
 export default function SwipeImpactScreen() {
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
@@ -63,7 +64,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: fonts.interBold,
     marginBottom: 24,
   },
 });

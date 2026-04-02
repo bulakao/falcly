@@ -3,6 +3,7 @@ import { StyleSheet, Pressable, Modal, View as RNView } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 interface StatusTooltipProps {
   children?: React.ReactNode;
@@ -92,7 +93,7 @@ const styles = StyleSheet.create({
   },
   tooltipTitle: {
     fontSize: 20,
-    fontWeight: '800',
+    fontFamily: fonts.interBold,
     textAlign: 'center',
     marginBottom: 4,
   },
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
   },
   tierLabel: {
     fontSize: 14,
-    fontWeight: '800',
+    fontFamily: fonts.interBold,
     letterSpacing: 0.5,
   },
   tierDescription: {
@@ -141,6 +142,6 @@ const styles = StyleSheet.create({
   },
   dismissText: {
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
 });

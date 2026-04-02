@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import { calculateCardStatus } from '@/utils/decisionEngine';
 import type { Card, CardStatus } from '@/types/card';
 
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
   },
   miniBankName: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     flex: 1,
     marginRight: 6,
   },
@@ -139,12 +140,12 @@ const styles = StyleSheet.create({
   },
   extraLabel: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
     marginTop: 8,
   },
   allCardsLabel: {
     fontSize: 16,
-    fontWeight: '800',
+    fontFamily: fonts.interBold,
     marginTop: 4,
   },
 });

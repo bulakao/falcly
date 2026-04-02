@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 export default function NotFoundScreen() {
   const t = useAppTheme();
@@ -30,7 +31,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: fonts.interBold,
   },
   link: {
     marginTop: 15,

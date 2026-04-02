@@ -4,6 +4,7 @@ import type { Card, CardStatus, FutureCycleProjection } from '@/types/card';
 import { projectFutureCycles } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';
 import type { SemanticTokens } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 const STATUS_ICONS: Record<CardStatus, string> = {
   SAFE: '✓',
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
   },
   cycleLabel: {
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   badge: {
     paddingHorizontal: 8,
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   itemRow: {
     flexDirection: 'row',
@@ -183,7 +184,7 @@ const styles = StyleSheet.create({
   },
   itemValue: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   totalRow: {
     flexDirection: 'row',
@@ -195,11 +196,11 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   totalValue: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   reason: {
     fontSize: 12,

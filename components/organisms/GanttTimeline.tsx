@@ -4,6 +4,7 @@ import type { Card, CardStatus } from '@/types/card';
 import { getCycleDates, calculateCardStatus } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';
 import type { SemanticTokens } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 const STATUS_ICONS: Record<CardStatus, string> = {
   SAFE: '✓',
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
   },
   todayHeaderText: {
     fontSize: 10,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   row: {
     flexDirection: 'row',
@@ -187,7 +188,7 @@ const styles = StyleSheet.create({
   },
   bankName: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   statusRow: {
     flexDirection: 'row',
@@ -199,7 +200,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 11,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   todayLine: {
     position: 'absolute',
@@ -247,7 +248,7 @@ const styles = StyleSheet.create({
     transform: [{ translateX: -14 }],
   },
   barDateRight: {
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   legend: {
     flexDirection: 'row',

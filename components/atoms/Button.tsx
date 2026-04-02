@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { useAppTheme, type SemanticTokens } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 type ButtonVariant = 'primary' | 'secondary' | 'destructive' | 'destructive-outline' | 'ghost';
 
@@ -68,6 +69,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
 });

@@ -1,5 +1,6 @@
 import { StyleSheet, Pressable, Text } from 'react-native';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 interface EmptyCardFaceProps {
   onPress: () => void;
@@ -31,11 +32,11 @@ const styles = StyleSheet.create({
   },
   plus: {
     fontSize: 36,
-    fontWeight: '300',
+    fontFamily: fonts.interRegular,
     marginBottom: 4,
   },
   label: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
 });

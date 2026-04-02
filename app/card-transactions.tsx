@@ -12,6 +12,7 @@ import { Text, View } from '@/components/Themed';
 import { Button, Caption } from '@/components/atoms';
 import { SectionCard } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';
 import { useTransactionStore, type Transaction } from '@/store/transactionStore';
 import { getCycleDates } from '@/utils/decisionEngine';
@@ -259,15 +260,15 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   heading: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   addBtn: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   listContent: {
     paddingHorizontal: 16,
@@ -279,7 +280,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     letterSpacing: 0.5,
   },
   sectionFooter: {
@@ -295,11 +296,11 @@ const styles = StyleSheet.create({
   },
   subtotalLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   subtotalValue: {
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   txRow: {
     flexDirection: 'row',
@@ -319,7 +320,7 @@ const styles = StyleSheet.create({
   },
   txMerchant: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: fonts.interMedium,
     flex: 1,
   },
   txRight: {
@@ -327,7 +328,7 @@ const styles = StyleSheet.create({
   },
   txAmount: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   txBadge: {
     fontSize: 11,
@@ -341,7 +342,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
     marginBottom: 8,
   },
   emptyBtn: {

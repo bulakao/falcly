@@ -9,6 +9,7 @@ import {
 import { Text, View } from '@/components/Themed';
 import { useAppTheme, useEffectiveColorScheme, palette } from '@/theme';
 import { Button, Badge, FormInput, Heading, SectionHeader, Label, Caption } from '@/components/atoms';
+import { fonts } from '@/theme/fonts';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   const t = useAppTheme();
@@ -277,17 +278,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 20,
   },
-  themeLabel: { fontSize: 16, fontWeight: '700' },
+  themeLabel: { fontSize: 16, fontFamily: fonts.interBold },
   themeButton: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8 },
-  themeButtonText: { fontSize: 13, fontWeight: '700' },
+  themeButtonText: { fontSize: 13, fontFamily: fonts.interBold },
 
   section: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 20 },
-  sectionTitle: { fontSize: 14, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 16 },
+  sectionTitle: { fontSize: 14, fontFamily: fonts.nunitoBold, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 16 },
 
   swatchGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, backgroundColor: 'transparent' },
   swatchItem: { alignItems: 'center', width: 90, backgroundColor: 'transparent' },
   swatch: { width: 56, height: 56, borderRadius: 12, borderWidth: 1 },
-  swatchLabel: { fontSize: 10, fontWeight: '600', marginTop: 6, textAlign: 'center' },
+  swatchLabel: { fontSize: 10, fontFamily: fonts.interSemiBold, marginTop: 6, textAlign: 'center' },
   swatchHex: { fontSize: 9, marginTop: 2 },
 
   typeBody: { fontSize: 15, lineHeight: 22, marginBottom: 8 },
@@ -298,15 +299,15 @@ const styles = StyleSheet.create({
 
   card: { borderRadius: 12, borderWidth: 1, marginBottom: 12, overflow: 'hidden' },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingBottom: 8 },
-  cardTitle: { fontSize: 16, fontWeight: '700' },
+  cardTitle: { fontSize: 16, fontFamily: fonts.interBold },
   cardBody: { fontSize: 14, paddingHorizontal: 16, paddingBottom: 12 },
   cardFooter: { borderTopWidth: 1, padding: 12, paddingHorizontal: 16 },
 
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, backgroundColor: 'transparent' },
-  toggleLabel: { fontSize: 15, fontWeight: '600' },
+  toggleLabel: { fontSize: 15, fontFamily: fonts.interSemiBold },
 
   alert: { borderWidth: 1, borderRadius: 8, padding: 12, marginBottom: 10 },
-  alertText: { fontSize: 13, fontWeight: '600' },
+  alertText: { fontSize: 13, fontFamily: fonts.interSemiBold },
 
   progressTrack: { height: 8, borderRadius: 4, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: 4 },
@@ -317,6 +318,6 @@ const styles = StyleSheet.create({
 
   listItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, backgroundColor: 'transparent' },
   listItemContent: { backgroundColor: 'transparent', flex: 1 },
-  listTitle: { fontSize: 15, fontWeight: '600' },
-  listValue: { fontSize: 18, fontWeight: '700' },
+  listTitle: { fontSize: 15, fontFamily: fonts.interSemiBold },
+  listValue: { fontSize: 18, fontFamily: fonts.interBold },
 });

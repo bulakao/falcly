@@ -17,6 +17,7 @@ import { trackCardAdded } from '@/utils/analytics';
 import { Button } from '@/components/atoms';
 import { FormFieldGroup } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
+import { fonts } from '@/theme/fonts';
 
 export default function AddCardScreen() {
   const t = useAppTheme();
@@ -140,11 +141,11 @@ const styles = StyleSheet.create({
   },
   headerAction: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fonts.interSemiBold,
   },
   headerTitle: {
     fontSize: 17,
-    fontWeight: '700',
+    fontFamily: fonts.interBold,
   },
   container: {
     padding: 24,
