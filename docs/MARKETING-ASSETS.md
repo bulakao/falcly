@@ -29,6 +29,9 @@
 
 **Status:** ✅ Have base image — need to export at correct sizes.
 
+**AI Image Prompt (if regenerating):**
+> A friendly cartoon falcon mascot head, right-facing profile, on a deep black square background (`#0A0A0A`). The falcon is centered with comfortable padding on all sides. Big expressive amber eye (`#F5A623`) as the focal point. Rounded, approachable shapes — soft feather edges, slight smile in the beak. Flat illustration style, minimal shading. No text. No letters. No gradients. Output: 1024×1024px PNG, no transparent background.
+
 ---
 
 ### Screenshots (5–8 screens)
@@ -115,12 +118,19 @@ Free to use. Falcly Pro unlocks unlimited cards.
 ### Favicon
 - **Sizes needed:** 32×32px, 16×16px, and a 180×180px Apple touch icon
 - **Approach:** Crop the falcon's amber eye from the icon as the favicon — single recognizable shape at tiny sizes
+- **Tool:** Upload the app icon to [RealFaviconGenerator.net](https://realfavicongenerator.net) — it handles all sizes automatically
+
+**AI Image Prompt (if generating standalone favicon):**
+> A single bold amber circle (`#F5A623`) styled as a cartoon falcon eye — sharp iris, slight gleam highlight, on a deep black square background (`#0A0A0A`). Flat vector style. Extremely simple — must be readable at 16×16px. No other elements. Output: 512×512px PNG (will be scaled down).
 
 ---
 
 ### Hero Section Mockup
 - Phone frame showing the home screen (all cards, SAFE/CAUTION/RISKY)
 - Suggested tool: [Previewed.app](https://previewed.app) or [Rotato](https://rotato.app)
+
+**AI Image Prompt:**
+> A premium dark-mode Android phone mockup floating at a slight 3/4 angle on a deep black background (`#0A0A0A`). The phone screen shows a credit card status app — three cards listed with large pill badges: one SAFE (emerald `#2ECC71`), one CAUTION (amber `#F39C12`), one RISKY (crimson `#E74C3C`). Nunito Bold headlines, Inter body text, dark UI. Soft amber glow (`#F5A623`) radiating from behind the phone. No hands. No people. Premium fintech hero image style. Widescreen 1440×900px composition with room on the left for headline text overlay.
 
 ---
 
@@ -129,6 +139,9 @@ Free to use. Falcly Pro unlocks unlimited cards.
 ### Profile Picture
 - **Size:** 400×400px
 - Use the app icon (falcon head, amber eye, black background)
+
+**AI Image Prompt (if generating standalone):**
+> A friendly cartoon falcon mascot head, right-facing profile, centered in a square frame. Deep black background (`#0A0A0A`). Big expressive amber eye (`#F5A623`). Rounded approachable shapes, flat illustration style. No text. Will be displayed as a circle — keep the falcon centered and away from edges. Output: 400×400px PNG.
 
 ### Twitter/X Banner
 - **Size:** 1500×500px
@@ -163,6 +176,18 @@ Contents to prepare:
 - [ ] App screenshots (5 key screens)
 - [ ] One-pager: what Falcly is, who it's for, key features
 - [ ] Founder bio (optional)
+
+**AI Image Prompt — Logo color variant (falcon + wordmark):**
+> The Falcly logo. Left side: friendly cartoon falcon mascot head, right-facing, amber eye (`#F5A623`), rounded flat illustration style. Right side: the word "Falcly" in Nunito Bold, white (`#F0F0F0`). Deep black background (`#0A0A0A`). Horizontal lockup, both elements vertically centered. No tagline. No other elements. Clean, premium. Output: 800×200px PNG.
+
+**AI Image Prompt — Logo white variant (for dark backgrounds):**
+> Same as the Falcly logo lockup but on a transparent background. Falcon mascot in white outline style, amber eye only as the accent color (`#F5A623`). "Falcly" wordmark in Nunito Bold, white. Transparent background. Output: 800×200px PNG.
+
+**AI Image Prompt — Logo dark variant (for light backgrounds):**
+> Same as the Falcly logo lockup but inverted for light backgrounds. Falcon mascot in dark gray/black flat style, amber eye (`#F5A623`) as accent. "Falcly" wordmark in Nunito Bold, near-black (`#0D0D0D`). White or transparent background. Output: 800×200px PNG.
+
+**AI Image Prompt — Mascot standalone (transparent background):**
+> The Falcly falcon mascot character — friendly cartoon falcon head, right-facing profile. Big expressive amber eye (`#F5A623`). Rounded, approachable flat illustration style. Transparent background. No text. No frame. No background color. The mascot should feel like a sticker — clean edges, self-contained. Output: 800×800px PNG with transparent background.
 
 ---
 
