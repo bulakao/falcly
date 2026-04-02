@@ -12,7 +12,6 @@ import { Text, View } from '@/components/Themed';
 import { Badge, Button } from '@/components/atoms';
 import { FormFieldGroup, StatusTooltip } from '@/components/molecules';
 import { useCardStore, cardDefaults } from '@/store/cardStore';
-import { useUserStore } from '@/store/userStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
 import { calculateCardStatus } from '@/utils/decisionEngine';
 import type { CardStatus } from '@/types/card';
@@ -42,7 +41,6 @@ export default function OnboardingResultScreen() {
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
   const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
   const updateCard = useCardStore((s) => s.updateCard);
-  const setCashOnHand = useUserStore((s) => s.setCashOnHand);
 
   const STATUS_COLORS: Record<CardStatus, string> = {
     SAFE: t.safe,
@@ -51,8 +49,7 @@ export default function OnboardingResultScreen() {
   };
 
   const [showEnrichment, setShowEnrichment] = useState(false);
-  const [cashOnHand, setCashInput] = useState('');
-  const [dueDayOffset, setDueDayOffset] = useState(String(cardDefaults.dueDayOffset));
+  const [dueDay, setDueDay] = useState('');
   const [interestRate, setInterestRate] = useState(
     String(cardDefaults.interestRate * 100),
   );
@@ -77,12 +74,13 @@ export default function OnboardingResultScreen() {
   function handleEnrichmentSave() {
     if (!card) return;
 
-    const offset = parseInt(dueDayOffset, 10);
+    const dueDayNum = parseInt(dueDay, 10);
     const rate = parseFloat(interestRate);
-    const cash = parseFloat(cashOnHand);
 
     const updates: Record<string, number> = {};
-    if (!isNaN(offset) && offset > 0) {
+    if (!isNaN(dueDayNum) && dueDayNum >= 1 && dueDayNum <= 31) {
+      // Calculate offset from statement day to due day
+      const offset = (dueDayNum - card.statementDay + 30) % 30 || 30;
       updates.dueDayOffset = offset;
     }
     if (!isNaN(rate) && rate > 0) {
@@ -92,11 +90,7 @@ export default function OnboardingResultScreen() {
       updateCard(card.id, updates);
     }
 
-    if (!isNaN(cash) && cash >= 0) {
-      setCashOnHand(cash);
-    }
-
-    trackOnboardingEnrichmentCompleted(!isNaN(cash) && cash > 0, false);
+    trackOnboardingEnrichmentCompleted(false, false);
     useOnboardingStore.getState().complete();
     router.replace('/');
   }
@@ -140,7 +134,7 @@ export default function OnboardingResultScreen() {
               Improve accuracy (optional)
             </Text>
             <Text style={[styles.enrichHint, { color: t.textMuted }]}>
-              Add cash on hand, due day offset, or interest rate
+              Add your due date or interest rate
             </Text>
           </Pressable>
         ) : (
@@ -148,20 +142,11 @@ export default function OnboardingResultScreen() {
             <Text style={styles.enrichHeading}>Fine-tune your result</Text>
 
             <FormFieldGroup
-              label="Cash on Hand (PHP)"
-              value={cashOnHand}
-              onChangeText={setCashInput}
-              placeholder="e.g. 25000"
+              label="Due Date (day of month)"
+              value={dueDay}
+              onChangeText={setDueDay}
+              placeholder="e.g. 15"
               keyboardType="numeric"
-            />
-
-            <FormFieldGroup
-              label="Due Day Offset (days after statement)"
-              value={dueDayOffset}
-              onChangeText={setDueDayOffset}
-              placeholder={String(cardDefaults.dueDayOffset)}
-              keyboardType="numeric"
-              selectTextOnFocus
             />
 
             <FormFieldGroup
