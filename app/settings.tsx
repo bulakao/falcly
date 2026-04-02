@@ -58,7 +58,7 @@ export default function SettingsScreen() {
       <Heading>Settings</Heading>
 
       {/* Account */}
-      {user && (
+      {user ? (
         <SectionCard>
           <SectionHeader title="Account" />
           <View style={styles.accountRow}>
@@ -73,6 +73,22 @@ export default function SettingsScreen() {
               <Text style={[styles.accountName, { color: t.textPrimary }]}>{user.user_metadata?.full_name ?? 'User'}</Text>
               <Text style={[styles.accountEmail, { color: t.textMuted }]}>{user.email}</Text>
             </View>
+          </View>
+        </SectionCard>
+      ) : (
+        <SectionCard accentBorder={t.primary}>
+          <View style={styles.accountPromptRow}>
+            <FontAwesome name="shield" size={24} color={t.primary} />
+            <View style={styles.accountPromptText}>
+              <Text style={[styles.accountName, { color: t.textPrimary }]}>Back up your data</Text>
+              <Text style={[styles.accountPromptSubtitle, { color: t.textSecondary }]}>
+                Create a free account to sync across devices and keep your data safe.
+              </Text>
+            </View>
+          </View>
+          <View style={styles.accountPromptButtons}>
+            <Button label="Create Account" onPress={() => router.push({ pathname: '/sign-in', params: { mode: 'signup' } })} />
+            <Button label="Sign In" variant="secondary" onPress={() => router.push('/sign-in')} />
           </View>
         </SectionCard>
       )}
@@ -190,7 +206,7 @@ export default function SettingsScreen() {
       </SectionCard>
 
       {/* Sign Out */}
-      <SectionCard>
+      {user && <SectionCard>
         <SectionHeader
           title="Sign Out"
           subtitle="Switch to a different account. Your local data stays on this device."
@@ -216,10 +232,10 @@ export default function SettingsScreen() {
           }}
           variant="secondary"
         />
-      </SectionCard>
+      </SectionCard>}
 
       {/* Delete Account */}
-      <SectionCard>
+      {user && <SectionCard>
         <SectionHeader
           title="Delete Account"
           subtitle="Permanently removes your account, all cards, and associated data. This cannot be undone."
@@ -249,7 +265,7 @@ export default function SettingsScreen() {
             );
           }}
         />
-      </SectionCard>
+      </SectionCard>}
     </ScrollView>
   );
 }
@@ -283,6 +299,23 @@ const styles = StyleSheet.create({
   },
   accountInfo: {
     flex: 1,
+  },
+  accountPromptRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginBottom: 16,
+  },
+  accountPromptText: {
+    flex: 1,
+  },
+  accountPromptSubtitle: {
+    fontSize: 13,
+    marginTop: 4,
+    lineHeight: 18,
+  },
+  accountPromptButtons: {
+    gap: 10,
   },
   accountName: {
     fontSize: 15,

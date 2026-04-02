@@ -72,12 +72,16 @@ export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress,
     <View style={styles.container}>
       {/* Top row: avatar + tier badge + offline chip */}
       <View style={styles.topRow}>
-        <Pressable style={[styles.avatar, { backgroundColor: user?.user_metadata?.avatar_url ? undefined : t.primary }]} onPress={() => router.push('/settings')}>
+        <Pressable
+          style={[styles.avatar, { backgroundColor: user?.user_metadata?.avatar_url ? undefined : user ? t.primary : t.surface }]}
+          onPress={() => router.push('/settings')}
+        >
           {user?.user_metadata?.avatar_url ? (
             <Image source={{ uri: user.user_metadata.avatar_url }} style={styles.avatarImage} />
           ) : (
-            <FontAwesome name="user" size={16} color={t.primaryText} />
+            <FontAwesome name={user ? 'user' : 'user-plus'} size={16} color={user ? t.primaryText : t.textMuted} />
           )}
+          {!user && <RNView style={[styles.nudgeDot, { backgroundColor: t.accent }]} />}
         </Pressable>
         <View style={styles.spacer} />
         <OfflineChip />
@@ -136,7 +140,15 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'hidden',
+    overflow: 'visible',
+  },
+  nudgeDot: {
+    position: 'absolute',
+    top: -1,
+    right: -1,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
   avatarImage: {
     width: 32,

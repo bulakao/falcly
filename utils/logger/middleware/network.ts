@@ -4,6 +4,8 @@ const SKIP_URL_PATTERNS = [
   /posthog/i,
   /supabase.*\/auth\/v1\/token/i,
   /supabase.*\/realtime/i,
+  /clients\d*\.google\.com/i,
+  /generate_204/i,
 ];
 
 let requestCounter = 0;

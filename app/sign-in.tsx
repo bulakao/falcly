@@ -8,7 +8,7 @@ import {
   View,
   ActivityIndicator,
 } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/Themed';
@@ -16,46 +16,56 @@ import { Button, FormInput } from '@/components/atoms';
 import { useAuthStore } from '@/store/authStore';
 import { useAppTheme } from '@/theme';
 
-function mapFirebaseError(code: string): string {
-  switch (code) {
-    case 'auth/user-not-found':
-      return 'No account found with this email.';
-    case 'auth/wrong-password':
-      return 'Incorrect password. Try again or reset it.';
-    case 'auth/too-many-requests':
-      return 'Too many attempts. Please wait a moment.';
-    case 'auth/invalid-email':
-      return 'Check your email format.';
-    default:
-      return 'Sign-in failed. Please try again.';
-  }
+function mapAuthError(message: string): string {
+  const lower = message.toLowerCase();
+  if (lower.includes('invalid login')) return 'Incorrect email or password.';
+  if (lower.includes('already registered')) return 'An account with this email already exists.';
+  if (lower.includes('too many')) return 'Too many attempts. Please wait a moment.';
+  if (lower.includes('invalid email')) return 'Check your email format.';
+  return message;
 }
 
 export default function SignInScreen() {
   const t = useAppTheme();
   const insets = useSafeAreaInsets();
+  const { mode: initialMode } = useLocalSearchParams<{ mode?: string }>();
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
   const signInWithEmail = useAuthStore((s) => s.signInWithEmail);
+  const signUpWithEmail = useAuthStore((s) => s.signUpWithEmail);
   const resetPassword = useAuthStore((s) => s.resetPassword);
 
+  const [mode, setMode] = useState<'signin' | 'signup'>(
+    initialMode === 'signup' ? 'signup' : 'signin',
+  );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [resetSent, setResetSent] = useState(false);
 
+  const isSignUp = mode === 'signup';
+
   async function handleEmailAuth() {
     if (!email.trim() || !password.trim()) {
       setError('Enter your email and password.');
       return;
     }
+    if (isSignUp && password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
     setError('');
     setLoading(true);
     try {
-      await signInWithEmail(email.trim(), password);
+      if (isSignUp) {
+        await signUpWithEmail(email.trim(), password);
+      } else {
+        await signInWithEmail(email.trim(), password);
+      }
+      router.back();
     } catch (e: unknown) {
-      const code = (e as { code?: string }).code ?? '';
-      setError(mapFirebaseError(code));
+      const msg = e instanceof Error ? e.message : 'Authentication failed';
+      setError(mapAuthError(msg));
     } finally {
       setLoading(false);
     }
@@ -66,6 +76,7 @@ export default function SignInScreen() {
     setLoading(true);
     try {
       await signInWithGoogle();
+      router.back();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Google Sign-In failed';
       setError(msg);
@@ -95,10 +106,21 @@ export default function SignInScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        contentContainerStyle={[styles.container, { paddingTop: insets.top + 60 }]}
+        contentContainerStyle={[styles.container, { paddingTop: insets.top + 40 }]}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={[styles.title, { color: t.textPrimary }]}>Welcome back</Text>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Text style={[styles.backText, { color: t.textMuted }]}>← Back</Text>
+        </Pressable>
+
+        <Text style={[styles.title, { color: t.textPrimary }]}>
+          {isSignUp ? 'Create Account' : 'Welcome back'}
+        </Text>
+        <Text style={[styles.subtitle, { color: t.textSecondary }]}>
+          {isSignUp
+            ? 'Back up your data and sync across devices.'
+            : 'Sign in to sync your data.'}
+        </Text>
 
         {error !== '' && (
           <Text style={[styles.errorText, { color: t.risky }]}>{error}</Text>
@@ -127,17 +149,19 @@ export default function SignInScreen() {
           />
           <View style={styles.buttonWrapper}>
             <Button
-              label={loading ? 'Please wait...' : 'Sign In'}
+              label={loading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
               onPress={handleEmailAuth}
               disabled={loading}
             />
           </View>
 
-          <Pressable onPress={handleForgotPassword} style={styles.forgotPassword}>
-            <Text style={[styles.forgotPasswordText, { color: t.textMuted }]}>
-              Forgot password?
-            </Text>
-          </Pressable>
+          {!isSignUp && (
+            <Pressable onPress={handleForgotPassword} style={styles.forgotPassword}>
+              <Text style={[styles.forgotPasswordText, { color: t.textMuted }]}>
+                Forgot password?
+              </Text>
+            </Pressable>
+          )}
         </View>
 
         <View style={styles.dividerRow}>
@@ -157,10 +181,15 @@ export default function SignInScreen() {
           <ActivityIndicator style={styles.spinner} color={t.primary} />
         )}
 
-        <Pressable onPress={() => router.replace('/welcome')} style={styles.toggle}>
+        <Pressable
+          onPress={() => { setMode(isSignUp ? 'signin' : 'signup'); setError(''); setResetSent(false); }}
+          style={styles.toggle}
+        >
           <Text style={[styles.toggleText, { color: t.textMuted }]}>
-            Don&apos;t have an account?{' '}
-            <Text style={{ color: t.primary, fontWeight: '600' }}>Sign up</Text>
+            {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
+            <Text style={{ color: t.primary, fontWeight: '600' }}>
+              {isSignUp ? 'Sign In' : 'Create Account'}
+            </Text>
           </Text>
         </Pressable>
       </ScrollView>
@@ -174,9 +203,20 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 48,
   },
+  backButton: {
+    marginBottom: 24,
+  },
+  backText: {
+    fontSize: 16,
+  },
   title: {
     fontSize: 24,
     fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 15,
     textAlign: 'center',
     marginBottom: 24,
   },

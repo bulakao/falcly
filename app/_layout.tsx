@@ -130,40 +130,22 @@ export default RootLayout;
 function RootLayoutNav() {
   useNavigationLogger();
   const colorScheme = useColorScheme();
-  const user = useAuthStore((s) => s.user);
-  const authLoading = useAuthStore((s) => s.loading);
   const isOnboardingComplete = useOnboardingStore((s) => s.isComplete);
   const segments = useSegments();
   const router = useRouter();
 
-  // Redirect based on auth + onboarding state
+  // Redirect based on onboarding state (no auth gate)
   useEffect(() => {
-    if (authLoading) return;
-
     const currentSegment = segments[0];
-    const authScreens = ['sign-in', 'sign-up', 'welcome'];
-    const onAuthScreen = authScreens.includes(currentSegment as string);
-    const onOnboardingScreen = currentSegment === 'onboarding' || currentSegment === 'onboarding-result' || currentSegment === 'onboarding-paywall' || currentSegment === 'onboarding-notifications';
+    const onboardingScreens = ['welcome', 'onboarding', 'onboarding-result'];
+    const onOnboardingScreen = onboardingScreens.includes(currentSegment as string);
 
-    if (!user) {
-      // Not authenticated → go to welcome (unless already on an auth screen)
-      if (!onAuthScreen) {
-        router.replace('/welcome');
-      }
-    } else if (!isOnboardingComplete) {
-      // Authenticated but onboarding not complete → stay on onboarding screens
-      if (!onOnboardingScreen && !onAuthScreen) {
-        router.replace('/onboarding');
-      }
-    } else {
-      // Authenticated + onboarding complete → go to main app
-      if (onAuthScreen || onOnboardingScreen) {
-        router.replace('/');
-      }
+    if (!isOnboardingComplete && !onOnboardingScreen) {
+      router.replace('/welcome');
+    } else if (isOnboardingComplete && onOnboardingScreen) {
+      router.replace('/');
     }
-  }, [user, authLoading, isOnboardingComplete, segments]);
-
-  if (authLoading) return null;
+  }, [isOnboardingComplete, segments]);
 
   return (
     <AppThemeProvider>
@@ -172,7 +154,6 @@ function RootLayoutNav() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="welcome" options={{ headerShown: false }} />
           <Stack.Screen name="sign-in" options={{ headerShown: false }} />
-          <Stack.Screen name="sign-up" options={{ headerShown: false }} />
           <Stack.Screen name="add-card" options={{ presentation: 'fullScreenModal', headerShown: false }} />
           <Stack.Screen name="swipe-impact" options={{ presentation: 'modal', title: 'Swipe Impact' }} />
           <Stack.Screen name="update-balance" options={{ presentation: 'modal', title: 'Update Balance' }} />
@@ -180,8 +161,6 @@ function RootLayoutNav() {
           <Stack.Screen name="pro-paywall" options={{ presentation: 'modal', title: 'Upgrade to Pro' }} />
           <Stack.Screen name="onboarding" options={{ presentation: 'modal', title: 'Get Started', headerShown: false }} />
           <Stack.Screen name="onboarding-result" options={{ presentation: 'modal', title: 'Your Status', headerShown: false }} />
-          <Stack.Screen name="onboarding-paywall" options={{ presentation: 'modal', title: 'Free Trial', headerShown: false }} />
-          <Stack.Screen name="onboarding-notifications" options={{ presentation: 'modal', title: 'Notifications', headerShown: false }} />
           <Stack.Screen name="settings" options={{ presentation: 'fullScreenModal', headerShown: false }} />
           <Stack.Screen name="manage-cards" options={{ presentation: 'fullScreenModal', headerShown: false }} />
           <Stack.Screen name="log-transaction" options={{ presentation: 'modal', title: 'Log Transaction' }} />

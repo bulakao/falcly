@@ -57,7 +57,13 @@ export default function OnboardingResultScreen() {
     String(cardDefaults.interestRate * 100),
   );
 
-  if (!card) {
+  const statusResult = card ? calculateCardStatus(card, new Date()) : null;
+
+  useEffect(() => {
+    if (statusResult) trackOnboardingFirstStatusViewed(statusResult.status);
+  }, [statusResult]);
+
+  if (!card || !statusResult) {
     return (
       <View style={styles.container}>
         <Text>Card not found.</Text>
@@ -65,12 +71,8 @@ export default function OnboardingResultScreen() {
     );
   }
 
-  const { status, reason } = calculateCardStatus(card, new Date());
+  const { status, reason } = statusResult;
   const color = STATUS_COLORS[status];
-
-  useEffect(() => {
-    trackOnboardingFirstStatusViewed(status);
-  }, [status]);
 
   function handleEnrichmentSave() {
     if (!card) return;
@@ -95,16 +97,16 @@ export default function OnboardingResultScreen() {
     }
 
     trackOnboardingEnrichmentCompleted(!isNaN(cash) && cash > 0, false);
-    useOnboardingStore.getState().setStep('paywall');
-    router.replace('/onboarding-paywall');
+    useOnboardingStore.getState().complete();
+    router.replace('/');
   }
 
   function handleSkip() {
     if (showEnrichment) {
       trackOnboardingEnrichmentSkipped();
     }
-    useOnboardingStore.getState().setStep('paywall');
-    router.replace('/onboarding-paywall');
+    useOnboardingStore.getState().complete();
+    router.replace('/');
   }
 
   return (
