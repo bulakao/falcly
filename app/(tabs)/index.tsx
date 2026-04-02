@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { Link, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,6 +25,16 @@ export default function HomeScreen() {
   const committedExpenses = useUserStore((s) => s.committedExpenses);
 
   const daysRemaining = daysUntilDataDeletion();
+
+  // DEBUG — remove after diagnosis
+  useEffect(() => {
+    console.log('[DEBUG] userStore:', { cashOnHand, monthlyIncome, payday, committedExpenses });
+    cards.forEach((card) => {
+      const nac = computeNetAvailableCash(cashOnHand, monthlyIncome, payday, card, committedExpenses);
+      const minPayment = Math.max(card.outstandingBalance * card.minPaymentPct, card.minPaymentFloor);
+      console.log(`[DEBUG] card: ${card.bankName} | outstandingBalance: ${card.outstandingBalance} | minPayment: ${minPayment} | nac: ${nac} | statementDay: ${card.statementDay}`);
+    });
+  }, [cards, cashOnHand, monthlyIncome, payday, committedExpenses]);
 
   const activeCards = useMemo(() => cards.filter((c) => c.isActive), [cards]);
   const hasHiddenCards = cards.length > activeCards.length;
