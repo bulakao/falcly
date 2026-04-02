@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { ShieldCheck, CalendarDays, CreditCard } from 'lucide-react-native';
 
 import { Text } from '@/components/Themed';
 import { Button } from '@/components/atoms';
@@ -12,10 +14,12 @@ import {
   trackOnboardingGetStartedTapped,
 } from '@/utils/analytics';
 
+const falclyLogo = require('@/assets/images/falcon-mascot.png');
+
 const BENEFITS = [
-  { icon: '✓', label: 'SAFE/CAUTION/RISKY per card' },
-  { icon: '📅', label: 'Which cycle each purchase lands on' },
-  { icon: '💳', label: 'Exactly what to pay and when' },
+  { Icon: ShieldCheck, label: 'Know if it\'s safe to swipe each card' },
+  { Icon: CalendarDays, label: 'Which cycle each purchase lands on' },
+  { Icon: CreditCard, label: 'Exactly what to pay and when' },
 ];
 
 export default function WelcomeScreen() {
@@ -32,28 +36,52 @@ export default function WelcomeScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: t.background, paddingTop: insets.top + 60, paddingBottom: insets.bottom + 24 }]}>
-      <View style={styles.content}>
-        <Text style={[styles.brand, { color: t.primary }]}>Falcly</Text>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: t.background,
+          paddingTop: insets.top + 40,
+          paddingBottom: insets.bottom + 24,
+        },
+      ]}
+    >
+      <View style={styles.hero}>
+        <View style={[styles.logoContainer, { backgroundColor: t.surface }]}>
+          <Image source={falclyLogo} style={styles.logo} resizeMode="contain" />
+        </View>
+
         <Text style={[styles.headline, { color: t.textPrimary }]}>
-          Know before you swipe.
-        </Text>
-        <Text style={[styles.subheadline, { color: t.textSecondary }]}>
-          Falcly tells you if it&apos;s safe to use your credit card — before you swipe.
+          Know before{'\n'}you swipe.
         </Text>
 
-        <View style={styles.benefits}>
-          {BENEFITS.map((b) => (
-            <View key={b.label} style={[styles.chip, { backgroundColor: t.surface }]}>
-              <Text style={styles.chipIcon}>{b.icon}</Text>
-              <Text style={[styles.chipLabel, { color: t.textPrimary }]}>{b.label}</Text>
-            </View>
-          ))}
-        </View>
+        <Text style={[styles.subheadline, { color: t.textSecondary }]}>
+          Falcly tells you if it's safe to use your credit card — before you swipe.
+        </Text>
+      </View>
+
+      <View style={[styles.benefits, { backgroundColor: t.surface }]}>
+        {BENEFITS.map((b, i) => (
+          <View
+            key={b.label}
+            style={[
+              styles.benefitRow,
+              i < BENEFITS.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.border },
+            ]}
+          >
+            <b.Icon size={22} color={t.primary} strokeWidth={2} />
+            <Text style={[styles.benefitLabel, { color: t.textPrimary }]}>
+              {b.label}
+            </Text>
+          </View>
+        ))}
       </View>
 
       <View style={styles.cta}>
         <Button label="Get Started" onPress={handleGetStarted} />
+        <Text style={[styles.footnote, { color: t.textMuted }]}>
+          No sign-up required
+        </Text>
       </View>
     </View>
   );
@@ -62,53 +90,61 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
+    paddingHorizontal: 28,
     justifyContent: 'space-between',
   },
-  content: {
+  hero: {
     alignItems: 'center',
+    gap: 4,
   },
-  brand: {
-    fontSize: 20,
-    fontFamily: fonts.nunitoBold,
-    marginBottom: 32,
-    letterSpacing: 1,
+  logoContainer: {
+    width: 96,
+    height: 96,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  logo: {
+    width: 112,
+    height: 112,
   },
   headline: {
-    fontSize: 32,
+    fontSize: 34,
     fontFamily: fonts.nunitoBold,
     textAlign: 'center',
-    marginBottom: 12,
+    lineHeight: 42,
+    marginBottom: 8,
   },
   subheadline: {
     fontSize: 16,
+    fontFamily: fonts.interRegular,
     textAlign: 'center',
     lineHeight: 24,
-    marginBottom: 40,
-    paddingHorizontal: 8,
+    paddingHorizontal: 16,
   },
   benefits: {
-    width: '100%',
-    gap: 12,
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 4,
   },
-  chip: {
+  benefitRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    gap: 12,
+    paddingVertical: 16,
+    gap: 14,
   },
-  chipIcon: {
-    fontSize: 18,
-  },
-  chipLabel: {
+  benefitLabel: {
     fontSize: 15,
-    fontFamily: fonts.interSemiBold,
+    fontFamily: fonts.interMedium,
     flex: 1,
   },
   cta: {
     gap: 12,
     alignItems: 'center',
+  },
+  footnote: {
+    fontSize: 13,
+    fontFamily: fonts.interRegular,
   },
 });

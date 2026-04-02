@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'expo-router';
-import { logger } from '../index';
+import { logger } from '../instance';
 
 export function useNavigationLogger(): void {
   const pathname = usePathname();

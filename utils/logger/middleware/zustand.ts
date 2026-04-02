@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand';
-import { logger } from '../index';
+import { logger } from '../instance';
 
 interface LoggerOptions {
   ignoreKeys?: string[];

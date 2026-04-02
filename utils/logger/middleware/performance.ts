@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { logger } from '../index';
+import { logger } from '../instance';
 
 export async function measureAsync<T>(
   tag: string,

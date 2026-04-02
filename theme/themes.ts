@@ -18,7 +18,7 @@ export const lightTheme: SemanticTokens = {
 
   // Primary action
   primary: palette.amberGold,
-  primaryText: palette.deepNavy,
+  primaryText: palette.white,
   primaryMuted: palette.borderLight,
 
   // Status
@@ -59,8 +59,8 @@ export const darkTheme: SemanticTokens = {
 
   // Text
   textPrimary: palette.paleSilver,
-  textSecondary: palette.warmTaupe,
-  textMuted: palette.warmTaupe,
+  textSecondary: '#B0A89E',
+  textMuted: '#918880',
   textInverse: palette.deepNavy,
 
   // Borders

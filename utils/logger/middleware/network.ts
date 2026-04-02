@@ -1,4 +1,4 @@
-import { logger } from '../index';
+import { logger } from '../instance';
 
 const SKIP_URL_PATTERNS = [
   /posthog/i,
