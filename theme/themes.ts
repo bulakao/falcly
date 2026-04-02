@@ -53,7 +53,7 @@ export const lightTheme: SemanticTokens = {
 
 export const darkTheme: SemanticTokens = {
   // Surfaces
-  background: '#000000',
+  background: '#1A2634',
   surface: palette.deepNavy,
   surfaceElevated: '#080808',
 
@@ -69,7 +69,7 @@ export const darkTheme: SemanticTokens = {
 
   // Primary action
   primary: palette.amberGold,
-  primaryText: palette.deepNavy,
+  primaryText: palette.white,
   primaryMuted: palette.muted,
 
   // Status

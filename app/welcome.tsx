@@ -48,7 +48,7 @@ export default function WelcomeScreen() {
     >
       <View style={styles.hero}>
         <View style={styles.logoContainer}>
-          <Image source={falclyLogo} style={styles.logo} resizeMode="contain" />
+          <Image source={falclyLogo} style={styles.logo} resizeMode="cover" />
         </View>
 
         <Text style={[styles.headline, { color: t.textPrimary }]}>
@@ -100,14 +100,15 @@ const styles = StyleSheet.create({
   logoContainer: {
     width: 96,
     height: 96,
-    borderRadius: 28,
+    borderRadius: 22,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   logo: {
-    width: 112,
-    height: 112,
+    width: 116,
+    height: 116,
   },
   headline: {
     fontSize: 34,
