@@ -27,6 +27,7 @@ export default function SettingsScreen() {
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
   const deleteAccount = useAuthStore((s) => s.deleteAccount);
+  const clearLocalData = useAuthStore((s) => s.clearLocalData);
 
   const tier = useSubscriptionStore((s) => s.tier);
   const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
@@ -234,29 +235,38 @@ export default function SettingsScreen() {
         />
       </SectionCard>}
 
-      {/* Delete Account */}
-      {user && <SectionCard>
+      {/* Delete Account / Clear Data */}
+      <SectionCard>
         <SectionHeader
-          title="Delete Account"
-          subtitle="Permanently removes your account, all cards, and associated data. This cannot be undone."
+          title={user ? 'Delete Account' : 'Clear All Data'}
+          subtitle={user
+            ? 'Permanently removes your account, all cards, and associated data. This cannot be undone.'
+            : 'Erase all cards, finances, and settings from this device. This cannot be undone.'}
         />
         <Button
-          label="Delete Account"
+          label={user ? 'Delete Account' : 'Clear All Data'}
           variant="destructive-outline"
           onPress={() => {
             Alert.alert(
-              'Delete Account',
-              'This will permanently delete your account and all your data. This cannot be undone.',
+              user ? 'Delete Account' : 'Clear All Data',
+              user
+                ? 'This will permanently delete your account and all your data. This cannot be undone.'
+                : 'This will erase all your cards and data from this device. This cannot be undone.',
               [
                 { text: 'Cancel', style: 'cancel' },
                 {
-                  text: 'Delete',
+                  text: user ? 'Delete' : 'Clear',
                   style: 'destructive',
                   onPress: async () => {
                     try {
-                      await deleteAccount();
+                      if (user) {
+                        await deleteAccount();
+                      } else {
+                        clearLocalData();
+                      }
+                      router.replace('/welcome');
                     } catch (e: unknown) {
-                      const msg = e instanceof Error ? e.message : 'Failed to delete account';
+                      const msg = e instanceof Error ? e.message : 'Failed to delete data';
                       Alert.alert('Error', msg);
                     }
                   },
@@ -265,7 +275,7 @@ export default function SettingsScreen() {
             );
           }}
         />
-      </SectionCard>}
+      </SectionCard>
     </ScrollView>
   );
 }
