@@ -7,6 +7,7 @@ import {
   Alert,
   Switch,
   View as RNView,
+  Clipboard,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -180,18 +181,60 @@ export default function SettingsScreen() {
         </SectionCard>
       )}
 
+      {/* Dev Tools */}
+      {__DEV__ && (
+        <SectionCard accentBorder={t.caution}>
+          <SectionHeader
+            title="Dev Tools"
+            subtitle="Debug only — not visible in production."
+          />
+          <Button
+            label="Copy Store State"
+            variant="secondary"
+            onPress={() => {
+              const state = {
+                profile: { cashOnHand, monthlyIncome, payday, committedExpenses },
+                cards: cards.map((c) => ({
+                  id: c.id,
+                  bankName: c.bankName,
+                  creditLimit: c.creditLimit,
+                  outstandingBalance: c.outstandingBalance,
+                  statementDay: c.statementDay,
+                  dueDayOffset: c.dueDayOffset,
+                  minPaymentPct: c.minPaymentPct,
+                  minPaymentFloor: c.minPaymentFloor,
+                  isActive: c.isActive,
+                  pendingTransactions: c.pendingTransactions,
+                  installmentsMonthlyAmount: c.installmentsMonthlyAmount,
+                  subscriptionsThisCycle: c.subscriptionsThisCycle,
+                })),
+              };
+              Clipboard.setString(JSON.stringify(state, null, 2));
+              Alert.alert('Copied!', 'Store state copied to clipboard.');
+            }}
+          />
+          <Button
+            label="Open Showcase"
+            onPress={() => router.push('/component-showcase')}
+            variant="secondary"
+          />
+        </SectionCard>
+      )}
+
       {/* Component Showcase */}
-      <SectionCard>
-        <SectionHeader
-          title="Component Showcase"
-          subtitle="Preview all UI components with the falcon premium palette."
-        />
-        <Button
-          label="Open Showcase"
-          onPress={() => router.push('/component-showcase')}
-          variant="secondary"
-        />
-      </SectionCard>
+      {!__DEV__ && (
+        <SectionCard>
+          <SectionHeader
+            title="Component Showcase"
+            subtitle="Preview all UI components with the falcon premium palette."
+          />
+          <Button
+            label="Open Showcase"
+            onPress={() => router.push('/component-showcase')}
+            variant="secondary"
+          />
+        </SectionCard>
+      )}
 
       {/* Appearance */}
       <SectionCard>
