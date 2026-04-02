@@ -127,13 +127,13 @@ export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress,
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 8,
+    paddingTop: 16,
   },
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginBottom: 24,
+    marginBottom: 20,
   },
   avatar: {
     width: 32,

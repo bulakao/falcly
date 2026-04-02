@@ -105,12 +105,12 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interSemiBold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: 8,
+    marginBottom: 10,
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
     backgroundColor: 'transparent',
   },
   dot: {
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   },
   reason: {
     fontSize: 13,
-    lineHeight: 18,
+    lineHeight: 20,
   },
   topLine: {
     flexDirection: 'row',
@@ -152,13 +152,13 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    marginTop: 12,
+    marginTop: 14,
   },
   manageRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 12,
+    paddingTop: 14,
   },
   manageButton: {
     flexDirection: 'row',
