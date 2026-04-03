@@ -90,3 +90,16 @@ Started: Sat Apr  4 00:26:15 PST 2026
   - Module-level variables are the simplest way to persist UI state across component re-mounts within a session (no store or AsyncStorage needed)
   - The section order after this change: banners → actions → BillingTimeline → collapsible GanttTimeline → input → breakdown → nav links → hint → trial CTA
 ---
+
+## 2026-04-04 - UX-02
+- Added dismissible hint banner at top of FinanceCard expanded section when all four finance fields are null
+- Banner reads "Fill this in to see if you can cover your payments." with an X dismiss button
+- Disappears automatically when fundsAvailable (cashOnHand) is set, or when user dismisses it
+- Dismissal persisted in AsyncStorage under key `falcly-finance-hint-dismissed`
+- Files changed: `components/molecules/FinanceCard.tsx`
+- **Learnings for future iterations:**
+  - AsyncStorage key pattern: `falcly-<feature>-<purpose>` (e.g. `falcly-finance-hint-dismissed`)
+  - Default `hintDismissed` to `true` initially to avoid flash-of-hint before AsyncStorage loads
+  - `accentBg` theme token provides a subtle highlight background suitable for info banners
+  - `lucide-react-native` `X` icon at size 14 works well for inline dismiss buttons
+---

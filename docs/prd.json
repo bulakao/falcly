@@ -942,7 +942,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "New users see an empty FinanceCard with no context. Low effort, high first-run clarity."
     },
     {
