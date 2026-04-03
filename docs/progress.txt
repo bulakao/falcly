@@ -9,6 +9,7 @@ Started: Sat Apr  4 00:26:15 PST 2026
 - Card-specific routes accept `cardId` as a query param via `useLocalSearchParams()`
 - Decision engine functions (`calculateCardStatus`, `scoreCard`, `calculateBestCard`) accept optional `currentCycleTxSum` param — defaults to 0 for backward compat
 - Per-card callbacks (e.g. `getNetAvailableCash`, `getCurrentCycleTxSum`) are created in HomeScreen and threaded through CardPager to child components
+- `EmptyState` component accepts optional `icon` (ReactNode), `title`, `subtitle`, and `children` — use it for all empty states across screens
 
 ---
 
@@ -113,4 +114,15 @@ Started: Sat Apr  4 00:26:15 PST 2026
   - The split hint was partially implemented in a prior phase (FF-06) — always check existing code before building from scratch
   - `currencySymbol` is available in userStore and defaults to '₱' — use it for all user-facing currency displays
   - `ordinalSuffix()` helper exists in FinanceCard for formatting day-of-month (1st, 2nd, 3rd, etc.)
+---
+
+## 2026-04-04 - UX-04
+- Refactored card-transactions.tsx to use the shared `EmptyState` component instead of inline custom empty state
+- Added `icon` optional prop to `EmptyState` component for reuse across screens
+- Empty state shows Receipt icon, heading "No transactions yet", subtext "Log a purchase to see which bill it lands on", and a prominent "Log Transaction" button
+- Files changed: `app/card-transactions.tsx`, `components/molecules/EmptyState.tsx`
+- **Learnings for future iterations:**
+  - `EmptyState` now supports an optional `icon` prop (ReactNode) — use it for future empty states
+  - `lucide-react-native` `Receipt` icon works well for transaction-related empty states
+  - The old card-transactions empty state had custom styles that duplicated EmptyState — always check for existing shared components first
 ---
