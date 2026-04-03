@@ -855,7 +855,7 @@
         "Does not appear when funds are set and fresh"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Discovery spec: '[Update my cash]' action on swipe impact card."
     },
     {

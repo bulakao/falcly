@@ -28,3 +28,15 @@ Started: Sat Apr  4 00:26:15 PST 2026
   - The `navRow` container in SwipeImpactPanel now holds two nav buttons (Transactions + Payment Summary) — future nav entry points should follow the same pattern
   - Route `/payment-summary` already existed; NV-02 only added the entry point, not the route
 ---
+
+## 2026-04-04 - NV-03
+- Added "Update funds available →" / "Set funds available →" tappable prompt to SwipeImpactPanel
+- Shows when cashOnHand is null OR cashUpdatedAt staleness is 'warning'/'stale'
+- Tapping navigates to home screen where FinanceCard section lives
+- Prompt hidden when funds are set and fresh (staleness = 'fresh')
+- Files changed: `components/organisms/SwipeImpactPanel.tsx`
+- **Learnings for future iterations:**
+  - `cashUpdatedAt` in userStore tracks when funds were last updated — use `getStalenessLevel(cashUpdatedAt)` for funds freshness
+  - Theme has `caution`/`cautionBg` colors matching the amber warning palette
+  - `router.navigate('/')` from expo-router navigates back to home tab
+---
