@@ -49,3 +49,15 @@ Started: Fri Apr  3 18:25:08 PST 2026
   - Store actions follow a consistent pattern: call `updateProfile()` then `set()` — follow this for any new field
   - Pre-existing lint warnings in userStore.ts are `@typescript-eslint/no-require-imports` for lazy cardStore imports (circular dep avoidance)
 ---
+
+## 2026-04-03 - FF-05
+- Updated `computeNetAvailableCash` signature: `payday: number | null` → `paydays: number[]`
+- Engine now loops over each payday, adding `monthlyIncome / paydays.length` per eligible payday
+- Updated all 3 callers to use `getPaydays()` from userStore instead of single `payday`
+- Updated `incomeApplies` in SwipeImpactPanel to use `paydays.some()` and breakdown guard to `paydays.length > 0`
+- Files changed: `utils/decisionEngine.ts`, `app/(tabs)/index.tsx`, `app/swipe-impact.tsx`, `components/organisms/SwipeImpactPanel.tsx`
+- **Learnings for future iterations:**
+  - SwipeImpactPanel has a display guard (`monthlyIncome !== null && payday !== null`) around the income breakdown row — must update this too when changing the payday signature
+  - `getPaydays()` is not a hook — it reads from `useUserStore.getState()` so it can be called outside React components and in render bodies without hook rules issues
+  - The 3 pre-existing TS errors (`_layout.tsx`, `StatusTooltip.tsx`) are not introduced by Phase 2 work
+---

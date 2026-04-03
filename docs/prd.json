@@ -786,7 +786,7 @@
         "TypeScript compiles cleanly, no regressions in existing logic"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Depends on FF-04. Most sensitive change \u2014 test manually after."
     },
     {
