@@ -249,6 +249,11 @@ export function SwipeImpactPanel({
             <Text style={[styles.navButtonText, { color: t.primary }]}>View Transactions ›</Text>
           </Pressable>
         </Link>
+        <Link href={{ pathname: '/payment-summary', params: { cardId: card.id } }} asChild>
+          <Pressable style={[styles.navButton, { backgroundColor: t.surface, borderColor: t.border }]}>
+            <Text style={[styles.navButtonText, { color: t.primary }]}>What You Owe ›</Text>
+          </Pressable>
+        </Link>
       </View>
 
       {impact.netAvailableCash === null && (
