@@ -50,7 +50,7 @@ export default function EditCardScreen() {
     const stmtDay = parseInt(statementDay, 10);
 
     if (!bankName.trim()) {
-      Alert.alert('Required', 'Enter the bank name.');
+      Alert.alert('Required', 'Enter the card name.');
       return;
     }
     if (isNaN(limit) || limit <= 0) {
@@ -115,7 +115,7 @@ export default function EditCardScreen() {
         <Heading>Edit Card</Heading>
 
         <FormFieldGroup
-          label="Bank Name"
+          label="Card Name"
           value={bankName}
           onChangeText={setBankName}
           placeholder="BDO, BPI, Metrobank"

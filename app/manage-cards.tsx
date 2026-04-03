@@ -121,17 +121,35 @@ export default function ManageCardsScreen() {
     );
   }
 
+  const header = (
+    <Stack.Screen
+      options={{
+        headerRight: () => (
+          <Pressable onPress={handleAddCard} hitSlop={8} style={{ paddingLeft: 12, marginRight: 12 }}>
+            <Text style={{ color: t.primary, fontSize: 16, fontFamily: fonts.interSemiBold }}>Add Card</Text>
+          </Pressable>
+        ),
+      }}
+    />
+  );
+
+  if (cards.length === 0) {
+    return (
+      <RNView style={[styles.container, { backgroundColor: t.background, paddingTop: insets.top + 56 }]}>
+        {header}
+        <Text style={[styles.title, { color: t.textPrimary }]}>Manage Cards</Text>
+        <Text style={[styles.subtitle, { color: t.textMuted }]}>No cards yet</Text>
+        <RNView style={styles.emptyState}>
+          <FontAwesome name="credit-card-alt" size={48} color={t.border} />
+          <Text style={[styles.emptyText, { color: t.textMuted }]}>Tap "Add Card" to get started</Text>
+        </RNView>
+      </RNView>
+    );
+  }
+
   return (
     <GestureHandlerRootView style={[styles.container, { backgroundColor: t.background, paddingTop: insets.top + 56 }]}>
-      <Stack.Screen
-        options={{
-          headerRight: () => (
-            <Pressable onPress={handleAddCard} hitSlop={8} style={{ paddingLeft: 12, marginRight: 12 }}>
-              <Text style={{ color: t.primary, fontSize: 16, fontFamily: fonts.interSemiBold }}>Add Card</Text>
-            </Pressable>
-          ),
-        }}
-      />
+      {header}
       <Text style={[styles.title, { color: t.textPrimary }]}>Manage Cards</Text>
       <Text style={[styles.subtitle, { color: t.textMuted }]}>
         {tier === 'free'
@@ -139,7 +157,6 @@ export default function ManageCardsScreen() {
           : `${activeCount} active · Pro`}
       </Text>
 
-      {/* Draggable list */}
       <DraggableFlatList
         data={cards}
         keyExtractor={(item) => item.id}
@@ -235,5 +252,16 @@ const styles = StyleSheet.create({
   separator: {
     height: 1,
     marginHorizontal: 20,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    paddingBottom: 80,
+  },
+  emptyText: {
+    fontSize: 15,
+    fontFamily: fonts.interMedium,
   },
 });

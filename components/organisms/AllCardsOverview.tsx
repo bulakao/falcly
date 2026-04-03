@@ -19,6 +19,7 @@ interface AllCardsOverviewProps {
   getNetAvailableCash: (card: Card) => number | null;
   onGanttCardPress?: (cardId: string) => void;
   onBannerPress?: () => void;
+  onAddPress?: () => void;
 }
 
 function GanttSkeleton() {
@@ -37,7 +38,7 @@ function GanttSkeleton() {
   );
 }
 
-export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress, onBannerPress }: AllCardsOverviewProps) {
+export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress, onBannerPress, onAddPress }: AllCardsOverviewProps) {
   const t = useAppTheme();
   const router = useRouter();
   const allCards = useCardStore((s) => s.cards);
@@ -91,7 +92,7 @@ export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress,
         </Pressable>
       </View>
 
-      <BestCardBanner bestCard={bestCard} hasCards={allCards.length > 0} hasActiveCards={cards.length > 0} onPress={onBannerPress} />
+      <BestCardBanner bestCard={bestCard} hasCards={allCards.length > 0} hasActiveCards={cards.length > 0} onPress={onBannerPress} onAddPress={onAddPress} />
 
       <View style={styles.section}>
         <SectionHeader

@@ -8,6 +8,7 @@ import {
   Keyboard,
 } from 'react-native';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, View } from '@/components/Themed';
 import { CreditCardFace, EmptyCardFace } from '@/components/atoms';
 import { ImpactSkeleton } from '@/components/molecules';
@@ -43,6 +44,7 @@ type PageItem =
 export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
   function CardPager({ cards, onAddCard, getNetAvailableCash, initialIndex = 0, onBannerPress, hasHiddenCards = false }, ref) {
     const t = useAppTheme();
+    const insets = useSafeAreaInsets();
     const isCardReadOnly = useSubscriptionStore((s) => s.isCardReadOnly);
     const flatListRef = useRef<FlatList<PageItem>>(null);
 
@@ -75,7 +77,7 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
           return (
             <ScrollView
               style={{ width: PAGE_WIDTH }}
-              contentContainerStyle={styles.pageContent}
+              contentContainerStyle={[styles.pageContent, { paddingTop: insets.top }]}
               showsVerticalScrollIndicator={false}
             >
               <AllCardsOverview
@@ -83,6 +85,7 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
                 getNetAvailableCash={getNetAvailableCash}
                 onGanttCardPress={handleGanttCardPress}
                 onBannerPress={onBannerPress}
+                onAddPress={onAddCard}
               />
             </ScrollView>
           );
@@ -92,7 +95,7 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
           return (
             <ScrollView
               style={{ width: PAGE_WIDTH }}
-              contentContainerStyle={styles.pageContent}
+              contentContainerStyle={[styles.pageContent, { paddingTop: insets.top }]}
               showsVerticalScrollIndicator={false}
             >
               <View style={styles.cardWrapper}>
@@ -114,7 +117,7 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
         return (
           <ScrollView
             style={{ width: PAGE_WIDTH }}
-            contentContainerStyle={styles.pageContent}
+            contentContainerStyle={[styles.pageContent, { paddingTop: insets.top }]}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
@@ -126,7 +129,7 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
           </ScrollView>
         );
       },
-      [cards, getNetAvailableCash, handleGanttCardPress, hasHiddenCards, isCardReadOnly, onAddCard, onBannerPress, t.accent],
+      [cards, getNetAvailableCash, handleGanttCardPress, hasHiddenCards, insets.top, isCardReadOnly, onAddCard, onBannerPress, t.accent],
     );
 
     const keyExtractor = useCallback(

@@ -53,7 +53,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: t.background, paddingTop: insets.top }]}>
+    <View style={[styles.container, { backgroundColor: t.background }]}>
       {daysRemaining !== null && (
         <Link href="/pro-paywall" asChild>
           <AlertBanner

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, Pressable, View as RNView } from 'react-native';
 import { View } from '@/components/Themed';
-import { ChevronRight } from 'lucide-react-native';
+import { ChevronRight, Plus } from 'lucide-react-native';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import StatusTooltip from '@/components/molecules/StatusTooltip';
@@ -11,9 +11,10 @@ interface BestCardBannerProps {
   hasCards: boolean;
   hasActiveCards: boolean;
   onPress?: () => void;
+  onAddPress?: () => void;
 }
 
-export function BestCardBanner({ bestCard, hasCards, hasActiveCards, onPress }: BestCardBannerProps) {
+export function BestCardBanner({ bestCard, hasCards, hasActiveCards, onPress, onAddPress }: BestCardBannerProps) {
   const t = useAppTheme();
 
   const statusColorMap: Record<CardStatus, string> = {
@@ -39,17 +40,28 @@ export function BestCardBanner({ bestCard, hasCards, hasActiveCards, onPress }: 
             </Text>
           </View>
         </RNView>
-        {onPress && (
+        {(!hasCards ? onAddPress : onPress) && (
           <>
             <RNView style={[styles.divider, { backgroundColor: t.border }]} />
             <RNView style={styles.manageRow}>
-              <StatusTooltip>
-                <Text style={[styles.manageText, { color: t.textMuted }]}>WHY?</Text>
-              </StatusTooltip>
-              <Pressable style={styles.manageButton} onPress={onPress}>
-                <Text style={[styles.manageText, { color: t.primary }]}>MANAGE</Text>
-                <ChevronRight size={14} color={t.primary} />
-              </Pressable>
+              {hasActiveCards ? (
+                <StatusTooltip>
+                  <Text style={[styles.manageText, { color: t.textMuted }]}>WHY?</Text>
+                </StatusTooltip>
+              ) : (
+                <RNView />
+              )}
+              {!hasCards ? (
+                <Pressable style={styles.manageButton} onPress={onAddPress}>
+                  <Text style={[styles.manageText, { color: t.primary }]}>ADD</Text>
+                  <Plus size={14} color={t.primary} />
+                </Pressable>
+              ) : (
+                <Pressable style={styles.manageButton} onPress={onPress}>
+                  <Text style={[styles.manageText, { color: t.primary }]}>MANAGE</Text>
+                  <ChevronRight size={14} color={t.primary} />
+                </Pressable>
+              )}
             </RNView>
           </>
         )}
@@ -70,6 +82,22 @@ export function BestCardBanner({ bestCard, hasCards, hasActiveCards, onPress }: 
           <RNView style={[styles.dot, { backgroundColor: accentColor, shadowColor: accentColor }]} />
           <Text style={[styles.bankName, { color: t.textPrimary }]}>{card.bankName}</Text>
         </View>
+        <RNView style={styles.utilizationRow}>
+          <RNView style={[styles.utilizationTrack, { backgroundColor: t.border }]}>
+            <RNView
+              style={[
+                styles.utilizationFill,
+                {
+                  backgroundColor: accentColor,
+                  width: `${Math.max(Math.min(card.outstandingBalance / card.creditLimit, 1) * 100, 2)}%` as `${number}%`,
+                },
+              ]}
+            />
+          </RNView>
+          <Text style={[styles.utilizationLabel, { color: t.textMuted }]}>
+            ₱{card.outstandingBalance.toLocaleString()} / ₱{card.creditLimit.toLocaleString()}
+          </Text>
+        </RNView>
         <Text style={[styles.reason, { color: t.textSecondary }]}>{status.reason}</Text>
         {warning && (
           <Text style={[styles.warning, { color: t.caution }]}>⚠ {warning}</Text>
@@ -105,12 +133,12 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interSemiBold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: 10,
+    marginBottom: 14,
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
     backgroundColor: 'transparent',
   },
   dot: {
@@ -130,6 +158,24 @@ const styles = StyleSheet.create({
   reason: {
     fontSize: 13,
     lineHeight: 20,
+  },
+  utilizationRow: {
+    marginBottom: 16,
+  },
+  utilizationTrack: {
+    height: 4,
+    borderRadius: 2,
+    width: '100%',
+    marginBottom: 4,
+  },
+  utilizationFill: {
+    height: 4,
+    borderRadius: 2,
+  },
+  utilizationLabel: {
+    fontSize: 11,
+    fontFamily: fonts.interMedium,
+    textAlign: 'right',
   },
   topLine: {
     flexDirection: 'row',

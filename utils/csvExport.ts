@@ -35,7 +35,7 @@ function formatPercent(rate: number): string {
 
 function buildCardsCSV(cards: Card[]): string {
   const headers = [
-    'Bank Name',
+    'Card Name',
     'Credit Limit',
     'Outstanding Balance',
     'Statement Day',
