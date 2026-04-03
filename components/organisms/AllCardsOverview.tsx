@@ -17,6 +17,7 @@ import type { Card } from '@/types/card';
 interface AllCardsOverviewProps {
   cards: Card[];
   getNetAvailableCash: (card: Card) => number | null;
+  getCurrentCycleTxSum?: (card: Card) => number;
   onGanttCardPress?: (cardId: string) => void;
   onBannerPress?: () => void;
   onAddPress?: () => void;
@@ -38,7 +39,7 @@ function GanttSkeleton() {
   );
 }
 
-export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress, onBannerPress, onAddPress }: AllCardsOverviewProps) {
+export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTxSum, onGanttCardPress, onBannerPress, onAddPress }: AllCardsOverviewProps) {
   const t = useAppTheme();
   const router = useRouter();
   const allCards = useCardStore((s) => s.cards);
@@ -46,7 +47,7 @@ export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress,
   const user = useAuthStore((s) => s.user);
   const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
   const getTrialEndDate = useSubscriptionStore((s) => s.getTrialEndDate);
-  const bestCard = cards.length > 0 ? calculateBestCard(cards, new Date(), getNetAvailableCash) : null;
+  const bestCard = cards.length > 0 ? calculateBestCard(cards, new Date(), getNetAvailableCash, getCurrentCycleTxSum) : null;
 
   function getBadgeLabel() {
     if (tier === 'pro') return 'PRO';

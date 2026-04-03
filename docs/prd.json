@@ -872,7 +872,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "TL-06 was marked passing but currentCycleTxSum is never passed in home screen engine calls — all default to 0."
     },
     {

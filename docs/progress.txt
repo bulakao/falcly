@@ -7,6 +7,8 @@ Started: Sat Apr  4 00:26:15 PST 2026
 - Navigation uses Expo Router `Link` component with `pathname`/`params` pattern for typed routes
 - Styles use `useAppTheme()` for colors and `fonts` from `@/theme/fonts` for typography
 - Card-specific routes accept `cardId` as a query param via `useLocalSearchParams()`
+- Decision engine functions (`calculateCardStatus`, `scoreCard`, `calculateBestCard`) accept optional `currentCycleTxSum` param — defaults to 0 for backward compat
+- Per-card callbacks (e.g. `getNetAvailableCash`, `getCurrentCycleTxSum`) are created in HomeScreen and threaded through CardPager to child components
 
 ---
 
@@ -39,4 +41,17 @@ Started: Sat Apr  4 00:26:15 PST 2026
   - `cashUpdatedAt` in userStore tracks when funds were last updated — use `getStalenessLevel(cashUpdatedAt)` for funds freshness
   - Theme has `caution`/`cautionBg` colors matching the amber warning palette
   - `router.navigate('/')` from expo-router navigates back to home tab
+---
+
+## 2026-04-04 - EF-01
+- Wired currentCycleTxSum into home screen decision engine calls
+- `calculateCardStatus`, `scoreCard`, `calculateBestCard` now accept `currentCycleTxSum` param (defaults to 0 for backward compat)
+- Home screen computes per-card currentCycleTxSum via `computeCurrentCycleTxSum(getCurrentCycle(cardId, statementDay))`
+- Passed through CardPager → CreditCardFace and AllCardsOverview → calculateBestCard
+- Files changed: `utils/decisionEngine.ts`, `app/(tabs)/index.tsx`, `components/organisms/CardPager.tsx`, `components/atoms/CreditCardFace.tsx`, `components/organisms/AllCardsOverview.tsx`
+- **Learnings for future iterations:**
+  - `calculateCardStatus` uses `effectiveBalance = outstandingBalance + currentCycleTxSum` for utilization and minimum payment checks
+  - `getCurrentCycleTxSum` callback pattern follows the same shape as `getNetAvailableCash` — a `(card: Card) => number` callback passed through CardPager
+  - `StackedCardsPreview` and `GanttTimeline` also call `calculateCardStatus` but use default `currentCycleTxSum=0` — could be wired in future if needed
+  - `transactions` from transactionStore is included in the useCallback deps to ensure recalculation when transactions change
 ---
