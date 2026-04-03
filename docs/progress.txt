@@ -36,3 +36,16 @@ Started: Fri Apr  3 18:25:08 PST 2026
   - Snapshots are not required for every migration (0003 and 0004 have none)
   - Nullable columns in drizzle schema simply omit `.notNull()` — no explicit `.default(null)` needed
 ---
+
+## 2026-04-03 - FF-04
+- Added `payday2: number | null` field to UserStore interface and state (default null)
+- Added `setPayday2(day: number | null)` action that persists to DB
+- Updated `loadProfile()` to read `payday2` from DB row
+- Updated `reset()` to clear `payday2` to null
+- Added exported `getPaydays()` helper that returns `number[]` filtering nulls from `[payday, payday2]`
+- Files changed: `store/userStore.ts`
+- **Learnings for future iterations:**
+  - `getPaydays()` must be defined after `useUserStore` since it calls `useUserStore.getState()`
+  - Store actions follow a consistent pattern: call `updateProfile()` then `set()` — follow this for any new field
+  - Pre-existing lint warnings in userStore.ts are `@typescript-eslint/no-require-imports` for lazy cardStore imports (circular dep avoidance)
+---

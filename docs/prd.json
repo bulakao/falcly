@@ -767,7 +767,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Depends on FF-03 (schema). Engine update in FF-05."
     },
     {
