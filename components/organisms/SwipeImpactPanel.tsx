@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { StyleSheet, Pressable, Alert } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { FormInput, Label } from '@/components/atoms';
@@ -43,6 +43,7 @@ export function SwipeImpactPanel({
   const t = useAppTheme();
   const deleteCard = useCardStore((s) => s.deleteCard);
   const cashOnHand = useUserStore((s) => s.cashOnHand);
+  const cashUpdatedAt = useUserStore((s) => s.cashUpdatedAt);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
   const committedExpenses = useUserStore((s) => s.committedExpenses);
   const paydays = getPaydays();
@@ -71,6 +72,10 @@ export function SwipeImpactPanel({
   );
 
   const staleness = getStalenessLevel(card.balanceUpdatedAt);
+
+  const showFundsPrompt = cashOnHand === null || (
+    cashUpdatedAt !== null && getStalenessLevel(cashUpdatedAt) !== 'fresh'
+  );
 
   // Track swipe check when user enters a non-zero proposed amount
   const prevAmountRef = useRef(0);
@@ -256,6 +261,18 @@ export function SwipeImpactPanel({
         </Link>
       </View>
 
+      {/* Quick-update funds available prompt */}
+      {showFundsPrompt && !readOnly && (
+        <Pressable
+          style={[styles.fundsPrompt, { backgroundColor: t.cautionBg, borderColor: t.caution }]}
+          onPress={() => router.navigate('/')}
+        >
+          <Text style={[styles.fundsPromptText, { color: t.caution }]}>
+            {cashOnHand === null ? 'Set funds available \u2192' : 'Update funds available \u2192'}
+          </Text>
+        </Pressable>
+      )}
+
       {impact.netAvailableCash === null && (
         <Text style={[styles.hint, { color: t.textMuted }]}>
           Set your cash on hand in Settings to see payoff projections.
@@ -317,6 +334,17 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   navButtonText: {
+    fontSize: 14,
+    fontFamily: fonts.interSemiBold,
+  },
+  fundsPrompt: {
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 16,
+  },
+  fundsPromptText: {
     fontSize: 14,
     fontFamily: fonts.interSemiBold,
   },
