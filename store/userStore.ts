@@ -13,6 +13,7 @@ interface UserStore {
   cashUpdatedAt: number | null;
   monthlyIncome: number | null;
   payday: number | null;
+  payday2: number | null;
   committedExpenses: number | null;
   analyticsOptOut: boolean;
   themePreference: ThemePreference;
@@ -33,6 +34,7 @@ interface UserStore {
   setIncome: (income: number, payday: number) => void;
   setMonthlyIncome: (income: number) => void;
   setPayday: (day: number) => void;
+  setPayday2: (day: number | null) => void;
   setCommittedExpenses: (amount: number) => void;
   setAnalyticsOptOut: (optOut: boolean) => void;
   setThemePreference: (pref: ThemePreference) => void;
@@ -63,6 +65,7 @@ export const useUserStore = create<UserStore>()((set) => ({
   cashUpdatedAt: null,
   monthlyIncome: null,
   payday: null,
+  payday2: null,
   committedExpenses: null,
   analyticsOptOut: false,
   themePreference: 'system' as ThemePreference,
@@ -85,6 +88,7 @@ export const useUserStore = create<UserStore>()((set) => ({
           cashUpdatedAt: row.cashUpdatedAt ? row.cashUpdatedAt.getTime() : null,
           monthlyIncome: row.monthlyIncome,
           payday: row.payday,
+          payday2: row.payday2,
           committedExpenses: row.committedExpenses,
           analyticsOptOut: row.analyticsOptOut,
           themePreference: (row.themePreference as ThemePreference) ?? 'system',
@@ -121,6 +125,10 @@ export const useUserStore = create<UserStore>()((set) => ({
   setPayday: (day: number) => {
     updateProfile({ payday: day });
     set({ payday: day });
+  },
+  setPayday2: (day: number | null) => {
+    updateProfile({ payday2: day });
+    set({ payday2: day });
   },
   setCommittedExpenses: (amount: number) => {
     updateProfile({ committedExpenses: amount });
@@ -176,6 +184,7 @@ export const useUserStore = create<UserStore>()((set) => ({
       cashUpdatedAt: null,
       monthlyIncome: null,
       payday: null,
+      payday2: null,
       committedExpenses: null,
       analyticsOptOut: false,
       themePreference: 'system',
@@ -189,3 +198,9 @@ export const useUserStore = create<UserStore>()((set) => ({
     });
   },
 }));
+
+/** Returns an array of payday days, filtering out nulls from [payday, payday2]. */
+export function getPaydays(): number[] {
+  const { payday, payday2 } = useUserStore.getState();
+  return [payday, payday2].filter((d): d is number => d != null);
+}
