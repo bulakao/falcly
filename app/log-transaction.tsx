@@ -1,11 +1,13 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Pressable,
+  Modal,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
@@ -42,12 +44,29 @@ function getDateChips(): { label: string; date: Date }[] {
   return chips;
 }
 
+const TEACHABLE_MOMENT_KEY = 'falcly-first-tx-teachable-dismissed';
+
 export default function LogTransactionScreen() {
   const t = useAppTheme();
   const router = useRouter();
   const { cardId: paramCardId } = useLocalSearchParams<{ cardId?: string }>();
   const cards = useCardStore((s) => s.cards).filter((c) => c.isActive);
   const addTransaction = useTransactionStore((s) => s.addTransaction);
+  const transactionCount = useTransactionStore((s) => s.transactions.length);
+  const [showTeachable, setShowTeachable] = useState(false);
+  const [teachableDismissed, setTeachableDismissed] = useState(true);
+
+  useEffect(() => {
+    AsyncStorage.getItem(TEACHABLE_MOMENT_KEY).then((val) => {
+      setTeachableDismissed(val === 'true');
+    });
+  }, []);
+
+  const dismissTeachable = useCallback(() => {
+    AsyncStorage.setItem(TEACHABLE_MOMENT_KEY, 'true');
+    setShowTeachable(false);
+    router.back();
+  }, [router]);
 
   const [amountText, setAmountText] = useState('');
   const [merchant, setMerchant] = useState('');
@@ -83,6 +102,8 @@ export default function LogTransactionScreen() {
     const amount = parseFloat(amountText);
     if (isNaN(amount) || amount <= 0 || !selectedCard) return;
 
+    const isFirstTx = transactionCount === 0 && !teachableDismissed;
+
     const dateTs = selectedDate.getTime();
     const cycleLabel = txType === 'payment'
       ? 'previous' as const
@@ -101,7 +122,11 @@ export default function LogTransactionScreen() {
       notes: undefined,
     });
 
-    router.back();
+    if (isFirstTx) {
+      setShowTeachable(true);
+    } else {
+      router.back();
+    }
   }
 
   const isValid = !isNaN(parseFloat(amountText)) && parseFloat(amountText) > 0 && selectedCard;
@@ -254,6 +279,46 @@ export default function LogTransactionScreen() {
           />
         </View>
       </ScrollView>
+
+      {/* First-transaction teachable moment (UX-05) */}
+      <Modal
+        visible={showTeachable}
+        transparent
+        animationType="fade"
+        onRequestClose={dismissTeachable}
+      >
+        <Pressable style={styles.modalOverlay} onPress={dismissTeachable}>
+          <Pressable style={[styles.modalContent, { backgroundColor: t.surfaceElevated }]}>
+            <Text style={[styles.modalTitle, { color: t.textPrimary }]}>
+              How Falcly organizes your transactions
+            </Text>
+            <Text style={[styles.modalBody, { color: t.textSecondary }]}>
+              {"Every transaction you log is automatically sorted into a billing cycle based on your card's statement day:"}
+            </Text>
+            <View style={styles.modalSection}>
+              <Text style={[styles.modalLabel, { color: t.safe }]}>Current cycle</Text>
+              <Text style={[styles.modalDesc, { color: t.textSecondary }]}>
+                Purchases that will appear on your upcoming statement.
+              </Text>
+            </View>
+            <View style={styles.modalSection}>
+              <Text style={[styles.modalLabel, { color: t.caution }]}>Previous cycle</Text>
+              <Text style={[styles.modalDesc, { color: t.textSecondary }]}>
+                Already on your last statement — these are what you owe now.
+              </Text>
+            </View>
+            <View style={styles.modalSection}>
+              <Text style={[styles.modalLabel, { color: t.accent }]}>Next cycle</Text>
+              <Text style={[styles.modalDesc, { color: t.textSecondary }]}>
+                {"Won't hit a statement for a while \u2014 the furthest out."}
+              </Text>
+            </View>
+            <View style={styles.modalButtonWrapper}>
+              <Button label="Got it" onPress={dismissTeachable} />
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -332,6 +397,46 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interSemiBold,
   },
   buttonWrapper: {
+    marginTop: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    width: '100%',
+    borderRadius: 16,
+    padding: 24,
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: fonts.interBold,
+    marginBottom: 12,
+  },
+  modalBody: {
+    fontSize: 14,
+    fontFamily: fonts.interRegular,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  modalSection: {
+    marginBottom: 12,
+  },
+  modalLabel: {
+    fontSize: 14,
+    fontFamily: fonts.interSemiBold,
+    marginBottom: 2,
+  },
+  modalDesc: {
+    fontSize: 13,
+    fontFamily: fonts.interRegular,
+    lineHeight: 18,
+  },
+  modalButtonWrapper: {
     marginTop: 8,
   },
 });
