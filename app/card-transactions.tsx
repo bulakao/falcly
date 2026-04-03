@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text, View } from '@/components/Themed';
 import { Button, Caption } from '@/components/atoms';
-import { SectionCard } from '@/components/molecules';
+
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';

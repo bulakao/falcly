@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { transactions as txTable } from '@/db/schema/local';
 import type { CycleLabel } from '@/utils/cycleUtils';

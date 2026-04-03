@@ -9,7 +9,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
-import { Button, FormInput, Label, Caption } from '@/components/atoms';
+import { Button, FormInput, Label } from '@/components/atoms';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';

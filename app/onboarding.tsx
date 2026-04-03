@@ -17,7 +17,6 @@ import { useOnboardingStore } from '@/store/onboardingStore';
 import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
 import { trackCardAdded, trackOnboardingCardEntryCompleted } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
 import { Button, Heading } from '@/components/atoms';
 import { DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
 

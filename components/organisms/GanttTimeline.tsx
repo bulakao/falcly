@@ -1,5 +1,5 @@
 import { StyleSheet, Pressable, View as RNView } from 'react-native';
-import { Text, View } from '@/components/Themed';
+import { Text } from '@/components/Themed';
 import type { Card, CardStatus } from '@/types/card';
 import { getCycleDates, calculateCardStatus } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';

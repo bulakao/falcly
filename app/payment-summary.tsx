@@ -1,15 +1,14 @@
 import { useMemo } from 'react';
-import { StyleSheet, ScrollView, Pressable } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { Button, Caption } from '@/components/atoms';
-import { SectionCard } from '@/components/molecules';
-import { BreakdownRow, BreakdownDivider } from '@/components/molecules';
+import { SectionCard, BreakdownRow, BreakdownDivider } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';
-import { useTransactionStore, type Transaction } from '@/store/transactionStore';
+import { useTransactionStore } from '@/store/transactionStore';
 import { getCycleDates } from '@/utils/decisionEngine';
 
 function formatPeso(amount: number): string {

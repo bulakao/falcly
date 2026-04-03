@@ -6,9 +6,9 @@ import {
   ScrollView,
   Alert,
   Switch,
+  Share,
   View as RNView,
 } from 'react-native';
-import { Share } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';

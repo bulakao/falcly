@@ -1,8 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { Link, router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import { View } from '@/components/Themed';
 import { AlertBanner } from '@/components/molecules';
 import { CardPager } from '@/components/organisms';
@@ -15,7 +13,6 @@ import type { Card } from '@/types/card';
 
 export default function HomeScreen() {
   const t = useAppTheme();
-  const insets = useSafeAreaInsets();
   const cards = useCardStore((s) => s.cards);
   const canAddCard = useSubscriptionStore((s) => s.canAddCard);
   const daysUntilDataDeletion = useSubscriptionStore((s) => s.daysUntilDataDeletion);

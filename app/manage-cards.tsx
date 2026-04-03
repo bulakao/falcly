@@ -141,7 +141,7 @@ export default function ManageCardsScreen() {
         <Text style={[styles.subtitle, { color: t.textMuted }]}>No cards yet</Text>
         <RNView style={styles.emptyState}>
           <FontAwesome name="credit-card-alt" size={48} color={t.border} />
-          <Text style={[styles.emptyText, { color: t.textMuted }]}>Tap "Add Card" to get started</Text>
+          <Text style={[styles.emptyText, { color: t.textMuted }]}>Tap &quot;Add Card&quot; to get started</Text>
         </RNView>
       </RNView>
     );

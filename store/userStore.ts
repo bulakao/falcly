@@ -162,18 +162,21 @@ export const useUserStore = create<UserStore>()((set) => ({
   setDefaultInterestRate: (rate: number) => {
     updateProfile({ defaultInterestRate: rate });
     set({ defaultInterestRate: rate });
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useCardStore } = require('@/store/cardStore');
     useCardStore.getState().applyDefaultsToCards({ interestRate: rate });
   },
   setDefaultMinPaymentPct: (pct: number) => {
     updateProfile({ defaultMinPaymentPct: pct });
     set({ defaultMinPaymentPct: pct });
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useCardStore } = require('@/store/cardStore');
     useCardStore.getState().applyDefaultsToCards({ minPaymentPct: pct });
   },
   setDefaultMinPaymentFloor: (floor: number) => {
     updateProfile({ defaultMinPaymentFloor: floor });
     set({ defaultMinPaymentFloor: floor });
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useCardStore } = require('@/store/cardStore');
     useCardStore.getState().applyDefaultsToCards({ minPaymentFloor: floor });
   },

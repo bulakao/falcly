@@ -13,7 +13,7 @@ export default function StatusTooltip({ children }: StatusTooltipProps) {
   return (
     <Pressable
       style={!children ? { marginLeft: 6, justifyContent: 'center' } : undefined}
-      onPress={() => router.push('/status-guide')}
+      onPress={() => router.push('/status-guide' as never)}
       hitSlop={8}
     >
       {children ?? <Text style={{ fontSize: 18, color: t.textSecondary }}>ⓘ</Text>}

@@ -56,7 +56,7 @@ export default function WelcomeScreen() {
         </Text>
 
         <Text style={[styles.subheadline, { color: t.textSecondary }]}>
-          Falcly tells you if it's safe to use your credit card — before you swipe.
+          Falcly tells you if it&apos;s safe to use your credit card — before you swipe.
         </Text>
       </View>
 

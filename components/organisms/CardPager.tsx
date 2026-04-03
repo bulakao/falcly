@@ -10,7 +10,7 @@ import {
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View as RNView } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { LayoutGrid } from 'lucide-react-native';
 import { Text, View } from '@/components/Themed';
 import { CreditCardFace, EmptyCardFace } from '@/components/atoms';

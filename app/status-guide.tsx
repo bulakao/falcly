@@ -1,5 +1,5 @@
 import { StyleSheet, ScrollView, Pressable, View as RNView } from 'react-native';
-import { Text, View } from '@/components/Themed';
+import { Text } from '@/components/Themed';
 import { X } from 'lucide-react-native';
 import { Stack, router } from 'expo-router';
 import { useAppTheme } from '@/theme';
@@ -39,7 +39,7 @@ export default function StatusGuideScreen() {
         }}
       />
       <Text style={[styles.subtitle, { color: t.textMuted }]}>
-        Falcly checks your balance, credit limit, and billing cycle to determine if it's safe to swipe.
+        Falcly checks your balance, credit limit, and billing cycle to determine if it&apos;s safe to swipe.
       </Text>
 
       {tiers.map((tier) => {
