@@ -8,8 +8,9 @@ import { AlertBanner, BreakdownRow, BreakdownDivider, ChipSelector } from '@/com
 import { BillingTimeline } from '@/components/organisms/BillingTimeline';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore, getPaydays } from '@/store/userStore';
+import { useTransactionStore } from '@/store/transactionStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
-import { calculateSwipeImpact, computeNetAvailableCash, getCycleDates } from '@/utils/decisionEngine';
+import { calculateSwipeImpact, computeNetAvailableCash, computeCurrentCycleTxSum, getCycleDates } from '@/utils/decisionEngine';
 import { getStalenessLevel } from '@/utils/staleness';
 import type { Card } from '@/types/card';
 import { trackSwipeCheckPerformed, trackDataStalenessWarningShown } from '@/utils/analytics';
@@ -48,6 +49,8 @@ export function SwipeImpactPanel({
   const committedExpenses = useUserStore((s) => s.committedExpenses);
   const paydays = getPaydays();
   const subscriptionTier = useSubscriptionStore((s) => s.tier);
+  const getCurrentCycle = useTransactionStore((s) => s.getCurrentCycle);
+  const transactions = useTransactionStore((s) => s.transactions);
   const [amountText, setAmountText] = useState('');
 
   const proposedAmount = useMemo(() => {
@@ -66,9 +69,14 @@ export function SwipeImpactPanel({
     return paydays.some((day) => day <= dueDate.getDate());
   }, [card, monthlyIncome, paydays]);
 
+  const currentCycleTxSum = useMemo(
+    () => computeCurrentCycleTxSum(getCurrentCycle(card.id, card.statementDay)),
+    [card.id, card.statementDay, getCurrentCycle, transactions],
+  );
+
   const impact = useMemo(
-    () => calculateSwipeImpact(card, proposedAmount, netAvailableCash),
-    [card, proposedAmount, netAvailableCash],
+    () => calculateSwipeImpact(card, proposedAmount, netAvailableCash, new Date(), currentCycleTxSum),
+    [card, proposedAmount, netAvailableCash, currentCycleTxSum],
   );
 
   const staleness = getStalenessLevel(card.balanceUpdatedAt);
@@ -208,11 +216,19 @@ export function SwipeImpactPanel({
         })() && (
           <BreakdownRow label="Annual fee" value={`+${formatPeso(card.annualFee)}`} />
         )}
+        {currentCycleTxSum > 0 && (
+          <BreakdownRow label="Logged this cycle" value={`+${formatPeso(currentCycleTxSum)}`} />
+        )}
         {proposedAmount > 0 && (
           <BreakdownRow label="Proposed swipe" value={`+${formatPeso(proposedAmount)}`} />
         )}
         <BreakdownDivider />
         <BreakdownRow label="Projected statement balance" value={formatPeso(impact.projectedBalance)} bold />
+        {currentCycleTxSum > 0 && (
+          <Text style={[styles.cycleTxLabel, { color: t.textMuted }]}>
+            Includes {formatPeso(currentCycleTxSum)} logged this cycle
+          </Text>
+        )}
 
         {impact.netAvailableCash !== null ? (
           <>
@@ -322,6 +338,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: fonts.interBold,
     marginBottom: 12,
+  },
+  cycleTxLabel: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    marginTop: 2,
+    marginBottom: 4,
   },
   navRow: {
     gap: 8,
