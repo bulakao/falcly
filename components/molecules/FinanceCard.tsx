@@ -59,6 +59,7 @@ export function FinanceCard() {
   const setPayday2 = useUserStore((s) => s.setPayday2);
   const committedExpenses = useUserStore((s) => s.committedExpenses);
   const setCommittedExpenses = useUserStore((s) => s.setCommittedExpenses);
+  const currencySymbol = useUserStore((s) => s.currencySymbol);
 
   const cashStaleness = cashUpdatedAt ? getStalenessLevel(cashUpdatedAt) : null;
   const [expanded, setExpanded] = useState(true);
@@ -248,7 +249,7 @@ export function FinanceCard() {
           />
           {payday !== null && payday2 !== null && monthlyIncome !== null && monthlyIncome > 0 && (
             <Text style={[styles.splitHint, { color: t.textMuted }]}>
-              Income split evenly: ₱{formatMoney(String(Math.round(monthlyIncome / 2)))} on the {payday}{ordinalSuffix(payday)} · ₱{formatMoney(String(Math.round(monthlyIncome / 2)))} on the {payday2}{ordinalSuffix(payday2)}
+              Split evenly: {currencySymbol}{formatMoney(String(Math.round(monthlyIncome / 2)))} on the {payday}{ordinalSuffix(payday)} · {currencySymbol}{formatMoney(String(Math.round(monthlyIncome / 2)))} on the {payday2}{ordinalSuffix(payday2)}
             </Text>
           )}
 
