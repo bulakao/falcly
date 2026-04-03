@@ -9,6 +9,9 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View as RNView } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
+import { LayoutGrid } from 'lucide-react-native';
 import { Text, View } from '@/components/Themed';
 import { CreditCardFace, EmptyCardFace } from '@/components/atoms';
 import { ImpactSkeleton } from '@/components/molecules';
@@ -47,6 +50,23 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
     const insets = useSafeAreaInsets();
     const isCardReadOnly = useSubscriptionStore((s) => s.isCardReadOnly);
     const flatListRef = useRef<FlatList<PageItem>>(null);
+    const buttonTranslateX = useSharedValue(initialIndex > 0 ? 0 : -56);
+    const isAnimatingOut = useRef(false);
+
+    const BUTTON_WIDTH = 56;
+    // Slide in when 60% into the next page (0.6 * PAGE_WIDTH)
+    const SLIDE_IN_THRESHOLD = PAGE_WIDTH * 0.6;
+
+    const scrollToOverview = useCallback(() => {
+      // Immediately slide out
+      isAnimatingOut.current = true;
+      buttonTranslateX.value = withTiming(-BUTTON_WIDTH, { duration: 200 });
+      flatListRef.current?.scrollToIndex({ index: 0, animated: true });
+    }, [buttonTranslateX]);
+
+    const buttonStyle = useAnimatedStyle(() => ({
+      transform: [{ translateX: buttonTranslateX.value }],
+    }));
 
     const pages: PageItem[] = [
       { type: 'overview' as const },
@@ -152,6 +172,24 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
           keyExtractor={keyExtractor}
           renderItem={renderItem}
           onScrollBeginDrag={() => Keyboard.dismiss()}
+          onScroll={(e) => {
+            const offsetX = e.nativeEvent.contentOffset.x;
+            if (isAnimatingOut.current) {
+              // Reset once we've scrolled back to overview
+              if (offsetX <= 0) isAnimatingOut.current = false;
+              return;
+            }
+            if (offsetX >= SLIDE_IN_THRESHOLD) {
+              if (buttonTranslateX.value < 0) {
+                buttonTranslateX.value = withTiming(0, { duration: 250 });
+              }
+            } else {
+              if (buttonTranslateX.value > -BUTTON_WIDTH) {
+                buttonTranslateX.value = withTiming(-BUTTON_WIDTH, { duration: 200 });
+              }
+            }
+          }}
+          scrollEventThrottle={16}
           windowSize={3}
           maxToRenderPerBatch={2}
           initialScrollIndex={initialIndex}
@@ -164,6 +202,17 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
           snapToInterval={PAGE_WIDTH}
           decelerationRate="fast"
         />
+        <Animated.View style={[styles.overviewButton, { top: insets.top + 4, backgroundColor: t.surface }, buttonStyle]}>
+          <Pressable
+            style={styles.overviewButtonInner}
+            onPress={scrollToOverview}
+            hitSlop={8}
+          >
+            <RNView style={[styles.overviewIconWrap, { backgroundColor: t.surfaceElevated }]}>
+              <LayoutGrid size={20} color={t.textMuted} />
+            </RNView>
+          </Pressable>
+        </Animated.View>
       </View>
     );
   },
@@ -178,7 +227,7 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   cardWrapper: {
-    marginTop: 16,
+    marginTop: 68,
     marginBottom: 8,
     paddingBottom: 16,
   },
@@ -190,5 +239,31 @@ const styles = StyleSheet.create({
   manageLinkText: {
     fontSize: 13,
     fontFamily: fonts.interSemiBold,
+  },
+  overviewButton: {
+    position: 'absolute',
+    left: 0,
+    width: 56,
+    height: 48,
+    borderTopRightRadius: 24,
+    borderBottomRightRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  overviewButtonInner: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  overviewIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 4,
   },
 });
