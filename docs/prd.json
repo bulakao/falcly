@@ -891,7 +891,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Companion to EF-01. Makes the TL integration actually meaningful."
     },
     {

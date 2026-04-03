@@ -55,3 +55,14 @@ Started: Sat Apr  4 00:26:15 PST 2026
   - `StackedCardsPreview` and `GanttTimeline` also call `calculateCardStatus` but use default `currentCycleTxSum=0` — could be wired in future if needed
   - `transactions` from transactionStore is included in the useCallback deps to ensure recalculation when transactions change
 ---
+
+## 2026-04-04 - EF-02
+- Added "Logged this cycle" breakdown row in SwipeImpactPanel showing `+₱X` when currentCycleTxSum > 0
+- Added subtle italic label "Includes ₱X logged this cycle" below projected statement balance
+- Both elements hidden when no transactions are logged (not shown as ₱0)
+- SwipeImpactPanel already had currentCycleTxSum computed and passed to engine from EF-01; this story added the UI layer
+- Files changed: `components/organisms/SwipeImpactPanel.tsx`
+- **Learnings for future iterations:**
+  - The breakdown section order is: outstanding balance → pending → installments → subscriptions → annual fee → logged this cycle → proposed swipe → divider → projected balance
+  - Use `cycleTxLabel` style for subtle metadata below bold breakdown rows
+---
