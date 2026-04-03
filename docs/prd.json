@@ -1,6 +1,6 @@
 {
   "project": "Falcly",
-  "branchName": "ralph/phase-2-finance-fields",
+  "branchName": "ralph/phase-3-nav-engine-ux",
   "description": "Phase 1 \u2014 Core Loop, Cash Awareness, Decision Engine, Card Management, Onboarding, Monetization, Data & Privacy, Analytics",
   "userStories": [
     {
@@ -809,6 +809,224 @@
       "priority": 6,
       "passes": true,
       "notes": "Depends on FF-04 and FF-05."
+    },
+    {
+      "id": "NV-01",
+      "title": "Transaction log entry point on card detail",
+      "phase": 3,
+      "group": "Navigation",
+      "description": "As a user, I want to tap into my transaction history directly from a card's detail view so that I can log and review transactions without hunting for a hidden screen.",
+      "acceptanceCriteria": [
+        "SwipeImpactPanel shows a tappable row or button labeled 'Transactions' or 'View Transactions' below the breakdown",
+        "Tapping navigates to /card-transactions?cardId=<id>",
+        "Button is visible without scrolling on a standard phone screen (or clearly visible after one scroll)",
+        "Entry point is present for all cards (not just Pro)"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "card-transactions, log-transaction, payment-summary are built but orphaned \u2014 no navigation to them from home/card pager."
+    },
+    {
+      "id": "NV-02",
+      "title": "Payment summary entry point on card detail",
+      "phase": 3,
+      "group": "Navigation",
+      "description": "As a user, I want to see 'What You Owe' for a card directly from its detail view so that I know exactly what to pay and when.",
+      "acceptanceCriteria": [
+        "SwipeImpactPanel shows a tappable row or button labeled 'What You Owe' or 'Payment Summary' below the breakdown",
+        "Tapping navigates to /payment-summary?cardId=<id>",
+        "Entry point is visible on the card detail without requiring deep scroll",
+        "Entry point is present for all cards"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Companion to NV-01. Both should feel like natural extensions of the card detail."
+    },
+    {
+      "id": "NV-03",
+      "title": "Quick-update funds available shortcut on card detail",
+      "phase": 3,
+      "group": "Navigation",
+      "description": "As a user, I want to quickly update my Funds Available figure from the card detail view so that I do not have to scroll past multiple cards to find the FinanceCard section.",
+      "acceptanceCriteria": [
+        "When cashOnHand is null OR staleness is 'warning' or 'stale', a tappable prompt appears in SwipeImpactPanel: 'Update funds available \u2192'",
+        "Tapping scrolls home screen to FinanceCard section OR navigates to /update-balance",
+        "Prompt disappears once cashOnHand is set and fresh (staleness = null or 'ok')",
+        "Does not appear when funds are set and fresh"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Discovery spec: '[Update my cash]' action on swipe impact card."
+    },
+    {
+      "id": "EF-01",
+      "title": "Wire current-cycle transaction sum into home screen engine",
+      "phase": 3,
+      "group": "Engine Fixes",
+      "description": "As a user who logs transactions, I want the SAFE/CAUTION/RISKY status on the home screen to reflect my logged current-cycle purchases so that my verdict is accurate, not just based on my last statement balance.",
+      "acceptanceCriteria": [
+        "app/(tabs)/index.tsx computes currentCycleTxSum per card using computeCurrentCycleTxSum() from decisionEngine",
+        "computeNetAvailableCash and calculateCardStatus calls on home screen pass currentCycleTxSum for each card",
+        "scoreCard and calculateBestCard calls also incorporate currentCycleTxSum",
+        "If no transactions logged for a card, currentCycleTxSum defaults to 0 (backward compat \u2014 identical to current behavior)",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "TL-06 was marked passing but currentCycleTxSum is never passed in home screen engine calls \u2014 all default to 0."
+    },
+    {
+      "id": "EF-02",
+      "title": "Wire current-cycle transaction sum into SwipeImpactPanel",
+      "phase": 3,
+      "group": "Engine Fixes",
+      "description": "As a user who logs transactions, I want the Swipe Impact calculator to factor in my logged purchases so that the projected statement balance is accurate when I simulate a new swipe.",
+      "acceptanceCriteria": [
+        "SwipeImpactPanel fetches current-cycle transactions for the card from transactionStore",
+        "Computes currentCycleTxSum using computeCurrentCycleTxSum()",
+        "Passes currentCycleTxSum to calculateSwipeImpact and projectedStatementBalance",
+        "Breakdown shows a 'Logged this cycle' row (e.g. '+\u20b13,450') when currentCycleTxSum > 0",
+        "Row is hidden (not shown as \u20b10) when no transactions logged",
+        "If transactions are logged, shows a subtle badge or label: 'Includes \u20b1X logged this cycle'",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Companion to EF-01. Makes the TL integration actually meaningful."
+    },
+    {
+      "id": "EF-03",
+      "title": "Balance staleness warning on home card status badge",
+      "phase": 3,
+      "group": "Engine Fixes",
+      "description": "As a user, I want to see a staleness indicator on my card status when my outstanding balance is outdated so that I know the SAFE/CAUTION/RISKY verdict may not reflect reality.",
+      "acceptanceCriteria": [
+        "CreditCardFace or status badge shows a \u26a0\ufe0f indicator when card.balanceUpdatedAt is > 5 days old",
+        "Tapping the \u26a0\ufe0f navigates to /update-balance?cardId=<id>",
+        "Indicator disappears once balance is updated",
+        "Staleness threshold uses the existing getStalenessLevel() utility from utils/staleness.ts",
+        "Does not appear if balance was updated within 5 days",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "CL-07 only tracks cashOnHand staleness. Balance staleness on the card status badge is unimplemented per discovery spec."
+    },
+    {
+      "id": "UX-01",
+      "title": "Gantt timeline accessible from card detail",
+      "phase": 3,
+      "group": "UX Polish",
+      "description": "As a user, I want to see the billing cycle Gantt chart for a card without having to navigate away from the card detail so that I can understand my cycle timing at a glance.",
+      "acceptanceCriteria": [
+        "GanttTimeline is rendered inline within the SwipeImpactPanel or as a collapsible section below the breakdown",
+        "Defaults to collapsed on first render to keep the card detail compact",
+        "User can expand/collapse with a labeled tap target (e.g. 'Billing Cycle \u25be')",
+        "State persists for the session (if expanded, stays expanded on scroll back)",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "GanttTimeline is only accessible via AllCardsOverview tap handler \u2014 not visible from single card detail."
+    },
+    {
+      "id": "UX-02",
+      "title": "Hint text on FinanceCard when funds not set",
+      "phase": 3,
+      "group": "UX Polish",
+      "description": "As a new user who hasn't set their finances, I want to see a clear explanation of why the FinanceCard matters so that I understand the value before filling it in.",
+      "acceptanceCriteria": [
+        "When all four fields (fundsAvailable, monthlyIncome, payday, committedExpenses) are null, FinanceCard shows a one-line explainer at the top: 'Fill this in to see if you can cover your payments.'",
+        "Explainer disappears once at least fundsAvailable is set",
+        "Explainer does not appear if the user has dismissed it (persisted in AsyncStorage/DB)",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "New users see an empty FinanceCard with no context. Low effort, high first-run clarity."
+    },
+    {
+      "id": "UX-03",
+      "title": "Inline income split hint in FinanceCard",
+      "phase": 3,
+      "group": "UX Polish",
+      "description": "As a user with two paydays set, I want to see a live summary of how my income is split so that I can verify the calculation is correct before relying on it.",
+      "acceptanceCriteria": [
+        "When both payday and payday2 are set AND monthlyIncome > 0, a hint line appears below the Second Payday field",
+        "Hint reads: 'Split evenly: \u20b1[X] on the [N]th \u00b7 \u20b1[X] on the [M]th' using actual store values",
+        "Hint uses currencySymbol from store (not hardcoded \u20b1)",
+        "Hint disappears if payday2 is cleared",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "CASH.md plan included this hint \u2014 wiggum didn't implement it in FF-06."
+    },
+    {
+      "id": "UX-04",
+      "title": "Empty state on card-transactions screen",
+      "phase": 3,
+      "group": "UX Polish",
+      "description": "As a user who hasn't logged any transactions yet, I want to see a helpful empty state on the transactions screen so that I understand what to do next.",
+      "acceptanceCriteria": [
+        "card-transactions.tsx shows an empty state when no transactions exist for the card",
+        "Empty state includes: icon, heading ('No transactions yet'), and a subtext explaining the value ('Log a purchase to see which bill it lands on')",
+        "A prominent 'Log Transaction' button is visible in the empty state",
+        "Empty state matches existing EmptyState component pattern",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "Currently shows a blank screen with no guidance when no transactions exist."
+    },
+    {
+      "id": "UX-05",
+      "title": "First-transaction teachable moment",
+      "phase": 3,
+      "group": "UX Polish",
+      "description": "As a user logging their first transaction, I want a one-time explainer about billing cycles so that I understand how Falcly classifies my purchases.",
+      "acceptanceCriteria": [
+        "When a user logs their first ever transaction (transactionStore has 0 transactions before this log), show a one-time bottom sheet or modal after save",
+        "Content: title 'How Falcly organizes your transactions', brief explanation of current/next/previous cycle, and a [Got it] button",
+        "Never shown again after dismissed (persisted in DB/AsyncStorage)",
+        "Does not block the transaction save \u2014 appears after success",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "Discovery doc 19 section 4.1 specifies this teachable moment explicitly."
+    },
+    {
+      "id": "CH-01",
+      "title": "Fix hint text referencing old 'cash on hand' in SwipeImpactPanel",
+      "phase": 3,
+      "group": "Code Health",
+      "description": "As a user, I want all in-app text to use the updated 'Funds Available' terminology consistently so that the experience feels polished.",
+      "acceptanceCriteria": [
+        "SwipeImpactPanel hint 'Set your cash on hand in Settings to see payoff projections.' is updated to 'Set your funds available to see payoff projections.'",
+        "Any other remaining references to 'cash on hand' in user-facing text (labels, captions, hints, alerts) are updated to 'Funds Available' or 'funds available'",
+        "grep -ri 'cash on hand' app/ components/ returns 0 results",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "FF-02 missed at least one instance in SwipeImpactPanel hint text."
+    },
+    {
+      "id": "CH-02",
+      "title": "Remove unused BillingTimeline duplicate render in onboarding",
+      "phase": 3,
+      "group": "Code Health",
+      "description": "As a developer, I want the codebase to be clean and consistent so that future changes are predictable.",
+      "acceptanceCriteria": [
+        "Audit all usages of BillingTimeline \u2014 confirm it renders correctly in SwipeImpactPanel and onboarding-result",
+        "Verify GanttTimeline vs BillingTimeline are distinct components with distinct purposes (document in a comment at top of each file if not already clear)",
+        "No duplicate rendering of the same timeline in a single scroll view",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "BillingTimeline appears in SwipeImpactPanel AND onboarding-result. Worth verifying these are intentional."
     }
   ]
 }

@@ -43,3 +43,8 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Dev artifacts
+data.json
+Screenshot*.png
+docs/the-reset/
