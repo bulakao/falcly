@@ -1208,6 +1208,76 @@
       "priority": 7,
       "passes": false,
       "notes": "Discovery spec. Low effort for multi-card users."
+    },
+    {
+      "id": "P2-01",
+      "title": "SMS/notification listener \u2014 auto-detect transactions (Android)",
+      "phase": 6,
+      "group": "Phase 2 \u2014 AI Layer",
+      "description": "As an Android user, I want Falcly to automatically detect credit card transactions from bank push notifications so that I don't have to log purchases manually.",
+      "acceptanceCriteria": [
+        "Create a local Expo module at modules/notification-listener/ with a Kotlin NotificationListenerService",
+        "Service listens for push notifications from known PH bank package IDs: BDO (com.bdo.bdo_mobile_banking), BPI (com.bpi.ng.app), Metrobank (com.metrobank.mbonline), RCBC (com.rcbc.mobileapp), SecurityBank (com.securitybank.mobile)",
+        "Parse notification text for: amount, merchant, last 4 digits of card",
+        "Emit parsed transaction to React Native JS layer via EventEmitter",
+        "JS layer maps last-4 to a known card (if matched) and pre-fills log-transaction screen with parsed data",
+        "User reviews and confirms before saving \u2014 AI pre-fills, human approves (golden rule)",
+        "Duplicate detection: if a matching manual transaction exists within 5 minutes and same amount, show merge prompt instead of new entry",
+        "Requires explicit user opt-in (separate permission screen beyond notification access)",
+        "Config plugin handles AndroidManifest.xml BIND_NOTIFICATION_LISTENER_SERVICE permission",
+        "iOS: not supported (no equivalent API) \u2014 feature is Android-only, gracefully hidden on iOS",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Phase 2 \u2014 post-launch. Requires EAS Build for native Kotlin module. Do not implement until app is live and user feedback confirms demand."
+    },
+    {
+      "id": "P2-02",
+      "title": "Avalanche and snowball multi-month payoff planner",
+      "phase": 6,
+      "group": "Phase 2 \u2014 AI Layer",
+      "description": "As a user with multiple cards and revolving balances, I want an avalanche or snowball payoff plan across all my cards so that I can get out of debt in the most efficient (or most motivating) way possible.",
+      "acceptanceCriteria": [
+        "computeAvalanchePlan(cards, netAvailableCash, minPaymentPct, minPaymentFloor) added to decisionEngine.ts",
+        "Avalanche: pay minimums on all cards, apply extra toward highest interest rate card first",
+        "computeSnowballPlan(cards, netAvailableCash, minPaymentPct, minPaymentFloor) added to decisionEngine.ts",
+        "Snowball: pay minimums on all cards, apply extra toward lowest balance card first",
+        "Both return: per-card monthly payment schedule, months to debt-free, total interest paid, total paid",
+        "New screen: app/payoff-planner.tsx \u2014 shows side-by-side avalanche vs snowball comparison",
+        "Summary: 'Avalanche saves you \u20b1X in interest but takes N months' vs 'Snowball pays off your first card in N months'",
+        "Per-card timeline: shows which card gets paid off when, and when extra payments shift to next card",
+        "Screen accessible from SwipeImpactPanel (Pro-gated) and from a new 'Payoff Planner' entry in settings or home",
+        "Pro-gated: free users see teaser with upgrade CTA",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Phase 2 \u2014 post-launch. Depends on PS-01/PS-02 foundation. High Pro value-add."
+    },
+    {
+      "id": "P2-03",
+      "title": "Natural language queries \u2014 conversational advisor",
+      "phase": 6,
+      "group": "Phase 2 \u2014 AI Layer",
+      "description": "As a Pro+ user, I want to ask Falcly questions in plain language like 'Can I pay my Netflix today?' or 'Which card should I use for a \u20b15,000 purchase?' and get an instant, engine-backed answer.",
+      "acceptanceCriteria": [
+        "New screen or bottom sheet: app/ask-falcly.tsx \u2014 single text input, send button",
+        "User types a natural language query",
+        "Query + current card/finance state sent to Gemini 2.0 Flash API (server-side, never expose API key in client)",
+        "Gemini extracts intent + parameters (e.g. amount, card name) and calls the deterministic engine with those parameters",
+        "Golden rule enforced: AI extracts intent, engine computes the answer \u2014 Gemini never overrides SAFE/CAUTION/RISKY",
+        "Response rendered as a conversational card: status badge + plain language explanation + key numbers",
+        "Example queries handled: 'Can I use my BDO card today?', 'Which card is best for \u20b13,000?', 'Will I carry a balance this month?', 'When is my BPI payment due?'",
+        "Falls back gracefully if Gemini is unavailable: 'I couldn't process that \u2014 here's your current card status'",
+        "Pro+ only \u2014 free and Pro users see teaser CTA",
+        "Requires server-side API route (not callable from client) for Gemini API key security",
+        "RA 10173 compliant: no card numbers or balances sent to Gemini \u2014 only intent + anonymized parameters",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Phase 2 \u2014 post-launch. Pro+ differentiator. Requires server-side infrastructure for Gemini API. Do not implement until Pro+ tier has paying users."
     }
   ]
 }
