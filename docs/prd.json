@@ -909,7 +909,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "CL-07 only tracks cashOnHand staleness. Balance staleness on the card status badge is unimplemented per discovery spec."
     },
     {

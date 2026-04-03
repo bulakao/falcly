@@ -66,3 +66,15 @@ Started: Sat Apr  4 00:26:15 PST 2026
   - The breakdown section order is: outstanding balance → pending → installments → subscriptions → annual fee → logged this cycle → proposed swipe → divider → projected balance
   - Use `cycleTxLabel` style for subtle metadata below bold breakdown rows
 ---
+
+## 2026-04-04 - EF-03
+- Added ⚠️ indicator next to status dot on CreditCardFace when `balanceUpdatedAt` is > 5 days old
+- Tapping ⚠️ navigates to `/update-balance?cardId=<id>` via `Link` + `Pressable`
+- Indicator hidden when staleness is 'fresh' (< 5 days)
+- Uses existing `getStalenessLevel()` from utils/staleness.ts
+- Files changed: `components/atoms/CreditCardFace.tsx`
+- **Learnings for future iterations:**
+  - CreditCardFace already computed staleness and used it for stale state (muted dot color + italic reason text) — EF-03 added the warning-level indicator
+  - `statusGroup` style wraps the ⚠️ icon and status dot in a row with `gap: 6`
+  - The staleness levels map to: fresh (< 5 days) = no indicator, warning (5-9 days) = ⚠️ shown, stale (10+ days) = ⚠️ shown + muted dot + italic reason
+---
