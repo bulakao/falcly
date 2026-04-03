@@ -3,7 +3,7 @@ import { Text, View } from '@/components/Themed';
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { SectionHeader, OfflineChip, Badge } from '@/components/atoms';
-import { BestCardBanner, FinanceCard } from '@/components/molecules';
+import { BestCardBanner, FinanceCard, SurfaceCard } from '@/components/molecules';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useAuthStore } from '@/store/authStore';
 import { GanttTimeline } from '@/components/organisms/GanttTimeline';
@@ -94,7 +94,7 @@ export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress,
 
       <BestCardBanner bestCard={bestCard} hasCards={allCards.length > 0} hasActiveCards={cards.length > 0} onPress={onBannerPress} onAddPress={onAddPress} />
 
-      <View style={styles.section}>
+      <SurfaceCard style={styles.billingCard}>
         <SectionHeader
           title="Billing Cycles"
           subtitle="Tap a card to see its details"
@@ -104,7 +104,7 @@ export function AllCardsOverview({ cards, getNetAvailableCash, onGanttCardPress,
         ) : (
           <GanttSkeleton />
         )}
-      </View>
+      </SurfaceCard>
 
       <FinanceCard />
 
@@ -161,6 +161,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   section: {
+    marginBottom: 24,
+  },
+  billingCard: {
     marginBottom: 24,
   },
   futureSection: {
