@@ -78,3 +78,15 @@ Started: Sat Apr  4 00:26:15 PST 2026
   - `statusGroup` style wraps the ⚠️ icon and status dot in a row with `gap: 6`
   - The staleness levels map to: fresh (< 5 days) = no indicator, warning (5-9 days) = ⚠️ shown, stale (10+ days) = ⚠️ shown + muted dot + italic reason
 ---
+
+## 2026-04-04 - UX-01
+- Added collapsible GanttTimeline section to SwipeImpactPanel, placed after the existing BillingTimeline
+- Defaults to collapsed; tap "Billing Cycle ▾/▴" to expand/collapse
+- Uses module-level `ganttExpandedSession` variable for session persistence across re-mounts
+- GanttTimeline receives `[card]` (single-element array) to show the current card's Gantt bar
+- Files changed: `components/organisms/SwipeImpactPanel.tsx`
+- **Learnings for future iterations:**
+  - GanttTimeline accepts `cards: Card[]` — for single-card usage, wrap in `[card]`
+  - Module-level variables are the simplest way to persist UI state across component re-mounts within a session (no store or AsyncStorage needed)
+  - The section order after this change: banners → actions → BillingTimeline → collapsible GanttTimeline → input → breakdown → nav links → hint → trial CTA
+---

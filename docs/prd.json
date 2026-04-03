@@ -926,7 +926,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "GanttTimeline is only accessible via AllCardsOverview tap handler — not visible from single card detail."
     },
     {
