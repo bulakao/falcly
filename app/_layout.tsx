@@ -161,7 +161,7 @@ function RootLayoutNav() {
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="welcome" options={{ headerShown: false }} />
-          <Stack.Screen name="sign-in" options={{ headerShown: false }} />
+          <Stack.Screen name="sign-in" options={{ headerTitle: '', headerBackTitle: 'Settings', headerTransparent: true }} />
           <Stack.Screen name="add-card" options={{ presentation: 'fullScreenModal', headerShown: false }} />
           <Stack.Screen name="swipe-impact" options={{ presentation: 'modal', title: 'Swipe Impact' }} />
           <Stack.Screen name="update-balance" options={{ presentation: 'modal', title: 'Update Balance' }} />

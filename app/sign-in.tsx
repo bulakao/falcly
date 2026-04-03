@@ -41,21 +41,31 @@ export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [resetSent, setResetSent] = useState(false);
 
   const isSignUp = mode === 'signup';
 
+  function clearErrors() {
+    setEmailError('');
+    setPasswordError('');
+  }
+
   async function handleEmailAuth() {
-    if (!email.trim() || !password.trim()) {
-      setError('Enter your email and password.');
+    clearErrors();
+    if (!email.trim()) {
+      setEmailError('Enter your email.');
+      return;
+    }
+    if (!password.trim()) {
+      setPasswordError('Enter your password.');
       return;
     }
     if (isSignUp && password.length < 6) {
-      setError('Password must be at least 6 characters.');
+      setPasswordError('Must be at least 6 characters.');
       return;
     }
-    setError('');
     setLoading(true);
     try {
       if (isSignUp) {
@@ -65,39 +75,43 @@ export default function SignInScreen() {
       }
       router.back();
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Authentication failed';
-      setError(mapAuthError(msg));
+      const msg = mapAuthError(e instanceof Error ? e.message : 'Authentication failed');
+      if (msg.toLowerCase().includes('email') || msg.toLowerCase().includes('account')) {
+        setEmailError(msg);
+      } else {
+        setPasswordError(msg);
+      }
     } finally {
       setLoading(false);
     }
   }
 
   async function handleGoogleSignIn() {
-    setError('');
+    clearErrors();
     setLoading(true);
     try {
       await signInWithGoogle();
       router.back();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Google Sign-In failed';
-      setError(msg);
+      setEmailError(msg);
     } finally {
       setLoading(false);
     }
   }
 
   async function handleForgotPassword() {
+    clearErrors();
     if (!email.trim()) {
-      setError('Type your email address above, then tap Forgot Password.');
+      setEmailError('Enter your email first.');
       return;
     }
-    setError('');
     try {
       await resetPassword(email.trim());
       setResetSent(true);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Failed to send reset email';
-      setError(msg);
+      setEmailError(msg);
     }
   }
 
@@ -107,83 +121,81 @@ export default function SignInScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        contentContainerStyle={[styles.container, { paddingTop: insets.top + 40 }]}
+        contentContainerStyle={[styles.container, { paddingTop: insets.top + 80 }]}
         keyboardShouldPersistTaps="handled"
       >
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Text style={[styles.backText, { color: t.textMuted }]}>← Back</Text>
-        </Pressable>
-
         <Text style={[styles.title, { color: t.textPrimary }]}>
           {isSignUp ? 'Create Account' : 'Welcome back'}
         </Text>
-        <Text style={[styles.subtitle, { color: t.textSecondary }]}>
-          {isSignUp
+        <Text style={[styles.subtitle, { color: resetSent ? t.safe : t.textSecondary }]}>
+          {resetSent
+            ? `Password reset link sent to ${email.trim()}.`
+            : isSignUp
             ? 'Back up your data and sync across devices.'
             : 'Sign in to sync your data.'}
         </Text>
 
-        {error !== '' && (
-          <Text style={[styles.errorText, { color: t.risky }]}>{error}</Text>
-        )}
-        {resetSent && (
-          <Text style={[styles.successText, { color: t.safe }]}>
-            Password reset link sent to {email.trim()}.
-          </Text>
-        )}
+        <Button
+          label={loading ? 'Please wait...' : 'Continue with Google'}
+          onPress={handleGoogleSignIn}
+          disabled={loading}
+        />
+
+        <View style={styles.dividerRow}>
+          <View style={[styles.dividerLine, { backgroundColor: t.border }]} />
+          <Text style={[styles.dividerText, { color: t.textMuted }]}>OR</Text>
+          <View style={[styles.dividerLine, { backgroundColor: t.border }]} />
+        </View>
 
         <View style={styles.form}>
           <FormInput
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(v) => { setEmail(v); setEmailError(''); }}
             placeholder="Email"
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
+            error={!!emailError}
           />
+          <Text style={[styles.fieldError, { color: emailError ? t.risky : 'transparent' }]}>
+            {emailError || ' '}
+          </Text>
           <View style={styles.spacer} />
           <FormInput
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(v) => { setPassword(v); setPasswordError(''); }}
             placeholder="Password"
             secureTextEntry
+            error={!!passwordError}
           />
+          <View style={styles.passwordHintRow}>
+            <Text style={[styles.fieldError, { color: passwordError ? t.risky : 'transparent', flex: 1 }]}>
+              {passwordError || ' '}
+            </Text>
+            {!isSignUp && (
+              <Pressable onPress={handleForgotPassword} hitSlop={8}>
+                <Text style={[styles.forgotPasswordText, { color: t.textMuted }]}>
+                  Forgot password?
+                </Text>
+              </Pressable>
+            )}
+          </View>
           <View style={styles.buttonWrapper}>
             <Button
               label={loading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
               onPress={handleEmailAuth}
               disabled={loading}
+              variant="secondary"
             />
           </View>
-
-          {!isSignUp && (
-            <Pressable onPress={handleForgotPassword} style={styles.forgotPassword}>
-              <Text style={[styles.forgotPasswordText, { color: t.textMuted }]}>
-                Forgot password?
-              </Text>
-            </Pressable>
-          )}
         </View>
-
-        <View style={styles.dividerRow}>
-          <View style={[styles.dividerLine, { backgroundColor: t.border }]} />
-          <Text style={[styles.dividerText, { color: t.textMuted }]}>or</Text>
-          <View style={[styles.dividerLine, { backgroundColor: t.border }]} />
-        </View>
-
-        <Button
-          label={loading ? 'Please wait...' : 'Continue with Google'}
-          onPress={handleGoogleSignIn}
-          variant="secondary"
-          disabled={loading}
-        />
 
         {loading && (
           <ActivityIndicator style={styles.spinner} color={t.primary} />
         )}
 
         <Pressable
-          onPress={() => { setMode(isSignUp ? 'signin' : 'signup'); setError(''); setResetSent(false); }}
+          onPress={() => { setMode(isSignUp ? 'signin' : 'signup'); clearErrors(); setResetSent(false); }}
           style={styles.toggle}
         >
           <Text style={[styles.toggleText, { color: t.textMuted }]}>
@@ -204,12 +216,6 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 48,
   },
-  backButton: {
-    marginBottom: 24,
-  },
-  backText: {
-    fontSize: 16,
-  },
   title: {
     fontSize: 24,
     fontFamily: fonts.interBold,
@@ -219,20 +225,14 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 15,
     textAlign: 'center',
-    marginBottom: 24,
-  },
-  errorText: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  successText: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 32,
   },
   form: {
-    marginBottom: 24,
+  },
+  fieldError: {
+    fontSize: 13,
+    fontFamily: fonts.interMedium,
+    marginTop: 4,
   },
   spacer: { height: 12 },
   buttonWrapper: {
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    marginVertical: 24,
   },
   dividerLine: {
     flex: 1,
@@ -258,9 +258,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginHorizontal: 16,
   },
-  forgotPassword: {
+  passwordHintRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
   },
   forgotPasswordText: {
     fontSize: 13,

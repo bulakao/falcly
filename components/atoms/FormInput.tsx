@@ -32,7 +32,7 @@ export function FormInput({ error = false, focused: focusedProp = false, compact
         {
           backgroundColor: error ? t.riskyBg : t.inputBg,
           borderColor: error ? t.risky : active ? t.primary : t.inputBorder,
-          borderWidth: error || active ? 2 : 1,
+          borderWidth: 2,
           color: error ? t.risky : t.inputText,
         },
       ]}
