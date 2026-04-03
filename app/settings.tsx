@@ -22,7 +22,7 @@ import { fonts } from '@/theme/fonts';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { exportDataAsCSV } from '@/utils/csvExport';
 import { Button, Badge } from '@/components/atoms';
-import { AlertBanner, SurfaceCard } from '@/components/molecules';
+import { AlertBanner, SurfaceCard, PercentInput, MoneyInput } from '@/components/molecules';
 
 export default function SettingsScreen() {
   const t = useAppTheme();
@@ -51,14 +51,16 @@ export default function SettingsScreen() {
   const setNotifyDueReminder = useUserStore((s) => s.setNotifyDueReminder);
   const notifyHighUtilization = useUserStore((s) => s.notifyHighUtilization);
   const setNotifyHighUtilization = useUserStore((s) => s.setNotifyHighUtilization);
-  const currencySymbol = useUserStore((s) => s.currencySymbol);
-  const setCurrencySymbol = useUserStore((s) => s.setCurrencySymbol);
   const defaultInterestRate = useUserStore((s) => s.defaultInterestRate);
   const setDefaultInterestRate = useUserStore((s) => s.setDefaultInterestRate);
   const defaultMinPaymentPct = useUserStore((s) => s.defaultMinPaymentPct);
   const setDefaultMinPaymentPct = useUserStore((s) => s.setDefaultMinPaymentPct);
   const defaultMinPaymentFloor = useUserStore((s) => s.defaultMinPaymentFloor);
   const setDefaultMinPaymentFloor = useUserStore((s) => s.setDefaultMinPaymentFloor);
+
+  const [interestRateText, setInterestRateText] = useState(() => (defaultInterestRate * 100).toFixed(1));
+  const [minPaymentPctText, setMinPaymentPctText] = useState(() => (defaultMinPaymentPct * 100).toFixed(1));
+  const [minPaymentFloorText, setMinPaymentFloorText] = useState(() => defaultMinPaymentFloor.toString());
   const cashOnHand = useUserStore((s) => s.cashOnHand);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
   const payday = useUserStore((s) => s.payday);
@@ -75,7 +77,7 @@ export default function SettingsScreen() {
     <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 56 }]}>
 
       {/* ── Account & Subscription ── */}
-      <Text style={[styles.groupLabel, { color: t.textMuted }]}>Account</Text>
+      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Account</Text>
       <SurfaceCard>
         {user ? (
           <RNView style={styles.accountRow}>
@@ -151,10 +153,9 @@ export default function SettingsScreen() {
         )}
       </SurfaceCard>
 
-      {/* ── Preferences ── */}
-      <Text style={[styles.groupLabel, { color: t.textMuted }]}>Preferences</Text>
+      {/* ── Appearance ── */}
+      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Appearance</Text>
       <SurfaceCard>
-        <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Appearance</Text>
         <RNView style={styles.themeRow}>
           {(['system', 'light', 'dark'] as const).map((option) => (
             <Pressable
@@ -176,26 +177,10 @@ export default function SettingsScreen() {
             </Pressable>
           ))}
         </RNView>
-
-        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
-
-        <RNView style={styles.valueRow}>
-          <RNView style={{ flex: 1 }}>
-            <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Analytics</Text>
-            <Text style={[styles.itemHint, { color: t.textMuted }]}>
-              Anonymous usage data to improve Falcly
-            </Text>
-          </RNView>
-          <Switch
-            value={analyticsOptOut}
-            onValueChange={setAnalyticsOptOutStore}
-            trackColor={{ true: t.risky }}
-          />
-        </RNView>
       </SurfaceCard>
 
       {/* ── Notifications ── */}
-      <Text style={[styles.groupLabel, { color: t.textMuted }]}>Notifications</Text>
+      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Notifications</Text>
       <SurfaceCard>
         <RNView style={styles.valueRow}>
           <RNView style={{ flex: 1 }}>
@@ -226,56 +211,73 @@ export default function SettingsScreen() {
         </RNView>
       </SurfaceCard>
 
-      {/* ── Currency ── */}
-      <Text style={[styles.groupLabel, { color: t.textMuted }]}>Currency</Text>
+      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Analytics</Text>
       <SurfaceCard>
-        <RNView style={styles.themeRow}>
-          {['₱', '$', '€', '¥', '£'].map((sym) => (
-            <Pressable
-              key={sym}
-              onPress={() => setCurrencySymbol(sym)}
-              style={[
-                styles.themeOption,
-                { borderColor: currencySymbol === sym ? t.primary : t.border, backgroundColor: currencySymbol === sym ? t.accentBg : 'transparent' },
-              ]}
-            >
-              <Text style={[styles.currencyText, { color: currencySymbol === sym ? t.primary : t.textPrimary }]}>
-                {sym}
-              </Text>
-            </Pressable>
-          ))}
+        <Text style={[styles.itemHint, { color: t.textMuted }]}>
+          Helps us understand how Falcly is used so we can make it better
+        </Text>
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+        <RNView style={styles.valueRow}>
+          <RNView style={{ flex: 1 }}>
+            <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Usage data</Text>
+            <Text style={[styles.itemHint, { color: t.textMuted }]}>
+              {analyticsOptOut ? 'Opted out — no usage data is collected' : 'Opted in — anonymous usage data is shared'}
+            </Text>
+          </RNView>
+          <Switch
+            value={!analyticsOptOut}
+            onValueChange={(v) => setAnalyticsOptOutStore(!v)}
+          />
         </RNView>
       </SurfaceCard>
 
       {/* ── Card Defaults ── */}
-      <Text style={[styles.groupLabel, { color: t.textMuted }]}>Card Defaults</Text>
+      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Card Defaults</Text>
       <SurfaceCard>
         <Text style={[styles.itemHint, { color: t.textMuted, marginBottom: 12 }]}>
-          Applied when adding new cards. Existing cards are not affected.
+          Applied to all cards unless customized individually.
         </Text>
 
-        <RNView style={styles.defaultRow}>
-          <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Interest rate</Text>
-          <Text style={[styles.defaultValue, { color: t.textSecondary }]}>{(defaultInterestRate * 100).toFixed(1)}%</Text>
-        </RNView>
+        <PercentInput
+          compact
+          label="Interest rate %"
+          value={interestRateText}
+          onChangeText={(text) => {
+            setInterestRateText(text);
+            const v = parseFloat(text);
+            if (!isNaN(v)) setDefaultInterestRate(v / 100);
+          }}
+        />
 
         <RNView style={[styles.divider, { backgroundColor: t.border }]} />
 
-        <RNView style={styles.defaultRow}>
-          <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Min. payment</Text>
-          <Text style={[styles.defaultValue, { color: t.textSecondary }]}>{(defaultMinPaymentPct * 100).toFixed(0)}%</Text>
-        </RNView>
+        <PercentInput
+          compact
+          label="Min. payment %"
+          value={minPaymentPctText}
+          onChangeText={(text) => {
+            setMinPaymentPctText(text);
+            const v = parseFloat(text);
+            if (!isNaN(v)) setDefaultMinPaymentPct(v / 100);
+          }}
+        />
 
         <RNView style={[styles.divider, { backgroundColor: t.border }]} />
 
-        <RNView style={styles.defaultRow}>
-          <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Min. payment floor</Text>
-          <Text style={[styles.defaultValue, { color: t.textSecondary }]}>{currencySymbol}{defaultMinPaymentFloor.toLocaleString()}</Text>
-        </RNView>
+        <MoneyInput
+          compact
+          label="Min. payment floor"
+          value={minPaymentFloorText}
+          onChangeText={(text) => {
+            setMinPaymentFloorText(text);
+            const v = parseFloat(text.replace(/,/g, ''));
+            if (!isNaN(v)) setDefaultMinPaymentFloor(v);
+          }}
+        />
       </SurfaceCard>
 
       {/* ── About ── */}
-      <Text style={[styles.groupLabel, { color: t.textMuted }]}>About</Text>
+      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>About</Text>
       <SurfaceCard>
         <RNView style={styles.defaultRow}>
           <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Version</Text>
@@ -305,7 +307,7 @@ export default function SettingsScreen() {
       </SurfaceCard>
 
       {/* ── Data ── */}
-      <Text style={[styles.groupLabel, { color: t.textMuted }]}>Data</Text>
+      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Data</Text>
       <SurfaceCard>
         <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Export</Text>
         <Text style={[styles.itemHint, { color: t.textMuted, marginBottom: 12 }]}>
@@ -349,7 +351,7 @@ export default function SettingsScreen() {
       {/* ── Dev / Showcase ── */}
       {__DEV__ && (
         <>
-          <Text style={[styles.groupLabel, { color: t.textMuted }]}>Developer</Text>
+          <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Developer</Text>
           <SurfaceCard>
             <Button
               label="Share Store State"
@@ -386,7 +388,7 @@ export default function SettingsScreen() {
       )}
 
       {/* ── Danger Zone ── */}
-      <Text style={[styles.groupLabel, { color: t.textMuted }]}>Danger Zone</Text>
+      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Danger Zone</Text>
       <SurfaceCard>
         {user && (
           <>
@@ -456,10 +458,8 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   groupLabel: {
-    fontSize: 13,
+    fontSize: 15,
     fontFamily: fonts.interSemiBold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
     marginBottom: 8,
     marginTop: 8,
   },
@@ -542,10 +542,6 @@ const styles = StyleSheet.create({
   cloudOnlineText: {
     fontSize: 13,
     fontFamily: fonts.interSemiBold,
-  },
-  currencyText: {
-    fontSize: 18,
-    fontFamily: fonts.interBold,
   },
   defaultRow: {
     flexDirection: 'row',

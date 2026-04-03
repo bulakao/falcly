@@ -11,8 +11,10 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/Themed';
-import { useCardStore, cardDefaults } from '@/store/cardStore';
+import { useCardStore } from '@/store/cardStore';
+import { useUserStore } from '@/store/userStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
+import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
 import { trackCardAdded, trackOnboardingCardEntryCompleted } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
@@ -25,6 +27,9 @@ export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const addCard = useCardStore((s) => s.addCard);
   const updateCard = useCardStore((s) => s.updateCard);
+  const defaultInterestRate = useUserStore((s) => s.defaultInterestRate);
+  const defaultMinPaymentPct = useUserStore((s) => s.defaultMinPaymentPct);
+  const defaultMinPaymentFloor = useUserStore((s) => s.defaultMinPaymentFloor);
 
   const existingCards = useCardStore((s) => s.cards);
   const [onboardingCardId, setOnboardingCardId] = useState<string | null>(
@@ -48,7 +53,7 @@ export default function OnboardingScreen() {
       return;
     }
     const dueDayNum = parseInt(dueDate, 10);
-    let offset: number = cardDefaults.dueDayOffset;
+    let offset: number = DEFAULT_DUE_DAY_OFFSET;
     if (!isNaN(dueDayNum) && dueDayNum >= 1 && dueDayNum <= 31) {
       offset = (dueDayNum - stmtDay + 30) % 30 || 30;
       if (offset < 20) {
@@ -87,9 +92,9 @@ export default function OnboardingScreen() {
         outstandingBalance: balance,
         statementDay: stmtDay,
         dueDayOffset: offset,
-        interestRate: cardDefaults.interestRate,
-        minPaymentPct: cardDefaults.minPaymentPct,
-        minPaymentFloor: cardDefaults.minPaymentFloor,
+        interestRate: defaultInterestRate,
+        minPaymentPct: defaultMinPaymentPct,
+        minPaymentFloor: defaultMinPaymentFloor,
       });
       const cards = useCardStore.getState().cards;
       cardId = cards[cards.length - 1].id;

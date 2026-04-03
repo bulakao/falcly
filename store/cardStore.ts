@@ -2,13 +2,7 @@ import { create } from 'zustand';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { cards as cardsTable } from '@/db/schema/local';
-import {
-  Card,
-  DEFAULT_DUE_DAY_OFFSET,
-  DEFAULT_INTEREST_RATE,
-  DEFAULT_MIN_PAYMENT_PCT,
-  DEFAULT_MIN_PAYMENT_FLOOR,
-} from '@/types/card';
+import { Card } from '@/types/card';
 
 type EditableCardFields = Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt' | 'isActive'>;
 
@@ -24,6 +18,7 @@ function rowToCard(row: typeof cardsTable.$inferSelect): Card {
     interestRate: row.interestRate,
     minPaymentPct: row.minPaymentPct,
     minPaymentFloor: row.minPaymentFloor,
+    customFinancials: row.customFinancials,
     pendingTransactions: row.pendingTransactions,
     installmentsMonthlyAmount: row.installmentsMonthlyAmount,
     subscriptionsThisCycle: row.subscriptionsThisCycle,
@@ -40,7 +35,8 @@ interface CardStore {
   _nextId: number;
   _initialized: boolean;
   loadCards: () => void;
-  addCard: (card: Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt' | 'isActive' | 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'> & Partial<Pick<Card, 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'>>) => void;
+  addCard: (card: Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt' | 'isActive' | 'customFinancials' | 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'> & Partial<Pick<Card, 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'>>) => void;
+  applyDefaultsToCards: (updates: Partial<Pick<Card, 'interestRate' | 'minPaymentPct' | 'minPaymentFloor'>>) => void;
   updateCard: (cardId: string, updates: Partial<EditableCardFields>) => void;
   updateBalance: (cardId: string, newBalance: number) => void;
   deleteCard: (cardId: string) => void;
@@ -85,6 +81,7 @@ export const useCardStore = create<CardStore>()((set, get) => ({
       balanceUpdatedAt: now,
       createdAt: now,
       isActive: true,
+      customFinancials: false,
     };
 
     db.insert(cardsTable).values({
@@ -97,6 +94,7 @@ export const useCardStore = create<CardStore>()((set, get) => ({
       interestRate: card.interestRate,
       minPaymentPct: card.minPaymentPct,
       minPaymentFloor: card.minPaymentFloor,
+      customFinancials: false,
       pendingTransactions: card.pendingTransactions,
       installmentsMonthlyAmount: card.installmentsMonthlyAmount,
       subscriptionsThisCycle: card.subscriptionsThisCycle,
@@ -187,6 +185,20 @@ export const useCardStore = create<CardStore>()((set, get) => ({
     set({ cards: [], _nextId: 1 });
   },
 
+  applyDefaultsToCards: (updates) => {
+    // Update all cards that haven't been customized
+    db.update(cardsTable)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(cardsTable.customFinancials, false))
+      .run();
+
+    set((state) => ({
+      cards: state.cards.map((c) =>
+        c.customFinancials ? c : { ...c, ...updates },
+      ),
+    }));
+  },
+
   enforceActiveLimit: (limit) => {
     const { cards } = get();
     let activeCount = 0;
@@ -217,9 +229,3 @@ export const useCardStore = create<CardStore>()((set, get) => ({
   },
 }));
 
-export const cardDefaults = {
-  dueDayOffset: DEFAULT_DUE_DAY_OFFSET,
-  interestRate: DEFAULT_INTEREST_RATE,
-  minPaymentPct: DEFAULT_MIN_PAYMENT_PCT,
-  minPaymentFloor: DEFAULT_MIN_PAYMENT_FLOOR,
-} as const;

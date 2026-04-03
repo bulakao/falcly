@@ -10,6 +10,7 @@ export const cards = sqliteTable('cards', {
   interestRate: real('interest_rate').notNull().default(0.02),
   minPaymentPct: real('min_payment_pct').notNull().default(0.05),
   minPaymentFloor: real('min_payment_floor').notNull().default(500),
+  customFinancials: integer('custom_financials', { mode: 'boolean' }).notNull().default(false),
   pendingTransactions: real('pending_transactions').notNull().default(0),
   installmentsMonthlyAmount: real('installments_monthly_amount').notNull().default(0),
   subscriptionsThisCycle: real('subscriptions_this_cycle').notNull().default(0),

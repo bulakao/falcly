@@ -5,9 +5,10 @@ interface PercentInputProps {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
+  compact?: boolean;
 }
 
-export function PercentInput({ label, value, onChangeText, placeholder = '0' }: PercentInputProps) {
+export function PercentInput({ label, value, onChangeText, placeholder = '0', compact }: PercentInputProps) {
   return (
     <FormFieldGroup
       label={label}
@@ -21,6 +22,7 @@ export function PercentInput({ label, value, onChangeText, placeholder = '0' }: 
       placeholder={placeholder}
       keyboardType="decimal-pad"
       selectTextOnFocus
+      compact={compact}
     />
   );
 }

@@ -12,7 +12,9 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/Themed';
-import { useCardStore, cardDefaults } from '@/store/cardStore';
+import { useCardStore } from '@/store/cardStore';
+import { useUserStore } from '@/store/userStore';
+import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
 import { trackCardAdded } from '@/utils/analytics';
 import { Button } from '@/components/atoms';
 import { DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
@@ -23,12 +25,15 @@ export default function AddCardScreen() {
   const t = useAppTheme();
   const insets = useSafeAreaInsets();
   const addCard = useCardStore((s) => s.addCard);
+  const defaultInterestRate = useUserStore((s) => s.defaultInterestRate);
+  const defaultMinPaymentPct = useUserStore((s) => s.defaultMinPaymentPct);
+  const defaultMinPaymentFloor = useUserStore((s) => s.defaultMinPaymentFloor);
 
   const [bankName, setBankName] = useState('');
   const [creditLimit, setCreditLimit] = useState('');
   const [outstandingBalance, setOutstandingBalance] = useState('');
   const [statementDay, setStatementDay] = useState('');
-  const [dueDayOffset, setDueDayOffset] = useState(String(cardDefaults.dueDayOffset));
+  const [dueDayOffset, setDueDayOffset] = useState(String(DEFAULT_DUE_DAY_OFFSET));
 
   function handleSave() {
     const limit = parseMoney(creditLimit);
@@ -62,10 +67,10 @@ export default function AddCardScreen() {
       creditLimit: limit,
       outstandingBalance: balance,
       statementDay: stmtDay,
-      dueDayOffset: isNaN(offset) ? cardDefaults.dueDayOffset : offset,
-      interestRate: cardDefaults.interestRate,
-      minPaymentPct: cardDefaults.minPaymentPct,
-      minPaymentFloor: cardDefaults.minPaymentFloor,
+      dueDayOffset: isNaN(offset) ? DEFAULT_DUE_DAY_OFFSET : offset,
+      interestRate: defaultInterestRate,
+      minPaymentPct: defaultMinPaymentPct,
+      minPaymentFloor: defaultMinPaymentFloor,
     });
     trackCardAdded('manual_add');
 
@@ -117,7 +122,7 @@ export default function AddCardScreen() {
           label="Due Day Offset (days after statement)"
           value={dueDayOffset}
           onChangeText={setDueDayOffset}
-          placeholder={String(cardDefaults.dueDayOffset)}
+          placeholder={String(DEFAULT_DUE_DAY_OFFSET)}
           keyboardType="numeric"
           hint="Minimum 20 days (BSP regulation). Most PH banks use 20–25 days."
         />

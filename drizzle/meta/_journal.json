@@ -29,6 +29,13 @@
       "when": 1775200000000,
       "tag": "0003_settings_notifications_currency_defaults",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1775300000000,
+      "tag": "0004_card_custom_financials",
+      "breakpoints": true
     }
   ]
 }

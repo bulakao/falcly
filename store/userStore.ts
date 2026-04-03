@@ -154,14 +154,20 @@ export const useUserStore = create<UserStore>()((set) => ({
   setDefaultInterestRate: (rate: number) => {
     updateProfile({ defaultInterestRate: rate });
     set({ defaultInterestRate: rate });
+    const { useCardStore } = require('@/store/cardStore');
+    useCardStore.getState().applyDefaultsToCards({ interestRate: rate });
   },
   setDefaultMinPaymentPct: (pct: number) => {
     updateProfile({ defaultMinPaymentPct: pct });
     set({ defaultMinPaymentPct: pct });
+    const { useCardStore } = require('@/store/cardStore');
+    useCardStore.getState().applyDefaultsToCards({ minPaymentPct: pct });
   },
   setDefaultMinPaymentFloor: (floor: number) => {
     updateProfile({ defaultMinPaymentFloor: floor });
     set({ defaultMinPaymentFloor: floor });
+    const { useCardStore } = require('@/store/cardStore');
+    useCardStore.getState().applyDefaultsToCards({ minPaymentFloor: floor });
   },
   reset: () => {
     db.delete(profileTable).where(eq(profileTable.id, PROFILE_ID)).run();

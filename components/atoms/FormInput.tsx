@@ -6,9 +6,10 @@ import { fonts } from '@/theme/fonts';
 interface FormInputProps extends Omit<TextInputProps, 'style' | 'placeholderTextColor'> {
   error?: boolean;
   focused?: boolean;
+  compact?: boolean;
 }
 
-export function FormInput({ error = false, focused: focusedProp = false, placeholder, onFocus, onBlur, ...props }: FormInputProps) {
+export function FormInput({ error = false, focused: focusedProp = false, compact = false, placeholder, onFocus, onBlur, ...props }: FormInputProps) {
   const t = useAppTheme();
   const [isFocused, setIsFocused] = useState(false);
   const active = focusedProp || isFocused;
@@ -27,6 +28,7 @@ export function FormInput({ error = false, focused: focusedProp = false, placeho
     <TextInput
       style={[
         styles.input,
+        compact && styles.inputCompact,
         {
           backgroundColor: error ? t.riskyBg : t.inputBg,
           borderColor: error ? t.risky : active ? t.primary : t.inputBorder,
@@ -50,5 +52,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: fonts.interBold,
     textAlign: 'center',
+  },
+  inputCompact: {
+    padding: 8,
+    fontSize: 14,
+    fontFamily: fonts.interSemiBold,
+    minWidth: 64,
+    textAlign: 'right',
   },
 });

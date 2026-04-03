@@ -8,11 +8,22 @@ interface FormFieldGroupProps extends Omit<TextInputProps, 'style' | 'placeholde
   label: string;
   error?: boolean;
   focused?: boolean;
+  compact?: boolean;
   hint?: string;
 }
 
-export function FormFieldGroup({ label, error, focused, hint, ...inputProps }: FormFieldGroupProps) {
+export function FormFieldGroup({ label, error, focused, compact, hint, ...inputProps }: FormFieldGroupProps) {
   const t = useAppTheme();
+
+  if (compact) {
+    return (
+      <View style={styles.compactGroup}>
+        <Label>{label}</Label>
+        <FormInput error={error} focused={focused} compact {...inputProps} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.fieldGroup}>
       <Label>{label}</Label>
@@ -25,6 +36,12 @@ export function FormFieldGroup({ label, error, focused, hint, ...inputProps }: F
 const styles = StyleSheet.create({
   fieldGroup: {
     marginTop: 16,
+  },
+  compactGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 2,
   },
   hint: {
     fontSize: 12,

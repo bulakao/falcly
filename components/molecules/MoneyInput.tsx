@@ -5,6 +5,7 @@ interface MoneyInputProps {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
+  compact?: boolean;
 }
 
 function formatMoney(raw: string): string {
@@ -20,7 +21,7 @@ export function parseMoney(formatted: string): number {
   return parseFloat(formatted.replace(/,/g, '')) || 0;
 }
 
-export function MoneyInput({ label, value, onChangeText, placeholder = '0' }: MoneyInputProps) {
+export function MoneyInput({ label, value, onChangeText, placeholder = '0', compact }: MoneyInputProps) {
   return (
     <FormFieldGroup
       label={label}
@@ -28,6 +29,7 @@ export function MoneyInput({ label, value, onChangeText, placeholder = '0' }: Mo
       onChangeText={(text) => onChangeText(formatMoney(text))}
       placeholder={placeholder}
       keyboardType="decimal-pad"
+      compact={compact}
     />
   );
 }

@@ -8,6 +8,7 @@ export interface Card {
   interestRate: number; // monthly rate, e.g. 0.02 = 2%
   minPaymentPct: number; // e.g. 0.05 = 5%
   minPaymentFloor: number; // e.g. 500
+  customFinancials: boolean; // true = user set custom interest/payment values
   pendingTransactions: number; // pending charges not yet posted
   installmentsMonthlyAmount: number; // committed installment amount per cycle
   subscriptionsThisCycle: number; // subscriptions hitting this billing cycle
@@ -70,6 +71,3 @@ export interface FutureCycleProjection {
 }
 
 export const DEFAULT_DUE_DAY_OFFSET = 21;
-export const DEFAULT_INTEREST_RATE = 0.02;
-export const DEFAULT_MIN_PAYMENT_PCT = 0.05;
-export const DEFAULT_MIN_PAYMENT_FLOOR = 500;
