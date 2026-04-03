@@ -203,7 +203,7 @@ export function SwipeImpactPanel({
 
         {impact.netAvailableCash !== null ? (
           <>
-            <BreakdownRow label="Cash on hand" value={cashOnHand !== null ? formatPeso(cashOnHand) : '—'} valueMuted />
+            <BreakdownRow label="Funds available" value={cashOnHand !== null ? formatPeso(cashOnHand) : '—'} valueMuted />
             {monthlyIncome !== null && payday !== null && (
               <BreakdownRow
                 label={`Monthly income${incomeApplies ? '' : ' (payday after due)'}`}
@@ -213,7 +213,7 @@ export function SwipeImpactPanel({
               />
             )}
             {committedExpenses !== null && committedExpenses > 0 && (
-              <BreakdownRow label="Committed expenses" value={`−${formatPeso(committedExpenses)}`} valueMuted />
+              <BreakdownRow label="Fixed expenses" value={`−${formatPeso(committedExpenses)}`} valueMuted />
             )}
             <BreakdownDivider />
             <BreakdownRow label="Available to pay" value={formatPeso(impact.netAvailableCash)} bold labelColor={t.inputText} valueColor={t.safe} />

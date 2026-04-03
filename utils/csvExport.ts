@@ -76,10 +76,10 @@ function buildCardsCSV(cards: Card[]): string {
 function buildUserProfileCSV(profile: UserProfile): string {
   const headers = ['Field', 'Value'];
   const rows = [
-    ['Cash on Hand', formatCurrency(profile.cashOnHand)],
+    ['Funds Available', formatCurrency(profile.cashOnHand)],
     ['Monthly Income', formatCurrency(profile.monthlyIncome)],
     ['Payday', profile.payday !== null ? `Day ${profile.payday}` : ''],
-    ['Committed Expenses', formatCurrency(profile.committedExpenses)],
+    ['Fixed Expenses', formatCurrency(profile.committedExpenses)],
   ];
 
   return [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');

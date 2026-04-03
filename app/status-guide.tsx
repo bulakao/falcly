@@ -9,7 +9,7 @@ export default function StatusGuideScreen() {
   const t = useAppTheme();
 
   const rules = [
-    { status: 'RISKY', icon: '✕', rule: "Cash on hand can't cover the minimum payment" },
+    { status: 'RISKY', icon: '✕', rule: "Not enough funds available to cover the minimum payment" },
     { status: 'RISKY', icon: '✕', rule: 'Statement closes within 2 days' },
     { status: 'RISKY', icon: '✕', rule: 'Credit utilization is above 80%' },
     { status: 'CAUTION', icon: '⚠', rule: 'Statement closes within 7 days' },

@@ -110,7 +110,7 @@ export function FinanceCard() {
         <RNView style={styles.enrichTextWrap}>
           <Text style={[styles.enrichTitle, { color: t.accent }]}>Your Finances</Text>
           <Text style={[styles.enrichHint, { color: t.textMuted }]}>
-            Used to calculate if you can safely pay off your statement balance.
+            Helps Falcly calculate if you can cover your card payments.
           </Text>
         </RNView>
         <RNView style={{ transform: [{ rotate: expanded ? '180deg' : '0deg' }] }}>
@@ -120,9 +120,9 @@ export function FinanceCard() {
 
       {expanded && (
         <RNView style={[styles.enrichSection, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border }]}>
-          {/* Cash on Hand */}
-          <Label>Cash on Hand</Label>
-          <Caption color={t.textMuted}>Liquid cash available to pay credit card bills.</Caption>
+          {/* Funds Available */}
+          <Label>Funds Available</Label>
+          <Caption color={t.textMuted}>Your accessible funds across all accounts — used as the starting point for payment calculations.</Caption>
           <FormInput
             value={cashText}
             onChangeText={handleCashChange}
@@ -180,9 +180,9 @@ export function FinanceCard() {
 
           <Divider />
 
-          {/* Committed Expenses */}
-          <Label>Committed Monthly Expenses</Label>
-          <Caption color={t.textMuted}>Fixed expenses (rent, utilities, etc.) deducted from available cash.</Caption>
+          {/* Fixed Monthly Expenses */}
+          <Label>Fixed Monthly Expenses</Label>
+          <Caption color={t.textMuted}>Regular fixed costs (rent, utilities, subscriptions) deducted before calculating what&apos;s available.</Caption>
           <FormInput
             value={expensesText}
             onChangeText={handleExpensesChange}
