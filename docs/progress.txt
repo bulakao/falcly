@@ -61,3 +61,16 @@ Started: Fri Apr  3 18:25:08 PST 2026
   - `getPaydays()` is not a hook — it reads from `useUserStore.getState()` so it can be called outside React components and in render bodies without hook rules issues
   - The 3 pre-existing TS errors (`_layout.tsx`, `StatusTooltip.tsx`) are not introduced by Phase 2 work
 ---
+
+## 2026-04-03 - FF-06
+- Added Second Payday field to FinanceCard UI below existing Payday field
+- Field labeled "Second Payday" with optional caption, placeholder "e.g. 30", validates 1–31
+- Blank field clears payday2 in store (setPayday2(null))
+- When both paydays and income are set, shows income split hint line with formatted amounts and ordinal suffixes
+- Added ordinalSuffix helper, payday2 local state, focus tracking, sync effect, change handler, debounced save
+- Files changed: `components/molecules/FinanceCard.tsx`
+- **Learnings for future iterations:**
+  - Follow the existing pattern exactly for new fields: local state + focus state + sync useEffect + change handler + useDebouncedSave
+  - For optional/nullable fields, the debounced save must handle empty string → null conversion explicitly
+  - JSX apostrophes need `&apos;` entity to pass lint
+---

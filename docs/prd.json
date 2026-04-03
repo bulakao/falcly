@@ -807,7 +807,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Depends on FF-04 and FF-05."
     }
   ]
