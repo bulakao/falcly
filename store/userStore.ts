@@ -7,6 +7,7 @@ import { setAnalyticsOptOut } from '@/utils/analytics';
 const PROFILE_ID = 'local';
 
 type ThemePreference = 'system' | 'light' | 'dark';
+export type PayoffStrategy = 'full' | 'minimum' | 'fixed' | 'aggressive';
 
 interface UserStore {
   cashOnHand: number | null;
@@ -27,6 +28,9 @@ interface UserStore {
   defaultInterestRate: number;
   defaultMinPaymentPct: number;
   defaultMinPaymentFloor: number;
+  // Payoff strategy
+  payoffStrategy: PayoffStrategy;
+  fixedPayoffAmount: number | null;
 
   _initialized: boolean;
   loadProfile: () => void;
@@ -45,6 +49,8 @@ interface UserStore {
   setDefaultInterestRate: (rate: number) => void;
   setDefaultMinPaymentPct: (pct: number) => void;
   setDefaultMinPaymentFloor: (floor: number) => void;
+  setPayoffStrategy: (strategy: PayoffStrategy) => void;
+  setFixedPayoffAmount: (amount: number | null) => void;
   reset: () => void;
 }
 
@@ -76,6 +82,8 @@ export const useUserStore = create<UserStore>()((set) => ({
   defaultInterestRate: 0.02,
   defaultMinPaymentPct: 0.05,
   defaultMinPaymentFloor: 500,
+  payoffStrategy: 'full' as PayoffStrategy,
+  fixedPayoffAmount: null,
   _initialized: false,
 
   loadProfile: () => {
@@ -99,6 +107,8 @@ export const useUserStore = create<UserStore>()((set) => ({
           defaultInterestRate: row.defaultInterestRate ?? 0.02,
           defaultMinPaymentPct: row.defaultMinPaymentPct ?? 0.05,
           defaultMinPaymentFloor: row.defaultMinPaymentFloor ?? 500,
+          payoffStrategy: (row.payoffStrategy as PayoffStrategy) ?? 'full',
+          fixedPayoffAmount: row.fixedPayoffAmount ?? null,
           _initialized: true,
         });
       } else {
@@ -180,6 +190,14 @@ export const useUserStore = create<UserStore>()((set) => ({
     const { useCardStore } = require('@/store/cardStore');
     useCardStore.getState().applyDefaultsToCards({ minPaymentFloor: floor });
   },
+  setPayoffStrategy: (strategy: PayoffStrategy) => {
+    updateProfile({ payoffStrategy: strategy });
+    set({ payoffStrategy: strategy });
+  },
+  setFixedPayoffAmount: (amount: number | null) => {
+    updateProfile({ fixedPayoffAmount: amount });
+    set({ fixedPayoffAmount: amount });
+  },
   reset: () => {
     db.delete(profileTable).where(eq(profileTable.id, PROFILE_ID)).run();
     set({
@@ -198,6 +216,8 @@ export const useUserStore = create<UserStore>()((set) => ({
       defaultInterestRate: 0.02,
       defaultMinPaymentPct: 0.05,
       defaultMinPaymentFloor: 500,
+      payoffStrategy: 'full',
+      fixedPayoffAmount: null,
     });
   },
 }));

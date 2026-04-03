@@ -91,4 +91,7 @@ export const profile = sqliteTable('profile', {
   defaultInterestRate: real('default_interest_rate').notNull().default(0.02),
   defaultMinPaymentPct: real('default_min_payment_pct').notNull().default(0.05),
   defaultMinPaymentFloor: real('default_min_payment_floor').notNull().default(500),
+  // Payoff strategy
+  payoffStrategy: text('payoff_strategy').notNull().default('full'), // full | minimum | fixed | aggressive
+  fixedPayoffAmount: real('fixed_payoff_amount'),
 });

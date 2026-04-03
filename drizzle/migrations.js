@@ -8,6 +8,7 @@ import m0003 from './0003_settings_notifications_currency_defaults.sql';
 import m0004 from './0004_card_custom_financials.sql';
 import m0005 from './0005_multi_payday.sql';
 import m0006 from './0006_installments_subscriptions.sql';
+import m0007 from './0007_payoff_strategy.sql';
 
   export default {
     journal,
@@ -18,7 +19,8 @@ m0002,
 m0003,
 m0004,
 m0005,
-m0006
+m0006,
+m0007
     }
   }
   

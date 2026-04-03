@@ -22,7 +22,8 @@ import { fonts } from '@/theme/fonts';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { exportDataAsCSV } from '@/utils/csvExport';
 import { Button, Badge } from '@/components/atoms';
-import { AlertBanner, SurfaceCard, PercentInput, MoneyInput } from '@/components/molecules';
+import { AlertBanner, SurfaceCard, PercentInput, MoneyInput, parseMoney } from '@/components/molecules';
+import type { PayoffStrategy } from '@/store/userStore';
 import { scheduleAllReminders } from '@/utils/notifications';
 
 export default function SettingsScreen() {
@@ -79,9 +80,15 @@ export default function SettingsScreen() {
   const defaultMinPaymentFloor = useUserStore((s) => s.defaultMinPaymentFloor);
   const setDefaultMinPaymentFloor = useUserStore((s) => s.setDefaultMinPaymentFloor);
 
+  const payoffStrategy = useUserStore((s) => s.payoffStrategy);
+  const setPayoffStrategy = useUserStore((s) => s.setPayoffStrategy);
+  const fixedPayoffAmount = useUserStore((s) => s.fixedPayoffAmount);
+  const setFixedPayoffAmount = useUserStore((s) => s.setFixedPayoffAmount);
+
   const [interestRateText, setInterestRateText] = useState(() => (defaultInterestRate * 100).toFixed(1));
   const [minPaymentPctText, setMinPaymentPctText] = useState(() => (defaultMinPaymentPct * 100).toFixed(1));
   const [minPaymentFloorText, setMinPaymentFloorText] = useState(() => defaultMinPaymentFloor.toString());
+  const [fixedPayoffText, setFixedPayoffText] = useState(() => fixedPayoffAmount?.toString() ?? '');
   const cashOnHand = useUserStore((s) => s.cashOnHand);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
   const payday = useUserStore((s) => s.payday);
@@ -295,6 +302,61 @@ export default function SettingsScreen() {
             if (!isNaN(v)) setDefaultMinPaymentFloor(v);
           }}
         />
+      </SurfaceCard>
+
+      {/* ── Payoff Strategy ── */}
+      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Payoff Strategy</Text>
+      <SurfaceCard>
+        <Text style={[styles.itemHint, { color: t.textMuted, marginBottom: 12 }]}>
+          How you plan to pay your credit card bills each month.
+        </Text>
+        <RNView style={styles.strategyGrid}>
+          {([
+            { key: 'full' as PayoffStrategy, label: 'Full Balance', desc: 'Pay everything' },
+            { key: 'minimum' as PayoffStrategy, label: 'Minimum Only', desc: 'Pay the minimum only' },
+            { key: 'fixed' as PayoffStrategy, label: 'Fixed Amount', desc: 'Pay a set amount each month' },
+            { key: 'aggressive' as PayoffStrategy, label: 'Aggressive', desc: 'Pay as much as possible after expenses' },
+          ]).map((option) => (
+            <Pressable
+              key={option.key}
+              onPress={() => setPayoffStrategy(option.key)}
+              style={[
+                styles.strategyChip,
+                {
+                  borderColor: payoffStrategy === option.key ? t.primary : t.border,
+                  backgroundColor: payoffStrategy === option.key ? t.accentBg : 'transparent',
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.strategyChipLabel,
+                  { color: payoffStrategy === option.key ? t.primary : t.textPrimary },
+                ]}
+              >
+                {option.label}
+              </Text>
+              <Text style={[styles.strategyChipDesc, { color: t.textMuted }]}>
+                {option.desc}
+              </Text>
+            </Pressable>
+          ))}
+        </RNView>
+        {payoffStrategy === 'fixed' && (
+          <>
+            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+            <MoneyInput
+              compact
+              label="Fixed monthly payment"
+              value={fixedPayoffText}
+              onChangeText={(text) => {
+                setFixedPayoffText(text);
+                const v = parseMoney(text);
+                if (!isNaN(v) && v > 0) setFixedPayoffAmount(v);
+              }}
+            />
+          </>
+        )}
       </SurfaceCard>
 
       {/* ── About ── */}
@@ -591,5 +653,27 @@ const styles = StyleSheet.create({
   themeOptionText: {
     fontSize: 13,
     fontFamily: fonts.interSemiBold,
+  },
+  strategyGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  strategyChip: {
+    flexBasis: '46%',
+    flexGrow: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1.5,
+  },
+  strategyChipLabel: {
+    fontSize: 13,
+    fontFamily: fonts.interSemiBold,
+    marginBottom: 2,
+  },
+  strategyChipDesc: {
+    fontSize: 11,
+    lineHeight: 15,
   },
 });
