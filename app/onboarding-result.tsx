@@ -19,7 +19,8 @@ import { calculateCardStatus, utilization } from '@/utils/decisionEngine';
 import type { CardStatus } from '@/types/card';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
-import { trackOnboardingFirstStatusViewed } from '@/utils/analytics';
+import { trackOnboardingFirstStatusViewed, trackOnboardingNotificationsGranted, trackOnboardingNotificationsDeclined } from '@/utils/analytics';
+import { requestPermission } from '@/utils/notifications';
 
 const STATUS_ICONS: Record<CardStatus, string> = {
   SAFE: '✓',
@@ -66,7 +67,13 @@ export default function OnboardingResultScreen() {
   const { status } = statusResult;
   const color = STATUS_COLORS[status];
 
-  function handleContinue() {
+  async function handleContinue() {
+    const granted = await requestPermission();
+    if (granted) {
+      trackOnboardingNotificationsGranted();
+    } else {
+      trackOnboardingNotificationsDeclined();
+    }
     useOnboardingStore.getState().complete();
     router.replace('/');
   }

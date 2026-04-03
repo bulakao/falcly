@@ -23,6 +23,7 @@ import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { exportDataAsCSV } from '@/utils/csvExport';
 import { Button, Badge } from '@/components/atoms';
 import { AlertBanner, SurfaceCard, PercentInput, MoneyInput } from '@/components/molecules';
+import { scheduleAllReminders } from '@/utils/notifications';
 
 export default function SettingsScreen() {
   const t = useAppTheme();
@@ -46,11 +47,31 @@ export default function SettingsScreen() {
   const themePreference = useUserStore((s) => s.themePreference);
   const setThemePreference = useUserStore((s) => s.setThemePreference);
   const notifyStatementReminder = useUserStore((s) => s.notifyStatementReminder);
-  const setNotifyStatementReminder = useUserStore((s) => s.setNotifyStatementReminder);
+  const _setNotifyStatementReminder = useUserStore((s) => s.setNotifyStatementReminder);
   const notifyDueReminder = useUserStore((s) => s.notifyDueReminder);
-  const setNotifyDueReminder = useUserStore((s) => s.setNotifyDueReminder);
+  const _setNotifyDueReminder = useUserStore((s) => s.setNotifyDueReminder);
   const notifyHighUtilization = useUserStore((s) => s.notifyHighUtilization);
-  const setNotifyHighUtilization = useUserStore((s) => s.setNotifyHighUtilization);
+  const _setNotifyHighUtilization = useUserStore((s) => s.setNotifyHighUtilization);
+
+  function rescheduleAfterToggle(statementVal: boolean, dueVal: boolean) {
+    const cards = useCardStore.getState().cards;
+    scheduleAllReminders(cards, {
+      notifyStatementReminder: statementVal,
+      notifyDueReminder: dueVal,
+    }).catch(() => {});
+  }
+
+  function setNotifyStatementReminder(v: boolean) {
+    _setNotifyStatementReminder(v);
+    rescheduleAfterToggle(v, notifyDueReminder);
+  }
+  function setNotifyDueReminder(v: boolean) {
+    _setNotifyDueReminder(v);
+    rescheduleAfterToggle(notifyStatementReminder, v);
+  }
+  function setNotifyHighUtilization(v: boolean) {
+    _setNotifyHighUtilization(v);
+  }
   const defaultInterestRate = useUserStore((s) => s.defaultInterestRate);
   const setDefaultInterestRate = useUserStore((s) => s.setDefaultInterestRate);
   const defaultMinPaymentPct = useUserStore((s) => s.defaultMinPaymentPct);
