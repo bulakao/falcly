@@ -7,7 +7,7 @@ import { FormInput, Label } from '@/components/atoms';
 import { AlertBanner, BreakdownRow, BreakdownDivider, ChipSelector } from '@/components/molecules';
 import { BillingTimeline } from '@/components/organisms/BillingTimeline';
 import { useCardStore } from '@/store/cardStore';
-import { useUserStore } from '@/store/userStore';
+import { useUserStore, getPaydays } from '@/store/userStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { calculateSwipeImpact, computeNetAvailableCash, getCycleDates } from '@/utils/decisionEngine';
 import { getStalenessLevel } from '@/utils/staleness';
@@ -44,8 +44,8 @@ export function SwipeImpactPanel({
   const deleteCard = useCardStore((s) => s.deleteCard);
   const cashOnHand = useUserStore((s) => s.cashOnHand);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
-  const payday = useUserStore((s) => s.payday);
   const committedExpenses = useUserStore((s) => s.committedExpenses);
+  const paydays = getPaydays();
   const subscriptionTier = useSubscriptionStore((s) => s.tier);
   const [amountText, setAmountText] = useState('');
 
@@ -55,15 +55,15 @@ export function SwipeImpactPanel({
   }, [amountText]);
 
   const netAvailableCash = useMemo(
-    () => computeNetAvailableCash(cashOnHand, monthlyIncome, payday, card, committedExpenses),
-    [card, cashOnHand, monthlyIncome, payday, committedExpenses],
+    () => computeNetAvailableCash(cashOnHand, monthlyIncome, paydays, card, committedExpenses),
+    [card, cashOnHand, monthlyIncome, paydays, committedExpenses],
   );
 
   const incomeApplies = useMemo(() => {
-    if (monthlyIncome === null || payday === null) return false;
+    if (monthlyIncome === null || paydays.length === 0) return false;
     const { dueDate } = getCycleDates(card);
-    return payday <= dueDate.getDate();
-  }, [card, monthlyIncome, payday]);
+    return paydays.some((day) => day <= dueDate.getDate());
+  }, [card, monthlyIncome, paydays]);
 
   const impact = useMemo(
     () => calculateSwipeImpact(card, proposedAmount, netAvailableCash),
@@ -204,7 +204,7 @@ export function SwipeImpactPanel({
         {impact.netAvailableCash !== null ? (
           <>
             <BreakdownRow label="Funds available" value={cashOnHand !== null ? formatPeso(cashOnHand) : '—'} valueMuted />
-            {monthlyIncome !== null && payday !== null && (
+            {monthlyIncome !== null && paydays.length > 0 && (
               <BreakdownRow
                 label={`Monthly income${incomeApplies ? '' : ' (payday after due)'}`}
                 value={`+${formatPeso(monthlyIncome)}`}

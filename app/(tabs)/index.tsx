@@ -7,7 +7,7 @@ import { View } from '@/components/Themed';
 import { AlertBanner } from '@/components/molecules';
 import { CardPager } from '@/components/organisms';
 import { useCardStore } from '@/store/cardStore';
-import { useUserStore } from '@/store/userStore';
+import { useUserStore, getPaydays } from '@/store/userStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useAppTheme } from '@/theme';
 import { computeNetAvailableCash } from '@/utils/decisionEngine';
@@ -21,8 +21,8 @@ export default function HomeScreen() {
   const daysUntilDataDeletion = useSubscriptionStore((s) => s.daysUntilDataDeletion);
   const cashOnHand = useUserStore((s) => s.cashOnHand);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
-  const payday = useUserStore((s) => s.payday);
   const committedExpenses = useUserStore((s) => s.committedExpenses);
+  const paydays = getPaydays();
 
   const daysRemaining = daysUntilDataDeletion();
 
@@ -30,8 +30,8 @@ export default function HomeScreen() {
   const hasHiddenCards = cards.length > activeCards.length;
 
   const getNetAvailableCash = useCallback(
-    (card: Card) => computeNetAvailableCash(cashOnHand, monthlyIncome, payday, card, committedExpenses),
-    [cashOnHand, monthlyIncome, payday, committedExpenses],
+    (card: Card) => computeNetAvailableCash(cashOnHand, monthlyIncome, paydays, card, committedExpenses),
+    [cashOnHand, monthlyIncome, paydays, committedExpenses],
   );
 
   function handleAddCard() {

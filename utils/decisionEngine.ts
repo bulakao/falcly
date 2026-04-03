@@ -306,12 +306,13 @@ export function calculateSwipeImpact(
 
 /**
  * Compute net available cash for a specific card.
- * Monthly income is added only when payday falls on or before the card's due date.
+ * For each payday that falls on or before the card's due date,
+ * adds an equal share of monthly income (monthlyIncome / paydays.length).
  */
 export function computeNetAvailableCash(
   cashOnHand: number | null,
   monthlyIncome: number | null,
-  payday: number | null,
+  paydays: number[],
   card: Card,
   committedExpenses: number | null = null,
   today: Date = new Date(),
@@ -320,11 +321,14 @@ export function computeNetAvailableCash(
 
   let net = cashOnHand;
 
-  if (monthlyIncome !== null && payday !== null) {
+  if (monthlyIncome !== null && paydays.length > 0) {
     const { dueDate } = getCycleDates(card, today);
     const dueDayOfMonth = dueDate.getDate();
-    if (payday <= dueDayOfMonth) {
-      net += monthlyIncome;
+    const perPayday = monthlyIncome / paydays.length;
+    for (const day of paydays) {
+      if (day <= dueDayOfMonth) {
+        net += perPayday;
+      }
     }
   }
 

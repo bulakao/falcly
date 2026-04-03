@@ -10,7 +10,7 @@ import { Text, View } from '@/components/Themed';
 import { CreditCardFace } from '@/components/atoms';
 import { SwipeImpactPanel } from '@/components/organisms';
 import { useCardStore } from '@/store/cardStore';
-import { useUserStore } from '@/store/userStore';
+import { useUserStore, getPaydays } from '@/store/userStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { computeNetAvailableCash } from '@/utils/decisionEngine';
 import { fonts } from '@/theme/fonts';
@@ -23,8 +23,8 @@ export default function SwipeImpactScreen() {
   const router = useRouter();
   const cashOnHand = useUserStore((s) => s.cashOnHand);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
-  const payday = useUserStore((s) => s.payday);
   const committedExpenses = useUserStore((s) => s.committedExpenses);
+  const paydays = getPaydays();
   const isCardReadOnly = useSubscriptionStore((s) => s.isCardReadOnly);
 
   if (!card) {
@@ -36,7 +36,7 @@ export default function SwipeImpactScreen() {
   }
 
   const readOnly = isCardReadOnly(cardIndex);
-  const netAvailableCash = computeNetAvailableCash(cashOnHand, monthlyIncome, payday, card, committedExpenses);
+  const netAvailableCash = computeNetAvailableCash(cashOnHand, monthlyIncome, paydays, card, committedExpenses);
 
   return (
     <KeyboardAvoidingView
