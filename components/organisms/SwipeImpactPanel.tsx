@@ -315,7 +315,7 @@ export function SwipeImpactPanel({
 
       {impact.netAvailableCash === null && (
         <Text style={[styles.hint, { color: t.textMuted }]}>
-          Set your cash on hand in Settings to see payoff projections.
+          Set your funds available to see payoff projections.
         </Text>
       )}
 
