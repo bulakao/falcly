@@ -58,6 +58,7 @@ module.exports = {
         },
       ],
       '@react-native-google-signin/google-signin',
+      '@notifee/react-native',
       './plugins/withXcode26Compat',
     ],
     experiments: {

@@ -1,152 +1,29 @@
 # Ralph Progress Log
-Started: Sat Apr  4 00:26:15 PST 2026
----
+Started: Sat Apr  4 01:20:06 PST 2026
 
 ## Codebase Patterns
-- SwipeImpactPanel is the main card detail organism — add navigation entry points here using `<Link>` with `asChild` wrapping a `<Pressable>`
-- Navigation uses Expo Router `Link` component with `pathname`/`params` pattern for typed routes
-- Styles use `useAppTheme()` for colors and `fonts` from `@/theme/fonts` for typography
-- Card-specific routes accept `cardId` as a query param via `useLocalSearchParams()`
-- Decision engine functions (`calculateCardStatus`, `scoreCard`, `calculateBestCard`) accept optional `currentCycleTxSum` param — defaults to 0 for backward compat
-- Per-card callbacks (e.g. `getNetAvailableCash`, `getCurrentCycleTxSum`) are created in HomeScreen and threaded through CardPager to child components
-- `EmptyState` component accepts optional `icon` (ReactNode), `title`, `subtitle`, and `children` — use it for all empty states across screens
-
+- Notification scheduling uses `@notifee/react-native` (not expo-notifications) — configured in app.config.js plugins
+- Card store uses `require()` pattern to avoid circular imports when accessing userStore (see existing pattern in userStore for cardStore)
+- Settings toggles that affect background behavior should trigger rescheduling — wrap store setters in the screen component
+- Notification IDs follow `{type}-{cardId}` pattern (e.g., `statement-3`, `due-3`) for per-card cancel support
 ---
 
-## 2026-04-04 - NV-01
-- Added "View Transactions ›" tappable button to SwipeImpactPanel below the breakdown section
-- Navigates to `/card-transactions?cardId=<id>` for all cards (not gated by Pro)
-- Files changed: `components/organisms/SwipeImpactPanel.tsx`
+## 2026-04-04 - PN-01
+- Installed `@notifee/react-native` and added to app.config.js plugins
+- Created `utils/notifications.ts` with: requestPermission(), createChannels(), scheduleStatementReminder(card), scheduleDueReminder(card), cancelCardNotifications(cardId), scheduleAllReminders(cards, settings), checkHighUtilization(cards, flag)
+- Android channels: `statement-reminders`, `due-reminders`, `utilization-alerts` (all HIGH importance)
+- Statement reminder: fires 3 days before statementDay at 9 AM
+- Due date reminder: fires 3 days before due date (statementDay + dueDayOffset) at 9 AM
+- High utilization alert: immediate notification when any card exceeds 80% — checked on app foreground and balance update
+- Integrated into cardStore: addCard/updateCard reschedule all; deleteCard cancels + reschedules; updateBalance checks high util
+- Wired scheduleAllReminders on app launch in _layout.tsx after cards + profile load
+- Wired requestPermission() in onboarding-result.tsx handleContinue with PostHog tracking
+- Settings toggles reschedule notifications when toggled
+- Confirmed expo-notifications is not in package.json
+- Files changed: package.json, package-lock.json, app.config.js, utils/notifications.ts (new), store/cardStore.ts, app/_layout.tsx, app/onboarding-result.tsx, app/settings.tsx, docs/prd.json
 - **Learnings for future iterations:**
-  - SwipeImpactPanel has a clear section order: banners → actions → timeline → input → breakdown → nav links → hint → trial CTA
-  - The `navRow` style container was added to group navigation buttons — NV-02 should add its button in the same container
-  - Unicode em dashes (—) in prd.json must be matched exactly when editing; they appear as `\u2014` in the raw file
----
-
-## 2026-04-04 - NV-02
-- Added "What You Owe ›" tappable button to SwipeImpactPanel in the existing `navRow` container
-- Navigates to `/payment-summary?cardId=<id>` for all cards
-- Files changed: `components/organisms/SwipeImpactPanel.tsx`
-- **Learnings for future iterations:**
-  - The `navRow` container in SwipeImpactPanel now holds two nav buttons (Transactions + Payment Summary) — future nav entry points should follow the same pattern
-  - Route `/payment-summary` already existed; NV-02 only added the entry point, not the route
----
-
-## 2026-04-04 - NV-03
-- Added "Update funds available →" / "Set funds available →" tappable prompt to SwipeImpactPanel
-- Shows when cashOnHand is null OR cashUpdatedAt staleness is 'warning'/'stale'
-- Tapping navigates to home screen where FinanceCard section lives
-- Prompt hidden when funds are set and fresh (staleness = 'fresh')
-- Files changed: `components/organisms/SwipeImpactPanel.tsx`
-- **Learnings for future iterations:**
-  - `cashUpdatedAt` in userStore tracks when funds were last updated — use `getStalenessLevel(cashUpdatedAt)` for funds freshness
-  - Theme has `caution`/`cautionBg` colors matching the amber warning palette
-  - `router.navigate('/')` from expo-router navigates back to home tab
----
-
-## 2026-04-04 - EF-01
-- Wired currentCycleTxSum into home screen decision engine calls
-- `calculateCardStatus`, `scoreCard`, `calculateBestCard` now accept `currentCycleTxSum` param (defaults to 0 for backward compat)
-- Home screen computes per-card currentCycleTxSum via `computeCurrentCycleTxSum(getCurrentCycle(cardId, statementDay))`
-- Passed through CardPager → CreditCardFace and AllCardsOverview → calculateBestCard
-- Files changed: `utils/decisionEngine.ts`, `app/(tabs)/index.tsx`, `components/organisms/CardPager.tsx`, `components/atoms/CreditCardFace.tsx`, `components/organisms/AllCardsOverview.tsx`
-- **Learnings for future iterations:**
-  - `calculateCardStatus` uses `effectiveBalance = outstandingBalance + currentCycleTxSum` for utilization and minimum payment checks
-  - `getCurrentCycleTxSum` callback pattern follows the same shape as `getNetAvailableCash` — a `(card: Card) => number` callback passed through CardPager
-  - `StackedCardsPreview` and `GanttTimeline` also call `calculateCardStatus` but use default `currentCycleTxSum=0` — could be wired in future if needed
-  - `transactions` from transactionStore is included in the useCallback deps to ensure recalculation when transactions change
----
-
-## 2026-04-04 - EF-02
-- Added "Logged this cycle" breakdown row in SwipeImpactPanel showing `+₱X` when currentCycleTxSum > 0
-- Added subtle italic label "Includes ₱X logged this cycle" below projected statement balance
-- Both elements hidden when no transactions are logged (not shown as ₱0)
-- SwipeImpactPanel already had currentCycleTxSum computed and passed to engine from EF-01; this story added the UI layer
-- Files changed: `components/organisms/SwipeImpactPanel.tsx`
-- **Learnings for future iterations:**
-  - The breakdown section order is: outstanding balance → pending → installments → subscriptions → annual fee → logged this cycle → proposed swipe → divider → projected balance
-  - Use `cycleTxLabel` style for subtle metadata below bold breakdown rows
----
-
-## 2026-04-04 - EF-03
-- Added ⚠️ indicator next to status dot on CreditCardFace when `balanceUpdatedAt` is > 5 days old
-- Tapping ⚠️ navigates to `/update-balance?cardId=<id>` via `Link` + `Pressable`
-- Indicator hidden when staleness is 'fresh' (< 5 days)
-- Uses existing `getStalenessLevel()` from utils/staleness.ts
-- Files changed: `components/atoms/CreditCardFace.tsx`
-- **Learnings for future iterations:**
-  - CreditCardFace already computed staleness and used it for stale state (muted dot color + italic reason text) — EF-03 added the warning-level indicator
-  - `statusGroup` style wraps the ⚠️ icon and status dot in a row with `gap: 6`
-  - The staleness levels map to: fresh (< 5 days) = no indicator, warning (5-9 days) = ⚠️ shown, stale (10+ days) = ⚠️ shown + muted dot + italic reason
----
-
-## 2026-04-04 - UX-01
-- Added collapsible GanttTimeline section to SwipeImpactPanel, placed after the existing BillingTimeline
-- Defaults to collapsed; tap "Billing Cycle ▾/▴" to expand/collapse
-- Uses module-level `ganttExpandedSession` variable for session persistence across re-mounts
-- GanttTimeline receives `[card]` (single-element array) to show the current card's Gantt bar
-- Files changed: `components/organisms/SwipeImpactPanel.tsx`
-- **Learnings for future iterations:**
-  - GanttTimeline accepts `cards: Card[]` — for single-card usage, wrap in `[card]`
-  - Module-level variables are the simplest way to persist UI state across component re-mounts within a session (no store or AsyncStorage needed)
-  - The section order after this change: banners → actions → BillingTimeline → collapsible GanttTimeline → input → breakdown → nav links → hint → trial CTA
----
-
-## 2026-04-04 - UX-02
-- Added dismissible hint banner at top of FinanceCard expanded section when all four finance fields are null
-- Banner reads "Fill this in to see if you can cover your payments." with an X dismiss button
-- Disappears automatically when fundsAvailable (cashOnHand) is set, or when user dismisses it
-- Dismissal persisted in AsyncStorage under key `falcly-finance-hint-dismissed`
-- Files changed: `components/molecules/FinanceCard.tsx`
-- **Learnings for future iterations:**
-  - AsyncStorage key pattern: `falcly-<feature>-<purpose>` (e.g. `falcly-finance-hint-dismissed`)
-  - Default `hintDismissed` to `true` initially to avoid flash-of-hint before AsyncStorage loads
-  - `accentBg` theme token provides a subtle highlight background suitable for info banners
-  - `lucide-react-native` `X` icon at size 14 works well for inline dismiss buttons
----
-
-## 2026-04-04 - UX-03
-- Fixed inline income split hint in FinanceCard to use `currencySymbol` from store instead of hardcoded ₱
-- Updated hint text from "Income split evenly" to "Split evenly" to match AC
-- The hint was already conditionally rendered when payday + payday2 + monthlyIncome > 0 are all set
-- Files changed: `components/molecules/FinanceCard.tsx`
-- **Learnings for future iterations:**
-  - The split hint was partially implemented in a prior phase (FF-06) — always check existing code before building from scratch
-  - `currencySymbol` is available in userStore and defaults to '₱' — use it for all user-facing currency displays
-  - `ordinalSuffix()` helper exists in FinanceCard for formatting day-of-month (1st, 2nd, 3rd, etc.)
----
-
-## 2026-04-04 - UX-04
-- Refactored card-transactions.tsx to use the shared `EmptyState` component instead of inline custom empty state
-- Added `icon` optional prop to `EmptyState` component for reuse across screens
-- Empty state shows Receipt icon, heading "No transactions yet", subtext "Log a purchase to see which bill it lands on", and a prominent "Log Transaction" button
-- Files changed: `app/card-transactions.tsx`, `components/molecules/EmptyState.tsx`
-- **Learnings for future iterations:**
-  - `EmptyState` now supports an optional `icon` prop (ReactNode) — use it for future empty states
-  - `lucide-react-native` `Receipt` icon works well for transaction-related empty states
-  - The old card-transactions empty state had custom styles that duplicated EmptyState — always check for existing shared components first
----
-
-## 2026-04-04 - UX-05
-- Added first-transaction teachable moment modal in log-transaction.tsx
-- When transactionStore has 0 transactions and user hasn't dismissed before, a modal appears after save
-- Modal explains current/next/previous cycle classification with color-coded labels
-- Dismissal persisted in AsyncStorage under key `falcly-first-tx-teachable-dismissed`
-- Transaction saves first, modal shown after — does not block save
-- Files changed: `app/log-transaction.tsx`
-- **Learnings for future iterations:**
-  - React Native built-in `Modal` with `transparent` + `animationType="fade"` works well for teachable moments — no third-party bottom sheet needed
-  - Use `surfaceElevated` for modal card background, not `cardBg` (doesn't exist in SemanticTokens)
-  - JSX string literals with apostrophes must be wrapped in `{"..."}` to satisfy `react/no-unescaped-entities` lint rule
-  - `transactionCount` from the store can be read in render to detect first-tx condition — checked before `addTransaction` is called
----
-
-## 2026-04-04 - CH-01
-- Updated SwipeImpactPanel hint from "Set your cash on hand in Settings to see payoff projections." to "Set your funds available to see payoff projections."
-- Updated component-showcase.tsx "Cash on Hand" label to "Funds Available"
-- Verified `grep -ri 'cash on hand' app/ components/` returns 0 results
-- Files changed: `components/organisms/SwipeImpactPanel.tsx`, `app/component-showcase.tsx`
-- **Learnings for future iterations:**
-  - component-showcase.tsx also contains user-facing text that must stay in sync with terminology changes
-  - The old FF-02 story missed the SwipeImpactPanel hint — always grep broadly when doing terminology renames
+  - notifee `createTriggerNotification` requires a future timestamp — need to compute "next occurrence" of monthly day-of-month minus N days
+  - `cancelAllNotifications()` cancels both trigger and displayed notifications — useful for full reschedule
+  - The `require()` pattern for cross-store access is already established in userStore (lines 166–181)
+  - onboarding-result.tsx is the final onboarding step — notification permission prompt fits here before `complete()`
 ---

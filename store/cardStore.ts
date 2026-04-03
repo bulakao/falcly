@@ -3,8 +3,29 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { cards as cardsTable } from '@/db/schema/local';
 import { Card } from '@/types/card';
+import {
+  scheduleAllReminders,
+  cancelCardNotifications,
+  checkHighUtilization,
+} from '@/utils/notifications';
 
 type EditableCardFields = Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt' | 'isActive'>;
+
+/** Re-schedule all card notifications using current user preferences. */
+function rescheduleNotifications(cards: Card[]) {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useUserStore } = require('@/store/userStore');
+  const { notifyStatementReminder, notifyDueReminder } = useUserStore.getState();
+  scheduleAllReminders(cards, { notifyStatementReminder, notifyDueReminder }).catch(() => {});
+}
+
+/** Check high-utilization alert using current user preference. */
+function checkUtilAlert(cards: Card[]) {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useUserStore } = require('@/store/userStore');
+  const { notifyHighUtilization } = useUserStore.getState();
+  checkHighUtilization(cards, notifyHighUtilization).catch(() => {});
+}
 
 // Map DB row to Card type
 function rowToCard(row: typeof cardsTable.$inferSelect): Card {
@@ -111,6 +132,8 @@ export const useCardStore = create<CardStore>()((set, get) => ({
       cards: [...state.cards, card],
       _nextId: state._nextId + 1,
     }));
+
+    rescheduleNotifications(get().cards);
   },
 
   updateCard: (cardId, updates) => {
@@ -125,6 +148,8 @@ export const useCardStore = create<CardStore>()((set, get) => ({
         c.id === cardId ? { ...c, ...updates } : c,
       ),
     }));
+
+    rescheduleNotifications(get().cards);
   },
 
   updateBalance: (cardId, newBalance) => {
@@ -141,13 +166,18 @@ export const useCardStore = create<CardStore>()((set, get) => ({
           : c,
       ),
     }));
+
+    checkUtilAlert(get().cards);
   },
 
   deleteCard: (cardId) => {
     db.delete(cardsTable).where(eq(cardsTable.id, cardId)).run();
+    cancelCardNotifications(cardId).catch(() => {});
     set((state) => ({
       cards: state.cards.filter((c) => c.id !== cardId),
     }));
+
+    rescheduleNotifications(get().cards);
   },
 
   toggleCardActive: (cardId) => {

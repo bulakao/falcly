@@ -19,6 +19,7 @@ import { supabase } from '@/utils/supabase';
 import { useRunMigrations } from '@/db/migrate';
 import { initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
 import { initLogger, initCrashHandler, logger, installNetworkLogger, useNavigationLogger } from '@/utils/logger';
+import { createChannels, scheduleAllReminders, checkHighUtilization } from '@/utils/notifications';
 import { AppThemeProvider, useEffectiveColorScheme, lightTheme, darkTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import type { Theme } from '@react-navigation/native';
@@ -109,6 +110,13 @@ function RootLayout() {
       if (tier === 'free') {
         useCardStore.getState().enforceActiveLimit(FREE_CARD_LIMIT);
       }
+      // Schedule push notifications after cards + profile are loaded
+      const cards = useCardStore.getState().cards;
+      const { notifyStatementReminder, notifyDueReminder, notifyHighUtilization } =
+        useUserStore.getState();
+      createChannels().catch(() => {});
+      scheduleAllReminders(cards, { notifyStatementReminder, notifyDueReminder }).catch(() => {});
+      checkHighUtilization(cards, notifyHighUtilization).catch(() => {});
     }
   }, [dbReady]);
 
