@@ -6,6 +6,7 @@ import { Text, View } from '@/components/Themed';
 import { FormInput, Label } from '@/components/atoms';
 import { AlertBanner, BreakdownRow, BreakdownDivider, ChipSelector } from '@/components/molecules';
 import { BillingTimeline } from '@/components/organisms/BillingTimeline';
+import { GanttTimeline } from '@/components/organisms/GanttTimeline';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore, getPaydays } from '@/store/userStore';
 import { useTransactionStore } from '@/store/transactionStore';
@@ -16,6 +17,9 @@ import type { Card } from '@/types/card';
 import { trackSwipeCheckPerformed, trackDataStalenessWarningShown } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
+
+// Module-level flag so expand/collapse persists across re-mounts within the session
+let ganttExpandedSession = false;
 
 const QUICK_AMOUNTS = [
   { label: '₱500', value: 500 },
@@ -52,6 +56,7 @@ export function SwipeImpactPanel({
   const getCurrentCycle = useTransactionStore((s) => s.getCurrentCycle);
   const transactions = useTransactionStore((s) => s.transactions);
   const [amountText, setAmountText] = useState('');
+  const [ganttExpanded, setGanttExpanded] = useState(ganttExpandedSession);
 
   const proposedAmount = useMemo(() => {
     const n = parseFloat(amountText);
@@ -125,6 +130,13 @@ export function SwipeImpactPanel({
     );
   }
 
+  function toggleGantt() {
+    setGanttExpanded((prev) => {
+      ganttExpandedSession = !prev;
+      return !prev;
+    });
+  }
+
   const showCarriedBalance = impact.carriedBalance > 0 && impact.monthlyInterest > 0;
 
   return (
@@ -167,6 +179,18 @@ export function SwipeImpactPanel({
 
       {/* Billing cycle timeline */}
       <BillingTimeline card={card} />
+
+      {/* Collapsible Gantt timeline */}
+      <Pressable onPress={toggleGantt} style={styles.ganttToggle}>
+        <Text style={[styles.ganttToggleText, { color: t.primary }]}>
+          Billing Cycle {ganttExpanded ? '▴' : '▾'}
+        </Text>
+      </Pressable>
+      {ganttExpanded && (
+        <View style={[styles.ganttContainer, { borderColor: t.border }]}>
+          <GanttTimeline cards={[card]} />
+        </View>
+      )}
 
       {/* Amount input */}
       <Label>How much will you swipe?</Label>
@@ -327,6 +351,20 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 12,
     fontFamily: fonts.interSemiBold,
+  },
+  ganttToggle: {
+    paddingVertical: 8,
+    marginBottom: 4,
+  },
+  ganttToggleText: {
+    fontSize: 14,
+    fontFamily: fonts.interSemiBold,
+  },
+  ganttContainer: {
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 12,
+    marginBottom: 16,
   },
   breakdown: {
     borderRadius: 12,
