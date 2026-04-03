@@ -823,7 +823,7 @@
         "Entry point is present for all cards (not just Pro)"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "card-transactions, log-transaction, payment-summary are built but orphaned \u2014 no navigation to them from home/card pager."
     },
     {
