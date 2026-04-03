@@ -749,7 +749,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Schema-only change. Store and UI come in FF-04 and FF-05."
     },
     {

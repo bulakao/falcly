@@ -25,3 +25,14 @@ Started: Fri Apr  3 18:25:08 PST 2026
   - JSX text with apostrophes must use `&apos;` to pass `react/no-unescaped-entities` lint rule
   - Pre-existing lint error in `status-guide.tsx` line 42 — same apostrophe issue, not introduced by this change
 ---
+
+## 2026-04-03 - FF-03
+- Added `payday2` nullable integer column to profile table in `db/schema/local.ts`
+- Created migration `drizzle/0005_multi_payday.sql` with `ALTER TABLE profile ADD payday2 integer`
+- Registered migration in `drizzle/migrations.js` and `drizzle/meta/_journal.json`
+- Files changed: `db/schema/local.ts`, `drizzle/0005_multi_payday.sql`, `drizzle/migrations.js`, `drizzle/meta/_journal.json`
+- **Learnings for future iterations:**
+  - Migration journal entries use incrementing `idx` and `when` timestamps; follow the existing pattern for version/breakpoints
+  - Snapshots are not required for every migration (0003 and 0004 have none)
+  - Nullable columns in drizzle schema simply omit `.notNull()` — no explicit `.default(null)` needed
+---
