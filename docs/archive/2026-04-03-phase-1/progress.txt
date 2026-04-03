@@ -1,0 +1,461 @@
+# Ralph Progress Log
+Started: Tue 31 Mar 2026 14:15:37 PST
+
+## Codebase Patterns
+- Use `@/` path alias for all imports (maps to project root)
+- Expo Router file-based routing: screens in `app/`, modal screens registered in `app/_layout.tsx`
+- Zustand stores go in `store/` directory, one store per domain
+- Types/interfaces go in `types/` directory
+- Decision engine logic in `utils/decisionEngine.ts` — deterministic, first-match-wins evaluation
+- Card status uses three channels: color (emerald/amber/crimson) + icon (✓/⚠/✕) + text label
+- After adding new route files, Expo regenerates `.expo/types/router.d.ts` — run tsc after to verify
+- Zustand persist with AsyncStorage: use `persist` + `createJSONStorage(() => AsyncStorage)` middleware, store name `falcly-cards`
+- Swipe impact: `calculateSwipeImpact(card, amount, netAvailableCash)` in `utils/decisionEngine.ts` — netAvailableCash is null until CA stories
+- Best card scoring: `scoreCard(card)` and `calculateBestCard(cards)` in `utils/decisionEngine.ts` — lowest score wins; cash penalty stubbed until CA
+- Route params: use `useLocalSearchParams<{ paramName: string }>()` for typed params in Expo Router screens
+- Cycle date math: `getCycleDates(card, today)` in `utils/decisionEngine.ts` returns cycleStart, statementClose, dueDate, and progress metrics
+- New tab screens go in `app/(tabs)/` and must be registered in `app/(tabs)/_layout.tsx`
+- Swipe-impact screen is the card detail screen — card-level actions (update balance, edit, delete) live here
+- Staleness helpers in `utils/staleness.ts`: `formatUpdatedAgo()`, `getStalenessLevel()`, `daysSinceUpdate()`
+- Staleness levels: fresh (<5 days), warning (5–9 days, amber), stale (10+ days, badge replaced)
+- User profile store: `store/userStore.ts` with Zustand persist, store name `falcly-user`
+- Cash on hand is `number | null` — null means not yet set; swipe impact shows "Not set" gracefully
+- Net available cash is per-card: `computeNetAvailableCash(cash, income, payday, card, committedExpenses)` in `utils/decisionEngine.ts` — income included only when payday ≤ card due date, committed expenses deducted
+- `calculateCardStatus()` accepts optional `netAvailableCash` param — pass it to enable cash-based RISKY detection on home screen
+- `scoreCard()` and `calculateBestCard()` also accept net available cash — pass a getter function for per-card computation
+- Projected balance formula: `projectedStatementBalance(card, proposedSwipe, today)` — canonical function, includes pending/installments/subscriptions/annual fee
+- When adding new Card fields: add Zustand persist migration in `store/cardStore.ts` to backfill defaults for existing data
+- Future cycle projections: `projectFutureCycles(card, netAvailableCash, today)` in `utils/decisionEngine.ts` — returns array of `FutureCycleProjection` with `isKnown` flag for signal-only cycles
+- Onboarding flow: `app/onboarding.tsx` → `app/onboarding-result.tsx` → home; uses `router.replace()` to prevent back-nav to completed forms
+- STATUS_EXPLANATIONS in `app/onboarding-result.tsx` — contextual one-sentence meaning for each status tier
+- `StatusTooltip` component (`components/StatusTooltip.tsx`) — reusable dismissible tooltip for status badge education, uses Modal + backdrop pattern
+- Subscription store: `store/subscriptionStore.ts` with Zustand persist, store name `falcly-subscription` — `canAddCard(count)` checks tier + card limit
+- FREE_CARD_LIMIT = 2 — exported from `store/subscriptionStore.ts`
+- Subscription state: `isPaidPro()` = paid subscriber, `isTrialActive()` = trial user, `tier === 'free'` = free user — use these helpers, not raw state checks
+- Read-only cards: `isCardReadOnly(cardIndex)` checks free tier + index >= FREE_CARD_LIMIT — use to gate editing/reminders on expired Pro cards
+- Data retention: `proExpiredAt` tracks when Pro expired; `daysUntilDataDeletion()` returns remaining days of 90-day retention window
+- Network status: `useNetworkStatus()` hook from `hooks/useNetworkStatus.ts` — returns `{ isConnected, isOffline }`; `OfflineChip` component renders automatically in tab headers
+- Firebase Firestore init: `initFirestore()` in `utils/firebase.ts` — call once at app startup; enables offline persistence with encrypted-at-rest cache
+- Encryption: `encrypt()`/`decrypt()` in `utils/encryption.ts` — AES-256-GCM via `@noble/ciphers`; uses `.js` extension in imports (`@noble/ciphers/aes.js`)
+- Cloud sync: `prepareCardForSync()`/`restoreCardFromSync()` in `utils/cloudSync.ts` — encrypts sensitive card fields before Firestore write
+- Secure logging: `secureLog()`/`secureWarn()` in `utils/secureLogger.ts` — redacts sensitive financial fields; suppressed in production
+- CSV export: `exportDataAsCSV()` in `utils/csvExport.ts` — uses `expo-file-system/next` (File/Paths API) + `expo-sharing`
+- Analytics: `utils/analytics.ts` — PostHog EU region; use `trackXxx()` helpers for events; amounts anonymized into tiers via `getAmountTier()`
+- Analytics opt-out: `analyticsOptOut` in `store/userStore.ts` — persisted; restored on app launch in `_layout.tsx`
+- All hooks (useRef, useEffect) must be called before any early return in React components — move them above guard clauses
+
+---
+
+## 2026-03-31 - CL-01
+- Implemented add-card form with bank name, credit limit, outstanding balance, statement day, due day offset
+- Created decision engine with SAFE/CAUTION/RISKY logic (utilization + days-to-statement)
+- Created Zustand card store with addCard action
+- Updated home screen to show card list with status badges
+- Files changed: `types/card.ts`, `utils/decisionEngine.ts`, `store/cardStore.ts`, `app/add-card.tsx`, `app/(tabs)/index.tsx`, `app/(tabs)/_layout.tsx`, `app/_layout.tsx`
+- **Learnings for future iterations:**
+  - Expo Router generates typed routes in `.expo/types/router.d.ts` — new route files need a tsc run to regenerate types
+  - Default Expo template has placeholder tabs (Tab One/Two) — renamed to Cards/Settings
+  - Decision engine is simplified for CL-01 (no cash/income inputs) — will need expansion for CA and DE stories
+  - Sensible defaults: due day offset 21, interest rate 2%, min payment 5% or ₱500 floor
+---
+
+## 2026-03-31 - CL-02
+- Added Zustand persistence via AsyncStorage so cards survive app restarts
+- Moved `nextId` counter into the store (`_nextId`) so IDs persist correctly
+- Home screen status display (color + icon + text + reason) was already implemented in CL-01
+- Files changed: `store/cardStore.ts`, `package.json`
+- **Learnings for future iterations:**
+  - Zustand persist middleware wraps create with double parens: `create<T>()(persist(...))`
+  - Store counter (`_nextId`) must be persisted alongside data to avoid ID collisions after restart
+  - CL-02 was mostly satisfied by CL-01's UI work — the missing piece was data persistence
+---
+
+## 2026-03-31 - CL-03
+- Added `SwipeImpactResult` type and `calculateSwipeImpact()` to decision engine
+- Created swipe-impact modal screen with numeric input, quick-amount chips (₱500/₱1K/₱2K/₱5K), real-time status/projection updates
+- Shows projected statement balance, minimum payment, credit available after swipe
+- Carried balance and monthly interest shown when net available cash < projected balance
+- Made home screen cards tappable — tap navigates to swipe impact for that card
+- Registered `/swipe-impact` route in root layout
+- Files changed: `types/card.ts`, `utils/decisionEngine.ts`, `app/swipe-impact.tsx`, `app/_layout.tsx`, `app/(tabs)/index.tsx`
+- **Learnings for future iterations:**
+  - `calculateSwipeImpact` mirrors the first-match-wins pattern from `calculateCardStatus` but with projected values
+  - `netAvailableCash` is null until CA stories implement cash/income inputs — UI shows "Not set" gracefully
+  - Expo typed routes regenerate via `npx expo export` — `.expo/types/router.d.ts` is gitignored so new routes need an export/tsc cycle to verify
+  - `useLocalSearchParams<{ cardId: string }>()` for typed route params in Expo Router
+  - Quick-amount chips use flex:1 in a row for equal sizing without hardcoded widths
+---
+
+## 2026-03-31 - CL-04
+- Added `scoreCard()` and `calculateBestCard()` to decision engine
+- Added `BestCardResult` type
+- Added hero recommendation component to home screen as FlatList header
+- Hero shows best card bank name + SAFE badge; taps through to swipe impact
+- Warning banner shown when no SAFE card available (falls back to lowest-scoring CAUTION)
+- Returns null (no hero) when all cards are RISKY
+- Files changed: `types/card.ts`, `utils/decisionEngine.ts`, `app/(tabs)/index.tsx`
+- **Learnings for future iterations:**
+  - Scoring formula: `utilization×100 + (30 - daysToStatement) + statusPenalty(SAFE=0/CAUTION=50/RISKY=100) + cashPenalty(0 until CA)`
+  - `FlatList.ListHeaderComponent` is the clean way to add a hero above a list without nesting ScrollViews
+  - Cash coverage penalty is stubbed at 0 — will need wiring when CA stories land
+---
+
+## 2026-03-31 - CL-05
+- Added `CycleDates` type and `getCycleDates()` helper to decision engine for cycle date calculations
+- Created `BillingTimeline` component: single-card timeline strip showing cycle start → today → statement close → due date
+- Statement close marker changes color: emerald (safe), amber (≤7 days), crimson (≤2 days)
+- Created `GanttTimeline` component: multi-card Gantt view with cards stacked vertically, sorted by urgency
+- Added new "Timeline" tab to tab layout with calendar icon
+- Integrated single-card timeline strip into swipe-impact screen
+- Files changed: `types/card.ts`, `utils/decisionEngine.ts`, `components/BillingTimeline.tsx`, `components/GanttTimeline.tsx`, `app/(tabs)/timeline.tsx`, `app/(tabs)/_layout.tsx`, `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - Cycle date math: cycle start = previous statement day + 1, due date = statement close + dueDayOffset
+  - For timeline positioning, calculate a global date range across all cards and convert dates to percentages
+  - `position: 'relative'` on parent + `position: 'absolute'` with `left: '%'` works well for timeline markers in RN
+  - Tab ordering in `_layout.tsx` determines the order in the tab bar — insert new tabs before Settings
+  - Manual browser/simulator verification needed for visual timeline components
+---
+
+## 2026-03-31 - CL-06
+- Added `updateBalance` action to cardStore — updates `outstandingBalance` and `balanceUpdatedAt` timestamp
+- Created `app/update-balance.tsx` modal with single numeric field, pre-filled with current balance, confirms on tap
+- Added "Balance updated X ago" timestamp and "Update Balance" CTA to swipe-impact (card detail) screen
+- Registered `/update-balance` route in root layout
+- Files changed: `store/cardStore.ts`, `app/update-balance.tsx`, `app/_layout.tsx`, `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - `formatUpdatedAgo()` helper converts timestamp to human-readable relative time — reusable for staleness warnings (CL-07)
+  - The swipe-impact screen doubles as the card detail screen — card-level actions (update, edit, delete) live here
+  - `selectTextOnFocus` on TextInput is useful for pre-filled numeric fields so users can overwrite easily
+  - Staleness warning banner (CL-07) will need to link to the update-balance modal — route is already registered
+---
+
+## 2026-03-31 - CL-07
+- Extracted `formatUpdatedAgo` from swipe-impact into shared `utils/staleness.ts`
+- Added `getStalenessLevel()` and `daysSinceUpdate()` helpers with three-tier system (fresh/warning/stale)
+- Home screen cards now show "Updated Xd ago" timestamp at all times
+- At 5+ days: amber inline warning with "Tap to update" CTA on home screen cards
+- At 10+ days: SAFE/CAUTION/RISKY badge replaced by gray "⚠ STALE" badge, reason text cleared
+- Swipe-impact (card detail) screen: tappable staleness banner links to update-balance modal, badge replaced at 10+ days
+- Balance timestamp text changes color based on staleness (amber at warning, gray at stale)
+- Files changed: `utils/staleness.ts` (new), `app/(tabs)/index.tsx`, `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - Staleness is a UI-level concern — it doesn't modify the decision engine's output, it overrides the badge display
+  - Shared utils in `utils/` prevent duplication between home screen and card detail
+  - Pre-existing eslint error on line 112 of index.tsx (unescaped apostrophe) — not introduced by CL-07
+---
+
+## 2026-03-31 - CA-01
+- Created `store/userStore.ts` — Zustand persisted store for user profile (cashOnHand, cashUpdatedAt)
+- Rebuilt Settings tab (`app/(tabs)/two.tsx`) with cash on hand field: display value, inline edit, save/cancel
+- Cash timestamp shown with staleness coloring (amber at 5+ days, gray at 10+ days)
+- Staleness nudge banners at 5+ and 10+ days, tappable to trigger edit mode
+- Wired `cashOnHand` from userStore into swipe-impact screen — replaces hardcoded `null` in `calculateSwipeImpact`
+- Net available cash now recalculates immediately in swipe impact when cash on hand changes
+- Files changed: `store/userStore.ts` (new), `app/(tabs)/two.tsx`, `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - User profile data lives in `store/userStore.ts` (separate from card store) — CA-02/CA-03 will add income, payday, expenses here
+  - Settings screen uses inline editing pattern (tap Update → input appears → Save/Cancel) rather than a separate modal
+  - Staleness reuse: `getStalenessLevel()` and `formatUpdatedAgo()` from `utils/staleness.ts` work for any timestamp, not just card balances
+  - Onboarding prompt for cash on hand (AC item 1) is deferred to OB-01 story which handles optional enrichment fields
+---
+
+## 2026-03-31 - CA-02
+- Added `monthlyIncome` and `payday` fields to `store/userStore.ts` with `setIncome()` action
+- Added `computeNetAvailableCash()` helper to `utils/decisionEngine.ts` — computes per-card net available cash, including income only when payday ≤ card due date
+- Added Monthly Income & Payday section to Settings screen with inline edit pattern (income + payday fields)
+- Updated swipe-impact screen to use `computeNetAvailableCash()` instead of raw `cashOnHand`
+- Files changed: `store/userStore.ts`, `utils/decisionEngine.ts`, `app/swipe-impact.tsx`, `app/(tabs)/two.tsx`
+- **Learnings for future iterations:**
+  - Net available cash is per-card because income inclusion depends on whether payday ≤ that card's due date — use `computeNetAvailableCash()` everywhere instead of raw `cashOnHand`
+  - `getCycleDates()` returns `dueDate` as a full Date object — use `.getDate()` to get the day-of-month for payday comparison
+  - CA-03 (committed expenses) and CA-04 (net available cash display) will extend `computeNetAvailableCash()` with expense deduction
+---
+
+## 2026-03-31 - CA-03
+- Added `committedExpenses` field and `setCommittedExpenses()` action to `store/userStore.ts`
+- Extended `computeNetAvailableCash()` in `utils/decisionEngine.ts` to accept and deduct committed expenses
+- Added Committed Monthly Expenses section to Settings screen with inline edit pattern (single numeric input)
+- Added "Committed expenses: −₱X,XXX" labeled line item in Swipe Impact breakdown (shown when expenses > 0)
+- Wired `committedExpenses` from userStore into swipe-impact screen's `computeNetAvailableCash()` call
+- Files changed: `store/userStore.ts`, `utils/decisionEngine.ts`, `app/swipe-impact.tsx`, `app/(tabs)/two.tsx`
+- **Learnings for future iterations:**
+  - `computeNetAvailableCash()` now has a `committedExpenses` param (default null) — all callers should pass it
+  - Committed expenses is a single number, not itemized — future stories may break it down but for now it's one field
+  - CA-04 (net available cash display) needs the full formula including committed expenses — already wired in
+---
+
+## 2026-03-31 - CA-04
+- Enhanced Swipe Impact screen with full net available cash formula breakdown
+- When cash is set: shows Cash on hand, Monthly income (+/excluded with strikethrough when payday > due date), Committed expenses (−), divider, then bold "Available to pay" total in emerald
+- When cash not set: shows simple "Not set" placeholder with hint to configure in Settings
+- Added `getCycleDates` import for payday vs due date comparison
+- Files changed: `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - `incomeApplies` must be computed per-card since each card has a different due date — use `getCycleDates(card).dueDate.getDate()` to compare with payday
+  - auto_payments and subscriptions_this_cycle are part of the formula spec but have no Phase 1 stories — they're effectively 0 until those features are added
+  - Strikethrough text (`textDecorationLine: 'line-through'`) is a good visual pattern for showing excluded-but-visible formula components
+---
+
+## 2026-03-31 - DE-01
+- Added cash-below-minimum-payment RISKY check as highest priority condition in `calculateCardStatus()`
+- Extended `calculateCardStatus()` with optional `netAvailableCash` parameter
+- Extended `scoreCard()` and `calculateBestCard()` to pass through net available cash
+- Wired home screen to compute per-card `netAvailableCash` via `computeNetAvailableCash()` and pass to all status calculations
+- Best card hero and card list items now reflect cash-aware RISKY status
+- Files changed: `utils/decisionEngine.ts`, `app/(tabs)/index.tsx`
+- **Learnings for future iterations:**
+  - `calculateCardStatus()` now accepts optional `netAvailableCash` — all callers should pass it when cash data is available
+  - `calculateBestCard()` uses a getter function `(card: Card) => number | null` to compute per-card cash, avoiding pre-computing for all cards
+  - `useCallback` for the getter function avoids re-creating on every render — depends on user store values
+  - The swipe-impact screen already had the minimum payment RISKY check in `calculateSwipeImpact()` — DE-01 brings parity to the home screen via `calculateCardStatus()`
+---
+
+## 2026-03-31 - DE-02
+- Already implemented in prior stories — `calculateCardStatus()` has `days <= 2` → RISKY check (line 103) with correct reason message
+- `calculateSwipeImpact()` also has the same check (line 196) for swipe context
+- Home screen calls `calculateCardStatus()` without swipe amount, satisfying AC3 (evaluated without proposed swipe)
+- No code changes needed — marked as passing
+- Files changed: `docs/prd.json` (marked passes: true)
+- **Learnings for future iterations:**
+  - Some DE stories may already be satisfied by earlier CL implementations — check existing logic before writing new code
+  - The decision engine was designed with first-match-wins from CL-01, so RISKY/CAUTION thresholds were baked in early
+---
+
+## 2026-03-31 - DE-03
+- Already implemented in prior stories — `calculateCardStatus()` has `days <= 7` → CAUTION check (line 118) with correct reason
+- `BillingTimeline` component already changes statement close marker to amber at ≤7 days (line 30-31)
+- First-match-wins ensures RISKY from higher-priority conditions takes precedence
+- No code changes needed — marked as passing
+- Files changed: `docs/prd.json` (marked passes: true)
+- **Learnings for future iterations:**
+  - CL-01 and CL-05 proactively implemented DE-02/DE-03 thresholds — check for pre-existing logic before starting DE stories
+---
+
+## 2026-03-31 - DE-04
+- Added `pendingTransactions`, `installmentsMonthlyAmount`, `subscriptionsThisCycle`, `annualFee`, `annualFeeMonth` fields to Card type (all default 0)
+- Created `projectedStatementBalance()` helper in decision engine implementing the full formula
+- Updated `calculateSwipeImpact()` to use `projectedStatementBalance()` instead of simple `outstanding + proposed`
+- Annual fee is conditionally added when `annualFeeMonth` matches the current cycle's statement close month
+- Added Zustand persist migration (v0→v1) to backfill new fields on existing cards
+- Swipe Impact screen now shows itemized breakdown: outstanding → pending → installments → subscriptions → annual fee → proposed swipe → total
+- Files changed: `types/card.ts`, `utils/decisionEngine.ts`, `store/cardStore.ts`, `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - When adding new Card fields, always add a Zustand persist migration to backfill defaults for existing data
+  - `projectedStatementBalance()` is the canonical formula — use it anywhere projected balance is needed
+  - Annual fee uses month comparison (1-based) against `statementClose.getMonth() + 1` from `getCycleDates()`
+  - The `addCard` type uses `Omit` + `Partial<Pick>` to make new fields optional with defaults in the store
+---
+
+## 2026-03-31 - DE-05
+- Added `FutureCycleProjection` and `FutureSignal` types to `types/card.ts`
+- Created `projectFutureCycles()` in `utils/decisionEngine.ts` — projects future billing cycles based on known fixed events (installments, subscriptions, annual fees)
+- Horizon: recurring events → 6 cycles; annual fee → project until next occurrence (up to 12). One signal-only cycle added beyond horizon.
+- Current cycle (cycle 0) uses `projectedStatementBalance()` for full balance; future cycles show only known committed items (no fabricated spending)
+- Signal-only cycles beyond the last fixed event show On Track / At Risk / Unknown based on current status
+- Created `components/FutureTimeline.tsx` — renders per-card cycle projection cards with status badges and committed item breakdowns
+- Integrated FutureTimeline into Timeline screen (`app/(tabs)/timeline.tsx`) below the Gantt chart, filtered to cards with fixed events
+- Cleaned up pre-existing unused `CardStatus` import in `utils/decisionEngine.ts`
+- Files changed: `types/card.ts`, `utils/decisionEngine.ts`, `components/FutureTimeline.tsx`, `app/(tabs)/timeline.tsx`
+- **Learnings for future iterations:**
+  - `projectFutureCycles()` is the canonical function for future cycle projections — use it anywhere multi-cycle forecasting is needed
+  - `getFutureCycleDates()` (internal helper) offsets statement close by N months from current cycle — handles month rollover via `Date.setMonth()`
+  - Future cycle status is based on committed items vs credit limit utilization, not the full decision engine (no days-to-statement logic for future cycles)
+  - Cards without any fixed events (installments/subscriptions/annualFee all 0) produce no future projections — FutureTimeline returns null
+  - Manual simulator/browser verification needed for the future timeline UI layout
+---
+
+## 2026-03-31 - CM-01
+- Added `updateCard` action to `store/cardStore.ts` — accepts partial card field updates
+- Created `app/edit-card.tsx` modal with all editable fields: bank name, credit limit, statement day, due day offset, interest rate, min payment pct/floor, annual fee/month, pending transactions, installments, subscriptions
+- Added "Edit Card" button to swipe-impact (card detail) screen alongside existing "Update Balance" button
+- Registered `/edit-card` route in root layout
+- Saving edits triggers Zustand reactivity → home screen and all dependent calculations recalculate immediately
+- Files changed: `store/cardStore.ts`, `app/edit-card.tsx` (new), `app/swipe-impact.tsx`, `app/_layout.tsx`
+- **Learnings for future iterations:**
+  - `updateCard` uses `Partial<EditableCardFields>` — only changed fields are spread into the card object
+  - Interest rate and min payment pct are stored as decimals (0.02) but displayed as percentages (2%) in the edit form — convert on save
+  - The swipe-impact screen is the card detail screen — all card-level actions (update balance, edit, delete) live here
+  - `selectTextOnFocus` on pre-filled numeric fields makes editing easier — user can overwrite without manual selection
+---
+
+## 2026-03-31 - CM-02
+- Added `deleteCard` action to `store/cardStore.ts` — filters card out by ID
+- Added "Delete" button with crimson styling to card detail (swipe-impact) screen action row
+- Confirmation dialog via `Alert.alert` with Cancel/Delete options before deletion
+- On delete: removes card from store and navigates back to home screen via `router.back()`
+- Zustand reactivity ensures card list and best-card hero recalculate immediately after deletion
+- AC3 (Pro-only card on Free tier) is satisfied: `deleteCard` is a simple filter, remaining cards are unaffected
+- Files changed: `store/cardStore.ts`, `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - TypeScript doesn't narrow types inside nested function declarations after a guard — capture narrowed values in consts before the function
+  - `Alert.alert` is the standard React Native pattern for confirmation dialogs — works on both iOS and Android
+  - Delete action follows the same action row pattern as Edit Card and Update Balance on the card detail screen
+---
+
+## 2026-03-31 - OB-01
+- Created `app/onboarding.tsx` — simplified 3-field onboarding screen (statement day, credit limit, outstanding balance) with bank name defaulting to "My Card"
+- Created `app/onboarding-result.tsx` — first status result screen showing SAFE/CAUTION/RISKY badge with contextual explanation and optional enrichment fields (cash on hand, due day offset, interest rate)
+- Updated home screen empty state with "Get Started" button linking to onboarding flow
+- Registered `/onboarding` and `/onboarding-result` routes in root layout (headerShown: false for immersive onboarding)
+- After 3-field save, user sees their first status result immediately; enrichment is expandable and optional
+- Files changed: `app/onboarding.tsx` (new), `app/onboarding-result.tsx` (new), `app/(tabs)/index.tsx`, `app/_layout.tsx`
+- **Learnings for future iterations:**
+  - `router.replace()` is better than `router.push()` for onboarding flow transitions — prevents back-navigating to the entry form after card is already saved
+  - `useCardStore.getState()` gives synchronous access to the store outside of React — useful for reading the newly added card ID right after `addCard()`
+  - `headerShown: false` on Stack.Screen options creates an immersive full-screen experience for onboarding — no navigation chrome
+  - STATUS_EXPLANATIONS map provides contextual one-sentence meanings for each status tier — reusable for OB-02 tooltips
+  - Enrichment fields use inline expand pattern (tap to reveal) rather than a separate screen — keeps the flow lightweight
+---
+
+## 2026-03-31 - OB-02
+- AC1 (contextual explanation) and AC2 (color + icon + text) were already implemented in OB-01's `onboarding-result.tsx`
+- Created `components/StatusTooltip.tsx` — reusable dismissible info tooltip (Modal-based) explaining all three status tiers
+- Integrated StatusTooltip next to status badges on onboarding result screen and home screen card items
+- Tooltip shows all three tiers with their badge color, icon, and one-sentence description; dismissed via "Got it" or backdrop tap
+- Files changed: `components/StatusTooltip.tsx` (new), `app/onboarding-result.tsx`, `app/(tabs)/index.tsx`
+- **Learnings for future iterations:**
+  - `Modal` with `transparent` + backdrop `Pressable` is the standard RN pattern for dismissible tooltips/popovers
+  - `hitSlop={8}` on small touch targets (like the ⓘ icon) improves usability on mobile
+  - StatusTooltip is stateless regarding which status is active — it always shows all three tiers for educational context
+  - Most of OB-02 was already satisfied by OB-01 — the only missing piece was the dismissible tooltip (AC3)
+---
+
+## 2026-03-31 - MO-01
+- Created `store/subscriptionStore.ts` — Zustand persisted store tracking subscription tier (free/pro) with `canAddCard()` helper
+- Created `app/pro-paywall.tsx` — paywall screen with feature list (unlimited cards, payment planning, installment tracking, AI alerts), annual plan as primary CTA with "₱83/mo, billed ₱999/yr — Save 44%" badge, monthly plan as secondary option
+- Updated home screen: replaced static `Link` on "+ Add Card" button with `Pressable` that checks `canAddCard(cards.length)` — routes to paywall when Free user has 2+ cards
+- Registered `/pro-paywall` route in root layout as modal
+- Existing free cards remain fully accessible — paywall only blocks adding card #3
+- Files changed: `store/subscriptionStore.ts` (new), `app/pro-paywall.tsx` (new), `app/(tabs)/index.tsx`, `app/_layout.tsx`, `docs/prd.json`
+- **Learnings for future iterations:**
+  - Subscription store uses `partialize` to only persist `tier` and `trialEndsAt`, excluding derived functions from storage
+  - `canAddCard()` is a store method using `get()` for reactive tier checking — MO-02/MO-03 will extend with trial/RevenueCat logic
+  - Paywall plan buttons are placeholder handlers (`router.back()`) — RevenueCat integration comes in MO-02/MO-03
+  - Home screen "Add Card" changed from `Link` to `Pressable` with `router.push()` to support conditional routing
+---
+
+## 2026-03-31 - MO-02
+- Added `startTrial()`, `isTrialActive()`, `checkTrialExpiry()`, `getTrialEndDate()` actions to `store/subscriptionStore.ts`
+- Added "Try Free for 14 Days" CTA button to paywall screen (`app/pro-paywall.tsx`) with confirmation dialog simulating payment method requirement
+- Added "Try Free for 14 Days" CTA to swipe-impact screen (payoff planner entry point) for free-tier users, linking to paywall
+- Added Pro subscription status section to Settings screen (`app/(tabs)/two.tsx`) showing PRO badge, "Free Trial" label, and trial end date
+- Added trial expiry check on app launch in `app/_layout.tsx` — reverts to free tier when trial expires
+- Trial CTA hidden on paywall when trial is already active
+- Files changed: `store/subscriptionStore.ts`, `app/pro-paywall.tsx`, `app/swipe-impact.tsx`, `app/(tabs)/two.tsx`, `app/_layout.tsx`
+- **Learnings for future iterations:**
+  - `startTrial()` sets tier to 'pro' and `trialEndsAt` to 14 days from now; `checkTrialExpiry()` reverts to 'free' when expired — called on app launch
+  - `useSubscriptionStore.getState().checkTrialExpiry()` is called from root layout's `useEffect` for synchronous expiry check without hooks
+  - RevenueCat integration is simulated via `Alert.alert` confirmation — real RevenueCat purchase flow comes in MO-03
+  - Trial CTA uses indigo (#6366f1) color to distinguish from the emerald purchase CTAs — visual hierarchy: trial > annual > monthly
+  - `getTrialEndDate()` returns a Date object for formatting; `toLocaleDateString('en-PH', ...)` gives localized date display
+---
+
+## 2026-03-31 - MO-03
+- Added `purchasePro(plan)` action and `isPaidPro()` helper to `store/subscriptionStore.ts`
+- Added `planType` ('annual' | 'monthly' | null) to subscription store, persisted via partialize
+- Added `verifyEntitlement()` action — called on app launch, delegates to `checkTrialExpiry()` (RevenueCat verification placeholder)
+- Updated `checkTrialExpiry()` to skip paid subscribers (only expires trial users)
+- Updated paywall screen: `handleAnnual`/`handleMonthly` now show purchase confirmation dialogs with price framing ("Less than one late payment fee", "Cancel anytime")
+- Paywall shows "You're on Pro" message if user is already a paid subscriber
+- Updated Settings screen: shows "Annual Plan" or "Monthly Plan" label with pricing for paid Pro; "Free Trial" with end date for trial users
+- Updated root layout to call `verifyEntitlement()` instead of `checkTrialExpiry()` on app launch
+- Files changed: `store/subscriptionStore.ts`, `app/pro-paywall.tsx`, `app/(tabs)/two.tsx`, `app/_layout.tsx`
+- **Learnings for future iterations:**
+  - `planType` distinguishes trial from paid: null = trial/free, 'annual'/'monthly' = paid subscriber
+  - `isPaidPro()` checks `tier === 'pro' && planType !== null` — use this to differentiate paid vs trial in UI
+  - `isTrialActive()` now also checks `planType === null` to exclude paid subscribers from trial logic
+  - RevenueCat purchase flow is simulated via `Alert.alert` — real integration requires `react-native-purchases` SDK
+  - Annual plan is pre-selected as primary (emerald CTA), monthly as secondary (bordered) — matches existing MO-01 layout
+---
+
+## 2026-03-31 - MO-04
+- Added `proExpiredAt` timestamp, `isCardReadOnly(cardIndex)`, and `daysUntilDataDeletion()` to subscription store
+- `checkTrialExpiry()` now sets `proExpiredAt` when trial expires; `startTrial()` and `purchasePro()` clear it
+- Home screen: cards at index >= FREE_CARD_LIMIT show read-only styling (dashed border, reduced opacity) with "Reactivate Pro to manage all cards" upgrade banner when on free tier
+- Home screen: data retention warning banner shows days remaining (90-day countdown) when `proExpiredAt` is set, links to paywall
+- Swipe impact (card detail): read-only cards show upgrade banner, hide edit/delete/update-balance actions, hide staleness reminders
+- All read-only cards still display balance, status badge, and reason — fully visible but not editable
+- Files changed: `store/subscriptionStore.ts`, `app/(tabs)/index.tsx`, `app/swipe-impact.tsx`
+- **Learnings for future iterations:**
+  - `isCardReadOnly(cardIndex)` uses array index, not card ID — card order in the store determines which cards are read-only
+  - `proExpiredAt` is set on trial expiry and cleared on re-subscription or new trial — prevents stale retention warnings
+  - Read-only cards disable staleness reminders (no "tap to update" since updates are disabled)
+  - `borderStyle: 'dashed'` in React Native works for visual read-only indication
+  - `daysUntilDataDeletion()` returns null when Pro or no expiry — only shows warning to expired users
+---
+
+## 2026-03-31 - DP-01
+- Core features (SAFE/CAUTION/RISKY, Swipe Impact, best card, Gantt timeline) already function fully offline via Zustand + AsyncStorage local persistence and deterministic client-side calculations
+- Created `hooks/useNetworkStatus.ts` — custom hook wrapping `@react-native-community/netinfo` with `isConnected` and `isOffline` state
+- Created `components/OfflineChip.tsx` — small gray "Offline" chip that renders only when disconnected, non-blocking
+- Integrated OfflineChip into tab layout headers via `headerRight` in `screenOptions` — visible on all tab screens
+- Added Cloud Sync section to Settings screen (Pro users only) — shows "Connected — sync available" or offline message explaining data is saved locally
+- Files changed: `hooks/useNetworkStatus.ts` (new), `components/OfflineChip.tsx` (new), `app/(tabs)/_layout.tsx`, `app/(tabs)/two.tsx`, `package.json`
+- **Learnings for future iterations:**
+  - `@react-native-community/netinfo` provides `addEventListener` for real-time network state changes — returns unsubscribe function for cleanup
+  - `headerRight` in tab `screenOptions` applies to all tab screens at once — no need to set per-screen
+  - `headerRightContainerStyle: { paddingRight: 16 }` adds spacing between chip and screen edge
+  - All core features are inherently offline — no network calls needed for calculations. Only cloud sync (future Pro feature) requires connectivity
+  - Network status hook initializes with `true` (optimistic) — `null` from NetInfo means unknown, treated as connected
+---
+
+## 2026-03-31 - DP-02
+- Initialized Firebase Firestore with offline persistence in `utils/firebase.ts` — native SDK encrypts cached data at rest on both iOS (Data Protection) and Android (Keystore)
+- Created `utils/secureLogger.ts` — `secureLog()`/`secureWarn()` redact sensitive financial fields (balances, limits, income) from debug output; logging suppressed entirely in production builds
+- Created `utils/encryption.ts` — AES-256-GCM encrypt/decrypt using `@noble/ciphers` (audited, pure JS); generates `EncryptedPayload` with base64 ciphertext + nonce + algorithm tag
+- Created `utils/cloudSync.ts` — `prepareCardForSync()` splits card into plaintext metadata (bankName, statementDay) + encrypted sensitive fields (balances, limits, rates); `restoreCardFromSync()` decrypts back to full Card object
+- Wired `initFirestore()` into `app/_layout.tsx` on app startup
+- Files changed: `utils/firebase.ts` (new), `utils/secureLogger.ts` (new), `utils/encryption.ts` (new), `utils/cloudSync.ts` (new), `app/_layout.tsx`, `package.json`
+- **Learnings for future iterations:**
+  - `@noble/ciphers` requires `.js` extension in subpath imports (`@noble/ciphers/aes.js`, not `@noble/ciphers/aes`) due to its package exports map
+  - Firestore `settings()` can only be called once before any other Firestore usage — wrap in try/catch for "already called" error
+  - `redactSensitive()` operates on arbitrary objects recursively — reusable for any logging context, not just cards
+  - Cloud sync separates plaintext metadata (for Firestore querying) from encrypted sensitive data — this allows server-side filtering without exposing financials
+  - `EncryptedPayload` includes `algorithm` and `version` fields for future-proofing migration to different ciphers
+  - `btoa`/`atob` are available in React Native (Hermes) for base64 encoding — no polyfill needed
+---
+
+## 2026-03-31 - DP-03
+- Created `utils/csvExport.ts` — exports all cards, installments, subscriptions, and user profile as CSV with ₱ currency formatting
+- CSV includes section headers (Cards, User Profile) with column headers; uses PH locale for dates and currency
+- Added "Export as CSV" button to Settings screen — available for both Free and Pro tiers
+- Uses `expo-file-system/next` (File/Paths API) to write CSV to cache directory + `expo-sharing` for share sheet
+- Files changed: `utils/csvExport.ts` (new), `app/(tabs)/two.tsx`, `package.json`
+- **Learnings for future iterations:**
+  - `expo-file-system` v18+ uses a new API: `import { File, Paths } from 'expo-file-system/next'` — the old `cacheDirectory`/`writeAsStringAsync` are gone
+  - `File.create()` + `File.write()` replaces `writeAsStringAsync` — synchronous write API
+  - `Paths.cache` gives the cache directory as a `Directory` instance — pass as first arg to `new File(Paths.cache, name)`
+  - `expo-sharing`'s `shareAsync` accepts `UTI` for iOS type hints: `'public.comma-separated-values-text'` for CSV
+  - Export button uses loading state (`exporting`) to prevent double-taps during file write + share
+---
+
+## 2026-03-31 - AQ-01
+- Installed `posthog-react-native` and created `utils/analytics.ts` with PostHog EU region config
+- Created typed event tracking helpers: `trackCardAdded`, `trackSwipeCheckPerformed`, `trackProConversionStarted`, `trackProTrialStarted`, `trackProConverted`, `trackDataStalenessWarningShown`
+- Amount anonymization via `getAmountTier()` — no exact balances or amounts tracked, only tier buckets
+- Added `analyticsOptOut` to `store/userStore.ts` with Zustand persist; restored on app launch in `_layout.tsx`
+- Added analytics opt-out toggle (Switch) to settings screen (`app/(tabs)/two.tsx`)
+- Integrated event tracking in: `add-card.tsx`, `onboarding.tsx`, `swipe-impact.tsx`, `pro-paywall.tsx`, `app/(tabs)/index.tsx`
+- Files changed: `utils/analytics.ts` (new), `store/userStore.ts`, `app/_layout.tsx`, `app/add-card.tsx`, `app/onboarding.tsx`, `app/swipe-impact.tsx`, `app/pro-paywall.tsx`, `app/(tabs)/index.tsx`, `app/(tabs)/two.tsx`, `package.json`
+- **Learnings for future iterations:**
+  - PostHog RN SDK uses `new PostHog(key, options)` constructor — not `initAsync` (that's the older API)
+  - Option is `captureAppLifecycleEvents` not `captureNativeAppLifecycleEvents`
+  - `optOut()`/`optIn()` are async (return Promise) but can be fire-and-forget
+  - All hooks (useRef, useEffect) must be placed before early returns in React components to satisfy rules-of-hooks lint
+  - PostHog API key placeholder `__POSTHOG_API_KEY__` needs to be replaced with real key before production
+---
+
+## 2026-03-31 - AQ-02
+- Created `utils/crashReporting.ts` — initializes Firebase Crashlytics with global JS error handler via `ErrorUtils.setGlobalHandler`
+- `recordSafeError()` sanitizes error messages (strips currency amounts, long numeric sequences) before sending to Crashlytics
+- `logBreadcrumb()` uses `redactSensitive()` from secureLogger to strip PII from breadcrumb data objects
+- `sanitizeErrorMessage()` replaces ₱/$/PHP amounts and 8+ digit numbers with placeholders
+- Wired `initCrashReporting()` into `app/_layout.tsx` on app start (before Firestore init)
+- Source maps handled automatically by `@react-native-firebase/crashlytics` Expo config plugin during EAS Build
+- Files changed: `utils/crashReporting.ts` (new), `app/_layout.tsx`
+- **Learnings for future iterations:**
+  - `@react-native-firebase/crashlytics` has no `beforeSend` hook like Sentry — instead, sanitize data before calling `recordError()` and `log()`
+  - `ErrorUtils.getGlobalHandler()` / `setGlobalHandler()` is the React Native global JS error handler — must chain to default handler for dev red screen
+  - Crashlytics `recordError()` takes an Error object and optional jsErrorName string — create a new Error with sanitized message but preserve original stack
+  - The Expo config plugin (`@react-native-firebase/crashlytics` in app.json plugins) handles native integration and source map upload during EAS Build
+---
