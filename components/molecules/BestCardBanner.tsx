@@ -55,7 +55,7 @@ export function BestCardBanner({ bestCard, hasCards, hasActiveCards, onPress, on
               </RNView>
               <Text style={[styles.reason, { color: t.textSecondary }]}>{bestCard!.status.reason}</Text>
               {bestCard!.warning && (
-                <Text style={[styles.warning, { color: t.caution }]}>⚠ {bestCard!.warning}</Text>
+                <Text style={[styles.warning, { color: accentColor }]}>⚠ {bestCard!.warning}</Text>
               )}
             </RNView>
           ) : (

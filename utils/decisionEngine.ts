@@ -557,6 +557,12 @@ export function calculateBestCard(
     };
   }
 
-  // All cards are RISKY
-  return null;
+  // All cards are RISKY — pick the least bad
+  const riskyPick = scored[0];
+  return {
+    card: riskyPick.card,
+    status: riskyPick.status,
+    score: riskyPick.score,
+    warning: 'All cards are risky — hold off if you can',
+  };
 }
