@@ -1,29 +1,27 @@
 # Ralph Progress Log
-Started: Sat Apr  4 01:20:06 PST 2026
-
-## Codebase Patterns
-- Notification scheduling uses `@notifee/react-native` (not expo-notifications) — configured in app.config.js plugins
-- Card store uses `require()` pattern to avoid circular imports when accessing userStore (see existing pattern in userStore for cardStore)
-- Settings toggles that affect background behavior should trigger rescheduling — wrap store setters in the screen component
-- Notification IDs follow `{type}-{cardId}` pattern (e.g., `statement-3`, `due-3`) for per-card cancel support
+Started: Sat Apr  4 01:34:00 PST 2026
 ---
 
-## 2026-04-04 - PN-01
-- Installed `@notifee/react-native` and added to app.config.js plugins
-- Created `utils/notifications.ts` with: requestPermission(), createChannels(), scheduleStatementReminder(card), scheduleDueReminder(card), cancelCardNotifications(cardId), scheduleAllReminders(cards, settings), checkHighUtilization(cards, flag)
-- Android channels: `statement-reminders`, `due-reminders`, `utilization-alerts` (all HIGH importance)
-- Statement reminder: fires 3 days before statementDay at 9 AM
-- Due date reminder: fires 3 days before due date (statementDay + dueDayOffset) at 9 AM
-- High utilization alert: immediate notification when any card exceeds 80% — checked on app foreground and balance update
-- Integrated into cardStore: addCard/updateCard reschedule all; deleteCard cancels + reschedules; updateBalance checks high util
-- Wired scheduleAllReminders on app launch in _layout.tsx after cards + profile load
-- Wired requestPermission() in onboarding-result.tsx handleContinue with PostHog tracking
-- Settings toggles reschedule notifications when toggled
-- Confirmed expo-notifications is not in package.json
-- Files changed: package.json, package-lock.json, app.config.js, utils/notifications.ts (new), store/cardStore.ts, app/_layout.tsx, app/onboarding-result.tsx, app/settings.tsx, docs/prd.json
+## Codebase Patterns
+- Profile table has a single row (id='local'); use `ensureProfile()` + `updateProfile()` helpers in userStore
+- Drizzle migrations: SQL file in `drizzle/`, register in `drizzle/migrations.js` and `drizzle/meta/_journal.json`
+- Snapshots in `drizzle/meta/` are not required for all migrations (only 3 exist for 7+ migrations)
+- Settings screen sections follow pattern: groupLabel → SurfaceCard → content with dividers
+- MoneyInput accepts `compact` prop for inline settings usage; use `parseMoney()` to convert formatted string to number
+- Zustand setters always call both `updateProfile()` (SQLite) and `set()` (Zustand) for bidirectional sync
+---
+
+## 2026-04-04 - PS-01
+- Implemented payoff strategy selector in user profile
+- Added `payoffStrategy` (full/minimum/fixed/aggressive) and `fixedPayoffAmount` fields
+- Files changed:
+  - `db/schema/local.ts` — added payoffStrategy and fixedPayoffAmount columns to profile table
+  - `store/userStore.ts` — added PayoffStrategy type, fields, setters, loadProfile sync, reset
+  - `app/settings.tsx` — added Payoff Strategy section with selectable chips and conditional MoneyInput
+  - `drizzle/0007_payoff_strategy.sql` — migration to add columns
+  - `drizzle/migrations.js` and `drizzle/meta/_journal.json` — registered migration
 - **Learnings for future iterations:**
-  - notifee `createTriggerNotification` requires a future timestamp — need to compute "next occurrence" of monthly day-of-month minus N days
-  - `cancelAllNotifications()` cancels both trigger and displayed notifications — useful for full reschedule
-  - The `require()` pattern for cross-store access is already established in userStore (lines 166–181)
-  - onboarding-result.tsx is the final onboarding step — notification permission prompt fits here before `complete()`
+  - Settings chip UI pattern: use Pressable with borderColor/backgroundColor toggling based on selected state
+  - For 2-column grid layout, use `flexBasis: '46%'` + `flexGrow: 1` with `flexWrap: 'wrap'` and `gap`
+  - The PRD says migration 0006 but that was already taken; used 0007 instead
 ---
