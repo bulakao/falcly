@@ -19,3 +19,12 @@ Started: Sat Apr  4 00:26:15 PST 2026
   - The `navRow` style container was added to group navigation buttons — NV-02 should add its button in the same container
   - Unicode em dashes (—) in prd.json must be matched exactly when editing; they appear as `\u2014` in the raw file
 ---
+
+## 2026-04-04 - NV-02
+- Added "What You Owe ›" tappable button to SwipeImpactPanel in the existing `navRow` container
+- Navigates to `/payment-summary?cardId=<id>` for all cards
+- Files changed: `components/organisms/SwipeImpactPanel.tsx`
+- **Learnings for future iterations:**
+  - The `navRow` container in SwipeImpactPanel now holds two nav buttons (Transactions + Payment Summary) — future nav entry points should follow the same pattern
+  - Route `/payment-summary` already existed; NV-02 only added the entry point, not the route
+---
