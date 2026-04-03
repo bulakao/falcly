@@ -242,6 +242,15 @@ export function SwipeImpactPanel({
         )}
       </View>
 
+      {/* Navigation links */}
+      <View style={styles.navRow}>
+        <Link href={{ pathname: '/card-transactions', params: { cardId: card.id } }} asChild>
+          <Pressable style={[styles.navButton, { backgroundColor: t.surface, borderColor: t.border }]}>
+            <Text style={[styles.navButtonText, { color: t.primary }]}>View Transactions ›</Text>
+          </Pressable>
+        </Link>
+      </View>
+
       {impact.netAvailableCash === null && (
         <Text style={[styles.hint, { color: t.textMuted }]}>
           Set your cash on hand in Settings to see payoff projections.
@@ -291,6 +300,20 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: fonts.interBold,
     marginBottom: 12,
+  },
+  navRow: {
+    gap: 8,
+    marginBottom: 16,
+  },
+  navButton: {
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  navButtonText: {
+    fontSize: 14,
+    fontFamily: fonts.interSemiBold,
   },
   hint: {
     fontSize: 13,
