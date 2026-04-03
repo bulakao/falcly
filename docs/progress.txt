@@ -140,3 +140,13 @@ Started: Sat Apr  4 00:26:15 PST 2026
   - JSX string literals with apostrophes must be wrapped in `{"..."}` to satisfy `react/no-unescaped-entities` lint rule
   - `transactionCount` from the store can be read in render to detect first-tx condition — checked before `addTransaction` is called
 ---
+
+## 2026-04-04 - CH-01
+- Updated SwipeImpactPanel hint from "Set your cash on hand in Settings to see payoff projections." to "Set your funds available to see payoff projections."
+- Updated component-showcase.tsx "Cash on Hand" label to "Funds Available"
+- Verified `grep -ri 'cash on hand' app/ components/` returns 0 results
+- Files changed: `components/organisms/SwipeImpactPanel.tsx`, `app/component-showcase.tsx`
+- **Learnings for future iterations:**
+  - component-showcase.tsx also contains user-facing text that must stay in sync with terminology changes
+  - The old FF-02 story missed the SwipeImpactPanel hint — always grep broadly when doing terminology renames
+---

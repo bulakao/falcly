@@ -1009,7 +1009,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "notes": "FF-02 missed at least one instance in SwipeImpactPanel hint text."
     },
     {
