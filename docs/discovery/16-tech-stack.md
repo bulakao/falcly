@@ -1,6 +1,7 @@
 # Falcly — Technical Stack
 
 > **Date:** 2026-03-31 (updated — Firebase replaces SQLite + Supabase + Sentry)
+> **⚠️ SUPERSEDED 2026-04-04:** Firebase/Firestore migration was NOT executed. Actual stack is expo-sqlite + Drizzle + Supabase Auth. See CLAUDE.md for current stack.
 > **For:** Falcly engineering reference — Android-first, iOS parity at launch
 > **Framework:** Expo CNG (Continuous Native Generation) — React Native 0.80+, New Architecture
 

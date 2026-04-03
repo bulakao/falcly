@@ -7,7 +7,9 @@ Credit card billing cycle intelligence app — "Is it safe to swipe right now?"
 - **Framework:** Expo CNG (React Native 0.81+, New Architecture enabled)
 - **Routing:** Expo Router (file-based, in `app/`)
 - **State:** Zustand (UI state)
-- **Database:** Firebase Firestore with offline persistence (`@react-native-firebase`)
+- **Database:** expo-sqlite + Drizzle ORM (local-first, offline)
+- **Auth:** Supabase Auth (`@supabase/supabase-js`) + Google Sign-In
+- **Crash reporting:** Custom JS error handler (`utils/crashReporting.ts`)
 - **Language:** TypeScript (strict mode)
 - **Node:** v22 (see `.nvmrc`)
 
