@@ -1,6 +1,6 @@
 {
   "project": "Falcly",
-  "branchName": "ralph/phase-1",
+  "branchName": "ralph/phase-2-finance-fields",
   "description": "Phase 1 \u2014 Core Loop, Cash Awareness, Decision Engine, Card Management, Onboarding, Monetization, Data & Privacy, Analytics",
   "userStories": [
     {
@@ -698,6 +698,117 @@
       "priority": 29,
       "passes": true,
       "notes": "Updated from Sentry to Firebase Crashlytics per tech stack decision"
+    },
+    {
+      "id": "FF-01",
+      "title": "Remove debug console.log from home screen",
+      "phase": 2,
+      "group": "Finance Fields",
+      "description": "As a developer, I want the debug console.log removed from app/(tabs)/index.tsx so that production builds don't leak internal state.",
+      "acceptanceCriteria": [
+        "The console.log('[DEBUG] userStore:', ...) line in app/(tabs)/index.tsx is removed",
+        "No other debug logs introduced",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Line 31 in app/(tabs)/index.tsx"
+    },
+    {
+      "id": "FF-02",
+      "title": "Rename user-facing finance field labels",
+      "phase": 2,
+      "group": "Finance Fields",
+      "description": "As a user, I want the finance fields to use clear, plain-English labels so that I understand what each field means without needing a tooltip.",
+      "acceptanceCriteria": [
+        "FinanceCard.tsx: 'Cash on Hand' label changed to 'Funds Available'",
+        "FinanceCard.tsx: 'Cash on Hand' caption updated to 'Your accessible funds across all accounts \u2014 used as the starting point for payment calculations.'",
+        "FinanceCard.tsx: 'Committed Monthly Expenses' label changed to 'Fixed Monthly Expenses'",
+        "FinanceCard.tsx: 'Fixed Monthly Expenses' caption updated to 'Regular fixed costs (rent, utilities, subscriptions) deducted before calculating what\\'s available.'",
+        "FinanceCard.tsx: section hint updated to 'Helps Falcly calculate if you can cover your card payments.'",
+        "SwipeImpactPanel.tsx: breakdown row label 'Cash on hand' changed to 'Funds available'",
+        "status-guide.tsx: RISKY rule 'Cash on hand can\\'t cover the minimum payment' changed to 'Not enough funds available to cover the minimum payment'",
+        "csvExport.ts: 'Cash on Hand' row label changed to 'Funds Available'",
+        "csvExport.ts: 'Committed Expenses' row label changed to 'Fixed Expenses'",
+        "No functional behavior changes \u2014 labels only"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Pure label changes. See docs/CASH.md for full decision rationale."
+    },
+    {
+      "id": "FF-03",
+      "title": "Add payday2 column to DB schema and migration",
+      "phase": 2,
+      "group": "Finance Fields",
+      "description": "As a user paid semi-monthly, I want the app to store a second payday date so that both salary tranches can be factored into my payment calculations.",
+      "acceptanceCriteria": [
+        "db/schema/local.ts: payday2 integer column added to profile table (nullable)",
+        "New migration file drizzle/0005_multi_payday.sql created with: ALTER TABLE profile ADD COLUMN payday2 INTEGER;",
+        "Migration runs cleanly on a fresh install and on upgrade from existing schema",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Schema-only change. Store and UI come in FF-04 and FF-05."
+    },
+    {
+      "id": "FF-04",
+      "title": "Add payday2 to userStore with getPaydays() helper",
+      "phase": 2,
+      "group": "Finance Fields",
+      "description": "As a developer, I want the userStore to expose payday2, setPayday2, and a getPaydays() helper so that all engine callers can pass a consistent paydays array.",
+      "acceptanceCriteria": [
+        "userStore.ts: payday2: number | null field added (default null)",
+        "userStore.ts: setPayday2(day: number | null) action added \u2014 persists to DB",
+        "userStore.ts: loadProfile() reads payday2 from DB row",
+        "userStore.ts: reset() clears payday2 to null",
+        "A getPaydays() helper is available that returns number[] \u2014 filters out null values from [payday, payday2]",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Depends on FF-03 (schema). Engine update in FF-05."
+    },
+    {
+      "id": "FF-05",
+      "title": "Update computeNetAvailableCash engine to support multiple paydays",
+      "phase": 2,
+      "group": "Finance Fields",
+      "description": "As a user paid semi-monthly, I want each salary tranche to be counted independently against my due date so that the app gives an accurate payment capacity verdict.",
+      "acceptanceCriteria": [
+        "computeNetAvailableCash signature updated: payday param replaced with paydays: number[]",
+        "Engine loops over each payday in paydays array; adds monthlyIncome / paydays.length for each payday day <= card due date day",
+        "Single payday ([15]) produces identical result to previous behavior (backward compat)",
+        "Empty paydays ([]) means income is never added \u2014 same as previous null behavior",
+        "Both paydays after due date: income not added (correct)",
+        "All callers updated: app/(tabs)/index.tsx, app/swipe-impact.tsx, components/organisms/SwipeImpactPanel.tsx \u2014 all pass getPaydays() instead of single payday",
+        "TypeScript compiles cleanly, no regressions in existing logic"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Depends on FF-04. Most sensitive change \u2014 test manually after."
+    },
+    {
+      "id": "FF-06",
+      "title": "Add Second Payday field to FinanceCard UI",
+      "phase": 2,
+      "group": "Finance Fields",
+      "description": "As a user paid semi-monthly, I want to enter a second payday date in the Finance card so that both paydays are factored into my available payment calculation.",
+      "acceptanceCriteria": [
+        "FinanceCard.tsx: Second Payday field appears below the existing Payday field",
+        "Field is labeled 'Second Payday' with caption 'Optional \u2014 if you\\'re paid twice a month (e.g. 15th and 30th).'",
+        "Placeholder text: 'e.g. 30'",
+        "Field validates 1\u201331 only (same as first payday)",
+        "Field is optional \u2014 leaving it blank clears payday2 in store (setPayday2(null))",
+        "When both paydays are set, a hint line appears: 'Income split evenly: \u20b1X on the Nth \u00b7 \u20b1X on the Nth' using actual store values",
+        "Debounced save wired to setPayday2",
+        "Focus/blur tracking consistent with other fields in FinanceCard",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Depends on FF-04 and FF-05."
     }
   ]
 }
