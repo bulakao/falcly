@@ -183,10 +183,18 @@ export function SwipeImpactPanel({
           <BreakdownRow label="Pending transactions" value={`+${formatPeso(card.pendingTransactions)}`} />
         )}
         {card.installmentsMonthlyAmount > 0 && (
-          <BreakdownRow label="Installments" value={`+${formatPeso(card.installmentsMonthlyAmount)}`} />
+          <Link href={{ pathname: '/manage-installments', params: { cardId: card.id } }} asChild>
+            <Pressable>
+              <BreakdownRow label="Installments ›" value={`+${formatPeso(card.installmentsMonthlyAmount)}`} />
+            </Pressable>
+          </Link>
         )}
         {card.subscriptionsThisCycle > 0 && (
-          <BreakdownRow label="Subscriptions" value={`+${formatPeso(card.subscriptionsThisCycle)}`} />
+          <Link href={{ pathname: '/manage-subscriptions', params: { cardId: card.id } }} asChild>
+            <Pressable>
+              <BreakdownRow label="Subscriptions ›" value={`+${formatPeso(card.subscriptionsThisCycle)}`} />
+            </Pressable>
+          </Link>
         )}
         {card.annualFee > 0 && card.annualFeeMonth > 0 && (() => {
           const cycle = getCycleDates(card);

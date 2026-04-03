@@ -5,20 +5,27 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Pressable,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
+import { useInstallmentStore } from '@/store/installmentStore';
+import { useSubscriptionItemStore } from '@/store/subscriptionItemStore';
+import { useAppTheme } from '@/theme';
 import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
 import { Button, Heading } from '@/components/atoms';
 import { FormFieldGroup } from '@/components/molecules';
 import { fonts } from '@/theme/fonts';
 
 export default function EditCardScreen() {
+  const t = useAppTheme();
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
   const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
+  const hasDetailedInstallments = useInstallmentStore((s) => s.installments.some((i) => i.cardId === cardId));
+  const hasDetailedSubscriptions = useSubscriptionItemStore((s) => s.subscriptions.some((s) => s.cardId === cardId));
   const updateCard = useCardStore((s) => s.updateCard);
   const defaultInterestRate = useUserStore((s) => s.defaultInterestRate);
   const defaultMinPaymentPct = useUserStore((s) => s.defaultMinPaymentPct);
@@ -203,23 +210,39 @@ export default function EditCardScreen() {
           selectTextOnFocus
         />
 
-        <FormFieldGroup
-          label="Monthly Installments (PHP)"
-          value={installmentsMonthlyAmount}
-          onChangeText={setInstallmentsMonthlyAmount}
-          placeholder="0"
-          keyboardType="numeric"
-          selectTextOnFocus
-        />
+        {hasDetailedInstallments ? (
+          <Pressable onPress={() => router.push({ pathname: '/manage-installments', params: { cardId } })} style={styles.managedField}>
+            <Text style={[styles.managedLabel, { color: t.textSecondary }]}>Monthly Installments</Text>
+            <Text style={[styles.managedValue, { color: t.textPrimary }]}>₱{card!.installmentsMonthlyAmount.toLocaleString()}</Text>
+            <Text style={[styles.managedHint, { color: t.primary }]}>Manage items →</Text>
+          </Pressable>
+        ) : (
+          <FormFieldGroup
+            label="Monthly Installments (PHP)"
+            value={installmentsMonthlyAmount}
+            onChangeText={setInstallmentsMonthlyAmount}
+            placeholder="0"
+            keyboardType="numeric"
+            selectTextOnFocus
+          />
+        )}
 
-        <FormFieldGroup
-          label="Subscriptions This Cycle (PHP)"
-          value={subscriptionsThisCycle}
-          onChangeText={setSubscriptionsThisCycle}
-          placeholder="0"
-          keyboardType="numeric"
-          selectTextOnFocus
-        />
+        {hasDetailedSubscriptions ? (
+          <Pressable onPress={() => router.push({ pathname: '/manage-subscriptions', params: { cardId } })} style={styles.managedField}>
+            <Text style={[styles.managedLabel, { color: t.textSecondary }]}>Subscriptions This Cycle</Text>
+            <Text style={[styles.managedValue, { color: t.textPrimary }]}>₱{card!.subscriptionsThisCycle.toLocaleString()}</Text>
+            <Text style={[styles.managedHint, { color: t.primary }]}>Manage items →</Text>
+          </Pressable>
+        ) : (
+          <FormFieldGroup
+            label="Subscriptions This Cycle (PHP)"
+            value={subscriptionsThisCycle}
+            onChangeText={setSubscriptionsThisCycle}
+            placeholder="0"
+            keyboardType="numeric"
+            selectTextOnFocus
+          />
+        )}
 
         <View style={styles.buttonWrapper}>
           <Button label="Save Changes" onPress={handleSave} />
@@ -234,6 +257,24 @@ const styles = StyleSheet.create({
   container: {
     padding: 24,
     paddingBottom: 48,
+  },
+  managedField: {
+    marginTop: 16,
+    paddingVertical: 12,
+  },
+  managedLabel: {
+    fontSize: 13,
+    fontFamily: fonts.interSemiBold,
+    marginBottom: 4,
+  },
+  managedValue: {
+    fontSize: 20,
+    fontFamily: fonts.interBold,
+  },
+  managedHint: {
+    fontSize: 13,
+    fontFamily: fonts.interSemiBold,
+    marginTop: 4,
   },
   notFound: {
     fontSize: 24,

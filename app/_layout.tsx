@@ -11,6 +11,8 @@ import { useSubscriptionStore, FREE_CARD_LIMIT } from '@/store/subscriptionStore
 import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
 import { useTransactionStore } from '@/store/transactionStore';
+import { useInstallmentStore } from '@/store/installmentStore';
+import { useSubscriptionItemStore } from '@/store/subscriptionItemStore';
 import { useAuthStore } from '@/store/authStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
 import { supabase } from '@/utils/supabase';
@@ -99,6 +101,8 @@ function RootLayout() {
     if (dbReady) {
       useCardStore.getState().loadCards();
       useTransactionStore.getState().loadTransactions();
+      useInstallmentStore.getState().loadInstallments();
+      useSubscriptionItemStore.getState().loadSubscriptions();
       useUserStore.getState().loadProfile();
       // Enforce free-tier active card limit on load
       const { tier } = useSubscriptionStore.getState();
@@ -175,6 +179,10 @@ function RootLayoutNav() {
           <Stack.Screen name="card-transactions" options={{ presentation: 'fullScreenModal', headerShown: false }} />
           <Stack.Screen name="payment-summary" options={{ presentation: 'modal', title: 'What You Owe' }} />
           <Stack.Screen name="status-guide" options={{ presentation: 'modal', title: 'How Status Works' }} />
+          <Stack.Screen name="add-installment" options={{ presentation: 'modal', title: 'Add Installment' }} />
+          <Stack.Screen name="add-subscription-item" options={{ presentation: 'modal', title: 'Add Subscription' }} />
+          <Stack.Screen name="manage-installments" options={{ presentation: 'modal', title: 'Installments' }} />
+          <Stack.Screen name="manage-subscriptions" options={{ presentation: 'modal', title: 'Subscriptions' }} />
           <Stack.Screen name="component-showcase" options={{ presentation: 'modal', title: 'Component Showcase' }} />
         </Stack>
       </ThemeProvider>

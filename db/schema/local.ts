@@ -41,6 +41,36 @@ export const transactions = sqliteTable('transactions', {
   index('idx_transactions_card_statement').on(table.cardId, table.statementMonth),
 ]);
 
+export const installments = sqliteTable('installments', {
+  id: text('id').primaryKey(),
+  cardId: text('card_id').notNull(),
+  name: text('name').notNull(),
+  merchant: text('merchant').notNull().default(''),
+  totalAmount: real('total_amount').notNull(),
+  monthlyAmount: real('monthly_amount').notNull(),
+  totalMonths: integer('total_months').notNull(),
+  startDate: integer('start_date', { mode: 'timestamp_ms' }).notNull(),
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+}, (table) => [
+  index('idx_installments_card_id').on(table.cardId),
+]);
+
+export const subscriptionItems = sqliteTable('subscription_items', {
+  id: text('id').primaryKey(),
+  cardId: text('card_id').notNull(),
+  name: text('name').notNull(),
+  amount: real('amount').notNull(),
+  billingDay: integer('billing_day').notNull(),
+  frequency: text('frequency').notNull().default('monthly'), // monthly | quarterly | annual
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+}, (table) => [
+  index('idx_subscription_items_card_id').on(table.cardId),
+]);
+
 export const profile = sqliteTable('profile', {
   id: text('id').primaryKey().default('local'),
   cashOnHand: real('cash_on_hand'),
