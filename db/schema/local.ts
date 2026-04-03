@@ -47,6 +47,7 @@ export const profile = sqliteTable('profile', {
   cashUpdatedAt: integer('cash_updated_at', { mode: 'timestamp_ms' }),
   monthlyIncome: real('monthly_income'),
   payday: integer('payday'),
+  payday2: integer('payday2'),
   committedExpenses: real('committed_expenses'),
   analyticsOptOut: integer('analytics_opt_out', { mode: 'boolean' }).notNull().default(false),
   themePreference: text('theme_preference').notNull().default('system'), // system | light | dark
