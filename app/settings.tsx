@@ -335,7 +335,7 @@ export default function SettingsScreen() {
           disabled={exporting}
         />
 
-        {(tier === 'pro' || tier === 'pro_plus') && (
+        {(tier === 'trial' || tier === 'pro' || tier === 'pro_plus') && (
           <>
             <RNView style={[styles.divider, { backgroundColor: t.border }]} />
             <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Cloud Sync</Text>
