@@ -993,7 +993,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "notes": "Discovery doc 19 section 4.1 specifies this teachable moment explicitly."
     },
     {

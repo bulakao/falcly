@@ -126,3 +126,17 @@ Started: Sat Apr  4 00:26:15 PST 2026
   - `lucide-react-native` `Receipt` icon works well for transaction-related empty states
   - The old card-transactions empty state had custom styles that duplicated EmptyState — always check for existing shared components first
 ---
+
+## 2026-04-04 - UX-05
+- Added first-transaction teachable moment modal in log-transaction.tsx
+- When transactionStore has 0 transactions and user hasn't dismissed before, a modal appears after save
+- Modal explains current/next/previous cycle classification with color-coded labels
+- Dismissal persisted in AsyncStorage under key `falcly-first-tx-teachable-dismissed`
+- Transaction saves first, modal shown after — does not block save
+- Files changed: `app/log-transaction.tsx`
+- **Learnings for future iterations:**
+  - React Native built-in `Modal` with `transparent` + `animationType="fade"` works well for teachable moments — no third-party bottom sheet needed
+  - Use `surfaceElevated` for modal card background, not `cardBg` (doesn't exist in SemanticTokens)
+  - JSX string literals with apostrophes must be wrapped in `{"..."}` to satisfy `react/no-unescaped-entities` lint rule
+  - `transactionCount` from the store can be read in render to detect first-tx condition — checked before `addTransaction` is called
+---
