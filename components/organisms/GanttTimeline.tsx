@@ -35,6 +35,13 @@ interface GanttTimelineProps {
   onCardPress?: (cardId: string) => void;
 }
 
+/**
+ * GanttTimeline — multi-card aligned timeline chart.
+ * Renders all cards on a shared time axis so the user can compare cycle positions at a glance.
+ * Use this for the all-cards overview and the collapsible Gantt section in SwipeImpactPanel.
+ *
+ * For a single-card progress bar, see BillingTimeline.
+ */
 export function GanttTimeline({ cards, today, onCardPress }: GanttTimelineProps) {
   const t = useAppTheme();
   const STATUS_COLORS = getStatusColors(t);

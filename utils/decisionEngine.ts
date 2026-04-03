@@ -182,8 +182,9 @@ export function calculateSwipeImpact(
   proposedAmount: number,
   netAvailableCash: number | null = null,
   today: Date = new Date(),
+  currentCycleTxSum: number = 0,
 ): SwipeImpactResult {
-  const projectedBalance = projectedStatementBalance(card, proposedAmount, today);
+  const projectedBalance = projectedStatementBalance(card, proposedAmount, today, currentCycleTxSum);
   const projectedUtil = utilization(projectedBalance, card.creditLimit);
   const projectedUtilPct = Math.round(projectedUtil * 100);
   const days = daysToStatement(card.statementDay, today);

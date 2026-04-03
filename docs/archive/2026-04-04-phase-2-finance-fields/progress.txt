@@ -1,0 +1,76 @@
+# Ralph Progress Log
+Started: Fri Apr  3 18:25:08 PST 2026
+---
+
+## Codebase Patterns
+- Pre-existing TS errors in `app/_layout.tsx` and `components/molecules/StatusTooltip.tsx` — not introduced by Phase 2 work
+- Pre-existing lint warning: `insets` unused in `app/(tabs)/index.tsx`
+- Pre-existing lint error: unescaped apostrophe on line 42 of `app/status-guide.tsx` (not introduced by Phase 2)
+- `computeNetAvailableCash` is used in `app/(tabs)/index.tsx` via `getNetAvailableCash` callback and in `app/swipe-impact.tsx` and `SwipeImpactPanel.tsx`
+---
+
+## 2026-04-03 - FF-01
+- Removed debug `useEffect` block with `console.log` calls from `app/(tabs)/index.tsx` (lines 29-37)
+- Removed unused `useEffect` import
+- Files changed: `app/(tabs)/index.tsx`
+- **Learnings for future iterations:**
+  - The debug block also used `computeNetAvailableCash` — but that import is still needed by `getNetAvailableCash` callback on line 33
+  - Always check if removed code was the only consumer of an import
+---
+
+## 2026-04-03 - FF-02
+- Renamed user-facing finance field labels across 4 files (pure label changes, no behavior)
+- Files changed: `components/molecules/FinanceCard.tsx`, `components/organisms/SwipeImpactPanel.tsx`, `app/status-guide.tsx`, `utils/csvExport.ts`
+- **Learnings for future iterations:**
+  - JSX text with apostrophes must use `&apos;` to pass `react/no-unescaped-entities` lint rule
+  - Pre-existing lint error in `status-guide.tsx` line 42 — same apostrophe issue, not introduced by this change
+---
+
+## 2026-04-03 - FF-03
+- Added `payday2` nullable integer column to profile table in `db/schema/local.ts`
+- Created migration `drizzle/0005_multi_payday.sql` with `ALTER TABLE profile ADD payday2 integer`
+- Registered migration in `drizzle/migrations.js` and `drizzle/meta/_journal.json`
+- Files changed: `db/schema/local.ts`, `drizzle/0005_multi_payday.sql`, `drizzle/migrations.js`, `drizzle/meta/_journal.json`
+- **Learnings for future iterations:**
+  - Migration journal entries use incrementing `idx` and `when` timestamps; follow the existing pattern for version/breakpoints
+  - Snapshots are not required for every migration (0003 and 0004 have none)
+  - Nullable columns in drizzle schema simply omit `.notNull()` — no explicit `.default(null)` needed
+---
+
+## 2026-04-03 - FF-04
+- Added `payday2: number | null` field to UserStore interface and state (default null)
+- Added `setPayday2(day: number | null)` action that persists to DB
+- Updated `loadProfile()` to read `payday2` from DB row
+- Updated `reset()` to clear `payday2` to null
+- Added exported `getPaydays()` helper that returns `number[]` filtering nulls from `[payday, payday2]`
+- Files changed: `store/userStore.ts`
+- **Learnings for future iterations:**
+  - `getPaydays()` must be defined after `useUserStore` since it calls `useUserStore.getState()`
+  - Store actions follow a consistent pattern: call `updateProfile()` then `set()` — follow this for any new field
+  - Pre-existing lint warnings in userStore.ts are `@typescript-eslint/no-require-imports` for lazy cardStore imports (circular dep avoidance)
+---
+
+## 2026-04-03 - FF-05
+- Updated `computeNetAvailableCash` signature: `payday: number | null` → `paydays: number[]`
+- Engine now loops over each payday, adding `monthlyIncome / paydays.length` per eligible payday
+- Updated all 3 callers to use `getPaydays()` from userStore instead of single `payday`
+- Updated `incomeApplies` in SwipeImpactPanel to use `paydays.some()` and breakdown guard to `paydays.length > 0`
+- Files changed: `utils/decisionEngine.ts`, `app/(tabs)/index.tsx`, `app/swipe-impact.tsx`, `components/organisms/SwipeImpactPanel.tsx`
+- **Learnings for future iterations:**
+  - SwipeImpactPanel has a display guard (`monthlyIncome !== null && payday !== null`) around the income breakdown row — must update this too when changing the payday signature
+  - `getPaydays()` is not a hook — it reads from `useUserStore.getState()` so it can be called outside React components and in render bodies without hook rules issues
+  - The 3 pre-existing TS errors (`_layout.tsx`, `StatusTooltip.tsx`) are not introduced by Phase 2 work
+---
+
+## 2026-04-03 - FF-06
+- Added Second Payday field to FinanceCard UI below existing Payday field
+- Field labeled "Second Payday" with optional caption, placeholder "e.g. 30", validates 1–31
+- Blank field clears payday2 in store (setPayday2(null))
+- When both paydays and income are set, shows income split hint line with formatted amounts and ordinal suffixes
+- Added ordinalSuffix helper, payday2 local state, focus tracking, sync effect, change handler, debounced save
+- Files changed: `components/molecules/FinanceCard.tsx`
+- **Learnings for future iterations:**
+  - Follow the existing pattern exactly for new fields: local state + focus state + sync useEffect + change handler + useDebouncedSave
+  - For optional/nullable fields, the debounced save must handle empty string → null conversion explicitly
+  - JSX apostrophes need `&apos;` entity to pass lint
+---
