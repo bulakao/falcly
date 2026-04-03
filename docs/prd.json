@@ -1027,6 +1027,26 @@
       "priority": 13,
       "passes": true,
       "notes": "Audited: BillingTimeline (single-card bar) and GanttTimeline (multi-card chart) are distinct and both usages are intentional. Added clarifying JSDoc comments to both files."
+    },
+    {
+      "id": "PK-01",
+      "title": "RevenueCat SDK integration \u2014 real IAP",
+      "phase": 99,
+      "group": "Parked",
+      "description": "Replace simulated purchasePro() in subscriptionStore with real react-native-purchases SDK calls. Requires RevenueCat project + App Store Connect / Play Console products to exist first.",
+      "acceptanceCriteria": [
+        "Install react-native-purchases",
+        "Configure RevenueCat project with iOS and Android entitlements",
+        "Purchases.configure() on app launch",
+        "Purchases.getOfferings() replaces hardcoded plan list",
+        "Purchases.purchasePackage() replaces set({ tier: 'pro' })",
+        "Purchases.getCustomerInfo() used in verifyEntitlement() on app launch",
+        "Trial period managed by RevenueCat, not local state",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 99,
+      "passes": false,
+      "notes": "PARKED \u2014 needs RevenueCat project + App Store Connect / Play Console products set up first. Do not implement until those exist."
     }
   ]
 }
