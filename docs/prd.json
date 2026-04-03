@@ -1,6 +1,6 @@
 {
   "project": "Falcly",
-  "branchName": "ralph/phase-3-nav-engine-ux",
+  "branchName": "ralph/phase-4-notifications",
   "description": "Phase 1 \u2014 Core Loop, Cash Awareness, Decision Engine, Card Management, Onboarding, Monetization, Data & Privacy, Analytics",
   "userStories": [
     {
@@ -1047,6 +1047,31 @@
       "priority": 99,
       "passes": false,
       "notes": "PARKED \u2014 needs RevenueCat project + App Store Connect / Play Console products set up first. Do not implement until those exist."
+    },
+    {
+      "id": "PN-01",
+      "title": "Real push notifications with notifee",
+      "phase": 4,
+      "group": "Push Notifications",
+      "description": "As a user, I want to receive real push notifications for statement reminders and due date reminders so that I never miss a payment or get caught off guard by a closing cycle.",
+      "acceptanceCriteria": [
+        "Install @notifee/react-native via npm",
+        "Add @notifee/react-native to app.config.js plugins (Expo CNG config plugin)",
+        "Create utils/notifications.ts with: requestPermission(), createChannels(), scheduleStatementReminder(card), scheduleDueReminder(card), cancelCardNotifications(cardId), scheduleAllReminders(cards)",
+        "Android: create two notification channels \u2014 'statement-reminders' (high importance) and 'due-reminders' (high importance)",
+        "Statement reminder: fires 3 days before statementDay each month \u2014 'Your [Bank] statement closes in 3 days'",
+        "Due date reminder: fires 3 days before due date (statementDay + dueDayOffset) \u2014 'Your [Bank] payment is due in 3 days. Minimum: \u20b1X'",
+        "scheduleAllReminders() called on app launch (after cards load) and whenever a card is added, edited, or deleted",
+        "cancelCardNotifications(cardId) called when a card is deleted \u2014 removes its pending notifications",
+        "Notification permission requested during onboarding (OB-08 already has the UI \u2014 wire it to notifee.requestPermission())",
+        "Settings toggles (notifyStatementReminder, notifyDueReminder, notifyHighUtilization) gate scheduling \u2014 if toggle is off, do not schedule that notification type",
+        "High utilization alert (notifyHighUtilization): triggered when any card exceeds 80% utilization \u2014 check on app foreground and card balance update",
+        "Remove expo-notifications from package.json if present (it is not \u2014 just confirm)",
+        "TypeScript compiles cleanly, 0 lint errors"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Use notifee over expo-notifications \u2014 better Android channel support, same ecosystem as Phase 2 SMS reader (NotificationListenerService). Requires EAS Build to compile native module."
     }
   ]
 }
