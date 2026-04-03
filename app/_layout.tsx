@@ -174,6 +174,7 @@ function RootLayoutNav() {
           <Stack.Screen name="log-transaction" options={{ presentation: 'modal', title: 'Log Transaction' }} />
           <Stack.Screen name="card-transactions" options={{ presentation: 'fullScreenModal', headerShown: false }} />
           <Stack.Screen name="payment-summary" options={{ presentation: 'modal', title: 'What You Owe' }} />
+          <Stack.Screen name="status-guide" options={{ presentation: 'modal', title: 'How Status Works', headerLeftContainerStyle: { paddingLeft: 16, justifyContent: 'center' } }} />
           <Stack.Screen name="component-showcase" options={{ presentation: 'modal', title: 'Component Showcase' }} />
         </Stack>
       </ThemeProvider>

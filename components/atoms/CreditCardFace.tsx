@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { Caption } from './Typography';
+import { UtilizationBar } from './UtilizationBar';
 import StatusTooltip from '@/components/molecules/StatusTooltip';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import { calculateCardStatus } from '@/utils/decisionEngine';
@@ -23,7 +24,6 @@ export function CreditCardFace({ card, netAvailableCash }: CreditCardFaceProps) 
     RISKY: t.risky,
   };
   const accentColor = staleness === 'stale' ? t.textMuted : statusColorMap[status];
-  const utilization = Math.min(card.outstandingBalance / card.creditLimit, 1);
 
   return (
     <View style={styles.cardShadow}>
@@ -61,17 +61,7 @@ export function CreditCardFace({ card, netAvailableCash }: CreditCardFaceProps) 
         </View>
 
         {/* Utilization bar */}
-        <View style={[styles.utilizationTrack, { backgroundColor: t.border }]}>
-          <View
-            style={[
-              styles.utilizationFill,
-              {
-                backgroundColor: accentColor,
-                width: `${Math.max(utilization * 100, 2)}%` as `${number}%`,
-              },
-            ]}
-          />
-        </View>
+        <UtilizationBar balance={card.outstandingBalance} limit={card.creditLimit} color={accentColor} />
 
         {/* Bottom row */}
         <View style={styles.bottomRow}>
@@ -145,15 +135,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: fonts.interSemiBold,
     marginTop: 2,
-  },
-  utilizationTrack: {
-    height: 4,
-    borderRadius: 2,
-    width: '100%',
-  },
-  utilizationFill: {
-    height: 4,
-    borderRadius: 2,
   },
   bottomRow: {
     flexDirection: 'row',
