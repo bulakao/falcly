@@ -10,6 +10,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text, View } from '@/components/Themed';
 import { Button, Caption } from '@/components/atoms';
+import { EmptyState } from '@/components/molecules/EmptyState';
+import { Receipt } from 'lucide-react-native';
 
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
@@ -127,16 +129,18 @@ export default function CardTransactionsScreen() {
       </View>
 
       {!hasTransactions ? (
-        <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyTitle, { color: t.textPrimary }]}>No transactions logged yet</Text>
-          <Caption>Tap + Log to log your first purchase.</Caption>
+        <EmptyState
+          icon={<Receipt size={48} color={t.textMuted} />}
+          title="No transactions yet"
+          subtitle="Log a purchase to see which bill it lands on"
+        >
           <View style={styles.emptyBtn}>
             <Button
               label="Log Transaction"
               onPress={() => router.push(`/log-transaction?cardId=${card.id}`)}
             />
           </View>
-        </View>
+        </EmptyState>
       ) : (
         <SectionList
           sections={sections}
@@ -333,17 +337,6 @@ const styles = StyleSheet.create({
   txBadge: {
     fontSize: 11,
     marginTop: 2,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontFamily: fonts.interBold,
-    marginBottom: 8,
   },
   emptyBtn: {
     marginTop: 24,
