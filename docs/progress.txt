@@ -9,6 +9,8 @@ Started: Sat Apr  4 01:34:00 PST 2026
 - Settings screen sections follow pattern: groupLabel → SurfaceCard → content with dividers
 - MoneyInput accepts `compact` prop for inline settings usage; use `parseMoney()` to convert formatted string to number
 - Zustand setters always call both `updateProfile()` (SQLite) and `set()` (Zustand) for bidirectional sync
+- `calculateSwipeImpact()` accepts optional strategy params at the end for backward compat; all existing callers work unchanged
+- `computeMonthlyPayment()` is a pure helper — no store access, easy to unit test
 ---
 
 ## 2026-04-04 - PS-01
@@ -24,4 +26,22 @@ Started: Sat Apr  4 01:34:00 PST 2026
   - Settings chip UI pattern: use Pressable with borderColor/backgroundColor toggling based on selected state
   - For 2-column grid layout, use `flexBasis: '46%'` + `flexGrow: 1` with `flexWrap: 'wrap'` and `gap`
   - The PRD says migration 0006 but that was already taken; used 0007 instead
+---
+
+## 2026-04-04 - PS-02
+- Implemented strategy-aware swipe impact calculations
+- Added `computeMonthlyPayment()` helper with full/minimum/fixed/aggressive strategies
+- Updated `calculateSwipeImpact()` to use monthly payment for carried balance/interest instead of raw netAvailableCash
+- CAUTION condition now uses strategy != minimum AND monthly payment < projectedBalance
+- SwipeImpactPanel reads payoffStrategy + fixedPayoffAmount from userStore
+- Breakdown shows "Monthly payment" row (bold) replacing static minimum payment; minimum shown as sub-row when strategy != minimum
+- Files changed:
+  - `utils/decisionEngine.ts` — added computeMonthlyPayment(), updated calculateSwipeImpact() signature and logic
+  - `types/card.ts` — added monthlyPayment field to SwipeImpactResult
+  - `components/organisms/SwipeImpactPanel.tsx` — reads strategy from store, passes to calculation, updated breakdown rows
+  - `docs/prd.json` — marked PS-02 passes: true
+- **Learnings for future iterations:**
+  - New params added at end of calculateSwipeImpact() with defaults preserve backward compat for all existing callers
+  - Aggressive strategy needs committedExpenses for safety buffer — panel already had it via userStore
+  - Carried balance logic key change: uses monthlyPayment instead of netAvailableCash for the deficit calculation
 ---

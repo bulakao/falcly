@@ -51,6 +51,8 @@ export function SwipeImpactPanel({
   const cashUpdatedAt = useUserStore((s) => s.cashUpdatedAt);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
   const committedExpenses = useUserStore((s) => s.committedExpenses);
+  const payoffStrategy = useUserStore((s) => s.payoffStrategy);
+  const fixedPayoffAmount = useUserStore((s) => s.fixedPayoffAmount);
   const paydays = getPaydays();
   const subscriptionTier = useSubscriptionStore((s) => s.tier);
   const getCurrentCycle = useTransactionStore((s) => s.getCurrentCycle);
@@ -80,8 +82,8 @@ export function SwipeImpactPanel({
   );
 
   const impact = useMemo(
-    () => calculateSwipeImpact(card, proposedAmount, netAvailableCash, new Date(), currentCycleTxSum),
-    [card, proposedAmount, netAvailableCash, currentCycleTxSum],
+    () => calculateSwipeImpact(card, proposedAmount, netAvailableCash, new Date(), currentCycleTxSum, payoffStrategy, fixedPayoffAmount, committedExpenses ?? 0),
+    [card, proposedAmount, netAvailableCash, currentCycleTxSum, payoffStrategy, fixedPayoffAmount, committedExpenses],
   );
 
   const staleness = getStalenessLevel(card.balanceUpdatedAt);
@@ -137,7 +139,7 @@ export function SwipeImpactPanel({
     });
   }
 
-  const showCarriedBalance = impact.carriedBalance > 0 && impact.monthlyInterest > 0;
+  const showCarriedBalance = payoffStrategy !== 'minimum' && impact.carriedBalance > 0 && impact.monthlyInterest > 0;
 
   return (
     <View style={styles.container}>
@@ -275,7 +277,10 @@ export function SwipeImpactPanel({
           <BreakdownRow label="Available to pay" value="Not set" valueMuted />
         )}
 
-        <BreakdownRow label="Minimum payment" value={formatPeso(impact.minimumPayment)} />
+        <BreakdownRow label="Monthly payment" value={formatPeso(impact.monthlyPayment)} bold />
+        {payoffStrategy !== 'minimum' && (
+          <BreakdownRow label="Minimum payment" value={formatPeso(impact.minimumPayment)} valueMuted />
+        )}
         <BreakdownRow label="Credit available after swipe" value={formatPeso(Math.max(0, card.creditLimit - impact.projectedBalance))} />
 
         {showCarriedBalance && (

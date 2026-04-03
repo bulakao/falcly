@@ -1,4 +1,5 @@
 import { Card, CardStatusResult, SwipeImpactResult, BestCardResult, CycleDates, FutureCycleProjection, FutureSignal } from '@/types/card';
+import type { PayoffStrategy } from '@/store/userStore';
 import type { Transaction } from '@/store/transactionStore';
 
 /**
@@ -174,6 +175,36 @@ export function calculateCardStatus(
 }
 
 /**
+ * Compute the monthly payment amount based on the user's payoff strategy.
+ * Returns the amount the user intends to pay this month toward the projected balance.
+ */
+export function computeMonthlyPayment(
+  projectedBalance: number,
+  netAvailableCash: number | null,
+  strategy: PayoffStrategy,
+  fixedAmount: number | null,
+  minPaymentPct: number,
+  minPaymentFloor: number,
+  committedExpenses: number = 0,
+): number {
+  switch (strategy) {
+    case 'full':
+      return projectedBalance;
+    case 'minimum':
+      return Math.max(projectedBalance * minPaymentPct, minPaymentFloor);
+    case 'fixed':
+      return Math.min(fixedAmount ?? 0, projectedBalance);
+    case 'aggressive': {
+      if (netAvailableCash === null) return projectedBalance;
+      const safetyBuffer = Math.max(committedExpenses * 0.2, 0);
+      return Math.min(Math.max(netAvailableCash - safetyBuffer, 0), projectedBalance);
+    }
+    default:
+      return projectedBalance;
+  }
+}
+
+/**
  * Calculate the impact of a proposed swipe on a card.
  * netAvailableCash is null until CA stories add cash/income inputs.
  */
@@ -183,6 +214,9 @@ export function calculateSwipeImpact(
   netAvailableCash: number | null = null,
   today: Date = new Date(),
   currentCycleTxSum: number = 0,
+  strategy: PayoffStrategy = 'full',
+  fixedPayoffAmount: number | null = null,
+  committedExpenses: number = 0,
 ): SwipeImpactResult {
   const projectedBalance = projectedStatementBalance(card, proposedAmount, today, currentCycleTxSum);
   const projectedUtil = utilization(projectedBalance, card.creditLimit);
@@ -194,14 +228,33 @@ export function calculateSwipeImpact(
     card.minPaymentFloor,
   );
 
-  // Carried balance and interest (when cash is known)
+  const monthlyPayment = computeMonthlyPayment(
+    projectedBalance,
+    netAvailableCash,
+    strategy,
+    fixedPayoffAmount,
+    card.minPaymentPct,
+    card.minPaymentFloor,
+    committedExpenses,
+  );
+
+  // Carried balance and interest based on monthly payment (not raw netAvailableCash)
   let carriedBalance = 0;
   let monthlyInterest = 0;
 
-  if (netAvailableCash !== null && netAvailableCash < projectedBalance) {
-    carriedBalance = Math.max(0, projectedBalance - netAvailableCash);
+  if (monthlyPayment < projectedBalance) {
+    carriedBalance = Math.max(0, projectedBalance - monthlyPayment);
     monthlyInterest = carriedBalance * card.interestRate;
   }
+
+  const result = {
+    projectedBalance,
+    netAvailableCash,
+    minimumPayment,
+    monthlyPayment,
+    carriedBalance,
+    monthlyInterest,
+  };
 
   // Status evaluation — first match wins (mirrors decision logic spec)
   // RISKY: can't cover minimum payment
@@ -209,11 +262,7 @@ export function calculateSwipeImpact(
     return {
       status: 'RISKY',
       reason: "You won't be able to make the minimum payment",
-      projectedBalance,
-      netAvailableCash,
-      minimumPayment,
-      carriedBalance,
-      monthlyInterest,
+      ...result,
     };
   }
 
@@ -222,11 +271,7 @@ export function calculateSwipeImpact(
     return {
       status: 'RISKY',
       reason: 'This would exceed your credit limit',
-      projectedBalance,
-      netAvailableCash,
-      minimumPayment,
-      carriedBalance,
-      monthlyInterest,
+      ...result,
     };
   }
 
@@ -235,11 +280,7 @@ export function calculateSwipeImpact(
     return {
       status: 'RISKY',
       reason: `Statement closes in ${days} day${days === 1 ? '' : 's'} — charge will hit this bill`,
-      projectedBalance,
-      netAvailableCash,
-      minimumPayment,
-      carriedBalance,
-      monthlyInterest,
+      ...result,
     };
   }
 
@@ -248,24 +289,16 @@ export function calculateSwipeImpact(
     return {
       status: 'RISKY',
       reason: `Utilization would be ${projectedUtilPct}% — above 80%`,
-      projectedBalance,
-      netAvailableCash,
-      minimumPayment,
-      carriedBalance,
-      monthlyInterest,
+      ...result,
     };
   }
 
-  // CAUTION: can't fully pay off
-  if (netAvailableCash !== null && netAvailableCash < projectedBalance) {
+  // CAUTION: strategy != minimum AND monthly payment < projectedBalance → carrying balance
+  if (strategy !== 'minimum' && monthlyPayment < projectedBalance) {
     return {
       status: 'CAUTION',
       reason: `You'll carry ₱${Math.round(carriedBalance).toLocaleString()} to next month at ${card.interestRate * 100}%/mo = ₱${Math.round(monthlyInterest).toLocaleString()} interest`,
-      projectedBalance,
-      netAvailableCash,
-      minimumPayment,
-      carriedBalance,
-      monthlyInterest,
+      ...result,
     };
   }
 
@@ -274,11 +307,7 @@ export function calculateSwipeImpact(
     return {
       status: 'CAUTION',
       reason: `${days} days to statement — charge lands on this bill`,
-      projectedBalance,
-      netAvailableCash,
-      minimumPayment,
-      carriedBalance,
-      monthlyInterest,
+      ...result,
     };
   }
 
@@ -287,11 +316,7 @@ export function calculateSwipeImpact(
     return {
       status: 'CAUTION',
       reason: `Utilization would be ${projectedUtilPct}% — approaching high threshold`,
-      projectedBalance,
-      netAvailableCash,
-      minimumPayment,
-      carriedBalance,
-      monthlyInterest,
+      ...result,
     };
   }
 
@@ -299,11 +324,7 @@ export function calculateSwipeImpact(
   return {
     status: 'SAFE',
     reason: `${days} days to statement · ${projectedUtilPct}% utilization after swipe`,
-    projectedBalance,
-    netAvailableCash,
-    minimumPayment,
-    carriedBalance,
-    monthlyInterest,
+    ...result,
   };
 }
 

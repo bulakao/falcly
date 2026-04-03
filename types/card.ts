@@ -32,6 +32,7 @@ export interface SwipeImpactResult {
   projectedBalance: number;
   netAvailableCash: number | null; // null when cash not set (CA stories)
   minimumPayment: number;
+  monthlyPayment: number; // strategy-aware payment amount
   carriedBalance: number; // 0 if full payoff possible
   monthlyInterest: number; // 0 if no carried balance
 }

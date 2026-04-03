@@ -1113,7 +1113,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Depends on PS-01. avalanche/snowball are multi-card strategies \u2014 deferred to PS-03."
     },
     {
