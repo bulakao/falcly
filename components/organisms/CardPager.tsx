@@ -30,6 +30,7 @@ interface CardPagerProps {
   cards: Card[];
   onAddCard: () => void;
   getNetAvailableCash: (card: Card) => number | null;
+  getCurrentCycleTxSum?: (card: Card) => number;
   initialIndex?: number;
   onBannerPress?: () => void;
   hasHiddenCards?: boolean;
@@ -45,7 +46,7 @@ type PageItem =
   | { type: 'empty' };
 
 export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
-  function CardPager({ cards, onAddCard, getNetAvailableCash, initialIndex = 0, onBannerPress, hasHiddenCards = false }, ref) {
+  function CardPager({ cards, onAddCard, getNetAvailableCash, getCurrentCycleTxSum, initialIndex = 0, onBannerPress, hasHiddenCards = false }, ref) {
     const t = useAppTheme();
     const insets = useSafeAreaInsets();
     const isCardReadOnly = useSubscriptionStore((s) => s.isCardReadOnly);
@@ -103,6 +104,7 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
               <AllCardsOverview
                 cards={cards}
                 getNetAvailableCash={getNetAvailableCash}
+                getCurrentCycleTxSum={getCurrentCycleTxSum}
                 onGanttCardPress={handleGanttCardPress}
                 onBannerPress={onBannerPress}
                 onAddPress={onAddCard}
@@ -143,13 +145,13 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
             keyboardDismissMode="on-drag"
           >
             <View style={styles.cardWrapper}>
-              <CreditCardFace card={card} netAvailableCash={getNetAvailableCash(card)} />
+              <CreditCardFace card={card} netAvailableCash={getNetAvailableCash(card)} currentCycleTxSum={getCurrentCycleTxSum ? getCurrentCycleTxSum(card) : 0} />
             </View>
             <SwipeImpactPanel card={card} readOnly={readOnly} />
           </ScrollView>
         );
       },
-      [cards, getNetAvailableCash, handleGanttCardPress, hasHiddenCards, insets.top, isCardReadOnly, onAddCard, onBannerPress, t.accent],
+      [cards, getNetAvailableCash, getCurrentCycleTxSum, handleGanttCardPress, hasHiddenCards, insets.top, isCardReadOnly, onAddCard, onBannerPress, t.accent],
     );
 
     const keyExtractor = useCallback(

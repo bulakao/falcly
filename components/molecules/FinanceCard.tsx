@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Pressable, View as RNView } from 'react-native';
-import { ChevronDown } from 'lucide-react-native';
+import { ChevronDown, X } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { Text } from '@/components/Themed';
 import { FormInput, Label, Caption } from '@/components/atoms';
@@ -10,6 +11,8 @@ import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
+
+const FINANCE_HINT_DISMISSED_KEY = 'falcly-finance-hint-dismissed';
 
 function formatMoney(raw: string): string {
   const cleaned = raw.replace(/[^0-9.]/g, '');
@@ -56,9 +59,24 @@ export function FinanceCard() {
   const setPayday2 = useUserStore((s) => s.setPayday2);
   const committedExpenses = useUserStore((s) => s.committedExpenses);
   const setCommittedExpenses = useUserStore((s) => s.setCommittedExpenses);
+  const currencySymbol = useUserStore((s) => s.currencySymbol);
 
   const cashStaleness = cashUpdatedAt ? getStalenessLevel(cashUpdatedAt) : null;
   const [expanded, setExpanded] = useState(true);
+
+  // Hint explainer for new users with no finance fields set
+  const [hintDismissed, setHintDismissed] = useState(true); // default true to avoid flash
+  useEffect(() => {
+    AsyncStorage.getItem(FINANCE_HINT_DISMISSED_KEY).then((v) => {
+      setHintDismissed(v === 'true');
+    });
+  }, []);
+  const dismissHint = useCallback(() => {
+    setHintDismissed(true);
+    AsyncStorage.setItem(FINANCE_HINT_DISMISSED_KEY, 'true');
+  }, []);
+  const allFieldsEmpty = cashOnHand == null && monthlyIncome == null && payday == null && committedExpenses == null;
+  const showHint = allFieldsEmpty && !hintDismissed;
 
   // Local state — show empty string for null/zero so placeholder is visible
   const initMoney = (v: number | null) => (v != null && v > 0 ? formatMoney(String(v)) : '');
@@ -148,6 +166,16 @@ export function FinanceCard() {
 
       {expanded && (
         <RNView style={[styles.enrichSection, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border }]}>
+          {showHint && (
+            <RNView style={[styles.hintBanner, { backgroundColor: t.accentBg ?? t.surface }]}>
+              <Text style={[styles.hintText, { color: t.accent }]}>
+                Fill this in to see if you can cover your payments.
+              </Text>
+              <Pressable onPress={dismissHint} hitSlop={8}>
+                <X size={14} color={t.textMuted} />
+              </Pressable>
+            </RNView>
+          )}
           {/* Funds Available */}
           <Label>Funds Available</Label>
           <Caption color={t.textMuted}>Your accessible funds across all accounts — used as the starting point for payment calculations.</Caption>
@@ -221,7 +249,7 @@ export function FinanceCard() {
           />
           {payday !== null && payday2 !== null && monthlyIncome !== null && monthlyIncome > 0 && (
             <Text style={[styles.splitHint, { color: t.textMuted }]}>
-              Income split evenly: ₱{formatMoney(String(Math.round(monthlyIncome / 2)))} on the {payday}{ordinalSuffix(payday)} · ₱{formatMoney(String(Math.round(monthlyIncome / 2)))} on the {payday2}{ordinalSuffix(payday2)}
+              Split evenly: {currencySymbol}{formatMoney(String(Math.round(monthlyIncome / 2)))} on the {payday}{ordinalSuffix(payday)} · {currencySymbol}{formatMoney(String(Math.round(monthlyIncome / 2)))} on the {payday2}{ordinalSuffix(payday2)}
             </Text>
           )}
 
@@ -284,5 +312,20 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     marginVertical: 20,
+  },
+  hintBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    gap: 8,
+  },
+  hintText: {
+    fontSize: 13,
+    fontFamily: fonts.interMedium,
+    flex: 1,
   },
 });

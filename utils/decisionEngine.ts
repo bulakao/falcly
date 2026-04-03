@@ -115,15 +115,17 @@ export function calculateCardStatus(
   card: Card,
   today: Date = new Date(),
   netAvailableCash: number | null = null,
+  currentCycleTxSum: number = 0,
 ): CardStatusResult {
   const days = daysToStatement(card.statementDay, today);
-  const util = utilization(card.outstandingBalance, card.creditLimit);
+  const effectiveBalance = card.outstandingBalance + currentCycleTxSum;
+  const util = utilization(effectiveBalance, card.creditLimit);
   const utilPct = Math.round(util * 100);
 
   // RISKY: cash below minimum payment — highest priority (first match wins)
   if (netAvailableCash !== null) {
     const minimumPayment = Math.max(
-      card.outstandingBalance * card.minPaymentPct,
+      effectiveBalance * card.minPaymentPct,
       card.minPaymentFloor,
     );
     if (netAvailableCash < minimumPayment) {
@@ -180,8 +182,9 @@ export function calculateSwipeImpact(
   proposedAmount: number,
   netAvailableCash: number | null = null,
   today: Date = new Date(),
+  currentCycleTxSum: number = 0,
 ): SwipeImpactResult {
-  const projectedBalance = projectedStatementBalance(card, proposedAmount, today);
+  const projectedBalance = projectedStatementBalance(card, proposedAmount, today, currentCycleTxSum);
   const projectedUtil = utilization(projectedBalance, card.creditLimit);
   const projectedUtilPct = Math.round(projectedUtil * 100);
   const days = daysToStatement(card.statementDay, today);
@@ -348,10 +351,12 @@ export function scoreCard(
   card: Card,
   today: Date = new Date(),
   netAvailableCash: number | null = null,
+  currentCycleTxSum: number = 0,
 ): number {
-  const util = utilization(card.outstandingBalance, card.creditLimit);
+  const effectiveBalance = card.outstandingBalance + currentCycleTxSum;
+  const util = utilization(effectiveBalance, card.creditLimit);
   const days = daysToStatement(card.statementDay, today);
-  const { status } = calculateCardStatus(card, today, netAvailableCash);
+  const { status } = calculateCardStatus(card, today, netAvailableCash, currentCycleTxSum);
 
   // Utilization component: 0–100
   const utilizationScore = util * 100;
@@ -524,15 +529,17 @@ export function calculateBestCard(
   cards: Card[],
   today: Date = new Date(),
   getNetAvailableCash?: (card: Card) => number | null,
+  getCurrentCycleTxSum?: (card: Card) => number,
 ): BestCardResult | null {
   if (cards.length === 0) return null;
 
   const scored = cards.map((card) => {
     const nac = getNetAvailableCash ? getNetAvailableCash(card) : null;
+    const txSum = getCurrentCycleTxSum ? getCurrentCycleTxSum(card) : 0;
     return {
       card,
-      score: scoreCard(card, today, nac),
-      status: calculateCardStatus(card, today, nac),
+      score: scoreCard(card, today, nac, txSum),
+      status: calculateCardStatus(card, today, nac, txSum),
     };
   });
 

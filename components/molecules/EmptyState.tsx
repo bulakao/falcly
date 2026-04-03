@@ -3,16 +3,18 @@ import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 
 interface EmptyStateProps {
+  icon?: React.ReactNode;
   title: string;
   subtitle: string;
   children?: React.ReactNode;
 }
 
-export function EmptyState({ title, subtitle, children }: EmptyStateProps) {
+export function EmptyState({ icon, title, subtitle, children }: EmptyStateProps) {
   const t = useAppTheme();
 
   return (
     <View style={styles.empty}>
+      {icon ? <View style={styles.icon}>{icon}</View> : null}
       <Text style={[styles.title, { color: t.textPrimary }]}>{title}</Text>
       <Text style={[styles.subtitle, { color: t.textMuted }]}>{subtitle}</Text>
       {children}
@@ -35,5 +37,8 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     textAlign: 'center',
+  },
+  icon: {
+    marginBottom: 16,
   },
 });

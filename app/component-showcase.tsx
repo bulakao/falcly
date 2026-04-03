@@ -239,7 +239,7 @@ export default function ComponentShowcase() {
       <Section title="List Items">
         <Pressable style={[styles.listItem, { borderBottomColor: t.border }]}>
           <View style={styles.listItemContent}>
-            <Text style={[styles.listTitle, { color: t.textPrimary }]}>Cash on Hand</Text>
+            <Text style={[styles.listTitle, { color: t.textPrimary }]}>Funds Available</Text>
             <Caption>Updated 2h ago</Caption>
           </View>
           <Text style={[styles.listValue, { color: t.accent }]}>₱25,000</Text>

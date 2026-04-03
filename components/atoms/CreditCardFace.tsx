@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Link } from 'expo-router';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { Caption } from './Typography';
@@ -11,11 +12,12 @@ import type { Card, CardStatus } from '@/types/card';
 interface CreditCardFaceProps {
   card: Card;
   netAvailableCash: number | null;
+  currentCycleTxSum?: number;
 }
 
-export function CreditCardFace({ card, netAvailableCash }: CreditCardFaceProps) {
+export function CreditCardFace({ card, netAvailableCash, currentCycleTxSum = 0 }: CreditCardFaceProps) {
   const t = useAppTheme();
-  const { status, reason } = calculateCardStatus(card, new Date(), netAvailableCash);
+  const { status, reason } = calculateCardStatus(card, new Date(), netAvailableCash, currentCycleTxSum);
   const staleness = getStalenessLevel(card.balanceUpdatedAt);
 
   const statusColorMap: Record<CardStatus, string> = {
@@ -34,9 +36,18 @@ export function CreditCardFace({ card, netAvailableCash }: CreditCardFaceProps) 
           <Text style={[styles.bankName, { color: t.textPrimary }]} numberOfLines={1}>
             {card.bankName}
           </Text>
-          <StatusTooltip>
-            <View style={[styles.statusDot, { backgroundColor: accentColor, shadowColor: accentColor }]} />
-          </StatusTooltip>
+          <View style={styles.statusGroup}>
+            {staleness !== 'fresh' && (
+              <Link href={{ pathname: '/update-balance', params: { cardId: card.id } }} asChild>
+                <Pressable>
+                  <Text style={styles.stalenessIcon}>⚠️</Text>
+                </Pressable>
+              </Link>
+            )}
+            <StatusTooltip>
+              <View style={[styles.statusDot, { backgroundColor: accentColor, shadowColor: accentColor }]} />
+            </StatusTooltip>
+          </View>
         </View>
 
         {/* Reason */}
@@ -102,6 +113,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  statusGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  stalenessIcon: {
+    fontSize: 14,
   },
   statusDot: {
     width: 12,

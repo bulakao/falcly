@@ -15,6 +15,13 @@ function formatShortDate(date: Date): string {
  * Shows: cycle start → today → statement close → due date
  * Statement close marker changes color at ≤7 days (amber) and ≤2 days (crimson).
  */
+/**
+ * BillingTimeline — single-card horizontal progress bar.
+ * Shows today's position within one card's billing cycle (cycle start → statement close → due date).
+ * Use this for per-card detail views (SwipeImpactPanel, onboarding-result).
+ *
+ * For a multi-card aligned timeline, see GanttTimeline.
+ */
 export function BillingTimeline({ card, today }: { card: Card; today?: Date }) {
   const t = useAppTheme();
   const cycle = getCycleDates(card, today);

@@ -823,7 +823,7 @@
         "Entry point is present for all cards (not just Pro)"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "card-transactions, log-transaction, payment-summary are built but orphaned \u2014 no navigation to them from home/card pager."
     },
     {
@@ -839,7 +839,7 @@
         "Entry point is present for all cards"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Companion to NV-01. Both should feel like natural extensions of the card detail."
     },
     {
@@ -855,7 +855,7 @@
         "Does not appear when funds are set and fresh"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Discovery spec: '[Update my cash]' action on swipe impact card."
     },
     {
@@ -872,7 +872,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "TL-06 was marked passing but currentCycleTxSum is never passed in home screen engine calls \u2014 all default to 0."
     },
     {
@@ -891,7 +891,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Companion to EF-01. Makes the TL integration actually meaningful."
     },
     {
@@ -909,7 +909,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "CL-07 only tracks cashOnHand staleness. Balance staleness on the card status badge is unimplemented per discovery spec."
     },
     {
@@ -926,7 +926,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "GanttTimeline is only accessible via AllCardsOverview tap handler \u2014 not visible from single card detail."
     },
     {
@@ -942,7 +942,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "New users see an empty FinanceCard with no context. Low effort, high first-run clarity."
     },
     {
@@ -959,7 +959,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "CASH.md plan included this hint \u2014 wiggum didn't implement it in FF-06."
     },
     {
@@ -976,7 +976,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "Currently shows a blank screen with no guidance when no transactions exist."
     },
     {
@@ -993,7 +993,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "notes": "Discovery doc 19 section 4.1 specifies this teachable moment explicitly."
     },
     {
@@ -1009,7 +1009,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "notes": "FF-02 missed at least one instance in SwipeImpactPanel hint text."
     },
     {
@@ -1025,8 +1025,8 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": "BillingTimeline appears in SwipeImpactPanel AND onboarding-result. Worth verifying these are intentional."
+      "passes": true,
+      "notes": "Audited: BillingTimeline (single-card bar) and GanttTimeline (multi-card chart) are distinct and both usages are intentional. Added clarifying JSDoc comments to both files."
     }
   ]
 }

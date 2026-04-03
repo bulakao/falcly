@@ -1,20 +1,25 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { StyleSheet, Pressable, Alert } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
 import { FormInput, Label } from '@/components/atoms';
 import { AlertBanner, BreakdownRow, BreakdownDivider, ChipSelector } from '@/components/molecules';
 import { BillingTimeline } from '@/components/organisms/BillingTimeline';
+import { GanttTimeline } from '@/components/organisms/GanttTimeline';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore, getPaydays } from '@/store/userStore';
+import { useTransactionStore } from '@/store/transactionStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
-import { calculateSwipeImpact, computeNetAvailableCash, getCycleDates } from '@/utils/decisionEngine';
+import { calculateSwipeImpact, computeNetAvailableCash, computeCurrentCycleTxSum, getCycleDates } from '@/utils/decisionEngine';
 import { getStalenessLevel } from '@/utils/staleness';
 import type { Card } from '@/types/card';
 import { trackSwipeCheckPerformed, trackDataStalenessWarningShown } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
+
+// Module-level flag so expand/collapse persists across re-mounts within the session
+let ganttExpandedSession = false;
 
 const QUICK_AMOUNTS = [
   { label: '₱500', value: 500 },
@@ -43,11 +48,15 @@ export function SwipeImpactPanel({
   const t = useAppTheme();
   const deleteCard = useCardStore((s) => s.deleteCard);
   const cashOnHand = useUserStore((s) => s.cashOnHand);
+  const cashUpdatedAt = useUserStore((s) => s.cashUpdatedAt);
   const monthlyIncome = useUserStore((s) => s.monthlyIncome);
   const committedExpenses = useUserStore((s) => s.committedExpenses);
   const paydays = getPaydays();
   const subscriptionTier = useSubscriptionStore((s) => s.tier);
+  const getCurrentCycle = useTransactionStore((s) => s.getCurrentCycle);
+  const transactions = useTransactionStore((s) => s.transactions);
   const [amountText, setAmountText] = useState('');
+  const [ganttExpanded, setGanttExpanded] = useState(ganttExpandedSession);
 
   const proposedAmount = useMemo(() => {
     const n = parseFloat(amountText);
@@ -65,12 +74,21 @@ export function SwipeImpactPanel({
     return paydays.some((day) => day <= dueDate.getDate());
   }, [card, monthlyIncome, paydays]);
 
+  const currentCycleTxSum = useMemo(
+    () => computeCurrentCycleTxSum(getCurrentCycle(card.id, card.statementDay)),
+    [card.id, card.statementDay, getCurrentCycle, transactions],
+  );
+
   const impact = useMemo(
-    () => calculateSwipeImpact(card, proposedAmount, netAvailableCash),
-    [card, proposedAmount, netAvailableCash],
+    () => calculateSwipeImpact(card, proposedAmount, netAvailableCash, new Date(), currentCycleTxSum),
+    [card, proposedAmount, netAvailableCash, currentCycleTxSum],
   );
 
   const staleness = getStalenessLevel(card.balanceUpdatedAt);
+
+  const showFundsPrompt = cashOnHand === null || (
+    cashUpdatedAt !== null && getStalenessLevel(cashUpdatedAt) !== 'fresh'
+  );
 
   // Track swipe check when user enters a non-zero proposed amount
   const prevAmountRef = useRef(0);
@@ -110,6 +128,13 @@ export function SwipeImpactPanel({
         },
       ],
     );
+  }
+
+  function toggleGantt() {
+    setGanttExpanded((prev) => {
+      ganttExpandedSession = !prev;
+      return !prev;
+    });
   }
 
   const showCarriedBalance = impact.carriedBalance > 0 && impact.monthlyInterest > 0;
@@ -154,6 +179,18 @@ export function SwipeImpactPanel({
 
       {/* Billing cycle timeline */}
       <BillingTimeline card={card} />
+
+      {/* Collapsible Gantt timeline */}
+      <Pressable onPress={toggleGantt} style={styles.ganttToggle}>
+        <Text style={[styles.ganttToggleText, { color: t.primary }]}>
+          Billing Cycle {ganttExpanded ? '▴' : '▾'}
+        </Text>
+      </Pressable>
+      {ganttExpanded && (
+        <View style={[styles.ganttContainer, { borderColor: t.border }]}>
+          <GanttTimeline cards={[card]} />
+        </View>
+      )}
 
       {/* Amount input */}
       <Label>How much will you swipe?</Label>
@@ -203,11 +240,19 @@ export function SwipeImpactPanel({
         })() && (
           <BreakdownRow label="Annual fee" value={`+${formatPeso(card.annualFee)}`} />
         )}
+        {currentCycleTxSum > 0 && (
+          <BreakdownRow label="Logged this cycle" value={`+${formatPeso(currentCycleTxSum)}`} />
+        )}
         {proposedAmount > 0 && (
           <BreakdownRow label="Proposed swipe" value={`+${formatPeso(proposedAmount)}`} />
         )}
         <BreakdownDivider />
         <BreakdownRow label="Projected statement balance" value={formatPeso(impact.projectedBalance)} bold />
+        {currentCycleTxSum > 0 && (
+          <Text style={[styles.cycleTxLabel, { color: t.textMuted }]}>
+            Includes {formatPeso(currentCycleTxSum)} logged this cycle
+          </Text>
+        )}
 
         {impact.netAvailableCash !== null ? (
           <>
@@ -242,9 +287,35 @@ export function SwipeImpactPanel({
         )}
       </View>
 
+      {/* Navigation links */}
+      <View style={styles.navRow}>
+        <Link href={{ pathname: '/card-transactions', params: { cardId: card.id } }} asChild>
+          <Pressable style={[styles.navButton, { backgroundColor: t.surface, borderColor: t.border }]}>
+            <Text style={[styles.navButtonText, { color: t.primary }]}>View Transactions ›</Text>
+          </Pressable>
+        </Link>
+        <Link href={{ pathname: '/payment-summary', params: { cardId: card.id } }} asChild>
+          <Pressable style={[styles.navButton, { backgroundColor: t.surface, borderColor: t.border }]}>
+            <Text style={[styles.navButtonText, { color: t.primary }]}>What You Owe ›</Text>
+          </Pressable>
+        </Link>
+      </View>
+
+      {/* Quick-update funds available prompt */}
+      {showFundsPrompt && !readOnly && (
+        <Pressable
+          style={[styles.fundsPrompt, { backgroundColor: t.cautionBg, borderColor: t.caution }]}
+          onPress={() => router.navigate('/')}
+        >
+          <Text style={[styles.fundsPromptText, { color: t.caution }]}>
+            {cashOnHand === null ? 'Set funds available \u2192' : 'Update funds available \u2192'}
+          </Text>
+        </Pressable>
+      )}
+
       {impact.netAvailableCash === null && (
         <Text style={[styles.hint, { color: t.textMuted }]}>
-          Set your cash on hand in Settings to see payoff projections.
+          Set your funds available to see payoff projections.
         </Text>
       )}
 
@@ -281,6 +352,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: fonts.interSemiBold,
   },
+  ganttToggle: {
+    paddingVertical: 8,
+    marginBottom: 4,
+  },
+  ganttToggleText: {
+    fontSize: 14,
+    fontFamily: fonts.interSemiBold,
+  },
+  ganttContainer: {
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 12,
+    marginBottom: 16,
+  },
   breakdown: {
     borderRadius: 12,
     borderWidth: 1,
@@ -291,6 +376,37 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: fonts.interBold,
     marginBottom: 12,
+  },
+  cycleTxLabel: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  navRow: {
+    gap: 8,
+    marginBottom: 16,
+  },
+  navButton: {
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  navButtonText: {
+    fontSize: 14,
+    fontFamily: fonts.interSemiBold,
+  },
+  fundsPrompt: {
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 16,
+  },
+  fundsPromptText: {
+    fontSize: 14,
+    fontFamily: fonts.interSemiBold,
   },
   hint: {
     fontSize: 13,
