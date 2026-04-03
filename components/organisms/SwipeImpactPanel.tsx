@@ -11,7 +11,7 @@ import { useCardStore } from '@/store/cardStore';
 import { useUserStore, getPaydays } from '@/store/userStore';
 import { useTransactionStore } from '@/store/transactionStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
-import { calculateSwipeImpact, computeNetAvailableCash, computeCurrentCycleTxSum, getCycleDates } from '@/utils/decisionEngine';
+import { calculateSwipeImpact, computeNetAvailableCash, computeCurrentCycleTxSum, getCycleDates, computePayoffProjection } from '@/utils/decisionEngine';
 import { getStalenessLevel } from '@/utils/staleness';
 import type { Card } from '@/types/card';
 import { trackSwipeCheckPerformed, trackDataStalenessWarningShown } from '@/utils/analytics';
@@ -85,6 +85,13 @@ export function SwipeImpactPanel({
     () => calculateSwipeImpact(card, proposedAmount, netAvailableCash, new Date(), currentCycleTxSum, payoffStrategy, fixedPayoffAmount, committedExpenses ?? 0),
     [card, proposedAmount, netAvailableCash, currentCycleTxSum, payoffStrategy, fixedPayoffAmount, committedExpenses],
   );
+
+  const [projectionExpanded, setProjectionExpanded] = useState(false);
+
+  const payoffProjection = useMemo(() => {
+    if (impact.carriedBalance <= 0) return null;
+    return computePayoffProjection(impact.carriedBalance, impact.monthlyPayment, card.interestRate);
+  }, [impact.carriedBalance, impact.monthlyPayment, card.interestRate]);
 
   const staleness = getStalenessLevel(card.balanceUpdatedAt);
 
@@ -290,6 +297,27 @@ export function SwipeImpactPanel({
             <BreakdownRow label={`Est. monthly interest (${card.interestRate * 100}%)`} value={formatPeso(impact.monthlyInterest)} labelColor={t.risky} valueColor={t.risky} />
           </>
         )}
+
+        {showCarriedBalance && payoffProjection && (
+          <>
+            <BreakdownDivider />
+            <Pressable onPress={() => setProjectionExpanded((p) => !p)} style={styles.projectionToggle}>
+              <Text style={[styles.projectionToggleText, { color: t.caution }]}>
+                Payoff Projection {projectionExpanded ? '▴' : '▾'}
+              </Text>
+            </Pressable>
+            {projectionExpanded && (
+              <View style={styles.projectionContent}>
+                <BreakdownRow
+                  label="Months to pay off"
+                  value={payoffProjection.monthsToPayoff >= 360 ? '360+' : String(payoffProjection.monthsToPayoff)}
+                />
+                <BreakdownRow label="Total interest" value={formatPeso(payoffProjection.totalInterest)} labelColor={t.risky} valueColor={t.risky} />
+                <BreakdownRow label="Total paid" value={formatPeso(payoffProjection.totalPaid)} bold />
+              </View>
+            )}
+          </>
+        )}
       </View>
 
       {/* Navigation links */}
@@ -432,5 +460,15 @@ const styles = StyleSheet.create({
   },
   trialCtaSubtext: {
     fontSize: 13,
+  },
+  projectionToggle: {
+    paddingVertical: 8,
+  },
+  projectionToggleText: {
+    fontSize: 14,
+    fontFamily: fonts.interSemiBold,
+  },
+  projectionContent: {
+    paddingTop: 4,
   },
 });

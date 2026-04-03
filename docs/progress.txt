@@ -45,3 +45,20 @@ Started: Sat Apr  4 01:34:00 PST 2026
   - Aggressive strategy needs committedExpenses for safety buffer — panel already had it via userStore
   - Carried balance logic key change: uses monthlyPayment instead of netAvailableCash for the deficit calculation
 ---
+
+## 2026-04-04 - PS-03
+- Implemented payoff projection — months to clear and total interest
+- Added `computePayoffProjection(balance, monthlyPayment, interestRate)` to decisionEngine.ts
+- Uses iterative amortization loop; caps at 360 months; returns null if monthlyPayment <= 0
+- SwipeImpactPanel: collapsible "Payoff Projection" section when carried balance > 0
+- Shows months to pay off, total interest, total paid; collapsed by default
+- Files changed:
+  - `types/card.ts` — added PayoffProjection interface
+  - `utils/decisionEngine.ts` — added computePayoffProjection() helper
+  - `components/organisms/SwipeImpactPanel.tsx` — collapsible projection section, new state + memo
+  - `docs/prd.json` — marked PS-03 passes: true
+- **Learnings for future iterations:**
+  - Amortization with monthly compounding: loop is clearer than closed-form for edge cases (early payoff overshoot)
+  - Projection uses carriedBalance (not projectedBalance) as the starting amount — this is the actual amount that accrues interest
+  - Collapsible sections in breakdown: use inline Pressable + state toggle, no need for separate component
+---

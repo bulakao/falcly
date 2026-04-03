@@ -1,4 +1,4 @@
-import { Card, CardStatusResult, SwipeImpactResult, BestCardResult, CycleDates, FutureCycleProjection, FutureSignal } from '@/types/card';
+import { Card, CardStatusResult, SwipeImpactResult, BestCardResult, CycleDates, FutureCycleProjection, FutureSignal, PayoffProjection } from '@/types/card';
 import type { PayoffStrategy } from '@/store/userStore';
 import type { Transaction } from '@/store/transactionStore';
 
@@ -202,6 +202,44 @@ export function computeMonthlyPayment(
     default:
       return projectedBalance;
   }
+}
+
+/**
+ * Compute payoff projection using standard amortization.
+ * Returns months to pay off, total interest, and total paid.
+ * Returns null if monthlyPayment <= 0 (would never pay off).
+ * Caps at 360 months.
+ */
+export function computePayoffProjection(
+  balance: number,
+  monthlyPayment: number,
+  interestRate: number,
+): PayoffProjection | null {
+  if (monthlyPayment <= 0 || balance <= 0) return null;
+
+  let remaining = balance;
+  let totalInterest = 0;
+  let months = 0;
+  const maxMonths = 360;
+
+  while (remaining > 0 && months < maxMonths) {
+    const interest = remaining * interestRate;
+    totalInterest += interest;
+    remaining = remaining + interest - monthlyPayment;
+    months++;
+
+    if (remaining <= 0) {
+      // Overpaid on the last month — adjust
+      totalInterest += remaining; // remaining is negative, so this subtracts the overpayment interest
+      remaining = 0;
+    }
+  }
+
+  return {
+    monthsToPayoff: months,
+    totalInterest: Math.max(0, totalInterest),
+    totalPaid: balance + Math.max(0, totalInterest),
+  };
 }
 
 /**

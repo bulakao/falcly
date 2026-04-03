@@ -71,4 +71,10 @@ export interface FutureCycleProjection {
   signal?: FutureSignal; // only set when isKnown is false
 }
 
+export interface PayoffProjection {
+  monthsToPayoff: number;
+  totalInterest: number;
+  totalPaid: number;
+}
+
 export const DEFAULT_DUE_DAY_OFFSET = 21;
