@@ -959,7 +959,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "CASH.md plan included this hint — wiggum didn't implement it in FF-06."
     },
     {

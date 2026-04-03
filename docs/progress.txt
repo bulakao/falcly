@@ -103,3 +103,14 @@ Started: Sat Apr  4 00:26:15 PST 2026
   - `accentBg` theme token provides a subtle highlight background suitable for info banners
   - `lucide-react-native` `X` icon at size 14 works well for inline dismiss buttons
 ---
+
+## 2026-04-04 - UX-03
+- Fixed inline income split hint in FinanceCard to use `currencySymbol` from store instead of hardcoded ₱
+- Updated hint text from "Income split evenly" to "Split evenly" to match AC
+- The hint was already conditionally rendered when payday + payday2 + monthlyIncome > 0 are all set
+- Files changed: `components/molecules/FinanceCard.tsx`
+- **Learnings for future iterations:**
+  - The split hint was partially implemented in a prior phase (FF-06) — always check existing code before building from scratch
+  - `currencySymbol` is available in userStore and defaults to '₱' — use it for all user-facing currency displays
+  - `ordinalSuffix()` helper exists in FinanceCard for formatting day-of-month (1st, 2nd, 3rd, etc.)
+---
