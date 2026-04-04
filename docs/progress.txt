@@ -62,3 +62,9 @@ Started: Sat Apr  4 01:34:00 PST 2026
   - Projection uses carriedBalance (not projectedBalance) as the starting amount — this is the actual amount that accrues interest
   - Collapsible sections in breakdown: use inline Pressable + state toggle, no need for separate component
 ---
+
+## 2026-04-04 - BP-01, HP-01, HP-02, HP-03
+- BP-01: BankPicker component for PH bank selection in add-card, edit-card, onboarding
+- HP-01: Time-aware personalized greeting on AllCardsOverview
+- HP-02: Try a different card button on SwipeImpactPanel
+- HP-03: Card sort options (Urgency/Utilization/Due Date) with AsyncStorage persistence
