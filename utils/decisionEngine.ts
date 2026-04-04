@@ -335,7 +335,7 @@ export function calculateSwipeImpact(
   if (strategy !== 'minimum' && monthlyPayment < projectedBalance) {
     return {
       status: 'CAUTION',
-      reason: `You'll carry ₱${Math.round(carriedBalance).toLocaleString()} to next month at ${card.interestRate * 100}%/mo = ₱${Math.round(monthlyInterest).toLocaleString()} interest`,
+      reason: `You'll carry ${formatPeso(carriedBalance)} to next month at ${card.interestRate * 100}%/mo = ${formatPeso(monthlyInterest)} interest`,
       ...result,
     };
   }
@@ -577,7 +577,12 @@ export function computeCurrentCycleTxSum(currentCycleTxns: Transaction[]): numbe
 }
 
 function formatPeso(amount: number): string {
-  return `₱${Math.round(amount).toLocaleString()}`;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useUserStore } = require('@/store/userStore');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { formatAmount } = require('@/utils/currency');
+  const currency = useUserStore.getState().globalCurrency;
+  return formatAmount(amount, currency);
 }
 
 /**

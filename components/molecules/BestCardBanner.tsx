@@ -6,6 +6,7 @@ import { fonts } from '@/theme/fonts';
 import { UtilizationBar } from '@/components/atoms';
 import StatusTooltip from '@/components/molecules/StatusTooltip';
 import type { BestCardResult, CardStatus } from '@/types/card';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface BestCardBannerProps {
   bestCard: BestCardResult | null;
@@ -25,6 +26,7 @@ export function BestCardBanner({ bestCard, hasCards, hasActiveCards, onPress, on
   };
 
   const card = bestCard?.card ?? null;
+  const { format } = useCurrency(card);
   const accentColor = card ? statusColorMap[bestCard!.status.status] : undefined;
 
   // Footer action
@@ -50,7 +52,7 @@ export function BestCardBanner({ bestCard, hasCards, hasActiveCards, onPress, on
               <RNView style={styles.utilizationRow}>
                 <UtilizationBar balance={card.outstandingBalance} limit={card.creditLimit} color={accentColor!} />
                 <Text style={[styles.utilizationLabel, { color: t.textMuted }]}>
-                  ₱{card.outstandingBalance.toLocaleString()} / ₱{card.creditLimit.toLocaleString()}
+                  {format(card.outstandingBalance)} / {format(card.creditLimit)}
                 </Text>
               </RNView>
               <Text style={[styles.reason, { color: t.textSecondary }]}>{bestCard!.status.reason}</Text>

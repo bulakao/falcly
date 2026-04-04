@@ -14,6 +14,7 @@ export interface Card {
   subscriptionsThisCycle: number; // subscriptions hitting this billing cycle
   annualFee: number; // annual fee amount (0 if none)
   annualFeeMonth: number; // month (1–12) when annual fee is charged (0 if none)
+  currency?: string; // ISO 4217 code; undefined = use globalCurrency
   balanceUpdatedAt: number; // timestamp
   createdAt: number;
   isActive: boolean;

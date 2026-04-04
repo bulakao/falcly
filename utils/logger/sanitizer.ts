@@ -31,9 +31,9 @@ const SENSITIVE_FIELDS = new Set([
 const REDACTED = '[REDACTED]';
 
 const PATTERN_REPLACEMENTS: [RegExp, string][] = [
-  // Currency amounts (₱, $, PHP)
-  [/[₱$]\s*[\d,]+\.?\d*/g, '[AMOUNT]'],
-  [/PHP\s*[\d,]+\.?\d*/gi, '[AMOUNT]'],
+  // Currency amounts (₱, $, €, £, ¥, etc.)
+  [/[₱$€£¥₩₫₹฿]\s*[\d,]+\.?\d*/g, '[AMOUNT]'],
+  [/(?:PHP|USD|EUR|GBP|JPY|SGD|MYR|THB|IDR|INR|AUD|CAD|NZD|CHF|HKD|KRW|CNY)\s*[\d,]+\.?\d*/gi, '[AMOUNT]'],
   // Credit card numbers
   [/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g, '[CARD_NUMBER]'],
   // Email addresses

@@ -14,6 +14,7 @@ import { Button } from '@/components/atoms';
 import { SurfaceCard } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
+import { useCurrency } from '@/hooks/useCurrency';
 
 export default function ManageInstallmentsScreen() {
   const t = useAppTheme();
@@ -22,6 +23,7 @@ export default function ManageInstallmentsScreen() {
   const installments = useInstallmentStore((s) => s.installments.filter((i) => i.cardId === cardId));
   const deleteInstallment = useInstallmentStore((s) => s.deleteInstallment);
   const getMonthsRemaining = useInstallmentStore((s) => s.getMonthsRemaining);
+  const { format } = useCurrency(card);
 
   if (!card) {
     return (
@@ -73,7 +75,7 @@ export default function ManageInstallmentsScreen() {
                 )}
               </RNView>
               <Text style={[styles.amount, { color: t.textPrimary }]}>
-                ₱{inst.monthlyAmount.toLocaleString()}/mo
+                {format(inst.monthlyAmount)}/mo
               </Text>
             </RNView>
 
@@ -88,7 +90,7 @@ export default function ManageInstallmentsScreen() {
 
             <RNView style={styles.row}>
               <Text style={[styles.itemDetail, { color: t.textMuted }]}>
-                Total ₱{inst.totalAmount.toLocaleString()}
+                Total {format(inst.totalAmount)}
               </Text>
               <Pressable onPress={() => handleDelete(inst.id, inst.name)} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Remove ${inst.name}`}>
                 <Text style={[styles.deleteText, { color: t.risky }]}>Remove</Text>

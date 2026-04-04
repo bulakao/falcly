@@ -46,6 +46,7 @@ function rowToCard(row: typeof cardsTable.$inferSelect): Card {
     annualFee: row.annualFee,
     annualFeeMonth: row.annualFeeMonth,
     balanceUpdatedAt: row.balanceUpdatedAt.getTime(),
+    currency: row.currency ?? undefined,
     isActive: row.isActive,
     createdAt: row.createdAt.getTime(),
   };
@@ -121,6 +122,7 @@ export const useCardStore = create<CardStore>()((set, get) => ({
       subscriptionsThisCycle: card.subscriptionsThisCycle,
       annualFee: card.annualFee,
       annualFeeMonth: card.annualFeeMonth,
+      currency: card.currency ?? null,
       balanceUpdatedAt: new Date(now),
       isActive: true,
       sortOrder: get().cards.length,

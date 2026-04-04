@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   StyleSheet,
   KeyboardAvoidingView,
@@ -7,6 +7,9 @@ import {
   Pressable,
   Alert,
   View,
+  Modal,
+  FlatList,
+  TextInput,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,6 +23,7 @@ import { Button, Label } from '@/components/atoms';
 import { BankPicker, DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
+import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
 
 export default function AddCardScreen() {
   const t = useAppTheme();
@@ -34,6 +38,16 @@ export default function AddCardScreen() {
   const [outstandingBalance, setOutstandingBalance] = useState('');
   const [statementDay, setStatementDay] = useState('');
   const [dueDayOffset, setDueDayOffset] = useState(String(DEFAULT_DUE_DAY_OFFSET));
+  const [currency, setCurrency] = useState<string | undefined>(undefined);
+  const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
+  const [currencySearch, setCurrencySearch] = useState('');
+  const filteredCurrencies = useMemo(() => {
+    if (!currencySearch.trim()) return SUPPORTED_CURRENCIES;
+    const q = currencySearch.trim().toLowerCase();
+    return SUPPORTED_CURRENCIES.filter(
+      (code) => code.toLowerCase().includes(q) || getCurrencySymbol(code).toLowerCase().includes(q),
+    );
+  }, [currencySearch]);
 
   function handleSave() {
     const limit = parseMoney(creditLimit);
@@ -71,6 +85,7 @@ export default function AddCardScreen() {
       interestRate: defaultInterestRate,
       minPaymentPct: defaultMinPaymentPct,
       minPaymentFloor: defaultMinPaymentFloor,
+      currency,
     });
     trackCardAdded('manual_add');
 
@@ -128,10 +143,75 @@ export default function AddCardScreen() {
           hint="Minimum 20 days (BSP regulation). Most PH banks use 20–25 days."
         />
 
+        <View style={styles.fieldGroup}>
+          <Label>Card Currency (optional)</Label>
+          <Pressable
+            onPress={() => setCurrencyModalVisible(true)}
+            style={[styles.currencyPicker, { borderColor: t.inputBorder, backgroundColor: t.inputBg }]}
+            accessibilityRole="button"
+            accessibilityLabel="Select card currency"
+          >
+            <Text style={[styles.currencyPickerText, { color: currency ? t.textPrimary : t.textMuted }]}>
+              {currency ? `${getCurrencySymbol(currency)} ${currency}` : 'Use global currency'}
+            </Text>
+          </Pressable>
+          <Text style={[styles.currencyHint, { color: t.textMuted }]}>Overrides your global currency for this card</Text>
+        </View>
+
         <View style={styles.buttonWrapper}>
           <Button label="Add Card" onPress={handleSave} />
         </View>
       </ScrollView>
+
+      <Modal
+        visible={currencyModalVisible}
+        animationType="slide"
+        onRequestClose={() => setCurrencyModalVisible(false)}
+        accessibilityViewIsModal
+      >
+        <View style={[styles.modalContainer, { backgroundColor: t.background }]}>
+          <View style={styles.modalHeader}>
+            <Text style={[styles.modalTitle, { color: t.textPrimary }]}>Card Currency</Text>
+            <Pressable onPress={() => setCurrencyModalVisible(false)} accessibilityRole="button" accessibilityLabel="Close">
+              <Text style={[styles.modalClose, { color: t.primary }]}>Done</Text>
+            </Pressable>
+          </View>
+          <TextInput
+            style={[styles.searchInput, { color: t.textPrimary, borderColor: t.border, backgroundColor: t.inputBg }]}
+            placeholder="Search currency..."
+            placeholderTextColor={t.textMuted}
+            value={currencySearch}
+            onChangeText={setCurrencySearch}
+            autoCorrect={false}
+          />
+          <Pressable
+            style={[styles.currencyRow, !currency && { backgroundColor: t.accentBg }]}
+            onPress={() => { setCurrency(undefined); setCurrencyModalVisible(false); setCurrencySearch(''); }}
+            accessibilityRole="button"
+            accessibilityLabel="Use global currency"
+          >
+            <Text style={[styles.currencyLabel, { color: !currency ? t.primary : t.textPrimary }]}>Use global currency</Text>
+            {!currency && <Text style={{ color: t.primary }}>✓</Text>}
+          </Pressable>
+          <FlatList
+            data={filteredCurrencies}
+            keyExtractor={(item) => item}
+            renderItem={({ item: code }) => (
+              <Pressable
+                style={[styles.currencyRow, code === currency && { backgroundColor: t.accentBg }]}
+                onPress={() => { setCurrency(code); setCurrencyModalVisible(false); setCurrencySearch(''); }}
+                accessibilityRole="button"
+                accessibilityLabel={`${getCurrencySymbol(code)} ${code}`}
+                accessibilityState={{ selected: code === currency }}
+              >
+                <Text style={[styles.currencySymbolText, { color: t.textPrimary }]}>{getCurrencySymbol(code)}</Text>
+                <Text style={[styles.currencyLabel, { color: code === currency ? t.primary : t.textPrimary, flex: 1 }]}>{code}</Text>
+                {code === currency && <Text style={{ color: t.primary }}>✓</Text>}
+              </Pressable>
+            )}
+          />
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -162,5 +242,64 @@ const styles = StyleSheet.create({
   },
   buttonWrapper: {
     marginTop: 32,
+  },
+  currencyPicker: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginTop: 6,
+  },
+  currencyPickerText: {
+    fontSize: 15,
+    fontFamily: fonts.interMedium,
+  },
+  currencyHint: {
+    fontSize: 12,
+    marginTop: 4,
+  },
+  modalContainer: {
+    flex: 1,
+    paddingTop: 50,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: fonts.interBold,
+  },
+  modalClose: {
+    fontSize: 16,
+    fontFamily: fonts.interSemiBold,
+  },
+  searchInput: {
+    marginHorizontal: 20,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 15,
+  },
+  currencyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  currencySymbolText: {
+    fontSize: 18,
+    fontFamily: fonts.interBold,
+    width: 40,
+  },
+  currencyLabel: {
+    fontSize: 15,
+    fontFamily: fonts.interSemiBold,
   },
 });

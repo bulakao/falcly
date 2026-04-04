@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { profile as profileTable } from '@/db/schema/local';
 import { setAnalyticsOptOut } from '@/utils/analytics';
+import { detectLocaleCurrency } from '@/utils/currency';
 
 const PROFILE_ID = 'local';
 
@@ -23,7 +24,7 @@ interface UserStore {
   notifyDueReminder: boolean;
   notifyHighUtilization: boolean;
   // Currency
-  currencySymbol: string;
+  globalCurrency: string;
   // Defaults
   defaultInterestRate: number;
   defaultMinPaymentPct: number;
@@ -45,7 +46,7 @@ interface UserStore {
   setNotifyStatementReminder: (v: boolean) => void;
   setNotifyDueReminder: (v: boolean) => void;
   setNotifyHighUtilization: (v: boolean) => void;
-  setCurrencySymbol: (symbol: string) => void;
+  setGlobalCurrency: (currency: string) => void;
   setDefaultInterestRate: (rate: number) => void;
   setDefaultMinPaymentPct: (pct: number) => void;
   setDefaultMinPaymentFloor: (floor: number) => void;
@@ -78,7 +79,7 @@ export const useUserStore = create<UserStore>()((set) => ({
   notifyStatementReminder: true,
   notifyDueReminder: true,
   notifyHighUtilization: false,
-  currencySymbol: '₱',
+  globalCurrency: detectLocaleCurrency(),
   defaultInterestRate: 0.02,
   defaultMinPaymentPct: 0.05,
   defaultMinPaymentFloor: 500,
@@ -103,7 +104,7 @@ export const useUserStore = create<UserStore>()((set) => ({
           notifyStatementReminder: row.notifyStatementReminder ?? true,
           notifyDueReminder: row.notifyDueReminder ?? true,
           notifyHighUtilization: row.notifyHighUtilization ?? false,
-          currencySymbol: row.currencySymbol ?? '₱',
+          globalCurrency: row.currencySymbol ?? detectLocaleCurrency(),
           defaultInterestRate: row.defaultInterestRate ?? 0.02,
           defaultMinPaymentPct: row.defaultMinPaymentPct ?? 0.05,
           defaultMinPaymentFloor: row.defaultMinPaymentFloor ?? 500,
@@ -165,9 +166,9 @@ export const useUserStore = create<UserStore>()((set) => ({
     updateProfile({ notifyHighUtilization: v });
     set({ notifyHighUtilization: v });
   },
-  setCurrencySymbol: (symbol: string) => {
-    updateProfile({ currencySymbol: symbol });
-    set({ currencySymbol: symbol });
+  setGlobalCurrency: (currency: string) => {
+    updateProfile({ currencySymbol: currency });
+    set({ globalCurrency: currency });
   },
   setDefaultInterestRate: (rate: number) => {
     updateProfile({ defaultInterestRate: rate });
@@ -212,7 +213,7 @@ export const useUserStore = create<UserStore>()((set) => ({
       notifyStatementReminder: true,
       notifyDueReminder: true,
       notifyHighUtilization: false,
-      currencySymbol: '₱',
+      globalCurrency: detectLocaleCurrency(),
       defaultInterestRate: 0.02,
       defaultMinPaymentPct: 0.05,
       defaultMinPaymentFloor: 500,

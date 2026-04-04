@@ -6,6 +6,14 @@ import notifee, {
 } from '@notifee/react-native';
 import { Platform } from 'react-native';
 import type { Card } from '@/types/card';
+import { formatAmount } from '@/utils/currency';
+
+function formatNotifAmount(amount: number): string {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useUserStore } = require('@/store/userStore');
+  const currency = useUserStore.getState().globalCurrency;
+  return formatAmount(amount, currency);
+}
 
 const CHANNEL_STATEMENT = 'statement-reminders';
 const CHANNEL_DUE = 'due-reminders';
@@ -128,7 +136,7 @@ export async function scheduleDueReminder(card: Card): Promise<void> {
     {
       id: dueNotifId(card.id),
       title: 'Payment due soon',
-      body: `Your ${card.bankName} payment is due in 3 days. Minimum: ₱${Math.round(minPayment).toLocaleString()}`,
+      body: `Your ${card.bankName} payment is due in 3 days. Minimum: ${formatNotifAmount(minPayment)}`,
       android: {
         channelId: CHANNEL_DUE,
         importance: AndroidImportance.HIGH,

@@ -16,6 +16,7 @@ export const cards = sqliteTable('cards', {
   subscriptionsThisCycle: real('subscriptions_this_cycle').notNull().default(0),
   annualFee: real('annual_fee').notNull().default(0),
   annualFeeMonth: integer('annual_fee_month').notNull().default(0),
+  currency: text('currency'),
   balanceUpdatedAt: integer('balance_updated_at', { mode: 'timestamp_ms' }).notNull(),
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
   sortOrder: integer('sort_order').notNull().default(0),
@@ -86,7 +87,7 @@ export const profile = sqliteTable('profile', {
   notifyDueReminder: integer('notify_due_reminder', { mode: 'boolean' }).notNull().default(true),
   notifyHighUtilization: integer('notify_high_utilization', { mode: 'boolean' }).notNull().default(false),
   // Currency
-  currencySymbol: text('currency_symbol').notNull().default('₱'),
+  currencySymbol: text('currency_symbol').notNull().default('PHP'),
   // Defaults
   defaultInterestRate: real('default_interest_rate').notNull().default(0.02),
   defaultMinPaymentPct: real('default_min_payment_pct').notNull().default(0.05),

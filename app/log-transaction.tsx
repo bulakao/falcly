@@ -23,6 +23,7 @@ import {
   getLandsOnLabel,
   daysUntilClose,
 } from '@/utils/cycleUtils';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const TX_TYPES: { label: string; value: TransactionType }[] = [
   { label: 'Purchase', value: 'purchase' },
@@ -79,6 +80,7 @@ export default function LogTransactionScreen() {
 
   const dateChips = useMemo(() => getDateChips(), []);
   const selectedCard = cards.find((c) => c.id === selectedCardId);
+  const { symbol } = useCurrency(selectedCard);
 
   const landsOnLabel = useMemo(() => {
     if (!selectedCard) return '';
@@ -142,7 +144,7 @@ export default function LogTransactionScreen() {
         {/* Amount */}
         <Label>{txType === 'payment' ? 'Payment amount' : 'Amount'}</Label>
         <View style={styles.amountRow}>
-          <Text style={[styles.currencyPrefix, { color: t.textSecondary }]}>₱</Text>
+          <Text style={[styles.currencyPrefix, { color: t.textSecondary }]}>{symbol}</Text>
           <FormInput
             value={amountText}
             onChangeText={setAmountText}

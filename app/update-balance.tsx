@@ -11,6 +11,7 @@ import { useCardStore } from '@/store/cardStore';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { Button, FormInput, Caption } from '@/components/atoms';
+import { useCurrency } from '@/hooks/useCurrency';
 
 export default function UpdateBalanceScreen() {
   const t = useAppTheme();
@@ -18,6 +19,7 @@ export default function UpdateBalanceScreen() {
   const router = useRouter();
   const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
   const updateBalance = useCardStore((s) => s.updateBalance);
+  const { format } = useCurrency(card);
   const [balanceText, setBalanceText] = useState(
     card ? String(card.outstandingBalance) : '',
   );
@@ -57,7 +59,7 @@ export default function UpdateBalanceScreen() {
         />
 
         <View style={styles.hintWrapper}>
-          <Caption>Current: ₱{card.outstandingBalance.toLocaleString()}</Caption>
+          <Caption>Current: {format(card.outstandingBalance)}</Caption>
         </View>
 
         <View style={styles.buttonWrapper}>

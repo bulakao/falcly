@@ -5,6 +5,7 @@ import { projectFutureCycles } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';
 import type { SemanticTokens } from '@/theme';
 import { fonts } from '@/theme/fonts';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const STATUS_ICONS: Record<CardStatus, string> = {
   SAFE: '✓',
@@ -36,9 +37,7 @@ function getSignalColors(t: SemanticTokens): Record<string, string> {
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-function formatPeso(amount: number): string {
-  return `₱${Math.round(amount).toLocaleString()}`;
-}
+// formatPeso is replaced by the useCurrency hook in the component
 
 function formatCycleLabel(cycle: FutureCycleProjection): string {
   const month = MONTHS[cycle.statementClose.getMonth()];
@@ -62,6 +61,7 @@ export function FutureTimeline({
   today?: Date;
 }) {
   const t = useAppTheme();
+  const { format: formatPeso } = useCurrency(card);
   const STATUS_COLORS = getStatusColors(t);
   const SIGNAL_COLORS = getSignalColors(t);
   const now = today ?? new Date();

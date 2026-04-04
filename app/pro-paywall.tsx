@@ -50,6 +50,7 @@ export default function ProPaywallScreen() {
   }
 
   function handlePurchase(plan: PlanType) {
+    // TODO: pricing strings are PH-specific — update when multi-currency pricing is implemented
     const labels: Record<PlanType, string> = {
       pro_monthly: 'Pro — ₱149/mo',
       pro_quarterly: 'Pro — ₱399/qtr (₱133/mo)',

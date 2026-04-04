@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   StyleSheet,
   KeyboardAvoidingView,
@@ -6,6 +6,9 @@ import {
   ScrollView,
   Alert,
   Pressable,
+  Modal,
+  FlatList,
+  TextInput,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 
@@ -19,6 +22,8 @@ import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
 import { Button, Heading, Label } from '@/components/atoms';
 import { BankPicker, FormFieldGroup } from '@/components/molecules';
 import { fonts } from '@/theme/fonts';
+import { useCurrency } from '@/hooks/useCurrency';
+import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
 
 export default function EditCardScreen() {
   const t = useAppTheme();
@@ -30,6 +35,7 @@ export default function EditCardScreen() {
   const defaultInterestRate = useUserStore((s) => s.defaultInterestRate);
   const defaultMinPaymentPct = useUserStore((s) => s.defaultMinPaymentPct);
   const defaultMinPaymentFloor = useUserStore((s) => s.defaultMinPaymentFloor);
+  const { format } = useCurrency(card);
 
   const [bankName, setBankName] = useState(card?.bankName ?? '');
   const [creditLimit, setCreditLimit] = useState(String(card?.creditLimit ?? ''));
@@ -43,6 +49,16 @@ export default function EditCardScreen() {
   const [pendingTransactions, setPendingTransactions] = useState(String(card?.pendingTransactions ?? 0));
   const [installmentsMonthlyAmount, setInstallmentsMonthlyAmount] = useState(String(card?.installmentsMonthlyAmount ?? 0));
   const [subscriptionsThisCycle, setSubscriptionsThisCycle] = useState(String(card?.subscriptionsThisCycle ?? 0));
+  const [cardCurrency, setCardCurrency] = useState<string | undefined>(card?.currency);
+  const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
+  const [currencySearch, setCurrencySearch] = useState('');
+  const filteredCurrencies = useMemo(() => {
+    if (!currencySearch.trim()) return SUPPORTED_CURRENCIES;
+    const q = currencySearch.trim().toLowerCase();
+    return SUPPORTED_CURRENCIES.filter(
+      (code) => code.toLowerCase().includes(q) || getCurrencySymbol(code).toLowerCase().includes(q),
+    );
+  }, [currencySearch]);
 
   if (!card) {
     return (
@@ -108,6 +124,7 @@ export default function EditCardScreen() {
       pendingTransactions: pending,
       installmentsMonthlyAmount: installments,
       subscriptionsThisCycle: subs,
+      currency: cardCurrency,
     });
 
     router.back();
@@ -215,7 +232,7 @@ export default function EditCardScreen() {
         {hasDetailedInstallments ? (
           <Pressable onPress={() => router.push({ pathname: '/manage-installments', params: { cardId } })} style={styles.managedField} accessibilityRole="button" accessibilityLabel="Manage installments">
             <Text style={[styles.managedLabel, { color: t.textSecondary }]}>Monthly Installments</Text>
-            <Text style={[styles.managedValue, { color: t.textPrimary }]}>₱{card!.installmentsMonthlyAmount.toLocaleString()}</Text>
+            <Text style={[styles.managedValue, { color: t.textPrimary }]}>{format(card!.installmentsMonthlyAmount)}</Text>
             <Text style={[styles.managedHint, { color: t.primary }]}>Manage items →</Text>
           </Pressable>
         ) : (
@@ -232,7 +249,7 @@ export default function EditCardScreen() {
         {hasDetailedSubscriptions ? (
           <Pressable onPress={() => router.push({ pathname: '/manage-subscriptions', params: { cardId } })} style={styles.managedField} accessibilityRole="button" accessibilityLabel="Manage subscriptions">
             <Text style={[styles.managedLabel, { color: t.textSecondary }]}>Subscriptions This Cycle</Text>
-            <Text style={[styles.managedValue, { color: t.textPrimary }]}>₱{card!.subscriptionsThisCycle.toLocaleString()}</Text>
+            <Text style={[styles.managedValue, { color: t.textPrimary }]}>{format(card!.subscriptionsThisCycle)}</Text>
             <Text style={[styles.managedHint, { color: t.primary }]}>Manage items →</Text>
           </Pressable>
         ) : (
@@ -246,10 +263,75 @@ export default function EditCardScreen() {
           />
         )}
 
+        <View style={styles.fieldGroup}>
+          <Label>Card Currency (optional)</Label>
+          <Pressable
+            onPress={() => setCurrencyModalVisible(true)}
+            style={[styles.currencyPicker, { borderColor: t.inputBorder, backgroundColor: t.inputBg }]}
+            accessibilityRole="button"
+            accessibilityLabel="Select card currency"
+          >
+            <Text style={[styles.currencyPickerText, { color: cardCurrency ? t.textPrimary : t.textMuted }]}>
+              {cardCurrency ? `${getCurrencySymbol(cardCurrency)} ${cardCurrency}` : 'Use global currency'}
+            </Text>
+          </Pressable>
+          <Text style={[styles.currencyHint, { color: t.textMuted }]}>Overrides your global currency for this card</Text>
+        </View>
+
         <View style={styles.buttonWrapper}>
           <Button label="Save Changes" onPress={handleSave} />
         </View>
       </ScrollView>
+
+      <Modal
+        visible={currencyModalVisible}
+        animationType="slide"
+        onRequestClose={() => setCurrencyModalVisible(false)}
+        accessibilityViewIsModal
+      >
+        <View style={[styles.modalContainer, { backgroundColor: t.background }]}>
+          <View style={styles.modalHeader}>
+            <Text style={[styles.modalTitle, { color: t.textPrimary }]}>Card Currency</Text>
+            <Pressable onPress={() => setCurrencyModalVisible(false)} accessibilityRole="button" accessibilityLabel="Close">
+              <Text style={[styles.modalClose, { color: t.primary }]}>Done</Text>
+            </Pressable>
+          </View>
+          <TextInput
+            style={[styles.searchInput, { color: t.textPrimary, borderColor: t.border, backgroundColor: t.inputBg }]}
+            placeholder="Search currency..."
+            placeholderTextColor={t.textMuted}
+            value={currencySearch}
+            onChangeText={setCurrencySearch}
+            autoCorrect={false}
+          />
+          <Pressable
+            style={[styles.currencyRow, !cardCurrency && { backgroundColor: t.accentBg }]}
+            onPress={() => { setCardCurrency(undefined); setCurrencyModalVisible(false); setCurrencySearch(''); }}
+            accessibilityRole="button"
+            accessibilityLabel="Use global currency"
+          >
+            <Text style={[styles.currencyLabel, { color: !cardCurrency ? t.primary : t.textPrimary }]}>Use global currency</Text>
+            {!cardCurrency && <Text style={{ color: t.primary }}>✓</Text>}
+          </Pressable>
+          <FlatList
+            data={filteredCurrencies}
+            keyExtractor={(item) => item}
+            renderItem={({ item: code }) => (
+              <Pressable
+                style={[styles.currencyRow, code === cardCurrency && { backgroundColor: t.accentBg }]}
+                onPress={() => { setCardCurrency(code); setCurrencyModalVisible(false); setCurrencySearch(''); }}
+                accessibilityRole="button"
+                accessibilityLabel={`${getCurrencySymbol(code)} ${code}`}
+                accessibilityState={{ selected: code === cardCurrency }}
+              >
+                <Text style={[styles.currencySymbolText, { color: t.textPrimary }]}>{getCurrencySymbol(code)}</Text>
+                <Text style={[styles.currencyLabel, { color: code === cardCurrency ? t.primary : t.textPrimary, flex: 1 }]}>{code}</Text>
+                {code === cardCurrency && <Text style={{ color: t.primary }}>✓</Text>}
+              </Pressable>
+            )}
+          />
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -288,5 +370,64 @@ const styles = StyleSheet.create({
   },
   buttonWrapper: {
     marginTop: 32,
+  },
+  currencyPicker: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginTop: 6,
+  },
+  currencyPickerText: {
+    fontSize: 15,
+    fontFamily: fonts.interMedium,
+  },
+  currencyHint: {
+    fontSize: 12,
+    marginTop: 4,
+  },
+  modalContainer: {
+    flex: 1,
+    paddingTop: 50,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: fonts.interBold,
+  },
+  modalClose: {
+    fontSize: 16,
+    fontFamily: fonts.interSemiBold,
+  },
+  searchInput: {
+    marginHorizontal: 20,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 15,
+  },
+  currencyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  currencySymbolText: {
+    fontSize: 18,
+    fontFamily: fonts.interBold,
+    width: 40,
+  },
+  currencyLabel: {
+    fontSize: 15,
+    fontFamily: fonts.interSemiBold,
   },
 });

@@ -11,6 +11,7 @@ import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const FINANCE_HINT_DISMISSED_KEY = 'falcly-finance-hint-dismissed';
 
@@ -59,7 +60,7 @@ export function FinanceCard() {
   const setPayday2 = useUserStore((s) => s.setPayday2);
   const committedExpenses = useUserStore((s) => s.committedExpenses);
   const setCommittedExpenses = useUserStore((s) => s.setCommittedExpenses);
-  const currencySymbol = useUserStore((s) => s.currencySymbol);
+  const { symbol: currencySymbol } = useCurrency();
 
   const cashStaleness = cashUpdatedAt ? getStalenessLevel(cashUpdatedAt) : null;
   const [expanded, setExpanded] = useState(true);

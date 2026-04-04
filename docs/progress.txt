@@ -68,3 +68,14 @@ Started: Sat Apr  4 01:34:00 PST 2026
 - HP-01: Time-aware personalized greeting on AllCardsOverview
 - HP-02: Try a different card button on SwipeImpactPanel
 - HP-03: Card sort options (Urgency/Utilization/Due Date) with AsyncStorage persistence
+---
+
+## 2026-04-04 - CU-01
+- Removed all hardcoded ₱ symbols
+- Added utils/currency.ts with locale detection, symbol map, formatAmount
+- Added globalCurrency to userStore (auto-detected from device locale)
+- Added per-card currency override field
+- Added useCurrency hook
+- Settings: global currency picker
+- Add-card/edit-card: per-card currency picker
+- Drizzle migration for currency column

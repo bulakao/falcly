@@ -20,10 +20,7 @@ import { useTransactionStore, type Transaction } from '@/store/transactionStore'
 import { getCycleDates } from '@/utils/decisionEngine';
 import { formatCycleDateRange, classifyTransactionCycle } from '@/utils/cycleUtils';
 import type { Card } from '@/types/card';
-
-function formatPeso(amount: number): string {
-  return `₱${Math.round(amount).toLocaleString()}`;
-}
+import { useCurrency } from '@/hooks/useCurrency';
 
 function formatTxDate(ts: number): string {
   const d = new Date(ts);
@@ -45,6 +42,7 @@ export default function CardTransactionsScreen() {
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
   const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
   const allTransactions = useTransactionStore((s) => s.transactions);
+  const { format: formatPeso } = useCurrency(card);
 
   const cardTxs = useMemo(
     () => allTransactions.filter((tx) => tx.cardId === cardId),
@@ -104,7 +102,7 @@ export default function CardTransactionsScreen() {
     }
 
     return result;
-  }, [card, cardTxs]);
+  }, [card, cardTxs, formatPeso]);
 
   if (!card) {
     return (
@@ -181,6 +179,7 @@ export default function CardTransactionsScreen() {
 
 function TransactionRow({ tx, card }: { tx: Transaction; card: Card }) {
   const t = useAppTheme();
+  const { format: formatPeso } = useCurrency(card);
   const excludeTransaction = useTransactionStore((s) => s.excludeTransaction);
   const includeTransaction = useTransactionStore((s) => s.includeTransaction);
   const deleteTransaction = useTransactionStore((s) => s.deleteTransaction);

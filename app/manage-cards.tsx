@@ -11,6 +11,8 @@ import { fonts } from '@/theme/fonts';
 import type { Card, CardStatus } from '@/types/card';
 import { router, Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { formatAmount } from '@/utils/currency';
+import { useUserStore } from '@/store/userStore';
 
 const ROW_HEIGHT = 68;
 
@@ -23,6 +25,7 @@ export default function ManageCardsScreen() {
   const reorderCards = useCardStore((s) => s.reorderCards);
   const tier = useSubscriptionStore((s) => s.tier);
   const canAddCard = useSubscriptionStore((s) => s.canAddCard);
+  const globalCurrency = useUserStore((s) => s.globalCurrency);
 
   const statusColorMap: Record<CardStatus, string> = {
     SAFE: t.safe,
@@ -62,6 +65,7 @@ export default function ManageCardsScreen() {
   function renderItem({ item: card, drag, isActive }: RenderItemParams<Card>) {
     const { status } = calculateCardStatus(card, new Date());
     const accentColor = statusColorMap[status];
+    const cc = card.currency ?? globalCurrency;
 
     return (
       <ScaleDecorator>
@@ -93,7 +97,7 @@ export default function ManageCardsScreen() {
                 {card.bankName}
               </Text>
               <Text style={[styles.balance, { color: t.textMuted }]}>
-                ₱{card.outstandingBalance.toLocaleString()} / ₱{card.creditLimit.toLocaleString()}
+                {formatAmount(card.outstandingBalance, cc)} / {formatAmount(card.creditLimit, cc)}
               </Text>
             </RNView>
           </RNView>

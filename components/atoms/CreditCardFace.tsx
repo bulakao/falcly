@@ -8,6 +8,7 @@ import StatusTooltip from '@/components/molecules/StatusTooltip';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import { calculateCardStatus } from '@/utils/decisionEngine';
 import type { Card, CardStatus } from '@/types/card';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface CreditCardFaceProps {
   card: Card;
@@ -17,6 +18,7 @@ interface CreditCardFaceProps {
 
 export function CreditCardFace({ card, netAvailableCash, currentCycleTxSum = 0 }: CreditCardFaceProps) {
   const t = useAppTheme();
+  const { format } = useCurrency(card);
   const { status, reason } = calculateCardStatus(card, new Date(), netAvailableCash, currentCycleTxSum);
   const staleness = getStalenessLevel(card.balanceUpdatedAt);
 
@@ -72,10 +74,10 @@ export function CreditCardFace({ card, netAvailableCash, currentCycleTxSum = 0 }
         {/* Balance */}
         <View style={styles.balanceArea}>
           <Text style={[styles.balance, { color: t.textPrimary }]}>
-            ₱{card.outstandingBalance.toLocaleString()}
+            {format(card.outstandingBalance)}
           </Text>
           <Text style={[styles.limit, { color: t.textMuted }]}>
-            of ₱{card.creditLimit.toLocaleString()}
+            of {format(card.creditLimit)}
           </Text>
         </View>
 

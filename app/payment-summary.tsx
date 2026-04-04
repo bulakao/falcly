@@ -10,10 +10,7 @@ import { fonts } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';
 import { useTransactionStore } from '@/store/transactionStore';
 import { getCycleDates } from '@/utils/decisionEngine';
-
-function formatPeso(amount: number): string {
-  return `₱${Math.round(amount).toLocaleString()}`;
-}
+import { useCurrency } from '@/hooks/useCurrency';
 
 export default function PaymentSummaryScreen() {
   const t = useAppTheme();
@@ -21,6 +18,7 @@ export default function PaymentSummaryScreen() {
   const { cardId } = useLocalSearchParams<{ cardId: string }>();
   const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
   const allTransactions = useTransactionStore((s) => s.transactions);
+  const { format: formatPeso } = useCurrency(card);
 
   const data = useMemo(() => {
     if (!card) return null;
@@ -131,7 +129,7 @@ export default function PaymentSummaryScreen() {
             </Text>
           ) : (
             <Text style={[styles.interestText, { color: t.safe }]}>
-              ₱0 interest
+              {formatPeso(0)} interest
             </Text>
           )}
         </View>

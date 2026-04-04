@@ -1,6 +1,8 @@
 import { File, Paths } from 'expo-file-system/next';
 import { shareAsync } from 'expo-sharing';
 import { Card } from '@/types/card';
+import { formatAmount } from '@/utils/currency';
+import { useUserStore } from '@/store/userStore';
 
 interface UserProfile {
   cashOnHand: number | null;
@@ -16,9 +18,13 @@ function escapeCSV(value: string): string {
   return value;
 }
 
-function formatCurrency(amount: number | null): string {
+function getGlobalCurrency(): string {
+  return useUserStore.getState().globalCurrency;
+}
+
+function formatCurrency(amount: number | null, currency?: string): string {
   if (amount === null) return '';
-  return `₱${amount.toLocaleString('en-PH')}`;
+  return formatAmount(amount, currency ?? getGlobalCurrency());
 }
 
 function formatDate(timestamp: number): string {
@@ -52,23 +58,26 @@ function buildCardsCSV(cards: Card[]): string {
     'Created',
   ];
 
-  const rows = cards.map((card) => [
+  const rows = cards.map((card) => {
+    const cc = card.currency ?? getGlobalCurrency();
+    return [
     escapeCSV(card.bankName),
-    formatCurrency(card.creditLimit),
-    formatCurrency(card.outstandingBalance),
+    formatCurrency(card.creditLimit, cc),
+    formatCurrency(card.outstandingBalance, cc),
     String(card.statementDay),
     String(card.dueDayOffset),
     formatPercent(card.interestRate),
     formatPercent(card.minPaymentPct),
-    formatCurrency(card.minPaymentFloor),
-    formatCurrency(card.pendingTransactions),
-    formatCurrency(card.installmentsMonthlyAmount),
-    formatCurrency(card.subscriptionsThisCycle),
-    formatCurrency(card.annualFee),
+    formatCurrency(card.minPaymentFloor, cc),
+    formatCurrency(card.pendingTransactions, cc),
+    formatCurrency(card.installmentsMonthlyAmount, cc),
+    formatCurrency(card.subscriptionsThisCycle, cc),
+    formatCurrency(card.annualFee, cc),
     card.annualFeeMonth > 0 ? String(card.annualFeeMonth) : '',
     formatDate(card.balanceUpdatedAt),
     formatDate(card.createdAt),
-  ]);
+  ];
+  });
 
   return [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
 }

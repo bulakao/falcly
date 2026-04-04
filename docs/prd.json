@@ -1278,6 +1278,16 @@
       "priority": 3,
       "passes": false,
       "notes": "Phase 2 — post-launch. Pro+ differentiator. Requires server-side infrastructure for Gemini API. Do not implement until Pro+ tier has paying users."
+    },
+    {
+      "id": "CU-01",
+      "title": "Multi-currency support — global + per-card",
+      "phase": 5,
+      "group": "Currency",
+      "description": "App is currency-agnostic. Global currency auto-detected from device locale. Per-card override available. All amounts formatted with correct symbol.",
+      "acceptanceCriteria": [],
+      "priority": 5,
+      "passes": true
     }
   ]
 }

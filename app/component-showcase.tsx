@@ -10,6 +10,7 @@ import { Text, View } from '@/components/Themed';
 import { useAppTheme, useEffectiveColorScheme, palette } from '@/theme';
 import { Button, Badge, FormInput, Heading, SectionHeader, Label, Caption } from '@/components/atoms';
 import { fonts } from '@/theme/fonts';
+import { useCurrency } from '@/hooks/useCurrency';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   const t = useAppTheme();
@@ -30,6 +31,7 @@ export default function ComponentShowcase() {
 
   const [switchVal, setSwitchVal] = useState(true);
   const [inputText, setInputText] = useState('');
+  const { format } = useCurrency();
 
   function toggleTheme() {
     Appearance.setColorScheme(dark ? 'light' : 'dark');
@@ -126,7 +128,7 @@ export default function ComponentShowcase() {
             <Text style={[styles.cardTitle, { color: t.textPrimary }]}>BPI Visa Gold</Text>
             <Badge label="✓ SAFE" variant="safe" />
           </View>
-          <Text style={[styles.cardBody, { color: t.textSecondary }]}>₱12,450 / ₱80,000 limit</Text>
+          <Text style={[styles.cardBody, { color: t.textSecondary }]}>{format(12450)} / {format(80000)} limit</Text>
           <View style={[styles.cardFooter, { backgroundColor: 'transparent', borderTopColor: t.border }]}>
             <Caption>Statement closes in 12 days</Caption>
           </View>
@@ -137,9 +139,9 @@ export default function ComponentShowcase() {
             <Text style={[styles.cardTitle, { color: t.risky }]}>Metrobank Platinum</Text>
             <Badge label="✕ RISKY" variant="risky" />
           </View>
-          <Text style={[styles.cardBody, { color: t.textSecondary }]}>₱147,200 / ₱150,000 limit</Text>
+          <Text style={[styles.cardBody, { color: t.textSecondary }]}>{format(147200)} / {format(150000)} limit</Text>
           <View style={[styles.cardFooter, { backgroundColor: 'transparent', borderTopColor: t.riskyBorder }]}>
-            <Caption color={t.risky}>Due in 3 days — minimum ₱7,360</Caption>
+            <Caption color={t.risky}>Due in 3 days — minimum {format(7360)}</Caption>
           </View>
         </View>
       </Section>
@@ -156,7 +158,7 @@ export default function ComponentShowcase() {
 
         <View style={{ marginTop: 16 }}>
           <Label>Focused Input</Label>
-          <FormInput value="₱40,000" focused editable={false} />
+          <FormInput value={format(40000)} focused editable={false} />
         </View>
 
         <View style={{ marginTop: 16 }}>
@@ -242,21 +244,21 @@ export default function ComponentShowcase() {
             <Text style={[styles.listTitle, { color: t.textPrimary }]}>Funds Available</Text>
             <Caption>Updated 2h ago</Caption>
           </View>
-          <Text style={[styles.listValue, { color: t.accent }]}>₱25,000</Text>
+          <Text style={[styles.listValue, { color: t.accent }]}>{format(25000)}</Text>
         </Pressable>
         <Pressable style={[styles.listItem, { borderBottomColor: t.border }]}>
           <View style={styles.listItemContent}>
             <Text style={[styles.listTitle, { color: t.textPrimary }]}>Monthly Income</Text>
             <Caption>Payday: 15th</Caption>
           </View>
-          <Text style={[styles.listValue, { color: t.textPrimary }]}>₱40,000</Text>
+          <Text style={[styles.listValue, { color: t.textPrimary }]}>{format(40000)}</Text>
         </Pressable>
         <Pressable style={[styles.listItem, { borderBottomColor: 'transparent' }]}>
           <View style={styles.listItemContent}>
             <Text style={[styles.listTitle, { color: t.textPrimary }]}>Committed Expenses</Text>
             <Caption>Rent, utils, etc.</Caption>
           </View>
-          <Text style={[styles.listValue, { color: t.textPrimary }]}>₱15,000</Text>
+          <Text style={[styles.listValue, { color: t.textPrimary }]}>{format(15000)}</Text>
         </Pressable>
       </Section>
 

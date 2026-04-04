@@ -28,8 +28,8 @@ export function logBreadcrumb(message: string, data?: Record<string, unknown>): 
 function sanitizeErrorMessage(message: string): string {
   return (
     message
-      .replace(/[₱$]\s*[\d,]+\.?\d*/g, '[AMOUNT]')
-      .replace(/PHP\s*[\d,]+\.?\d*/gi, '[AMOUNT]')
+      .replace(/[₱$€£¥₩₫₹฿]\s*[\d,]+\.?\d*/g, '[AMOUNT]')
+      .replace(/(?:PHP|USD|EUR|GBP|JPY|SGD|MYR|THB|IDR|INR|AUD|CAD|NZD|CHF|HKD|KRW|CNY)\s*[\d,]+\.?\d*/gi, '[AMOUNT]')
       .replace(/\b\d{8,}\b/g, '[REDACTED_NUMBER]')
   );
 }

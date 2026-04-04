@@ -14,6 +14,7 @@ import { Button } from '@/components/atoms';
 import { SurfaceCard } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
+import { useCurrency } from '@/hooks/useCurrency';
 
 function nextBillingDate(billingDay: number): string {
   const today = new Date();
@@ -34,6 +35,7 @@ export default function ManageSubscriptionsScreen() {
   const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
   const subscriptions = useSubscriptionItemStore((s) => s.subscriptions.filter((s) => s.cardId === cardId));
   const deleteSubscription = useSubscriptionItemStore((s) => s.deleteSubscription);
+  const { format } = useCurrency(card);
 
   if (!card) {
     return (
@@ -79,7 +81,7 @@ export default function ManageSubscriptionsScreen() {
               </Text>
             </RNView>
             <Text style={[styles.amount, { color: t.textPrimary }]}>
-              ₱{sub.amount.toLocaleString()}
+              {format(sub.amount)}
             </Text>
           </RNView>
           <RNView style={[styles.row, { marginTop: 8 }]}>

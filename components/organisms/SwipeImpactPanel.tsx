@@ -17,20 +17,10 @@ import type { Card } from '@/types/card';
 import { trackSwipeCheckPerformed, trackDataStalenessWarningShown } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
+import { useCurrency } from '@/hooks/useCurrency';
 
 // Module-level flag so expand/collapse persists across re-mounts within the session
 let ganttExpandedSession = false;
-
-const QUICK_AMOUNTS = [
-  { label: '₱500', value: 500 },
-  { label: '₱1K', value: 1000 },
-  { label: '₱2K', value: 2000 },
-  { label: '₱5K', value: 5000 },
-];
-
-function formatPeso(amount: number): string {
-  return `₱${Math.round(amount).toLocaleString()}`;
-}
 
 interface SwipeImpactPanelProps {
   card: Card;
@@ -46,6 +36,13 @@ export function SwipeImpactPanel({
   onDeleteComplete,
 }: SwipeImpactPanelProps) {
   const t = useAppTheme();
+  const { format: formatPeso, symbol } = useCurrency(card);
+  const QUICK_AMOUNTS = useMemo(() => [
+    { label: `${symbol}500`, value: 500 },
+    { label: `${symbol}1K`, value: 1000 },
+    { label: `${symbol}2K`, value: 2000 },
+    { label: `${symbol}5K`, value: 5000 },
+  ], [symbol]);
   const deleteCard = useCardStore((s) => s.deleteCard);
   const cashOnHand = useUserStore((s) => s.cashOnHand);
   const cashUpdatedAt = useUserStore((s) => s.cashUpdatedAt);

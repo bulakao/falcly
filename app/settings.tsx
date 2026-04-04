@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   StyleSheet,
   Pressable,
@@ -8,6 +8,9 @@ import {
   Switch,
   Share,
   View as RNView,
+  Modal,
+  FlatList,
+  TextInput,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,6 +28,7 @@ import { Button, Badge } from '@/components/atoms';
 import { AlertBanner, SurfaceCard, PercentInput, MoneyInput, parseMoney } from '@/components/molecules';
 import type { PayoffStrategy } from '@/store/userStore';
 import { scheduleAllReminders } from '@/utils/notifications';
+import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
 
 export default function SettingsScreen() {
   const t = useAppTheme();
@@ -84,6 +88,8 @@ export default function SettingsScreen() {
   const setPayoffStrategy = useUserStore((s) => s.setPayoffStrategy);
   const fixedPayoffAmount = useUserStore((s) => s.fixedPayoffAmount);
   const setFixedPayoffAmount = useUserStore((s) => s.setFixedPayoffAmount);
+  const globalCurrency = useUserStore((s) => s.globalCurrency);
+  const setGlobalCurrency = useUserStore((s) => s.setGlobalCurrency);
 
   const [interestRateText, setInterestRateText] = useState(() => (defaultInterestRate * 100).toFixed(1));
   const [minPaymentPctText, setMinPaymentPctText] = useState(() => (defaultMinPaymentPct * 100).toFixed(1));
@@ -99,6 +105,15 @@ export default function SettingsScreen() {
 
   const { isOffline } = useNetworkStatus();
   const [exporting, setExporting] = useState(false);
+  const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
+  const [currencySearch, setCurrencySearch] = useState('');
+  const filteredCurrencies = useMemo(() => {
+    if (!currencySearch.trim()) return SUPPORTED_CURRENCIES;
+    const q = currencySearch.trim().toLowerCase();
+    return SUPPORTED_CURRENCIES.filter(
+      (code) => code.toLowerCase().includes(q) || getCurrencySymbol(code).toLowerCase().includes(q),
+    );
+  }, [currencySearch]);
 
 
   return (
@@ -167,6 +182,7 @@ export default function SettingsScreen() {
                 })}
               </Text>
             )}
+            {/* TODO: pricing strings are PH-specific — update when multi-currency pricing is implemented */}
             {!isTrialActive() && planType && (
               <Text style={[styles.trialEndText, { color: t.accent }]}>
                 {planType === 'pro_annual' ? '₱999/yr'
@@ -208,6 +224,25 @@ export default function SettingsScreen() {
             </Pressable>
           ))}
         </RNView>
+      </SurfaceCard>
+
+      {/* ── Currency ── */}
+      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Currency</Text>
+      <SurfaceCard>
+        <Pressable
+          style={styles.defaultRow}
+          onPress={() => setCurrencyModalVisible(true)}
+          accessibilityRole="button"
+          accessibilityLabel={`Currency: ${globalCurrency}`}
+        >
+          <RNView>
+            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Display Currency</Text>
+            <Text style={[styles.itemHint, { color: t.textMuted }]}>Used for all amounts unless a card overrides it</Text>
+          </RNView>
+          <Text style={[styles.defaultValue, { color: t.primary }]}>
+            {globalCurrency} — {getCurrencySymbol(globalCurrency)}
+          </Text>
+        </Pressable>
       </SurfaceCard>
 
       {/* ── Notifications ── */}
@@ -537,6 +572,51 @@ export default function SettingsScreen() {
           }}
         />
       </SurfaceCard>
+      {/* Currency picker modal */}
+      <Modal
+        visible={currencyModalVisible}
+        animationType="slide"
+        onRequestClose={() => setCurrencyModalVisible(false)}
+        accessibilityViewIsModal
+      >
+        <RNView style={[styles.modalContainer, { backgroundColor: t.background, paddingTop: insets.top }]}>
+          <RNView style={styles.modalHeader}>
+            <Text style={[styles.modalTitle, { color: t.textPrimary }]}>Select Currency</Text>
+            <Pressable onPress={() => setCurrencyModalVisible(false)} accessibilityRole="button" accessibilityLabel="Close">
+              <Text style={[styles.modalClose, { color: t.primary }]}>Done</Text>
+            </Pressable>
+          </RNView>
+          <TextInput
+            style={[styles.searchInput, { color: t.textPrimary, borderColor: t.border, backgroundColor: t.inputBg }]}
+            placeholder="Search currency..."
+            placeholderTextColor={t.textMuted}
+            value={currencySearch}
+            onChangeText={setCurrencySearch}
+            autoCorrect={false}
+          />
+          <FlatList
+            data={filteredCurrencies}
+            keyExtractor={(item) => item}
+            renderItem={({ item: code }) => (
+              <Pressable
+                style={[styles.currencyRow, code === globalCurrency && { backgroundColor: t.accentBg }]}
+                onPress={() => {
+                  setGlobalCurrency(code);
+                  setCurrencyModalVisible(false);
+                  setCurrencySearch('');
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={`${getCurrencySymbol(code)} ${code}`}
+                accessibilityState={{ selected: code === globalCurrency }}
+              >
+                <Text style={[styles.currencySymbol, { color: t.textPrimary }]}>{getCurrencySymbol(code)}</Text>
+                <Text style={[styles.currencyCode, { color: code === globalCurrency ? t.primary : t.textPrimary }]}>{code}</Text>
+                {code === globalCurrency && <Text style={{ color: t.primary }}>✓</Text>}
+              </Pressable>
+            )}
+          />
+        </RNView>
+      </Modal>
     </ScrollView>
   );
 }
@@ -681,5 +761,50 @@ const styles = StyleSheet.create({
   strategyChipDesc: {
     fontSize: 11,
     lineHeight: 15,
+  },
+  modalContainer: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: fonts.interBold,
+  },
+  modalClose: {
+    fontSize: 16,
+    fontFamily: fonts.interSemiBold,
+  },
+  searchInput: {
+    marginHorizontal: 20,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 15,
+    fontFamily: fonts.interRegular,
+  },
+  currencyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  currencySymbol: {
+    fontSize: 18,
+    fontFamily: fonts.interBold,
+    width: 40,
+  },
+  currencyCode: {
+    fontSize: 15,
+    fontFamily: fonts.interSemiBold,
+    flex: 1,
   },
 });
