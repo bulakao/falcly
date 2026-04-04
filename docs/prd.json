@@ -1187,7 +1187,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Discovery spec: [Use different card] action on impact screen."
     },
     {

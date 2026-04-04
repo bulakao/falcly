@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { StyleSheet, Pressable, Alert } from 'react-native';
+import { StyleSheet, Pressable, Alert, Modal, FlatList } from 'react-native';
 import { Link, router } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
@@ -11,7 +11,7 @@ import { useCardStore } from '@/store/cardStore';
 import { useUserStore, getPaydays } from '@/store/userStore';
 import { useTransactionStore } from '@/store/transactionStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
-import { calculateSwipeImpact, computeNetAvailableCash, computeCurrentCycleTxSum, getCycleDates, computePayoffProjection } from '@/utils/decisionEngine';
+import { calculateSwipeImpact, calculateCardStatus, computeNetAvailableCash, computeCurrentCycleTxSum, getCycleDates, computePayoffProjection } from '@/utils/decisionEngine';
 import { getStalenessLevel } from '@/utils/staleness';
 import type { Card } from '@/types/card';
 import { trackSwipeCheckPerformed, trackDataStalenessWarningShown } from '@/utils/analytics';
@@ -59,6 +59,9 @@ export function SwipeImpactPanel({
   const transactions = useTransactionStore((s) => s.transactions);
   const [amountText, setAmountText] = useState('');
   const [ganttExpanded, setGanttExpanded] = useState(ganttExpandedSession);
+  const [cardPickerVisible, setCardPickerVisible] = useState(false);
+  const allCards = useCardStore((s) => s.cards);
+  const activeCards = useMemo(() => allCards.filter((c) => c.isActive), [allCards]);
 
   const proposedAmount = useMemo(() => {
     const n = parseFloat(amountText);
@@ -334,6 +337,46 @@ export function SwipeImpactPanel({
         </Link>
       </View>
 
+      {/* Try a different card */}
+      {activeCards.length > 1 && (
+        <>
+          <Pressable
+            style={[styles.tryCardButton, { borderColor: t.border }]}
+            onPress={() => setCardPickerVisible(true)}
+          >
+            <Text style={[styles.tryCardText, { color: t.primary }]}>Try a different card</Text>
+          </Pressable>
+
+          <Modal visible={cardPickerVisible} animationType="slide" transparent>
+            <Pressable style={styles.tryCardOverlay} onPress={() => setCardPickerVisible(false)}>
+              <View style={[styles.tryCardSheet, { backgroundColor: t.background }]}>
+                <Text style={[styles.tryCardTitle, { color: t.textPrimary }]}>Switch Card</Text>
+                <FlatList
+                  data={activeCards.filter((c) => c.id !== card.id)}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => {
+                    const status = calculateCardStatus(item);
+                    const dotColor = status.status === 'SAFE' ? t.safe : status.status === 'CAUTION' ? t.caution : t.risky;
+                    return (
+                      <Pressable
+                        style={[styles.tryCardRow, { borderBottomColor: t.border }]}
+                        onPress={() => {
+                          setCardPickerVisible(false);
+                          router.push({ pathname: '/swipe-impact', params: { cardId: item.id } });
+                        }}
+                      >
+                        <View style={[styles.statusDot, { backgroundColor: dotColor }]} />
+                        <Text style={[styles.tryCardName, { color: t.textPrimary }]}>{item.bankName}</Text>
+                      </Pressable>
+                    );
+                  }}
+                />
+              </View>
+            </Pressable>
+          </Modal>
+        </>
+      )}
+
       {/* Quick-update funds available prompt */}
       {showFundsPrompt && !readOnly && (
         <Pressable
@@ -470,5 +513,49 @@ const styles = StyleSheet.create({
   },
   projectionContent: {
     paddingTop: 4,
+  },
+  tryCardButton: {
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  tryCardText: {
+    fontSize: 14,
+    fontFamily: fonts.interSemiBold,
+  },
+  tryCardOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  tryCardSheet: {
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 16,
+    paddingBottom: 32,
+    maxHeight: '50%',
+  },
+  tryCardTitle: {
+    fontSize: 17,
+    fontFamily: fonts.interBold,
+    marginBottom: 12,
+  },
+  tryCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    gap: 10,
+  },
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  tryCardName: {
+    fontSize: 16,
+    fontFamily: fonts.interRegular,
   },
 });
