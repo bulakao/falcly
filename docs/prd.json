@@ -1206,7 +1206,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Discovery spec. Low effort for multi-card users."
     },
     {

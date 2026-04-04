@@ -1,4 +1,6 @@
+import { useState, useEffect, useMemo } from 'react';
 import { StyleSheet, Pressable, Image, View as RNView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Text, View } from '@/components/Themed';
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -8,11 +10,20 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useAuthStore } from '@/store/authStore';
 import { GanttTimeline } from '@/components/organisms/GanttTimeline';
 import { FutureTimeline } from '@/components/organisms/FutureTimeline';
-import { calculateBestCard, getCycleDates } from '@/utils/decisionEngine';
+import { calculateBestCard, calculateCardStatus, getCycleDates } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';
 import type { Card } from '@/types/card';
+
+type SortMode = 'urgency' | 'utilization' | 'dueDate';
+const SORT_KEY = '@falcly/card_sort';
+const SORT_OPTIONS: { label: string; value: SortMode }[] = [
+  { label: 'Urgency', value: 'urgency' },
+  { label: 'Utilization', value: 'utilization' },
+  { label: 'Due Date', value: 'dueDate' },
+];
+const STATUS_ORDER: Record<string, number> = { RISKY: 0, CAUTION: 1, SAFE: 2 };
 
 interface AllCardsOverviewProps {
   cards: Card[];
@@ -49,6 +60,44 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
   const getTrialEndDate = useSubscriptionStore((s) => s.getTrialEndDate);
   const bestCard = cards.length > 0 ? calculateBestCard(cards, new Date(), getNetAvailableCash, getCurrentCycleTxSum) : null;
 
+  const [sortMode, setSortMode] = useState<SortMode>('urgency');
+
+  useEffect(() => {
+    AsyncStorage.getItem(SORT_KEY).then((v) => {
+      if (v === 'urgency' || v === 'utilization' || v === 'dueDate') setSortMode(v);
+    });
+  }, []);
+
+  function handleSortChange(mode: SortMode) {
+    setSortMode(mode);
+    AsyncStorage.setItem(SORT_KEY, mode);
+  }
+
+  const displayCards = useMemo(() => {
+    const sorted = [...cards];
+    const now = new Date();
+    if (sortMode === 'urgency') {
+      sorted.sort((a, b) => {
+        const aStatus = calculateCardStatus(a, now, getNetAvailableCash(a), getCurrentCycleTxSum ? getCurrentCycleTxSum(a) : 0);
+        const bStatus = calculateCardStatus(b, now, getNetAvailableCash(b), getCurrentCycleTxSum ? getCurrentCycleTxSum(b) : 0);
+        const diff = (STATUS_ORDER[aStatus.status] ?? 2) - (STATUS_ORDER[bStatus.status] ?? 2);
+        if (diff !== 0) return diff;
+        return getCycleDates(a, now).daysToStatement - getCycleDates(b, now).daysToStatement;
+      });
+    } else if (sortMode === 'utilization') {
+      sorted.sort((a, b) => {
+        const aUtil = a.creditLimit > 0 ? a.outstandingBalance / a.creditLimit : 0;
+        const bUtil = b.creditLimit > 0 ? b.outstandingBalance / b.creditLimit : 0;
+        return bUtil - aUtil;
+      });
+    } else {
+      sorted.sort((a, b) => {
+        return getCycleDates(a, now).daysToStatement - getCycleDates(b, now).daysToStatement;
+      });
+    }
+    return sorted;
+  }, [cards, sortMode, getNetAvailableCash, getCurrentCycleTxSum]);
+
   function getBadgeLabel() {
     if (tier === 'pro') return 'PRO';
     if (isTrialActive()) {
@@ -61,15 +110,9 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
     return 'FREE';
   }
 
-  const cardsWithFixedEvents = cards.filter(
+  const sortedCards = displayCards.filter(
     (c) => c.installmentsMonthlyAmount > 0 || c.subscriptionsThisCycle > 0 || (c.annualFee > 0 && c.annualFeeMonth > 0),
   );
-
-  const sortedCards = [...cardsWithFixedEvents].sort((a, b) => {
-    const aCycle = getCycleDates(a);
-    const bCycle = getCycleDates(b);
-    return aCycle.daysToStatement - bCycle.daysToStatement;
-  });
 
   function getGreeting(): string {
     const hour = new Date().getHours();
@@ -114,13 +157,43 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
 
       <BestCardBanner bestCard={bestCard} hasCards={allCards.length > 0} hasActiveCards={cards.length > 0} onPress={onBannerPress} onAddPress={onAddPress} />
 
+      {/* Sort chips */}
+      {cards.length > 1 && (
+        <RNView style={styles.sortRow}>
+          {SORT_OPTIONS.map((opt) => {
+            const active = sortMode === opt.value;
+            return (
+              <Pressable
+                key={opt.value}
+                style={[
+                  styles.sortChip,
+                  { borderColor: t.inputBorder, backgroundColor: t.inputBg },
+                  active && { backgroundColor: t.primary, borderColor: t.primary },
+                ]}
+                onPress={() => handleSortChange(opt.value)}
+              >
+                <Text
+                  style={[
+                    styles.sortChipText,
+                    { color: t.inputText },
+                    active && { color: t.textInverse },
+                  ]}
+                >
+                  {opt.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </RNView>
+      )}
+
       <SurfaceCard style={styles.billingCard}>
         <SectionHeader
           title="Billing Cycles"
           subtitle="Tap a card to see its details"
         />
-        {cards.length > 0 ? (
-          <GanttTimeline cards={cards} onCardPress={onGanttCardPress} />
+        {displayCards.length > 0 ? (
+          <GanttTimeline cards={displayCards} onCardPress={onGanttCardPress} />
         ) : (
           <GanttSkeleton />
         )}
@@ -154,6 +227,22 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: fonts.interSemiBold,
     marginBottom: 12,
+  },
+  sortRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  sortChip: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  sortChipText: {
+    fontSize: 13,
+    fontFamily: fonts.interSemiBold,
   },
   topRow: {
     flexDirection: 'row',
