@@ -29,6 +29,19 @@ import { AlertBanner, SurfaceCard, PercentInput, MoneyInput, parseMoney } from '
 import type { PayoffStrategy } from '@/store/userStore';
 import { scheduleAllReminders } from '@/utils/notifications';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
+import { fullSync } from '@/utils/sync';
+import { supabase } from '@/utils/supabase';
+
+function timeAgo(ts: number): string {
+  const seconds = Math.floor((Date.now() - ts) / 1000);
+  if (seconds < 60) return 'Just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days === 1 ? '' : 's'} ago`;
+}
 
 export default function SettingsScreen() {
   const t = useAppTheme();
@@ -102,6 +115,11 @@ export default function SettingsScreen() {
 
   const cards = useCardStore((s) => s.cards);
   const router = useRouter();
+
+  const lastSyncedAt = useUserStore((s) => s.lastSyncedAt);
+  const setLastSyncedAt = useUserStore((s) => s.setLastSyncedAt);
+  const [syncingNow, setSyncingNow] = useState(false);
+  const [syncFeedback, setSyncFeedback] = useState<'synced' | 'failed' | null>(null);
 
   const { isOffline } = useNetworkStatus();
   const [exporting, setExporting] = useState(false);
@@ -459,14 +477,51 @@ export default function SettingsScreen() {
           disabled={exporting}
         />
 
-        {(tier === 'trial' || tier === 'pro' || tier === 'pro_plus') && (
+        {user && (
           <>
             <RNView style={[styles.divider, { backgroundColor: t.border }]} />
-            <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Cloud Sync</Text>
+            <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Cloud Backup</Text>
             {isOffline ? (
               <AlertBanner message="You are offline. Data is saved locally." variant="stale" />
             ) : (
-              <Text style={[styles.cloudOnlineText, { color: t.safe }]}>Connected — sync available</Text>
+              <Pressable
+                style={styles.defaultRow}
+                onPress={async () => {
+                  if (syncingNow) return;
+                  setSyncingNow(true);
+                  setSyncFeedback(null);
+                  try {
+                    const { data: { user: authUser } } = await supabase.auth.getUser();
+                    if (!authUser) throw new Error('Not signed in');
+                    await fullSync(authUser.id, cards);
+                    setLastSyncedAt(Date.now());
+                    setSyncFeedback('synced');
+                    setTimeout(() => setSyncFeedback(null), 2000);
+                  } catch {
+                    setSyncFeedback('failed');
+                  } finally {
+                    setSyncingNow(false);
+                  }
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="Sync now"
+              >
+                <RNView>
+                  <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Last synced</Text>
+                  <Text style={[styles.itemHint, { color: t.textMuted }]}>
+                    {syncingNow
+                      ? 'Syncing...'
+                      : syncFeedback === 'synced'
+                      ? 'Synced'
+                      : syncFeedback === 'failed'
+                      ? 'Sync failed. Try again.'
+                      : lastSyncedAt
+                      ? timeAgo(lastSyncedAt)
+                      : 'Never'}
+                  </Text>
+                </RNView>
+                <FontAwesome name="refresh" size={14} color={t.textMuted} />
+              </Pressable>
             )}
           </>
         )}

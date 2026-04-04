@@ -32,6 +32,7 @@ interface UserStore {
   // Payoff strategy
   payoffStrategy: PayoffStrategy;
   fixedPayoffAmount: number | null;
+  lastSyncedAt: number | null;
 
   _initialized: boolean;
   loadProfile: () => void;
@@ -52,6 +53,7 @@ interface UserStore {
   setDefaultMinPaymentFloor: (floor: number) => void;
   setPayoffStrategy: (strategy: PayoffStrategy) => void;
   setFixedPayoffAmount: (amount: number | null) => void;
+  setLastSyncedAt: (ts: number) => void;
   reset: () => void;
 }
 
@@ -85,6 +87,7 @@ export const useUserStore = create<UserStore>()((set) => ({
   defaultMinPaymentFloor: 500,
   payoffStrategy: 'full' as PayoffStrategy,
   fixedPayoffAmount: null,
+  lastSyncedAt: null,
   _initialized: false,
 
   loadProfile: () => {
@@ -199,6 +202,9 @@ export const useUserStore = create<UserStore>()((set) => ({
     updateProfile({ fixedPayoffAmount: amount });
     set({ fixedPayoffAmount: amount });
   },
+  setLastSyncedAt: (ts: number) => {
+    set({ lastSyncedAt: ts });
+  },
   reset: () => {
     db.delete(profileTable).where(eq(profileTable.id, PROFILE_ID)).run();
     set({
@@ -219,6 +225,7 @@ export const useUserStore = create<UserStore>()((set) => ({
       defaultMinPaymentFloor: 500,
       payoffStrategy: 'full',
       fixedPayoffAmount: null,
+      lastSyncedAt: null,
     });
   },
 }));
