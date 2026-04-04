@@ -1170,7 +1170,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Spec from discovery 17-ux-patterns.md. Small effort, meaningful warmth."
     },
     {
