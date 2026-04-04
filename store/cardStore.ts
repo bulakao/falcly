@@ -11,6 +11,31 @@ import {
 
 type EditableCardFields = Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt' | 'isActive'>;
 
+/** Get the current signed-in user ID, or null if not signed in. */
+function getSignedInUserId(): string | null {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useAuthStore } = require('@/store/authStore');
+  return useAuthStore.getState().user?.id ?? null;
+}
+
+/** Fire-and-forget upload of a card to the cloud. */
+function syncCardToCloud(card: Card) {
+  const userId = getSignedInUserId();
+  if (!userId) return;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { uploadCard } = require('@/utils/sync');
+  (uploadCard as (uid: string, c: Card) => Promise<void>)(userId, card).catch(() => {});
+}
+
+/** Fire-and-forget soft-delete of a card in the cloud. */
+function syncDeleteToCloud(cardId: string) {
+  const userId = getSignedInUserId();
+  if (!userId) return;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { softDeleteCloudCard } = require('@/utils/sync');
+  (softDeleteCloudCard as (uid: string, cid: string) => Promise<void>)(userId, cardId).catch(() => {});
+}
+
 /** Re-schedule all card notifications using current user preferences. */
 function rescheduleNotifications(cards: Card[]) {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -137,6 +162,7 @@ export const useCardStore = create<CardStore>()((set, get) => ({
     }));
 
     rescheduleNotifications(get().cards);
+    syncCardToCloud(card);
   },
 
   bulkImport: (importCards) => {
@@ -224,6 +250,8 @@ export const useCardStore = create<CardStore>()((set, get) => ({
     }));
 
     rescheduleNotifications(get().cards);
+    const updatedCard = get().cards.find((c) => c.id === cardId);
+    if (updatedCard) syncCardToCloud(updatedCard);
   },
 
   updateBalance: (cardId, newBalance) => {
@@ -242,6 +270,8 @@ export const useCardStore = create<CardStore>()((set, get) => ({
     }));
 
     checkUtilAlert(get().cards);
+    const updatedCard = get().cards.find((c) => c.id === cardId);
+    if (updatedCard) syncCardToCloud(updatedCard);
   },
 
   deleteCard: (cardId) => {
@@ -252,6 +282,7 @@ export const useCardStore = create<CardStore>()((set, get) => ({
     }));
 
     rescheduleNotifications(get().cards);
+    syncDeleteToCloud(cardId);
   },
 
   toggleCardActive: (cardId) => {
