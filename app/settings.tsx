@@ -51,7 +51,6 @@ export default function SettingsScreen() {
   const deleteAccount = useAuthStore((s) => s.deleteAccount);
   const clearLocalData = useAuthStore((s) => s.clearLocalData);
 
-  const tier = useSubscriptionStore((s) => s.tier);
   const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
   const isPro = useSubscriptionStore((s) => s.isPro);
   const isProPlus = useSubscriptionStore((s) => s.isProPlus);
