@@ -1527,6 +1527,71 @@
       "priority": 7,
       "passes": true,
       "notes": "Scenario 9 from SYNC.md \u2014 soft nudge, not a blocker."
+    },
+    {
+      "id": "SD-01",
+      "title": "analyzeSpread() engine",
+      "phase": 7,
+      "group": "Statement Advisor",
+      "description": "Core spread analysis engine — gap analysis, clustering detection, payday alignment, spread score, and recommendations.",
+      "acceptanceCriteria": [
+        "analyzeSpread() returns SpreadAnalysis with score, issues, tips, gaps, nextCardTarget",
+        "calculateGaps() handles circular month (day 30 wraps to day 1)",
+        "checkPaydayAlignment() returns true when card is 2–5 days after payday",
+        "getOptimalSwipeDays() returns correct swipe window",
+        "Test suite covers empty, single, evenly spaced, clustered, dead zone, payday, and wrap-around cases"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Pure functions, no side effects. 25 tests passing."
+    },
+    {
+      "id": "SD-02",
+      "title": "Statement Advisor screen — score + timeline",
+      "phase": 7,
+      "group": "Statement Advisor",
+      "description": "Statement Advisor screen with spread score ring and 30-day timeline visualization.",
+      "acceptanceCriteria": [
+        "SpreadScoreRing shows 0–100 score with color coding (green/yellow/red)",
+        "MonthTimeline shows cards as colored dots on a 30-day bar",
+        "Dead zones shaded in warning color",
+        "Entry point added to Settings under Education section"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Route registered in _layout.tsx as modal."
+    },
+    {
+      "id": "SD-03",
+      "title": "Issues list + recommendations",
+      "phase": 7,
+      "group": "Statement Advisor",
+      "description": "Issues and tips sections on Statement Advisor screen.",
+      "acceptanceCriteria": [
+        "Issues section shows detected problems with severity color and icon",
+        "Tips section shows actionable recommendations",
+        "IssueCard shows type icon, severity color, and message",
+        "TipCard shows type icon and message"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "SD-04",
+      "title": "Timing guide + bank reference + Credit Card 101 wiki",
+      "phase": 7,
+      "group": "Statement Advisor",
+      "description": "Timing guide per card, collapsible bank reference table, and browsable wiki cards (W-01 through W-13).",
+      "acceptanceCriteria": [
+        "TimingRow shows best/avoid swipe windows per card",
+        "Bank reference table with changeable status for PH banks (collapsible)",
+        "WikiCardList shows all 13 wiki cards (W-01 through W-13) with expand/collapse",
+        "Wiki cards stored in constants/wikiCards.ts"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
     }
   ]
 }

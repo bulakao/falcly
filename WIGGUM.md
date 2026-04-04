@@ -129,6 +129,29 @@ Tracking findings, issues, and things to review after wiggum completes.
 
 ---
 
+## Run 6 — Statement Advisor Batch 1
+
+### Stories completed
+- SD-01 (analyzeSpread engine)
+- SD-02 (Statement Advisor screen — score + timeline)
+- SD-03 (Issues list + recommendations)
+- SD-04 (Timing guide + bank reference + wiki)
+
+### New files
+- utils/statementAdvisor.ts
+- app/statement-advisor.tsx
+- constants/wikiCards.ts
+- __tests__/statementAdvisor.test.ts
+
+### Findings
+- Spread score algorithm uses circular 30-day month (normalizes day 31 to 30) — consistent with gap/clustering logic
+- `as never` cast needed for router.push('/statement-advisor') in settings — Expo Router typed routes regenerate at build time
+- Wiki cards (W-01 through W-13) stored as constants, not database — suitable for static educational content
+- 25 new tests added for statement advisor engine, all passing alongside existing 45 decision engine tests (70 total)
+- Bank reference table is hardcoded PH-specific data — will need localization if expanding to other markets
+
+---
+
 ## TODO
 
 - [ ] Set up RevenueCat project + integrate SDK (replace simulated purchase logic in subscriptionStore) — parked

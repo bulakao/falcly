@@ -294,6 +294,23 @@ export default function SettingsScreen() {
         </RNView>
       </SurfaceCard>
 
+      {/* ── Education ── */}
+      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Education</Text>
+      <SurfaceCard>
+        <Pressable
+          style={styles.valueRow}
+          onPress={() => router.push('/statement-advisor' as never)}
+          accessibilityRole="button"
+          accessibilityLabel="Statement Advisor"
+        >
+          <RNView style={{ flex: 1 }}>
+            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Statement Advisor</Text>
+            <Text style={[styles.itemHint, { color: t.textMuted }]}>Optimize your card spread and timing</Text>
+          </RNView>
+          <FontAwesome name="chevron-right" size={12} color={t.textMuted} />
+        </Pressable>
+      </SurfaceCard>
+
       <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Analytics</Text>
       <SurfaceCard>
         <Text style={[styles.itemHint, { color: t.textMuted }]}>
