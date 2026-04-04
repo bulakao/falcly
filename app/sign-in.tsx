@@ -19,8 +19,10 @@ import { useAuthStore } from '@/store/authStore';
 import { useCardStore } from '@/store/cardStore';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
-import { syncOnSignIn, type SyncResult } from '@/utils/sync';
+import { syncOnSignIn, uploadCard, type SyncResult } from '@/utils/sync';
 import { supabase } from '@/utils/supabase';
+import { MergePrompt } from '@/components/organisms/MergePrompt';
+import type { Card } from '@/types/card';
 
 function mapAuthError(message: string): string {
   const lower = message.toLowerCase();
@@ -59,10 +61,11 @@ export default function SignInScreen() {
   const [resetSent, setResetSent] = useState(false);
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
 
-  async function handlePostSignInSync() {
+  /** Returns true if sign-in screen should navigate away, false if merge prompt is shown. */
+  async function handlePostSignInSync(): Promise<boolean> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) return true;
       const localCards = useCardStore.getState().cards;
       const result = await syncOnSignIn(user.id, localCards);
       setSyncResult(result);
@@ -71,10 +74,70 @@ export default function SignInScreen() {
       } else if (result.action === 'restored' && result.cloudCards) {
         useCardStore.getState().bulkImport(result.cloudCards);
         showToast(`Restored ${result.cloudCards.length} cards from your account`);
+      } else if (result.action === 'merge_needed') {
+        return false; // Stay on screen to show MergePrompt
       }
     } catch {
       // Sync failure should not block sign-in
     }
+    return true;
+  }
+
+  async function handleKeepLocal() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const localCards = useCardStore.getState().cards;
+      await Promise.all(localCards.map((card) => uploadCard(user.id, card)));
+      showToast('Sync complete');
+    } catch {
+      showToast('Sync failed');
+    }
+    setSyncResult(null);
+    router.back();
+  }
+
+  async function handleRestoreCloud() {
+    if (!syncResult?.cloudCards) return;
+    useCardStore.getState().reset();
+    useCardStore.getState().bulkImport(syncResult.cloudCards);
+    showToast('Sync complete');
+    setSyncResult(null);
+    router.back();
+  }
+
+  async function handleMergeBoth() {
+    if (!syncResult?.cloudCards) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const localCards = useCardStore.getState().cards;
+      const cloudCards = syncResult.cloudCards;
+
+      // Deduplicate by bankName+statementDay, keep latest updatedAt
+      const merged = new Map<string, Card>();
+      for (const card of localCards) {
+        const key = `${card.bankName}::${card.statementDay}`;
+        merged.set(key, card);
+      }
+      for (const card of cloudCards) {
+        const key = `${card.bankName}::${card.statementDay}`;
+        const existing = merged.get(key);
+        if (!existing || (card.createdAt > existing.createdAt)) {
+          merged.set(key, card);
+        }
+      }
+
+      const mergedCards = Array.from(merged.values());
+      useCardStore.getState().reset();
+      useCardStore.getState().bulkImport(mergedCards);
+      await Promise.all(mergedCards.map((card) => uploadCard(user.id, card)));
+      showToast('Sync complete');
+    } catch {
+      showToast('Sync failed');
+    }
+    setSyncResult(null);
+    router.back();
   }
 
   const isSignUp = mode === 'signup';
@@ -105,8 +168,8 @@ export default function SignInScreen() {
       } else {
         await signInWithEmail(email.trim(), password);
       }
-      await handlePostSignInSync();
-      router.back();
+      const shouldNavigate = await handlePostSignInSync();
+      if (shouldNavigate) router.back();
     } catch (e: unknown) {
       const msg = mapAuthError(e instanceof Error ? e.message : 'Authentication failed');
       if (msg.toLowerCase().includes('email') || msg.toLowerCase().includes('account')) {
@@ -124,8 +187,8 @@ export default function SignInScreen() {
     setLoading(true);
     try {
       await signInWithGoogle();
-      await handlePostSignInSync();
-      router.back();
+      const shouldNavigate = await handlePostSignInSync();
+      if (shouldNavigate) router.back();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Google Sign-In failed';
       setEmailError(msg);
@@ -244,6 +307,16 @@ export default function SignInScreen() {
           </Text>
         </Pressable>
       </ScrollView>
+
+      {syncResult?.action === 'merge_needed' && syncResult.cloudCards && (
+        <MergePrompt
+          localCount={useCardStore.getState().cards.length}
+          cloudCards={syncResult.cloudCards}
+          onKeepLocal={handleKeepLocal}
+          onRestoreCloud={handleRestoreCloud}
+          onMerge={handleMergeBoth}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 }
