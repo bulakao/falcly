@@ -7,6 +7,8 @@ import {
   ScrollView,
   View,
   ActivityIndicator,
+  ToastAndroid,
+  Alert,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,8 +16,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/components/Themed';
 import { Button, FormInput } from '@/components/atoms';
 import { useAuthStore } from '@/store/authStore';
+import { useCardStore } from '@/store/cardStore';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
+import { syncOnSignIn, type SyncResult } from '@/utils/sync';
+import { supabase } from '@/utils/supabase';
 
 function mapAuthError(message: string): string {
   const lower = message.toLowerCase();
@@ -24,6 +29,14 @@ function mapAuthError(message: string): string {
   if (lower.includes('too many')) return 'Too many attempts. Please wait a moment.';
   if (lower.includes('invalid email')) return 'Check your email format.';
   return message;
+}
+
+function showToast(message: string) {
+  if (Platform.OS === 'android') {
+    ToastAndroid.show(message, ToastAndroid.SHORT);
+  } else {
+    Alert.alert('', message);
+  }
 }
 
 export default function SignInScreen() {
@@ -44,6 +57,22 @@ export default function SignInScreen() {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [resetSent, setResetSent] = useState(false);
+  const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
+
+  async function handlePostSignInSync() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const localCards = useCardStore.getState().cards;
+      const result = await syncOnSignIn(user.id, localCards);
+      setSyncResult(result);
+      if (result.action === 'uploaded') {
+        showToast('Your cards have been backed up');
+      }
+    } catch {
+      // Sync failure should not block sign-in
+    }
+  }
 
   const isSignUp = mode === 'signup';
 
@@ -73,6 +102,7 @@ export default function SignInScreen() {
       } else {
         await signInWithEmail(email.trim(), password);
       }
+      await handlePostSignInSync();
       router.back();
     } catch (e: unknown) {
       const msg = mapAuthError(e instanceof Error ? e.message : 'Authentication failed');
@@ -91,6 +121,7 @@ export default function SignInScreen() {
     setLoading(true);
     try {
       await signInWithGoogle();
+      await handlePostSignInSync();
       router.back();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Google Sign-In failed';
