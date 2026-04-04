@@ -58,6 +58,7 @@ interface CardStore {
   _initialized: boolean;
   loadCards: () => void;
   addCard: (card: Omit<Card, 'id' | 'balanceUpdatedAt' | 'createdAt' | 'isActive' | 'customFinancials' | 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'> & Partial<Pick<Card, 'pendingTransactions' | 'installmentsMonthlyAmount' | 'subscriptionsThisCycle' | 'annualFee' | 'annualFeeMonth'>>) => void;
+  bulkImport: (cards: Card[]) => void;
   applyDefaultsToCards: (updates: Partial<Pick<Card, 'interestRate' | 'minPaymentPct' | 'minPaymentFloor'>>) => void;
   updateCard: (cardId: string, updates: Partial<EditableCardFields>) => void;
   updateBalance: (cardId: string, newBalance: number) => void;
@@ -134,6 +135,77 @@ export const useCardStore = create<CardStore>()((set, get) => ({
       cards: [...state.cards, card],
       _nextId: state._nextId + 1,
     }));
+
+    rescheduleNotifications(get().cards);
+  },
+
+  bulkImport: (importCards) => {
+    const now = new Date();
+    for (const card of importCards) {
+      db.insert(cardsTable).values({
+        id: card.id,
+        bankName: card.bankName,
+        creditLimit: card.creditLimit,
+        outstandingBalance: card.outstandingBalance,
+        statementDay: card.statementDay,
+        dueDayOffset: card.dueDayOffset,
+        interestRate: card.interestRate,
+        minPaymentPct: card.minPaymentPct,
+        minPaymentFloor: card.minPaymentFloor,
+        customFinancials: card.customFinancials,
+        pendingTransactions: card.pendingTransactions,
+        installmentsMonthlyAmount: card.installmentsMonthlyAmount,
+        subscriptionsThisCycle: card.subscriptionsThisCycle,
+        annualFee: card.annualFee,
+        annualFeeMonth: card.annualFeeMonth,
+        currency: card.currency ?? null,
+        balanceUpdatedAt: new Date(card.balanceUpdatedAt),
+        isActive: card.isActive,
+        sortOrder: 0,
+        createdAt: new Date(card.createdAt),
+        updatedAt: now,
+      }).onConflictDoUpdate({
+        target: cardsTable.id,
+        set: {
+          bankName: card.bankName,
+          creditLimit: card.creditLimit,
+          outstandingBalance: card.outstandingBalance,
+          statementDay: card.statementDay,
+          dueDayOffset: card.dueDayOffset,
+          interestRate: card.interestRate,
+          minPaymentPct: card.minPaymentPct,
+          minPaymentFloor: card.minPaymentFloor,
+          customFinancials: card.customFinancials,
+          pendingTransactions: card.pendingTransactions,
+          installmentsMonthlyAmount: card.installmentsMonthlyAmount,
+          subscriptionsThisCycle: card.subscriptionsThisCycle,
+          annualFee: card.annualFee,
+          annualFeeMonth: card.annualFeeMonth,
+          currency: card.currency ?? null,
+          balanceUpdatedAt: new Date(card.balanceUpdatedAt),
+          isActive: card.isActive,
+          updatedAt: now,
+        },
+      }).run();
+    }
+
+    const maxId = importCards.reduce(
+      (max, c) => Math.max(max, parseInt(c.id, 10) || 0),
+      get()._nextId - 1,
+    );
+
+    set((state) => {
+      const existingIds = new Set(state.cards.map((c) => c.id));
+      const newCards = importCards.filter((c) => !existingIds.has(c.id));
+      const updatedExisting = state.cards.map((existing) => {
+        const incoming = importCards.find((c) => c.id === existing.id);
+        return incoming ?? existing;
+      });
+      return {
+        cards: [...updatedExisting, ...newCards],
+        _nextId: maxId + 1,
+      };
+    });
 
     rescheduleNotifications(get().cards);
   },

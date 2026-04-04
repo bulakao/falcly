@@ -68,6 +68,9 @@ export default function SignInScreen() {
       setSyncResult(result);
       if (result.action === 'uploaded') {
         showToast('Your cards have been backed up');
+      } else if (result.action === 'restored' && result.cloudCards) {
+        useCardStore.getState().bulkImport(result.cloudCards);
+        showToast(`Restored ${result.cloudCards.length} cards from your account`);
       }
     } catch {
       // Sync failure should not block sign-in
