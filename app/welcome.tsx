@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -79,9 +79,11 @@ export default function WelcomeScreen() {
 
       <View style={styles.cta}>
         <Button label="Get Started" onPress={handleGetStarted} />
-        <Text style={[styles.footnote, { color: t.textMuted }]}>
-          No sign-up required
-        </Text>
+        <Pressable onPress={() => router.push('/sign-in')}>
+          <Text style={[styles.loginLink, { color: t.primary }]}>
+            Already have an account? <Text style={{ fontFamily: fonts.interBold }}>Log in</Text>
+          </Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -144,8 +146,9 @@ const styles = StyleSheet.create({
     gap: 12,
     alignItems: 'center',
   },
-  footnote: {
-    fontSize: 13,
+  loginLink: {
+    fontSize: 14,
     fontFamily: fonts.interRegular,
+    textAlign: 'center',
   },
 });
