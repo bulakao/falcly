@@ -6,6 +6,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import type { PurchasesPackage } from 'react-native-purchases';
+import { trackProPurchaseCompleted } from '@/utils/analytics';
 
 export default function ManualPaywallScreen() {
   const router = useRouter();
@@ -34,6 +35,7 @@ export default function ManualPaywallScreen() {
     const success = await purchase(selectedPackage);
     setIsPurchasing(false);
     if (success) {
+      trackProPurchaseCompleted(selectedPackage.packageType);
       Alert.alert('Success!', 'Welcome to Falcly Pro!', [
         { text: 'OK', onPress: () => router.back() },
       ]);

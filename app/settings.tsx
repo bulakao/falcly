@@ -32,6 +32,7 @@ import { useOverlayStore } from '@/store/overlayStore';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
 import { fullSync } from '@/utils/sync';
 import { supabase } from '@/utils/supabase';
+import { posthog, trackUserSignedOut } from '@/utils/analytics';
 
 function timeAgo(ts: number): string {
   const seconds = Math.floor((Date.now() - ts) / 1000);
@@ -717,6 +718,8 @@ export default function SettingsScreen() {
                     text: 'Sign Out',
                     onPress: async () => {
                       try {
+                        trackUserSignedOut();
+                        posthog.reset();
                         await signOut();
                       } catch (e: unknown) {
                         const msg = e instanceof Error ? e.message : 'Sign out failed';

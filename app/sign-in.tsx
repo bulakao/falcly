@@ -25,7 +25,13 @@ import { syncOnSignIn, uploadCard, type SyncResult } from '@/utils/sync';
 import { supabase } from '@/utils/supabase';
 import { MergePrompt } from '@/components/organisms/MergePrompt';
 import type { Card } from '@/types/card';
-import { trackCardAdded } from '@/utils/analytics';
+import {
+  posthog,
+  trackCardAdded,
+  trackUserSignedIn,
+  trackUserSignedUp,
+  trackOnboardingSignupCompleted,
+} from '@/utils/analytics';
 
 function mapAuthError(message: string): string {
   const lower = message.toLowerCase();
@@ -204,8 +210,19 @@ export default function SignInScreen() {
     try {
       if (isSignUp) {
         await signUpWithEmail(email.trim(), password);
+        const { data: { user: newUser } } = await supabase.auth.getUser();
+        if (newUser) {
+          posthog.identify(newUser.id, { $set: { email: newUser.email ?? '' } });
+          trackUserSignedUp('email');
+          if (fromOnboarding === 'true') trackOnboardingSignupCompleted('email');
+        }
       } else {
         await signInWithEmail(email.trim(), password);
+        const { data: { user: signedInUser } } = await supabase.auth.getUser();
+        if (signedInUser) {
+          posthog.identify(signedInUser.id, { $set: { email: signedInUser.email ?? '' } });
+          trackUserSignedIn('email');
+        }
       }
       const shouldNavigate = await handlePostSignInSync();
       if (shouldNavigate) navigateAfterAuth();
@@ -226,6 +243,12 @@ export default function SignInScreen() {
     setLoading(true);
     try {
       await signInWithGoogle();
+      const { data: { user: googleUser } } = await supabase.auth.getUser();
+      if (googleUser) {
+        posthog.identify(googleUser.id, { $set: { email: googleUser.email ?? '' } });
+        trackUserSignedIn('google');
+        if (fromOnboarding === 'true') trackOnboardingSignupCompleted('google');
+      }
       const shouldNavigate = await handlePostSignInSync();
       if (shouldNavigate) navigateAfterAuth();
     } catch (e: unknown) {

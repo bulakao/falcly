@@ -5,6 +5,7 @@ import RevenueCatUI, { PAYWALL_RESULT } from 'react-native-purchases-ui';
 import { Text, View } from '@/components/Themed';
 import { ENTITLEMENT_ID } from '@/utils/revenuecat';
 import { useAppTheme } from '@/theme';
+import { trackProPaywallViewed, trackProPaywallDismissed, trackProPaywallPurchased } from '@/utils/analytics';
 
 export default function ProPaywallScreen() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function ProPaywallScreen() {
   async function presentPaywall() {
     if (isPresenting) return;
     setIsPresenting(true);
+    trackProPaywallViewed();
 
     try {
       const result = await RevenueCatUI.presentPaywallIfNeeded({
@@ -27,9 +29,18 @@ export default function ProPaywallScreen() {
 
       switch (result) {
         case PAYWALL_RESULT.PURCHASED:
+          trackProPaywallPurchased();
+          router.back();
+          break;
         case PAYWALL_RESULT.RESTORED:
+          trackProPaywallViewed();
+          router.back();
+          break;
         case PAYWALL_RESULT.NOT_PRESENTED:
+          router.back();
+          break;
         case PAYWALL_RESULT.CANCELLED:
+          trackProPaywallDismissed();
           router.back();
           break;
         case PAYWALL_RESULT.ERROR:

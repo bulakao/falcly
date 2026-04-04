@@ -2,9 +2,10 @@ import 'react-native-gesture-handler';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments, usePathname, useGlobalSearchParams } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { PostHogProvider } from 'posthog-react-native';
 import 'react-native-reanimated';
 
 import { useSubscriptionStore, FREE_CARD_LIMIT } from '@/store/subscriptionStore';
@@ -18,7 +19,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
 import { supabase } from '@/utils/supabase';
 import { useRunMigrations } from '@/db/migrate';
-import { initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
+import { posthog, initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
 import { initLogger, initCrashHandler, logger, installNetworkLogger, useNavigationLogger } from '@/utils/logger';
 import { createChannels, scheduleAllReminders, checkHighUtilization } from '@/utils/notifications';
 import { AppThemeProvider, useEffectiveColorScheme, lightTheme, darkTheme } from '@/theme';
@@ -166,6 +167,17 @@ function RootLayoutNav() {
   const isOnboardingComplete = useOnboardingStore((s) => s.isComplete);
   const segments = useSegments();
   const router = useRouter();
+  const pathname = usePathname();
+  const params = useGlobalSearchParams();
+  const previousPathname = useRef<string | undefined>(undefined);
+
+  // Manual screen tracking for Expo Router
+  useEffect(() => {
+    if (previousPathname.current !== pathname) {
+      posthog.screen(pathname, { previous_screen: previousPathname.current ?? null, ...params });
+      previousPathname.current = pathname;
+    }
+  }, [pathname, params]);
 
   // Redirect based on onboarding state (no auth gate)
   useEffect(() => {
@@ -181,6 +193,14 @@ function RootLayoutNav() {
   }, [isOnboardingComplete, segments]);
 
   return (
+    <PostHogProvider
+      client={posthog}
+      autocapture={{
+        captureScreens: false,
+        captureTouches: true,
+        propsToCapture: ['testID'],
+      }}
+    >
     <AppThemeProvider>
       <ThemeProvider value={colorScheme === 'dark' ? navDark : navLight}>
         <Stack>
@@ -211,5 +231,6 @@ function RootLayoutNav() {
         </Stack>
       </ThemeProvider>
     </AppThemeProvider>
+    </PostHogProvider>
   );
 }

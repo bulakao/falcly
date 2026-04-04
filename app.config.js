@@ -20,7 +20,7 @@ module.exports = {
       splash: {
         image: './assets/images/splash-icon.png',
         resizeMode: 'contain',
-        backgroundColor: '#F8F9FA',
+        backgroundColor: '#1e2a40',
         dark: {
           image: './assets/images/splash-icon.png',
           resizeMode: 'contain',
@@ -31,7 +31,7 @@ module.exports = {
     android: {
       adaptiveIcon: {
         foregroundImage: './assets/images/adaptive-icon.png',
-        backgroundColor: '#ffffff',
+        backgroundColor: '#1e2a40',
       },
       splash: {
         image: './assets/images/splash-icon.png',
@@ -60,6 +60,10 @@ module.exports = {
       '@react-native-google-signin/google-signin',
       './plugins/withXcode26Compat',
     ],
+    extra: {
+      posthogProjectToken: process.env.POSTHOG_PROJECT_TOKEN,
+      posthogHost: process.env.POSTHOG_HOST,
+    },
     experiments: {
       typedRoutes: true,
     },
