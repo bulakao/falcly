@@ -4,7 +4,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
+
   View as RNView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -14,15 +14,13 @@ import { Text, View } from '@/components/Themed';
 import { Badge, Button } from '@/components/atoms';
 import { StatusTooltip, SurfaceCard } from '@/components/molecules';
 import { BillingTimeline } from '@/components/organisms';
-import { useCardStore } from '@/store/cardStore';
-import { useUserStore } from '@/store/userStore';
+
 import { useOnboardingStore } from '@/store/onboardingStore';
 import { calculateCardStatus, utilization } from '@/utils/decisionEngine';
 import type { Card, CardStatus } from '@/types/card';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
-import { trackOnboardingFirstStatusViewed, trackOnboardingNotificationsGranted, trackOnboardingNotificationsDeclined } from '@/utils/analytics';
-import { requestPermission } from '@/utils/notifications';
+import { trackOnboardingFirstStatusViewed } from '@/utils/analytics';
 
 const STATUS_ICONS: Record<CardStatus, string> = {
   SAFE: '\u2713',
@@ -109,28 +107,6 @@ export default function OnboardingResultScreen() {
     });
   }
 
-  async function handleSkip() {
-    const { addCard } = useCardStore.getState();
-    const { defaultInterestRate, defaultMinPaymentPct, defaultMinPaymentFloor } = useUserStore.getState();
-
-    addCard({
-      bankName: bankName ?? '',
-      creditLimit: parseFloat(creditLimitStr ?? '0'),
-      outstandingBalance: parseFloat(outstandingBalanceStr ?? '0'),
-      statementDay: parseInt(statementDayStr ?? '1', 10),
-      dueDayOffset: parseInt(dueDayOffsetStr ?? '21', 10),
-      interestRate: defaultInterestRate,
-      minPaymentPct: defaultMinPaymentPct,
-      minPaymentFloor: defaultMinPaymentFloor,
-    });
-
-    const granted = await requestPermission();
-    if (granted) trackOnboardingNotificationsGranted();
-    else trackOnboardingNotificationsDeclined();
-
-    useOnboardingStore.getState().complete();
-    router.replace('/');
-  }
 
   return (
     <KeyboardAvoidingView
@@ -185,9 +161,6 @@ export default function OnboardingResultScreen() {
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
         <Button label="Save my card" onPress={handleSaveCard} />
-        <Pressable onPress={handleSkip} style={styles.skipButton}>
-          <Text style={[styles.skipText, { color: t.textMuted }]}>Skip for now</Text>
-        </Pressable>
       </View>
     </KeyboardAvoidingView>
   );
@@ -264,11 +237,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: fonts.interRegular,
   },
-  skipButton: {
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  skipText: {
-    fontSize: 14,
-  },
+
 });
