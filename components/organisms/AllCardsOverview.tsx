@@ -136,27 +136,8 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
     (c) => c.installmentsMonthlyAmount > 0 || c.subscriptionsThisCycle > 0 || (c.annualFee > 0 && c.annualFeeMonth > 0),
   );
 
-  function getGreeting(): string {
-    const hour = new Date().getHours();
-    let greeting: string;
-    if (hour >= 5 && hour < 12) greeting = 'Good morning';
-    else if (hour >= 12 && hour < 18) greeting = 'Good afternoon';
-    else if (hour >= 18) greeting = 'Good evening';
-    else greeting = 'Hey';
-
-    const raw = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email;
-    if (raw) {
-      const firstName = String(raw).split(/[\s@]/)[0];
-      if (firstName) return `${greeting}, ${firstName}`;
-    }
-    return greeting;
-  }
-
   return (
     <View style={styles.container}>
-      {/* Personalized greeting */}
-      <Text style={[styles.greeting, { color: t.textPrimary }]}>{getGreeting()}</Text>
-
       {/* Guest data warning banner */}
       {showGuestBanner && (
         <Pressable
@@ -274,11 +255,6 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
 const styles = StyleSheet.create({
   container: {
     paddingTop: 16,
-  },
-  greeting: {
-    fontSize: 18,
-    fontFamily: fonts.interSemiBold,
-    marginBottom: 12,
   },
   sortRow: {
     flexDirection: 'row',
