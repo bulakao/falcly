@@ -48,7 +48,7 @@ export default function WelcomeScreen() {
     >
       <View style={styles.hero}>
         <View style={styles.logoContainer}>
-          <Image source={falclyLogo} style={styles.logo} resizeMode="contain" />
+          <Image source={falclyLogo} style={styles.logo} resizeMode="contain" accessible={true} accessibilityLabel="Falcly logo" />
         </View>
 
         <Text style={[styles.headline, { color: t.textPrimary }]}>

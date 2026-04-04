@@ -44,7 +44,7 @@ export function BestCardBanner({ bestCard, hasCards, hasActiveCards, onPress, on
           {card ? (
             <RNView style={styles.middleSection}>
               <View style={styles.nameRow}>
-                <RNView style={[styles.dot, { backgroundColor: accentColor, shadowColor: accentColor }]} />
+                <RNView style={[styles.dot, { backgroundColor: accentColor, shadowColor: accentColor }]} accessible accessibilityLabel={`Status: ${bestCard!.status.status}`} />
                 <Text style={[styles.bankName, { color: t.textPrimary }]}>{card.bankName}</Text>
               </View>
               <RNView style={styles.utilizationRow}>
@@ -82,12 +82,12 @@ export function BestCardBanner({ bestCard, hasCards, hasActiveCards, onPress, on
                   <RNView />
                 )}
                 {!hasCards ? (
-                  <Pressable style={styles.manageButton} onPress={onAddPress}>
+                  <Pressable style={styles.manageButton} onPress={onAddPress} accessibilityRole="button" accessibilityLabel="Add a new card">
                     <Text style={[styles.manageText, { color: t.primary }]}>ADD</Text>
                     <Plus size={14} color={t.primary} />
                   </Pressable>
                 ) : (
-                  <Pressable style={styles.manageButton} onPress={onPress}>
+                  <Pressable style={styles.manageButton} onPress={onPress} accessibilityRole="button" accessibilityLabel="Manage all cards">
                     <Text style={[styles.manageText, { color: t.primary }]}>MANAGE</Text>
                     <ChevronRight size={14} color={t.primary} />
                   </Pressable>

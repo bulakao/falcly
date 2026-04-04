@@ -93,6 +93,8 @@ export function GanttTimeline({ cards, today, onCardPress }: GanttTimelineProps)
               style={({ pressed }) => [styles.row, pressed && onCardPress && styles.rowPressed]}
               onPress={() => onCardPress?.(card.id)}
               disabled={!onCardPress}
+              accessibilityRole="button"
+              accessibilityLabel={`${card.bankName}, ${status.status} status, statement in ${cycle.daysToStatement} days`}
             >
             {/* Card name with status icon prefix */}
             <RNView style={styles.nameRow}>

@@ -53,6 +53,7 @@ export default function UpdateBalanceScreen() {
           keyboardType="numeric"
           autoFocus
           selectTextOnFocus
+          accessibilityLabel="Outstanding balance"
         />
 
         <View style={styles.hintWrapper}>

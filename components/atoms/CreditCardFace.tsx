@@ -39,13 +39,21 @@ export function CreditCardFace({ card, netAvailableCash, currentCycleTxSum = 0 }
           <View style={styles.statusGroup}>
             {staleness !== 'fresh' && (
               <Link href={{ pathname: '/update-balance', params: { cardId: card.id } }} asChild>
-                <Pressable>
+                <Pressable
+                  accessibilityLabel="Update balance — data is stale"
+                  accessibilityRole="button"
+                  style={styles.stalenessHit}
+                >
                   <Text style={styles.stalenessIcon}>⚠️</Text>
                 </Pressable>
               </Link>
             )}
             <StatusTooltip>
-              <View style={[styles.statusDot, { backgroundColor: accentColor, shadowColor: accentColor }]} />
+              <View
+                style={[styles.statusDot, { backgroundColor: accentColor, shadowColor: accentColor }]}
+                accessible
+                accessibilityLabel={`Card status: ${status}`}
+              />
             </StatusTooltip>
           </View>
         </View>
@@ -118,6 +126,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+  },
+  stalenessHit: {
+    minWidth: 44,
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   stalenessIcon: {
     fontSize: 14,

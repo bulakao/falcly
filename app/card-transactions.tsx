@@ -119,11 +119,11 @@ export default function CardTransactionsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: t.background, paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
           <Text style={[styles.backBtn, { color: t.primary }]}>Back</Text>
         </Pressable>
         <Text style={[styles.heading, { color: t.textPrimary }]}>{card.bankName}</Text>
-        <Pressable onPress={() => router.push(`/log-transaction?cardId=${card.id}`)}>
+        <Pressable onPress={() => router.push(`/log-transaction?cardId=${card.id}`)} accessibilityRole="button" accessibilityLabel="Log transaction">
           <Text style={[styles.addBtn, { color: t.primary }]}>+ Log</Text>
         </Pressable>
       </View>
@@ -222,7 +222,7 @@ function TransactionRow({ tx, card }: { tx: Transaction; card: Card }) {
   }
 
   return (
-    <Pressable onLongPress={handleLongPress} style={[styles.txRow, isExcluded && { opacity: 0.4 }]}>
+    <Pressable onLongPress={handleLongPress} style={[styles.txRow, isExcluded && { opacity: 0.4 }]} accessibilityRole="button" accessibilityLabel={`${tx.merchant || tx.type}, ${formatPeso(tx.amount)}, ${formatTxDate(tx.date)}`} accessibilityHint="Long press for options">
       <View style={styles.txLeft}>
         <Text style={[styles.txDate, { color: t.textMuted }]}>
           {formatTxDate(tx.date)}

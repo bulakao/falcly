@@ -68,6 +68,8 @@ export default function ManageCardsScreen() {
         <Pressable
           onLongPress={drag}
           delayLongPress={150}
+          accessibilityRole="button"
+          accessibilityLabel={`${card.bankName} card, long press to reorder`}
           style={[
             styles.row,
             { height: ROW_HEIGHT },
@@ -97,7 +99,7 @@ export default function ManageCardsScreen() {
           </RNView>
 
           <RNView style={styles.rowActions}>
-            <Pressable onPress={() => handleToggle(card.id, card.isActive)} hitSlop={8}>
+            <Pressable onPress={() => handleToggle(card.id, card.isActive)} hitSlop={8} accessibilityRole="button" accessibilityLabel={card.isActive ? `Hide ${card.bankName}` : `Show ${card.bankName}`} accessibilityState={{ selected: card.isActive }}>
               <FontAwesome
                 name={card.isActive ? 'eye' : 'eye-slash'}
                 size={18}
@@ -112,6 +114,8 @@ export default function ManageCardsScreen() {
                 ])
               }
               hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={`Delete ${card.bankName}`}
             >
               <FontAwesome name="trash-o" size={18} color={t.risky} />
             </Pressable>
@@ -125,7 +129,7 @@ export default function ManageCardsScreen() {
     <Stack.Screen
       options={{
         headerRight: () => (
-          <Pressable onPress={handleAddCard} hitSlop={8} style={{ paddingLeft: 12, marginRight: 12 }}>
+          <Pressable onPress={handleAddCard} hitSlop={8} style={{ paddingLeft: 12, marginRight: 12 }} accessibilityRole="button" accessibilityLabel="Add card">
             <Text style={{ color: t.primary, fontSize: 16, fontFamily: fonts.interSemiBold }}>Add Card</Text>
           </Pressable>
         ),

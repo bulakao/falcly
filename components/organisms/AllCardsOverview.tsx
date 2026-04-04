@@ -140,6 +140,8 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
         <Pressable
           style={[styles.avatar, { backgroundColor: user?.user_metadata?.avatar_url ? undefined : user ? t.primary : t.surface }]}
           onPress={() => router.push('/settings')}
+          accessibilityRole="button"
+          accessibilityLabel="Settings"
         >
           {user?.user_metadata?.avatar_url ? (
             <Image source={{ uri: user.user_metadata.avatar_url }} style={styles.avatarImage} />
@@ -150,7 +152,7 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
         </Pressable>
         <View style={styles.spacer} />
         <OfflineChip />
-        <Pressable onPress={() => router.push('/pro-paywall')}>
+        <Pressable onPress={() => router.push('/pro-paywall')} accessibilityRole="button" accessibilityLabel={`${getBadgeLabel()} membership`}>
           <Badge label={getBadgeLabel()} variant={tier === 'pro' ? 'pro' : 'outline'} />
         </Pressable>
       </View>
@@ -171,6 +173,9 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
                   active && { backgroundColor: t.primary, borderColor: t.primary },
                 ]}
                 onPress={() => handleSortChange(opt.value)}
+                accessibilityRole="button"
+                accessibilityLabel={`Sort by ${opt.label}`}
+                accessibilityState={{ selected: active }}
               >
                 <Text
                   style={[

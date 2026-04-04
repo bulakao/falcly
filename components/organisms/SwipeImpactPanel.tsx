@@ -174,16 +174,16 @@ export function SwipeImpactPanel({
       {!readOnly && (
         <View style={styles.actionRow}>
           <Link href={{ pathname: '/edit-card', params: { cardId: card.id } }} asChild>
-            <Pressable style={[styles.actionButton, { backgroundColor: t.surface }]}>
+            <Pressable style={[styles.actionButton, { backgroundColor: t.surface }]} accessibilityRole="button" accessibilityLabel="Edit card">
               <Text style={[styles.actionButtonText, { color: t.primary }]}>Edit Card</Text>
             </Pressable>
           </Link>
           <Link href={{ pathname: '/update-balance', params: { cardId: card.id } }} asChild>
-            <Pressable style={[styles.actionButton, { backgroundColor: t.surface }]}>
+            <Pressable style={[styles.actionButton, { backgroundColor: t.surface }]} accessibilityRole="button" accessibilityLabel="Update balance">
               <Text style={[styles.actionButtonText, { color: t.primary }]}>Update Balance</Text>
             </Pressable>
           </Link>
-          <Pressable style={[styles.actionButton, { backgroundColor: t.riskyBg }]} onPress={handleDeleteCard}>
+          <Pressable style={[styles.actionButton, { backgroundColor: t.riskyBg }]} onPress={handleDeleteCard} accessibilityRole="button" accessibilityLabel="Delete card">
             <Text style={[styles.actionButtonText, { color: t.risky }]}>Delete</Text>
           </Pressable>
         </View>
@@ -193,7 +193,7 @@ export function SwipeImpactPanel({
       <BillingTimeline card={card} />
 
       {/* Collapsible Gantt timeline */}
-      <Pressable onPress={toggleGantt} style={styles.ganttToggle}>
+      <Pressable onPress={toggleGantt} style={styles.ganttToggle} accessibilityRole="button" accessibilityLabel="Billing cycle details" accessibilityState={{ expanded: ganttExpanded }}>
         <Text style={[styles.ganttToggleText, { color: t.primary }]}>
           Billing Cycle {ganttExpanded ? '▴' : '▾'}
         </Text>
@@ -212,6 +212,7 @@ export function SwipeImpactPanel({
         placeholder="0"
         keyboardType="numeric"
         autoFocus={autoFocusInput}
+        accessibilityLabel="Swipe amount"
       />
 
       {/* Quick amount chips */}
@@ -304,7 +305,7 @@ export function SwipeImpactPanel({
         {showCarriedBalance && payoffProjection && (
           <>
             <BreakdownDivider />
-            <Pressable onPress={() => setProjectionExpanded((p) => !p)} style={styles.projectionToggle}>
+            <Pressable onPress={() => setProjectionExpanded((p) => !p)} style={styles.projectionToggle} accessibilityRole="button" accessibilityLabel="Payoff projection" accessibilityState={{ expanded: projectionExpanded }}>
               <Text style={[styles.projectionToggleText, { color: t.caution }]}>
                 Payoff Projection {projectionExpanded ? '▴' : '▾'}
               </Text>
@@ -326,12 +327,12 @@ export function SwipeImpactPanel({
       {/* Navigation links */}
       <View style={styles.navRow}>
         <Link href={{ pathname: '/card-transactions', params: { cardId: card.id } }} asChild>
-          <Pressable style={[styles.navButton, { backgroundColor: t.surface, borderColor: t.border }]}>
+          <Pressable style={[styles.navButton, { backgroundColor: t.surface, borderColor: t.border }]} accessibilityRole="button" accessibilityLabel="View transactions">
             <Text style={[styles.navButtonText, { color: t.primary }]}>View Transactions ›</Text>
           </Pressable>
         </Link>
         <Link href={{ pathname: '/payment-summary', params: { cardId: card.id } }} asChild>
-          <Pressable style={[styles.navButton, { backgroundColor: t.surface, borderColor: t.border }]}>
+          <Pressable style={[styles.navButton, { backgroundColor: t.surface, borderColor: t.border }]} accessibilityRole="button" accessibilityLabel="What you owe">
             <Text style={[styles.navButtonText, { color: t.primary }]}>What You Owe ›</Text>
           </Pressable>
         </Link>
@@ -343,12 +344,14 @@ export function SwipeImpactPanel({
           <Pressable
             style={[styles.tryCardButton, { borderColor: t.border }]}
             onPress={() => setCardPickerVisible(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Try a different card"
           >
             <Text style={[styles.tryCardText, { color: t.primary }]}>Try a different card</Text>
           </Pressable>
 
-          <Modal visible={cardPickerVisible} animationType="slide" transparent>
-            <Pressable style={styles.tryCardOverlay} onPress={() => setCardPickerVisible(false)}>
+          <Modal visible={cardPickerVisible} animationType="slide" transparent accessibilityViewIsModal>
+            <Pressable style={styles.tryCardOverlay} onPress={() => setCardPickerVisible(false)} accessibilityLabel="Close card picker">
               <View style={[styles.tryCardSheet, { backgroundColor: t.background }]}>
                 <Text style={[styles.tryCardTitle, { color: t.textPrimary }]}>Switch Card</Text>
                 <FlatList
@@ -364,6 +367,8 @@ export function SwipeImpactPanel({
                           setCardPickerVisible(false);
                           router.push({ pathname: '/swipe-impact', params: { cardId: item.id } });
                         }}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Switch to ${item.bankName}, ${status.status}`}
                       >
                         <View style={[styles.statusDot, { backgroundColor: dotColor }]} />
                         <Text style={[styles.tryCardName, { color: t.textPrimary }]}>{item.bankName}</Text>
@@ -382,6 +387,8 @@ export function SwipeImpactPanel({
         <Pressable
           style={[styles.fundsPrompt, { backgroundColor: t.cautionBg, borderColor: t.caution }]}
           onPress={() => router.navigate('/')}
+          accessibilityRole="button"
+          accessibilityLabel={cashOnHand === null ? 'Set funds available' : 'Update funds available'}
         >
           <Text style={[styles.fundsPromptText, { color: t.caution }]}>
             {cashOnHand === null ? 'Set funds available \u2192' : 'Update funds available \u2192'}
@@ -398,7 +405,7 @@ export function SwipeImpactPanel({
       {/* Trial CTA */}
       {subscriptionTier === 'free' && (
         <Link href="/pro-paywall" asChild>
-          <Pressable style={[styles.trialCta, { backgroundColor: t.accentBg, borderColor: t.accent }]}>
+          <Pressable style={[styles.trialCta, { backgroundColor: t.accentBg, borderColor: t.accent }]} accessibilityRole="button" accessibilityLabel="Try free for 14 days — unlock payment planning, installment tracking, and more">
             <Text style={[styles.trialCtaText, { color: t.accent }]}>Try Free for 14 Days</Text>
             <Text style={[styles.trialCtaSubtext, { color: t.accent }]}>
               Unlock payment planning, installment tracking & more

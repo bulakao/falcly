@@ -90,7 +90,7 @@ export default function ManageInstallmentsScreen() {
               <Text style={[styles.itemDetail, { color: t.textMuted }]}>
                 Total ₱{inst.totalAmount.toLocaleString()}
               </Text>
-              <Pressable onPress={() => handleDelete(inst.id, inst.name)} hitSlop={8}>
+              <Pressable onPress={() => handleDelete(inst.id, inst.name)} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Remove ${inst.name}`}>
                 <Text style={[styles.deleteText, { color: t.risky }]}>Remove</Text>
               </Pressable>
             </RNView>
@@ -105,7 +105,7 @@ export default function ManageInstallmentsScreen() {
             <SurfaceCard key={inst.id} style={{ opacity: 0.6 }}>
               <RNView style={styles.row}>
                 <Text style={[styles.itemName, { color: t.textMuted }]}>{inst.name}</Text>
-                <Pressable onPress={() => handleDelete(inst.id, inst.name)} hitSlop={8}>
+                <Pressable onPress={() => handleDelete(inst.id, inst.name)} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Remove ${inst.name}`}>
                   <Text style={[styles.deleteText, { color: t.risky }]}>Remove</Text>
                 </Pressable>
               </RNView>

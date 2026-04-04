@@ -11,8 +11,16 @@ export function UtilizationBar({ balance, limit, color }: UtilizationBarProps) {
   const t = useAppTheme();
   const utilization = Math.min(balance / limit, 1);
 
+  const pct = Math.round(utilization * 100);
+
   return (
-    <View style={[styles.track, { backgroundColor: t.border }]}>
+    <View
+      style={[styles.track, { backgroundColor: t.border }]}
+      accessible
+      accessibilityRole="progressbar"
+      accessibilityLabel={`Credit utilization: ${pct}%`}
+      accessibilityValue={{ min: 0, max: 100, now: pct }}
+    >
       <View
         style={[
           styles.fill,

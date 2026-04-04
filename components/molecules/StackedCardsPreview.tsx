@@ -48,6 +48,8 @@ export function StackedCardsPreview({ cards, getNetAvailableCash }: StackedCards
                   ],
                 },
               ]}
+              accessible
+              accessibilityLabel={`${card.bankName}, status ${status}`}
             >
               <View style={styles.miniTop}>
                 <Text style={[styles.miniBankName, { color: t.textPrimary }]} numberOfLines={1}>

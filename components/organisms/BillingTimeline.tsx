@@ -42,7 +42,7 @@ export function BillingTimeline({ card, today }: { card: Card; today?: Date }) {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} accessible accessibilityLabel={`Billing cycle: statement closes in ${cycle.daysToStatement} days, due ${formatShortDate(cycle.dueDate)}`}>
       <Text style={[styles.title, { color: t.textMuted }]}>Billing Cycle</Text>
 
       {/* Today label above track */}

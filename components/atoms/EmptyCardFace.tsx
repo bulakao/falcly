@@ -13,6 +13,9 @@ export function EmptyCardFace({ onPress }: EmptyCardFaceProps) {
     <Pressable
       style={[styles.card, { borderColor: t.border, backgroundColor: t.surface }]}
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel="Add a card"
+      accessibilityHint="Opens form to add a new credit card"
     >
       <Text style={[styles.plus, { color: t.textMuted }]}>+</Text>
       <Text style={[styles.label, { color: t.textMuted }]}>Add a card</Text>

@@ -67,6 +67,9 @@ export function BankPicker({ value, onSelect, placeholder = 'Select your bank', 
           style,
         ]}
         onPress={() => setVisible(true)}
+        accessibilityRole="button"
+        accessibilityLabel={value || placeholder}
+        accessibilityHint="Opens bank selection list"
       >
         <Text
           style={[
@@ -78,12 +81,12 @@ export function BankPicker({ value, onSelect, placeholder = 'Select your bank', 
         </Text>
       </Pressable>
 
-      <Modal visible={visible} animationType="slide" transparent>
+      <Modal visible={visible} animationType="slide" transparent accessibilityViewIsModal>
         <View style={[styles.overlay]}>
           <View style={[styles.sheet, { backgroundColor: t.background }]}>
             <View style={styles.header}>
               <Text style={[styles.title, { color: t.textPrimary }]}>Select Bank</Text>
-              <Pressable onPress={close} hitSlop={8}>
+              <Pressable onPress={close} hitSlop={8} accessibilityRole="button" accessibilityLabel="Cancel bank selection">
                 <Text style={[styles.cancel, { color: t.primary }]}>Cancel</Text>
               </Pressable>
             </View>
@@ -109,10 +112,13 @@ export function BankPicker({ value, onSelect, placeholder = 'Select your bank', 
                   autoFocus
                   returnKeyType="done"
                   onSubmitEditing={handleCustomSubmit}
+                  accessibilityLabel="Enter bank or card name"
                 />
                 <Pressable
                   style={[styles.customButton, { backgroundColor: t.primary }]}
                   onPress={handleCustomSubmit}
+                  accessibilityRole="button"
+                  accessibilityLabel="Use this name"
                 >
                   <Text style={[styles.customButtonText, { color: t.textInverse }]}>
                     Use This Name
@@ -135,6 +141,7 @@ export function BankPicker({ value, onSelect, placeholder = 'Select your bank', 
                   placeholder="Search banks..."
                   placeholderTextColor={t.placeholder}
                   autoFocus
+                  accessibilityLabel="Search banks by name"
                 />
                 <FlatList
                   data={filtered}
@@ -148,6 +155,9 @@ export function BankPicker({ value, onSelect, placeholder = 'Select your bank', 
                         item === value && { backgroundColor: t.safeBg },
                       ]}
                       onPress={() => handleSelect(item)}
+                      accessibilityRole="button"
+                      accessibilityLabel={item === 'Other' ? 'Other — type custom name' : item}
+                      accessibilityState={{ selected: item === value }}
                     >
                       <Text
                         style={[

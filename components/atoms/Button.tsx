@@ -54,6 +54,9 @@ export function Button({ label, onPress, variant = 'primary', disabled = false, 
       ]}
       onPress={onPress}
       disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled }}
     >
       <Text style={[styles.label, { color: v.text }]}>{label}</Text>
     </Pressable>

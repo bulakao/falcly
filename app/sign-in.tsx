@@ -156,6 +156,7 @@ export default function SignInScreen() {
             autoCapitalize="none"
             autoCorrect={false}
             error={!!emailError}
+            accessibilityLabel="Email"
           />
           <Text style={[styles.fieldError, { color: emailError ? t.risky : 'transparent' }]}>
             {emailError || ' '}
@@ -167,13 +168,14 @@ export default function SignInScreen() {
             placeholder="Password"
             secureTextEntry
             error={!!passwordError}
+            accessibilityLabel="Password"
           />
           <View style={styles.passwordHintRow}>
             <Text style={[styles.fieldError, { color: passwordError ? t.risky : 'transparent', flex: 1 }]}>
               {passwordError || ' '}
             </Text>
             {!isSignUp && (
-              <Pressable onPress={handleForgotPassword} hitSlop={8}>
+              <Pressable onPress={handleForgotPassword} hitSlop={8} accessibilityRole="button" accessibilityLabel="Forgot password">
                 <Text style={[styles.forgotPasswordText, { color: t.textMuted }]}>
                   Forgot password?
                 </Text>
@@ -197,6 +199,8 @@ export default function SignInScreen() {
         <Pressable
           onPress={() => { setMode(isSignUp ? 'signin' : 'signup'); clearErrors(); setResetSent(false); }}
           style={styles.toggle}
+          accessibilityRole="button"
+          accessibilityLabel={isSignUp ? 'Switch to sign in' : 'Switch to create account'}
         >
           <Text style={[styles.toggleText, { color: t.textMuted }]}>
             {isSignUp ? 'Already have an account? ' : "Don't have an account? "}

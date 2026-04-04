@@ -29,6 +29,9 @@ export function ChipSelector({ options, selectedValue, onSelect }: ChipSelectorP
               active && { backgroundColor: t.primary, borderColor: t.primary },
             ]}
             onPress={() => onSelect(opt.value)}
+            accessibilityRole="button"
+            accessibilityLabel={opt.label}
+            accessibilityState={{ selected: active }}
           >
             <Text
               style={[

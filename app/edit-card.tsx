@@ -213,7 +213,7 @@ export default function EditCardScreen() {
         />
 
         {hasDetailedInstallments ? (
-          <Pressable onPress={() => router.push({ pathname: '/manage-installments', params: { cardId } })} style={styles.managedField}>
+          <Pressable onPress={() => router.push({ pathname: '/manage-installments', params: { cardId } })} style={styles.managedField} accessibilityRole="button" accessibilityLabel="Manage installments">
             <Text style={[styles.managedLabel, { color: t.textSecondary }]}>Monthly Installments</Text>
             <Text style={[styles.managedValue, { color: t.textPrimary }]}>₱{card!.installmentsMonthlyAmount.toLocaleString()}</Text>
             <Text style={[styles.managedHint, { color: t.primary }]}>Manage items →</Text>
@@ -230,7 +230,7 @@ export default function EditCardScreen() {
         )}
 
         {hasDetailedSubscriptions ? (
-          <Pressable onPress={() => router.push({ pathname: '/manage-subscriptions', params: { cardId } })} style={styles.managedField}>
+          <Pressable onPress={() => router.push({ pathname: '/manage-subscriptions', params: { cardId } })} style={styles.managedField} accessibilityRole="button" accessibilityLabel="Manage subscriptions">
             <Text style={[styles.managedLabel, { color: t.textSecondary }]}>Subscriptions This Cycle</Text>
             <Text style={[styles.managedValue, { color: t.textPrimary }]}>₱{card!.subscriptionsThisCycle.toLocaleString()}</Text>
             <Text style={[styles.managedHint, { color: t.primary }]}>Manage items →</Text>

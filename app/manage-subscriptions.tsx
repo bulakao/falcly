@@ -86,7 +86,7 @@ export default function ManageSubscriptionsScreen() {
             <Text style={[styles.itemDetail, { color: t.textMuted }]}>
               Bills on day {sub.billingDay}
             </Text>
-            <Pressable onPress={() => handleDelete(sub.id, sub.name)} hitSlop={8}>
+            <Pressable onPress={() => handleDelete(sub.id, sub.name)} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Remove ${sub.name}`}>
               <Text style={[styles.deleteText, { color: t.risky }]}>Remove</Text>
             </Pressable>
           </RNView>

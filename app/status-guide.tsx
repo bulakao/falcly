@@ -32,7 +32,7 @@ export default function StatusGuideScreen() {
         options={{
           headerBackVisible: false,
           headerLeft: () => (
-            <Pressable onPress={() => router.back()} hitSlop={8} style={{ justifyContent: 'center', alignItems: 'center', width: 32, height: 32, paddingLeft: 4 }}>
+            <Pressable onPress={() => router.back()} hitSlop={8} style={{ justifyContent: 'center', alignItems: 'center', width: 32, height: 32, paddingLeft: 4 }} accessibilityRole="button" accessibilityLabel="Close">
               <X size={20} color={t.textMuted} />
             </Pressable>
           ),

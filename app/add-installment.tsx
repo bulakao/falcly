@@ -101,6 +101,9 @@ export default function AddInstallmentScreen() {
                     styles.cardChip,
                     { borderColor: cardId === c.id ? t.primary : t.border, backgroundColor: cardId === c.id ? t.accentBg : 'transparent' },
                   ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={c.bankName}
+                  accessibilityState={{ selected: cardId === c.id }}
                 >
                   <Text style={[styles.cardChipText, { color: cardId === c.id ? t.primary : t.textPrimary }]}>
                     {c.bankName}

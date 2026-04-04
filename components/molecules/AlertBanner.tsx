@@ -33,6 +33,8 @@ export function AlertBanner({ message, variant = 'warning', centered = false, ..
         },
         centered && styles.centered,
       ]}
+      accessibilityRole="alert"
+      accessibilityLabel={message}
       {...props}
     >
       <Text style={[styles.text, { color: v.text }, centered && styles.centeredText]}>{message}</Text>

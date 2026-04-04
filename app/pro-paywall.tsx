@@ -115,7 +115,7 @@ export default function ProPaywallScreen() {
           ))}
         </View>
         <View style={styles.plans}>
-          <Pressable style={[styles.annualPlan, { backgroundColor: t.primary }]} onPress={() => handlePurchase('pro_plus_annual')}>
+          <Pressable style={[styles.annualPlan, { backgroundColor: t.primary }]} onPress={() => handlePurchase('pro_plus_annual')} accessibilityRole="button" accessibilityLabel="Pro+ Annual, 142 pesos per month, billed 1,699 pesos per year">
             <View style={styles.annualPlanContent}>
               <View style={styles.planHeader}>
                 <Text style={[styles.annualPlanTitle, { color: t.textInverse }]}>Annual</Text>
@@ -126,14 +126,14 @@ export default function ProPaywallScreen() {
               <Text style={[styles.annualPrice, { color: t.accentMuted }]}>₱142/mo, billed ₱1,699/yr</Text>
             </View>
           </Pressable>
-          <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_plus_quarterly')}>
+          <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_plus_quarterly')} accessibilityRole="button" accessibilityLabel="Pro+ Quarterly, 649 pesos per quarter">
             <View>
               <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Quarterly</Text>
               <Text style={[styles.planBadgeText, { color: t.textMuted }]}>Most Flexible</Text>
             </View>
             <Text style={[styles.monthlyPrice, { color: t.textMuted }]}>₱649/qtr</Text>
           </Pressable>
-          <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_plus_monthly')}>
+          <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_plus_monthly')} accessibilityRole="button" accessibilityLabel="Pro+ Monthly, 249 pesos per month">
             <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Monthly</Text>
             <Text style={[styles.monthlyPrice, { color: t.textMuted }]}>₱249/mo</Text>
           </Pressable>
@@ -170,7 +170,7 @@ export default function ProPaywallScreen() {
 
       {/* Trial CTA — only show if not already in trial */}
       {!trialActive && (
-        <Pressable style={[styles.trialButton, { backgroundColor: t.primary }]} onPress={handleStartTrial}>
+        <Pressable style={[styles.trialButton, { backgroundColor: t.primary }]} onPress={handleStartTrial} accessibilityRole="button" accessibilityLabel="Try free for 30 days">
           <Text style={[styles.trialButtonText, { color: t.textInverse }]}>Try Free for 30 Days</Text>
           <Text style={[styles.trialSubtext, { color: t.accentMuted }]}>
             Payment method required. No charge for 30 days.
@@ -181,7 +181,7 @@ export default function ProPaywallScreen() {
       {/* Pro plans */}
       <Text style={[styles.sectionLabel, { color: t.textSecondary }]}>Pro — Full access, no AI</Text>
       <View style={styles.plans}>
-        <Pressable style={[styles.annualPlan, { backgroundColor: t.primary }]} onPress={() => handlePurchase('pro_annual')}>
+        <Pressable style={[styles.annualPlan, { backgroundColor: t.primary }]} onPress={() => handlePurchase('pro_annual')} accessibilityRole="button" accessibilityLabel="Pro Annual, 83 pesos per month, billed 999 pesos per year">
           <View style={styles.annualPlanContent}>
             <View style={styles.planHeader}>
               <Text style={[styles.annualPlanTitle, { color: t.textInverse }]}>Annual</Text>
@@ -193,14 +193,14 @@ export default function ProPaywallScreen() {
             <Text style={[styles.annualCta, { color: t.accentMuted }]}>Less than one late payment fee</Text>
           </View>
         </Pressable>
-        <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_quarterly')}>
+        <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_quarterly')} accessibilityRole="button" accessibilityLabel="Pro Quarterly, 399 pesos per quarter">
           <View>
             <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Quarterly</Text>
             <Text style={[styles.planBadgeText, { color: t.textMuted }]}>Most Flexible</Text>
           </View>
           <Text style={[styles.monthlyPrice, { color: t.textMuted }]}>₱399/qtr</Text>
         </Pressable>
-        <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_monthly')}>
+        <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_monthly')} accessibilityRole="button" accessibilityLabel="Pro Monthly, 149 pesos per month">
           <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Monthly</Text>
           <Text style={[styles.monthlyPrice, { color: t.textMuted }]}>₱149/mo</Text>
         </Pressable>
@@ -209,7 +209,7 @@ export default function ProPaywallScreen() {
       {/* Pro+ plans */}
       <Text style={[styles.sectionLabel, { color: t.textSecondary }]}>Pro+ — Everything + AI</Text>
       <View style={styles.plans}>
-        <Pressable style={[styles.annualPlan, { backgroundColor: t.primary }]} onPress={() => handlePurchase('pro_plus_annual')}>
+        <Pressable style={[styles.annualPlan, { backgroundColor: t.primary }]} onPress={() => handlePurchase('pro_plus_annual')} accessibilityRole="button" accessibilityLabel="Pro+ Annual, 142 pesos per month, billed 1,699 pesos per year">
           <View style={styles.annualPlanContent}>
             <View style={styles.planHeader}>
               <Text style={[styles.annualPlanTitle, { color: t.textInverse }]}>Annual</Text>
@@ -220,14 +220,14 @@ export default function ProPaywallScreen() {
             <Text style={[styles.annualPrice, { color: t.accentMuted }]}>₱142/mo, billed ₱1,699/yr</Text>
           </View>
         </Pressable>
-        <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_plus_quarterly')}>
+        <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_plus_quarterly')} accessibilityRole="button" accessibilityLabel="Pro+ Quarterly, 649 pesos per quarter">
           <View>
             <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Quarterly</Text>
             <Text style={[styles.planBadgeText, { color: t.textMuted }]}>Most Flexible</Text>
           </View>
           <Text style={[styles.monthlyPrice, { color: t.textMuted }]}>₱649/qtr</Text>
         </Pressable>
-        <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_plus_monthly')}>
+        <Pressable style={[styles.monthlyPlan, { borderColor: t.border }]} onPress={() => handlePurchase('pro_plus_monthly')} accessibilityRole="button" accessibilityLabel="Pro+ Monthly, 249 pesos per month">
           <Text style={[styles.monthlyPlanTitle, { color: t.inputText }]}>Monthly</Text>
           <Text style={[styles.monthlyPrice, { color: t.textMuted }]}>₱249/mo</Text>
         </Pressable>

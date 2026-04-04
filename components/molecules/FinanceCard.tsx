@@ -152,7 +152,7 @@ export function FinanceCard() {
 
   return (
     <RNView style={[styles.enrichContainer, { backgroundColor: t.surface, borderColor: t.border }]}>
-      <Pressable style={styles.enrichToggle} onPress={() => setExpanded((v) => !v)}>
+      <Pressable style={styles.enrichToggle} onPress={() => setExpanded((v) => !v)} accessibilityRole="button" accessibilityLabel="Your Finances" accessibilityState={{ expanded }}>
         <RNView style={styles.enrichTextWrap}>
           <Text style={[styles.enrichTitle, { color: t.accent }]}>Your Finances</Text>
           <Text style={[styles.enrichHint, { color: t.textMuted }]}>
@@ -171,7 +171,7 @@ export function FinanceCard() {
               <Text style={[styles.hintText, { color: t.accent }]}>
                 Fill this in to see if you can cover your payments.
               </Text>
-              <Pressable onPress={dismissHint} hitSlop={8}>
+              <Pressable onPress={dismissHint} hitSlop={8} accessibilityRole="button" accessibilityLabel="Dismiss hint">
                 <X size={14} color={t.textMuted} />
               </Pressable>
             </RNView>
@@ -186,6 +186,7 @@ export function FinanceCard() {
             keyboardType="numeric"
             onFocus={() => setCashFocused(true)}
             onBlur={() => setCashFocused(false)}
+            accessibilityLabel="Funds available"
           />
           {cashUpdatedAt !== null && (
             <Text
@@ -218,6 +219,7 @@ export function FinanceCard() {
             keyboardType="numeric"
             onFocus={() => setIncomeFocused(true)}
             onBlur={() => setIncomeFocused(false)}
+            accessibilityLabel="Monthly income"
           />
 
           <Divider />
@@ -232,6 +234,7 @@ export function FinanceCard() {
             keyboardType="numeric"
             onFocus={() => setPaydayFocused(true)}
             onBlur={() => setPaydayFocused(false)}
+            accessibilityLabel="Payday, day of month"
           />
 
           <Divider />
@@ -246,6 +249,7 @@ export function FinanceCard() {
             keyboardType="numeric"
             onFocus={() => setPayday2Focused(true)}
             onBlur={() => setPayday2Focused(false)}
+            accessibilityLabel="Second payday, day of month"
           />
           {payday !== null && payday2 !== null && monthlyIncome !== null && monthlyIncome > 0 && (
             <Text style={[styles.splitHint, { color: t.textMuted }]}>
@@ -265,6 +269,7 @@ export function FinanceCard() {
             keyboardType="numeric"
             onFocus={() => setExpensesFocused(true)}
             onBlur={() => setExpensesFocused(false)}
+            accessibilityLabel="Fixed monthly expenses"
           />
         </RNView>
       )}

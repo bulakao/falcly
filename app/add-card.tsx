@@ -84,11 +84,11 @@ export default function AddCardScreen() {
     >
       {/* Header: Cancel | Title | Save */}
       <View style={styles.headerBar}>
-        <Pressable onPress={() => router.back()} hitSlop={8}>
+        <Pressable onPress={() => router.back()} hitSlop={8} accessibilityRole="button" accessibilityLabel="Cancel">
           <Text style={[styles.headerAction, { color: t.primary }]}>Cancel</Text>
         </Pressable>
         <Text style={[styles.headerTitle, { color: t.textPrimary }]}>Add Card</Text>
-        <Pressable onPress={handleSave} hitSlop={8}>
+        <Pressable onPress={handleSave} hitSlop={8} accessibilityRole="button" accessibilityLabel="Save card">
           <Text style={[styles.headerAction, { color: t.primary }]}>Save</Text>
         </Pressable>
       </View>

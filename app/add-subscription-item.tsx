@@ -94,6 +94,9 @@ export default function AddSubscriptionItemScreen() {
                     styles.cardChip,
                     { borderColor: cardId === c.id ? t.primary : t.border, backgroundColor: cardId === c.id ? t.accentBg : 'transparent' },
                   ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={c.bankName}
+                  accessibilityState={{ selected: cardId === c.id }}
                 >
                   <Text style={[styles.cardChipText, { color: cardId === c.id ? t.primary : t.textPrimary }]}>
                     {c.bankName}
@@ -129,6 +132,9 @@ export default function AddSubscriptionItemScreen() {
                 styles.freqChip,
                 { borderColor: frequency === f.value ? t.primary : t.border, backgroundColor: frequency === f.value ? t.accentBg : 'transparent' },
               ]}
+              accessibilityRole="button"
+              accessibilityLabel={f.label}
+              accessibilityState={{ selected: frequency === f.value }}
             >
               <Text style={[styles.freqChipText, { color: frequency === f.value ? t.primary : t.textPrimary }]}>
                 {f.label}

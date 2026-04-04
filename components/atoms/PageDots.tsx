@@ -12,7 +12,7 @@ export function PageDots({ count, activeIndex }: PageDotsProps) {
   if (count <= 1) return null;
 
   return (
-    <View style={styles.row}>
+    <View style={styles.row} accessible accessibilityLabel={`Page ${activeIndex + 1} of ${count}`}>
       {Array.from({ length: count }, (_, i) => (
         <View
           key={i}

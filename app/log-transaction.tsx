@@ -149,6 +149,7 @@ export default function LogTransactionScreen() {
             placeholder="0"
             keyboardType="numeric"
             autoFocus
+            accessibilityLabel="Amount"
           />
         </View>
 
@@ -159,6 +160,7 @@ export default function LogTransactionScreen() {
           onChangeText={setMerchant}
           placeholder="Grab Food, Watsons"
           keyboardType="default"
+          accessibilityLabel="Merchant"
         />
 
         {/* Date chips */}
@@ -175,6 +177,9 @@ export default function LogTransactionScreen() {
                   isActive && { backgroundColor: t.primary, borderColor: t.primary },
                 ]}
                 onPress={() => setSelectedDate(chip.date)}
+                accessibilityRole="button"
+                accessibilityLabel={chip.label}
+                accessibilityState={{ selected: isActive }}
               >
                 <Text
                   style={[
@@ -224,6 +229,9 @@ export default function LogTransactionScreen() {
                       isActive && { backgroundColor: t.primary, borderColor: t.primary },
                     ]}
                     onPress={() => setSelectedCardId(card.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={card.bankName}
+                    accessibilityState={{ selected: isActive }}
                   >
                     <Text
                       style={[
@@ -255,6 +263,9 @@ export default function LogTransactionScreen() {
                   isActive && { backgroundColor: t.primary, borderColor: t.primary },
                 ]}
                 onPress={() => setTxType(opt.value)}
+                accessibilityRole="button"
+                accessibilityLabel={opt.label}
+                accessibilityState={{ selected: isActive }}
               >
                 <Text
                   style={[
@@ -286,9 +297,10 @@ export default function LogTransactionScreen() {
         transparent
         animationType="fade"
         onRequestClose={dismissTeachable}
+        accessibilityViewIsModal
       >
-        <Pressable style={styles.modalOverlay} onPress={dismissTeachable}>
-          <Pressable style={[styles.modalContent, { backgroundColor: t.surfaceElevated }]}>
+        <Pressable style={styles.modalOverlay} onPress={dismissTeachable} accessibilityRole="button" accessibilityLabel="Close">
+          <Pressable style={[styles.modalContent, { backgroundColor: t.surfaceElevated }]} accessibilityRole="none">
             <Text style={[styles.modalTitle, { color: t.textPrimary }]}>
               How Falcly organizes your transactions
             </Text>

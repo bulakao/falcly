@@ -31,7 +31,7 @@ export function ImpactSkeleton() {
   const t = useAppTheme();
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} accessible accessibilityLabel="Loading impact summary">
       {/* Action buttons skeleton */}
       <View style={styles.actionRow}>
         <Bone width={72} height={28} rounded />

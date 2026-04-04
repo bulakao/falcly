@@ -189,6 +189,9 @@ export default function SettingsScreen() {
             <Pressable
               key={option}
               onPress={() => setThemePreference(option)}
+              accessibilityRole="button"
+              accessibilityLabel={`${option.charAt(0).toUpperCase() + option.slice(1)} theme`}
+              accessibilityState={{ selected: themePreference === option }}
               style={[
                 styles.themeOption,
                 { borderColor: themePreference === option ? t.primary : t.border, backgroundColor: themePreference === option ? t.accentBg : 'transparent' },
@@ -320,6 +323,9 @@ export default function SettingsScreen() {
             <Pressable
               key={option.key}
               onPress={() => setPayoffStrategy(option.key)}
+              accessibilityRole="button"
+              accessibilityLabel={`${option.label}: ${option.desc}`}
+              accessibilityState={{ selected: payoffStrategy === option.key }}
               style={[
                 styles.strategyChip,
                 {
@@ -369,21 +375,21 @@ export default function SettingsScreen() {
 
         <RNView style={[styles.divider, { backgroundColor: t.border }]} />
 
-        <Pressable style={styles.defaultRow}>
+        <Pressable style={styles.defaultRow} accessibilityRole="button" accessibilityLabel="Terms of Service">
           <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Terms of Service</Text>
           <FontAwesome name="chevron-right" size={12} color={t.textMuted} />
         </Pressable>
 
         <RNView style={[styles.divider, { backgroundColor: t.border }]} />
 
-        <Pressable style={styles.defaultRow}>
+        <Pressable style={styles.defaultRow} accessibilityRole="button" accessibilityLabel="Privacy Policy">
           <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Privacy Policy</Text>
           <FontAwesome name="chevron-right" size={12} color={t.textMuted} />
         </Pressable>
 
         <RNView style={[styles.divider, { backgroundColor: t.border }]} />
 
-        <Pressable style={styles.defaultRow}>
+        <Pressable style={styles.defaultRow} accessibilityRole="button" accessibilityLabel="Send Feedback">
           <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Send Feedback</Text>
           <FontAwesome name="chevron-right" size={12} color={t.textMuted} />
         </Pressable>

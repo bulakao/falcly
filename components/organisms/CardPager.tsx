@@ -124,7 +124,7 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
                 <EmptyCardFace onPress={onAddCard} />
               </View>
               {hasHiddenCards && (
-                <Pressable style={styles.manageLink} onPress={() => router.push('/manage-cards')}>
+                <Pressable style={styles.manageLink} onPress={() => router.push('/manage-cards')} accessibilityRole="button" accessibilityLabel="Manage hidden cards">
                   <Text style={[styles.manageLinkText, { color: t.accent }]}>You have hidden cards · Manage Cards</Text>
                 </Pressable>
               )}
@@ -209,6 +209,8 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
             style={styles.overviewButtonInner}
             onPress={scrollToOverview}
             hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="View all cards overview"
           >
             <RNView style={[styles.overviewIconWrap, { backgroundColor: t.surfaceElevated }]}>
               <LayoutGrid size={20} color={t.textMuted} />
