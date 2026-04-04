@@ -1,0 +1,1077 @@
+{
+  "project": "Falcly",
+  "branchName": "ralph/phase-4-notifications",
+  "description": "Phase 1 \u2014 Core Loop, Cash Awareness, Decision Engine, Card Management, Onboarding, Monetization, Data & Privacy, Analytics",
+  "userStories": [
+    {
+      "id": "CL-01",
+      "title": "Add a credit card",
+      "phase": 1,
+      "group": "Core Loop",
+      "description": "As Ria, I want to add a credit card with my statement day and credit limit, so that I can see my billing cycle status immediately.",
+      "acceptanceCriteria": [
+        "Card form accepts: bank name, credit limit, outstanding balance, statement day, due day offset (with sensible defaults)",
+        "After saving, card appears in card list with SAFE/CAUTION/RISKY badge calculated from entered data",
+        "Status is calculated and displayed without requiring an app reload or additional action"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "CL-02",
+      "title": "See SAFE/CAUTION/RISKY status",
+      "phase": 1,
+      "group": "Core Loop",
+      "description": "As Ria, I want to open the app and instantly see SAFE, CAUTION, or RISKY for each card, so that I know at a glance whether it's safe to swipe today.",
+      "acceptanceCriteria": [
+        "Home screen renders all card statuses within 1 second of app open",
+        "Each card status is displayed with three simultaneous channels: color (emerald/amber/crimson) + icon (\u2713/\u26a0/\u2715) + text label (SAFE/CAUTION/RISKY)",
+        "Each status includes a one-line reason (e.g., '14 days to statement \u00b7 28% utilization')"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "CL-03",
+      "title": "Swipe Impact calculator",
+      "phase": 1,
+      "group": "Core Loop",
+      "description": "As Ria, I want to enter a proposed spend amount and see how it affects my next statement, so that I can decide whether to swipe or wait.",
+      "acceptanceCriteria": [
+        "Amount input auto-opens numeric keyboard with quick-amount chips (\u20b1500, \u20b11K, \u20b12K, \u20b15K) visible without scrolling",
+        "Status badge, projected statement balance, available cash, and payoff plan update in real time as the amount is typed \u2014 no submit button required",
+        "Carried balance amount and estimated monthly interest cost are shown when full payoff is not possible given net available cash"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "CL-04",
+      "title": "Best card recommendation",
+      "phase": 1,
+      "group": "Core Loop",
+      "description": "As Ria, I want to see a 'best card to use today' recommendation, so that I don't have to compare cards manually before each purchase.",
+      "acceptanceCriteria": [
+        "Home screen shows a single best-card recommendation as a prominent hero element with bank name and SAFE badge",
+        "Best card is determined by the multi-card scoring algorithm: score = utilization\u00d7100 + days penalty + status penalty + cash coverage penalty; lowest-scoring SAFE card wins",
+        "If no SAFE card exists, shows the lowest-scoring CAUTION card with an explicit warning label"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "CL-05",
+      "title": "Billing cycle timeline",
+      "phase": 1,
+      "group": "Core Loop",
+      "description": "As Ria, I want to see a visual timeline of my billing cycle, so that I know exactly how far I am from statement close and due date.",
+      "acceptanceCriteria": [
+        "Timeline strip shows: cycle start \u2192 today marker \u2192 statement close \u2192 due date with labeled date markers",
+        "Statement close marker changes color at \u22647 days (amber) and \u22642 days (crimson) to communicate urgency",
+        "Multi-card Gantt view shows all cards stacked vertically, sorted by urgency (closest statement close first), with color-coded bars by status"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "CL-06",
+      "title": "Update balance",
+      "phase": 1,
+      "group": "Core Loop",
+      "description": "As Ria, I want to update my outstanding balance quickly after checking my bank app, so that my status stays accurate.",
+      "acceptanceCriteria": [
+        "'Update balance' action is accessible from the card detail screen and tappable from the staleness warning banner",
+        "Single numeric field accepts the new balance; saves immediately on confirm",
+        "Timestamp is updated to 'just now' and any active staleness warning is cleared after saving"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "CL-07",
+      "title": "Data freshness warning",
+      "phase": 1,
+      "group": "Core Loop",
+      "description": "As Ria, I want to see a warning when my balance data is stale, so that I don't trust a SAFE status based on outdated information.",
+      "acceptanceCriteria": [
+        "Each card shows 'Balance updated X days ago' timestamp in secondary text at all times",
+        "At 5+ days since last update: amber \u26a0\ufe0f inline warning appears on the card with a 'Tap to update' CTA",
+        "At 10+ days since last update: the SAFE/CAUTION/RISKY status badge is replaced by a staleness indicator ('Data stale \u2014 update before trusting this status')"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "CA-01",
+      "title": "Set liquid cash on hand",
+      "phase": 1,
+      "group": "Cash Awareness",
+      "description": "As Ria, I want to enter how much liquid cash I have available, so that Falcly can calculate whether I can actually pay my bill.",
+      "acceptanceCriteria": [
+        "Cash on hand field is accessible from profile/settings and prompted as an optional step during onboarding",
+        "Net available cash recalculates immediately whenever the cash on hand value is changed",
+        "Field shows timestamp 'Cash updated X days ago' and appears with a staleness nudge after 5+ days without update"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "CA-02",
+      "title": "Set monthly income and payday",
+      "phase": 1,
+      "group": "Cash Awareness",
+      "description": "As Ria, I want to enter my monthly income and the day it arrives, so that Falcly knows whether my paycheck lands before my card due date.",
+      "acceptanceCriteria": [
+        "Profile settings accepts monthly income (number) and payday (day of month, 1\u201331)",
+        "income_before_due_date flag is computed correctly: true if payday \u2264 card due date",
+        "Monthly income is added to net available cash only when payday precedes the card due date; excluded otherwise"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "CA-03",
+      "title": "Set committed monthly expenses",
+      "phase": 1,
+      "group": "Cash Awareness",
+      "description": "As Beth, I want to enter my total monthly committed expenses as a single number, so that Falcly deducts them from my available cash before projecting my payoff capacity.",
+      "acceptanceCriteria": [
+        "Single numeric input for total committed monthly expenses (not itemized categories) in profile/settings",
+        "Amount is deducted from net available cash in all Swipe Impact and payoff calculations",
+        "Shown as a labeled line item in the Swipe Impact breakdown: 'Committed expenses: \u2212\u20b1X,XXX'"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "CA-04",
+      "title": "Net available cash display",
+      "phase": 1,
+      "group": "Cash Awareness",
+      "description": "As Ria, I want to see my net available cash figure in the Swipe Impact screen, so that I understand exactly how much I can put toward my card bill this cycle.",
+      "acceptanceCriteria": [
+        "Net available cash is displayed in the Swipe Impact screen as a labeled line: 'Available to pay: \u20b1X,XXX'",
+        "Formula applied: liquid_cash + (income if payday \u2264 due_date) \u2212 committed_expenses \u2212 auto_payments \u2212 subscriptions_this_cycle",
+        "Figure updates in real time when cash on hand, income, or committed expenses change"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "DE-01",
+      "title": "RISKY when cash below minimum payment",
+      "phase": 1,
+      "group": "Decision Engine",
+      "description": "As Ria, I want Falcly to show RISKY when my available cash can't cover the minimum payment, so that I'm warned before I get into a situation I can't handle.",
+      "acceptanceCriteria": [
+        "Status is RISKY when net_available_cash < minimum_payment (max(outstanding \u00d7 min_pct, min_floor))",
+        "Reason shown: 'You won't be able to make the minimum payment'",
+        "This condition takes priority over all other SAFE/CAUTION/RISKY conditions (first match wins)"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "DE-02",
+      "title": "RISKY when statement closes in 2 days",
+      "phase": 1,
+      "group": "Decision Engine",
+      "description": "As Ria, I want Falcly to show RISKY when my statement closes in 2 days or fewer, so that I don't accidentally add to a bill that's about to be finalized.",
+      "acceptanceCriteria": [
+        "Status is RISKY when days_to_statement \u2264 2",
+        "Reason shown: 'Statement closes in {n} day(s) \u2014 charge will hit this bill'",
+        "Condition is evaluated even when no proposed swipe amount is entered"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "DE-03",
+      "title": "CAUTION when statement closes in 7 days",
+      "phase": 1,
+      "group": "Decision Engine",
+      "description": "As Ria, I want Falcly to show CAUTION when my statement closes within 7 days, so that I'm alerted to be careful even before the critical 2-day window.",
+      "acceptanceCriteria": [
+        "Status is CAUTION when days_to_statement \u2264 7 (and not already RISKY from a higher-priority condition)",
+        "Reason shown: '{n} days to statement \u2014 charge lands on this bill'",
+        "Statement close marker on the cycle timeline turns amber color at \u22647 days"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "DE-04",
+      "title": "Projected statement balance formula",
+      "phase": 1,
+      "group": "Decision Engine",
+      "description": "As Ria, I want the projected statement balance formula to include my pending transactions and committed installments, so that my status reflects what's actually hitting my next bill.",
+      "acceptanceCriteria": [
+        "projected_statement_balance = outstanding_balance + pending_transactions + installments_monthly_amount + subscriptions_this_cycle + proposed_swipe",
+        "Annual fee is added to the projected balance in the cycle month it is due",
+        "Calculation is deterministic: same inputs always produce the same projected balance"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "DE-05",
+      "title": "Flexible horizon timeline",
+      "phase": 1,
+      "group": "Decision Engine",
+      "description": "As Ria, I want the flexible horizon timeline to project future cycles based on known fixed events, so that I can see the impact of my installments over the coming months.",
+      "acceptanceCriteria": [
+        "Future cycle projections are shown for as many cycles as fixed events (installments, subscriptions, annual fees) exist",
+        "Each projected cycle shows: opening balance, known committed items, and a SAFE/CAUTION/RISKY signal",
+        "Cycles beyond the last known fixed event show a signal only (On Track / At Risk / Unknown) \u2014 no fabricated numbers"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "CM-01",
+      "title": "Edit card details",
+      "phase": 1,
+      "group": "Card Management",
+      "description": "As Ria, I want to edit a card's details after I've added it, so that I can correct mistakes or update settings like interest rate and due date offset.",
+      "acceptanceCriteria": [
+        "All card fields (limit, statement day, due day offset, interest rate, min payment, annual fee) are editable from the card detail settings tab",
+        "Saving edits immediately recalculates and updates the card's SAFE/CAUTION/RISKY status",
+        "Edit screen is accessible from the card detail screen with a clearly labeled 'Edit Card' action"
+      ],
+      "priority": 17,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "CM-02",
+      "title": "Delete a card",
+      "phase": 1,
+      "group": "Card Management",
+      "description": "As Ria, I want to delete a card from Falcly, so that I can remove cards I've cancelled or no longer want to track.",
+      "acceptanceCriteria": [
+        "Delete action is available in the card detail settings tab with a confirmation dialog before deletion",
+        "Deleting a card removes it from the card list and recalculates 'best card today' immediately",
+        "If the deleted card was a Pro-only card and the user is on Free, the remaining cards still function normally"
+      ],
+      "priority": 18,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "OB-01",
+      "title": "3-field onboarding",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As Ria, I want to add my first card and get an immediate status result with just 3 fields, so that I see Falcly's value before being asked for more information.",
+      "acceptanceCriteria": [
+        "Onboarding card entry requires only: statement day, credit limit, and outstanding balance \u2014 all other fields use defaults",
+        "After entering these 3 fields and tapping save, the user lands on their first SAFE/CAUTION/RISKY result screen",
+        "Additional enrichment fields (cash on hand, due day offset, interest rate) are prompted optionally after the first result is shown"
+      ],
+      "priority": 19,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "OB-02",
+      "title": "Status explanation for new users",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As a new user, I want to understand what SAFE, CAUTION, and RISKY mean the first time I see them, so that I can trust and act on the result.",
+      "acceptanceCriteria": [
+        "First status result screen includes a brief one-sentence explanation of what the current status means (not a tutorial \u2014 inline, contextual)",
+        "Status is displayed with color + icon + text label from the very first result",
+        "A dismissible info tooltip is available on the status badge explaining the three-tier system"
+      ],
+      "priority": 20,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "MO-01",
+      "title": "Pro paywall on 3rd card",
+      "phase": 1,
+      "group": "Monetization",
+      "description": "As Ria, I want to be prompted to upgrade when I try to add a 3rd card, so that I understand what Pro unlocks before committing.",
+      "acceptanceCriteria": [
+        "Hard paywall screen appears when a Free user attempts to add card #3",
+        "Paywall shows: feature list (unlimited cards, payment planning, installment tracking, AI alerts), annual plan as primary CTA with '\u20b183/mo, billed \u20b1999/yr \u2014 Save 44%' badge, monthly plan as secondary option",
+        "Existing 2 free cards remain fully accessible and functional; the user is never locked out of already-added data"
+      ],
+      "priority": 21,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "MO-02",
+      "title": "14-day Pro trial",
+      "phase": 1,
+      "group": "Monetization",
+      "description": "As Ria, I want to start a free 14-day Pro trial without being charged upfront, so that I can experience all Pro features before deciding to subscribe.",
+      "acceptanceCriteria": [
+        "Trial CTA 'Try Free for 14 Days' is available on the card 3 paywall and the payoff planner entry point",
+        "RevenueCat handles trial mechanics; payment method is required at trial start but no charge occurs for 14 days",
+        "Trial end date is shown in the Pro settings screen: 'Your trial ends on [date]'"
+      ],
+      "priority": 22,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "MO-03",
+      "title": "Pro upgrade after trial",
+      "phase": 1,
+      "group": "Monetization",
+      "description": "As Ria, I want to upgrade to Pro after my trial ends, so that I can continue managing all my cards with full Pro features.",
+      "acceptanceCriteria": [
+        "Paywall shows annual plan (\u20b1999/yr) as primary pre-selected option; monthly plan (\u20b1149/mo) shown below as secondary",
+        "Price framing includes 'Less than one late payment fee' and 'Cancel anytime' copy",
+        "RevenueCat entitlement 'pro' is granted immediately on purchase and verified on every app launch"
+      ],
+      "priority": 23,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "MO-04",
+      "title": "Graceful Pro expiry",
+      "phase": 1,
+      "group": "Monetization",
+      "description": "As Ria, I want my existing card data to remain visible (read-only) if my Pro trial expires before I upgrade, so that I don't lose information I've entered.",
+      "acceptanceCriteria": [
+        "On Pro trial expiry: cards 3 and above become read-only \u2014 balance and status are visible but editing and reminders are disabled",
+        "A soft upgrade banner appears on read-only cards: 'Reactivate Pro to manage all cards'",
+        "Card data is preserved for 90 days post-expiry; a warning is shown before any data deletion occurs"
+      ],
+      "priority": 24,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "DP-01",
+      "title": "Offline-first core features",
+      "phase": 1,
+      "group": "Data & Privacy",
+      "description": "As Ria, I want to use Falcly's core features without an internet connection, so that I can check my card status even when I have poor mobile data.",
+      "acceptanceCriteria": [
+        "SAFE/CAUTION/RISKY calculation, Swipe Impact, best card recommendation, and Gantt timeline all function fully offline",
+        "Offline state is indicated by a small non-blocking 'Offline' chip in the header \u2014 it never blocks any core screen",
+        "Only cloud sync (Pro feature) requires connectivity; its unavailability is communicated without blocking the app"
+      ],
+      "priority": 25,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "DP-02",
+      "title": "Secure local data storage",
+      "phase": 1,
+      "group": "Data & Privacy",
+      "description": "As Ria, I want my financial data stored securely on my device, so that my card balances and limits are not accessible to unauthorized parties.",
+      "acceptanceCriteria": [
+        "Firestore offline persistence stores data encrypted at rest via the native Firebase SDK",
+        "Sensitive fields (balances, limits) are never logged or exposed in debug builds",
+        "Pro cloud sync encrypts card config client-side (AES-256-GCM) before transmission \u2014 Firestore stores ciphertext only; balances and transactions never leave the device unencrypted"
+      ],
+      "priority": 26,
+      "passes": true,
+      "notes": "Updated from SQLite/SQLCipher to Firebase Firestore per tech stack decision"
+    },
+    {
+      "id": "DP-03",
+      "title": "CSV export",
+      "phase": 1,
+      "group": "Data & Privacy",
+      "description": "As Ria, I want to export my card data as a CSV, so that I have a backup of my information independent of the app.",
+      "acceptanceCriteria": [
+        "CSV export is available from the settings screen and exports all cards, installments, subscriptions, and the user profile (income, payday, expenses)",
+        "Export works on both Free and Pro tiers",
+        "CSV format includes column headers and uses \u20b1 for currency values in PH locale"
+      ],
+      "priority": 27,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "MO-05",
+      "title": "Quarterly billing option",
+      "phase": 1,
+      "group": "Monetization",
+      "description": "As Ria, I want to subscribe quarterly, so that I can commit to more than one month without paying for a full year upfront.",
+      "acceptanceCriteria": [
+        "Paywall shows three billing options per tier: Annual (Best Value), Quarterly (Most Flexible), Monthly \u2014 in that order",
+        "Pro quarterly: \u20b1399/qtr (\u20b1133/mo effective, ~11% off monthly); Pro+ quarterly: \u20b1649/qtr (\u20b1216/mo effective, ~13% off monthly)",
+        "RevenueCat planType values 'pro_quarterly' and 'pro_plus_quarterly' are granted the correct entitlement on purchase",
+        "Settings screen displays 'Quarterly' plan label and correct price (\u20b1399/qtr or \u20b1649/qtr)"
+      ],
+      "priority": 25,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "MO-06",
+      "title": "Pro+ tier with AI access",
+      "phase": 1,
+      "group": "Monetization",
+      "description": "As Marcus, I want to subscribe to Pro+ to access AI features, so that I can use natural language queries and smart alerts in addition to all Pro features.",
+      "acceptanceCriteria": [
+        "Pro+ is shown as a distinct tier on the paywall with AI features listed (AI-powered alerts, NL queries, spending insights)",
+        "Pro+ monthly: \u20b1249/mo \u00b7 quarterly: \u20b1649/qtr \u00b7 annual: \u20b11,699/yr (\u20b1142/mo)",
+        "hasAIAccess() returns true only for pro_plus tier; all AI feature entry points check this before rendering",
+        "Pro users see an upsell-only screen (not the full paywall) when navigating to pro-paywall"
+      ],
+      "priority": 26,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "OB-03",
+      "title": "Welcome screen with value prop",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As a new user, I want to see what Falcly does before being asked to sign up, so that I understand the value before committing to an account.",
+      "acceptanceCriteria": [
+        "Welcome screen shows headline, subheadline, and 3 benefit chips before any auth screen",
+        "Primary CTA [Get Started] leads to sign-up; secondary 'Sign in' leads to sign-in",
+        "PostHog events fired: onboarding_welcome_viewed, onboarding_get_started_tapped"
+      ],
+      "priority": 20,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "OB-04",
+      "title": "Separate sign-up and sign-in screens",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As a user, I want dedicated sign-up and sign-in screens so I'm never confused about which action to take.",
+      "acceptanceCriteria": [
+        "Sign-up screen: email + password + Google, ToS fine print, link to sign-in",
+        "Sign-in screen: email + password + Google, forgot password, link to sign-up",
+        "Firebase auth errors shown inline (not Alert): wrong password, user not found, too many requests, invalid email",
+        "PostHog event: onboarding_signup_completed with method: email/google"
+      ],
+      "priority": 21,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "OB-05",
+      "title": "Bank picker and day picker on card entry",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As Ria, I want to select my bank from a list and pick my statement day from a picker, so that card setup is fast and error-free.",
+      "acceptanceCriteria": [
+        "Bank picker shows BDO, BPI, Metrobank, RCBC, UnionBank, Security Bank, Chinabank, EastWest, Other with colored badges",
+        "Statement day uses wheel/drum picker (1\u201331) instead of free-text",
+        "Selected bank name saved as bankName on card"
+      ],
+      "priority": 22,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "OB-06",
+      "title": "Onboarding auto-triggered for new users",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As a developer, I want new users automatically routed through onboarding after sign-up so no user lands on an empty home screen.",
+      "acceptanceCriteria": [
+        "Auth guard routes to /onboarding if authenticated AND onboardingStore.isComplete === false",
+        "Onboarding state persisted via AsyncStorage \u2014 resumes at last step if app closed mid-flow",
+        "After complete(), flag set and onboarding never shown again"
+      ],
+      "priority": 23,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "OB-07",
+      "title": "Onboarding trial paywall after first status",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As a new user who just saw their first status, I want to be offered a free trial at peak motivation, so that I can make an informed upgrade decision.",
+      "acceptanceCriteria": [
+        "Trial paywall shown as Step 6 of onboarding (after first status + enrichment)",
+        "Shows free tier summary + [Start Free Trial] primary + [Continue with Free] ghost",
+        "Trial/Pro/Pro+ users skip this screen",
+        "PostHog events: onboarding_paywall_viewed, onboarding_trial_started, onboarding_paywall_dismissed"
+      ],
+      "priority": 24,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "OB-08",
+      "title": "Push notification permission request",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As a new user, I want to be asked for notification permission after seeing Falcly's value, so that I understand why notifications are useful.",
+      "acceptanceCriteria": [
+        "Custom pre-permission screen shown as final onboarding step: icon, title, benefit copy, [Turn on Notifications] + [Not now]",
+        "[Turn on Notifications] triggers native OS permission dialog",
+        "Declined preference stored, resurface in settings after 7 days",
+        "PostHog events: onboarding_notifications_granted, onboarding_notifications_declined"
+      ],
+      "priority": 25,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "OB-09",
+      "title": "Onboarding funnel analytics",
+      "phase": 1,
+      "group": "Onboarding",
+      "description": "As a developer, I want PostHog events at every onboarding step so I can identify and optimize drop-off points.",
+      "acceptanceCriteria": [
+        "Events tracked at each step: welcome_viewed, get_started_tapped, signup_completed, card_entry_completed, first_status_viewed, enrichment_completed/skipped, paywall_viewed, trial_started/dismissed, notifications_granted/declined",
+        "No PII: method (email/google), bank_name, has_balance (bool), status (SAFE/CAUTION/RISKY) only",
+        "Full funnel visible in PostHog dashboard"
+      ],
+      "priority": 26,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "TL-01",
+      "title": "Log a transaction",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As Ria, I want to manually log a transaction after I swipe, so that Falcly can track what I've spent this cycle and project my next bill accurately.",
+      "acceptanceCriteria": [
+        "Entry form accepts: amount (required), merchant (optional), date (defaults to today, editable), card (required)",
+        "After saving, transaction appears in cycle view immediately and projected balance updates",
+        "Entry accessible from card detail screen and via global '+' FAB on home screen"
+      ],
+      "priority": 30,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "TL-02",
+      "title": "Cycle auto-classification",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As Ria, I want every logged transaction to show which bill it will land on, so that I never have to guess whether a purchase hits this month's or next month's statement.",
+      "acceptanceCriteria": [
+        "Each transaction shows 'Lands on your [Month YYYY] statement \u00b7 due [date]' label",
+        "Cycle bucket (Current / Next / Previous) is auto-assigned based on transaction date vs statement close date",
+        "User can override the bucket assignment manually if needed"
+      ],
+      "priority": 31,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "TL-03",
+      "title": "Cycle-grouped transaction view",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As Ria, I want to see my transactions grouped by billing cycle, so that I can quickly see what's already billed vs what's coming on my next statement.",
+      "acceptanceCriteria": [
+        "Default view groups transactions into: Previous Cycle (pay now), Current Cycle (next bill), Next Cycle (bill after that)",
+        "Each group shows a subtotal",
+        "Current Cycle group shows projected statement balance (subtotal + installments + subscriptions)"
+      ],
+      "priority": 32,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "TL-04",
+      "title": "Near-cutoff transaction warning",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As Ria, I want a warning when I log a transaction close to my statement cutoff, so that I can decide whether to wait until the next cycle before swiping.",
+      "acceptanceCriteria": [
+        "When logging a transaction within 3 days of statement close: amber inline warning appears",
+        "Copy: 'This purchase closes in [n] day(s). Consider waiting until [date+1] to keep it off this statement.'",
+        "Warning is informational \u2014 does not block the log entry"
+      ],
+      "priority": 33,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "TL-05",
+      "title": "Payment summary screen",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As Ria, I want a clear screen that shows exactly what I owe right now and what my next bill will look like, so that I know when and how much to pay without confusion.",
+      "acceptanceCriteria": [
+        "Screen shows two sections: (1) Current bill due \u2014 statement balance + due date, (2) Coming next \u2014 projected next statement with line-item breakdown",
+        "Uses plain language: 'Pay \u20b1X,XXX by [date] to avoid interest'",
+        "Carrying balance shows interest cost in amber; paid in full shows \u20b10 interest in green",
+        "If no transactions logged: shows balance-only projection with nudge to log transactions"
+      ],
+      "priority": 34,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "TL-06",
+      "title": "Transaction engine integration",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As a developer, I want logged transactions to feed the decision engine's projected balance, so that SAFE/CAUTION/RISKY status reflects actual current-cycle spend.",
+      "acceptanceCriteria": [
+        "projected_balance includes sum(current_cycle_transactions) in addition to existing fields",
+        "If no transactions logged: formula falls back to existing balance-only model (no breaking change)",
+        "Excluded transactions (refunds, promos) are subtracted from current cycle sum"
+      ],
+      "priority": 35,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "TL-07",
+      "title": "Log a payment",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As Ria, I want to log when I make a payment to my credit card, so that Falcly's projected balance reflects the payment and stays accurate.",
+      "acceptanceCriteria": [
+        "Payment entry available in transaction log (type: payment)",
+        "Payment amount is subtracted from outstanding balance in the engine",
+        "Logged payment shows in Previous Cycle section as 'Payment received \u00b7 \u20b1X,XXX'"
+      ],
+      "priority": 36,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "TL-08",
+      "title": "Exclude a transaction",
+      "phase": 1.5,
+      "group": "Transaction Layer",
+      "description": "As Ria, I want to mark a transaction as excluded (e.g., a refund or cashback credit), so that it doesn't inflate my projected balance.",
+      "acceptanceCriteria": [
+        "Long-press or swipe on a transaction reveals 'Exclude' action",
+        "Excluded transactions are visually dimmed and labeled 'Excluded'",
+        "Excluded transactions are not added to projected balance"
+      ],
+      "priority": 37,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "AQ-01",
+      "title": "PostHog analytics",
+      "phase": 1,
+      "group": "Analytics & Quality",
+      "description": "As a developer, I want behavioral events tracked anonymously via PostHog, so that I can understand which features drive retention and conversion.",
+      "acceptanceCriteria": [
+        "Key events are tracked: card_added, swipe_check_performed (with status and amount tier), pro_conversion_started (with source), pro_trial_started, pro_converted (with plan type), data_staleness_warning_shown",
+        "No PII is tracked: no card numbers, no exact balances, no names \u2014 only behavioral events and anonymized tiers",
+        "PostHog is configured on EU region for RA 10173 / GDPR compatibility; analytics opt-out is available in settings"
+      ],
+      "priority": 28,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "AQ-02",
+      "title": "Crash reporting",
+      "phase": 1,
+      "group": "Analytics & Quality",
+      "description": "As a developer, I want crash reports sent automatically, so that production issues are surfaced without requiring user reports.",
+      "acceptanceCriteria": [
+        "Firebase Crashlytics is initialized on app start with source maps uploaded via EAS Build",
+        "beforeSend hook strips any PII from Crashlytics breadcrumbs before transmission",
+        "Crash reports are visible in Firebase console within 60 seconds of a crash occurring on a user device"
+      ],
+      "priority": 29,
+      "passes": true,
+      "notes": "Updated from Sentry to Firebase Crashlytics per tech stack decision"
+    },
+    {
+      "id": "FF-01",
+      "title": "Remove debug console.log from home screen",
+      "phase": 2,
+      "group": "Finance Fields",
+      "description": "As a developer, I want the debug console.log removed from app/(tabs)/index.tsx so that production builds don't leak internal state.",
+      "acceptanceCriteria": [
+        "The console.log('[DEBUG] userStore:', ...) line in app/(tabs)/index.tsx is removed",
+        "No other debug logs introduced",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Line 31 in app/(tabs)/index.tsx"
+    },
+    {
+      "id": "FF-02",
+      "title": "Rename user-facing finance field labels",
+      "phase": 2,
+      "group": "Finance Fields",
+      "description": "As a user, I want the finance fields to use clear, plain-English labels so that I understand what each field means without needing a tooltip.",
+      "acceptanceCriteria": [
+        "FinanceCard.tsx: 'Cash on Hand' label changed to 'Funds Available'",
+        "FinanceCard.tsx: 'Cash on Hand' caption updated to 'Your accessible funds across all accounts \u2014 used as the starting point for payment calculations.'",
+        "FinanceCard.tsx: 'Committed Monthly Expenses' label changed to 'Fixed Monthly Expenses'",
+        "FinanceCard.tsx: 'Fixed Monthly Expenses' caption updated to 'Regular fixed costs (rent, utilities, subscriptions) deducted before calculating what\\'s available.'",
+        "FinanceCard.tsx: section hint updated to 'Helps Falcly calculate if you can cover your card payments.'",
+        "SwipeImpactPanel.tsx: breakdown row label 'Cash on hand' changed to 'Funds available'",
+        "status-guide.tsx: RISKY rule 'Cash on hand can\\'t cover the minimum payment' changed to 'Not enough funds available to cover the minimum payment'",
+        "csvExport.ts: 'Cash on Hand' row label changed to 'Funds Available'",
+        "csvExport.ts: 'Committed Expenses' row label changed to 'Fixed Expenses'",
+        "No functional behavior changes \u2014 labels only"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Pure label changes. See docs/CASH.md for full decision rationale."
+    },
+    {
+      "id": "FF-03",
+      "title": "Add payday2 column to DB schema and migration",
+      "phase": 2,
+      "group": "Finance Fields",
+      "description": "As a user paid semi-monthly, I want the app to store a second payday date so that both salary tranches can be factored into my payment calculations.",
+      "acceptanceCriteria": [
+        "db/schema/local.ts: payday2 integer column added to profile table (nullable)",
+        "New migration file drizzle/0005_multi_payday.sql created with: ALTER TABLE profile ADD COLUMN payday2 INTEGER;",
+        "Migration runs cleanly on a fresh install and on upgrade from existing schema",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Schema-only change. Store and UI come in FF-04 and FF-05."
+    },
+    {
+      "id": "FF-04",
+      "title": "Add payday2 to userStore with getPaydays() helper",
+      "phase": 2,
+      "group": "Finance Fields",
+      "description": "As a developer, I want the userStore to expose payday2, setPayday2, and a getPaydays() helper so that all engine callers can pass a consistent paydays array.",
+      "acceptanceCriteria": [
+        "userStore.ts: payday2: number | null field added (default null)",
+        "userStore.ts: setPayday2(day: number | null) action added \u2014 persists to DB",
+        "userStore.ts: loadProfile() reads payday2 from DB row",
+        "userStore.ts: reset() clears payday2 to null",
+        "A getPaydays() helper is available that returns number[] \u2014 filters out null values from [payday, payday2]",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Depends on FF-03 (schema). Engine update in FF-05."
+    },
+    {
+      "id": "FF-05",
+      "title": "Update computeNetAvailableCash engine to support multiple paydays",
+      "phase": 2,
+      "group": "Finance Fields",
+      "description": "As a user paid semi-monthly, I want each salary tranche to be counted independently against my due date so that the app gives an accurate payment capacity verdict.",
+      "acceptanceCriteria": [
+        "computeNetAvailableCash signature updated: payday param replaced with paydays: number[]",
+        "Engine loops over each payday in paydays array; adds monthlyIncome / paydays.length for each payday day <= card due date day",
+        "Single payday ([15]) produces identical result to previous behavior (backward compat)",
+        "Empty paydays ([]) means income is never added \u2014 same as previous null behavior",
+        "Both paydays after due date: income not added (correct)",
+        "All callers updated: app/(tabs)/index.tsx, app/swipe-impact.tsx, components/organisms/SwipeImpactPanel.tsx \u2014 all pass getPaydays() instead of single payday",
+        "TypeScript compiles cleanly, no regressions in existing logic"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Depends on FF-04. Most sensitive change \u2014 test manually after."
+    },
+    {
+      "id": "FF-06",
+      "title": "Add Second Payday field to FinanceCard UI",
+      "phase": 2,
+      "group": "Finance Fields",
+      "description": "As a user paid semi-monthly, I want to enter a second payday date in the Finance card so that both paydays are factored into my available payment calculation.",
+      "acceptanceCriteria": [
+        "FinanceCard.tsx: Second Payday field appears below the existing Payday field",
+        "Field is labeled 'Second Payday' with caption 'Optional \u2014 if you\\'re paid twice a month (e.g. 15th and 30th).'",
+        "Placeholder text: 'e.g. 30'",
+        "Field validates 1\u201331 only (same as first payday)",
+        "Field is optional \u2014 leaving it blank clears payday2 in store (setPayday2(null))",
+        "When both paydays are set, a hint line appears: 'Income split evenly: \u20b1X on the Nth \u00b7 \u20b1X on the Nth' using actual store values",
+        "Debounced save wired to setPayday2",
+        "Focus/blur tracking consistent with other fields in FinanceCard",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Depends on FF-04 and FF-05."
+    },
+    {
+      "id": "NV-01",
+      "title": "Transaction log entry point on card detail",
+      "phase": 3,
+      "group": "Navigation",
+      "description": "As a user, I want to tap into my transaction history directly from a card's detail view so that I can log and review transactions without hunting for a hidden screen.",
+      "acceptanceCriteria": [
+        "SwipeImpactPanel shows a tappable row or button labeled 'Transactions' or 'View Transactions' below the breakdown",
+        "Tapping navigates to /card-transactions?cardId=<id>",
+        "Button is visible without scrolling on a standard phone screen (or clearly visible after one scroll)",
+        "Entry point is present for all cards (not just Pro)"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "card-transactions, log-transaction, payment-summary are built but orphaned \u2014 no navigation to them from home/card pager."
+    },
+    {
+      "id": "NV-02",
+      "title": "Payment summary entry point on card detail",
+      "phase": 3,
+      "group": "Navigation",
+      "description": "As a user, I want to see 'What You Owe' for a card directly from its detail view so that I know exactly what to pay and when.",
+      "acceptanceCriteria": [
+        "SwipeImpactPanel shows a tappable row or button labeled 'What You Owe' or 'Payment Summary' below the breakdown",
+        "Tapping navigates to /payment-summary?cardId=<id>",
+        "Entry point is visible on the card detail without requiring deep scroll",
+        "Entry point is present for all cards"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Companion to NV-01. Both should feel like natural extensions of the card detail."
+    },
+    {
+      "id": "NV-03",
+      "title": "Quick-update funds available shortcut on card detail",
+      "phase": 3,
+      "group": "Navigation",
+      "description": "As a user, I want to quickly update my Funds Available figure from the card detail view so that I do not have to scroll past multiple cards to find the FinanceCard section.",
+      "acceptanceCriteria": [
+        "When cashOnHand is null OR staleness is 'warning' or 'stale', a tappable prompt appears in SwipeImpactPanel: 'Update funds available \u2192'",
+        "Tapping scrolls home screen to FinanceCard section OR navigates to /update-balance",
+        "Prompt disappears once cashOnHand is set and fresh (staleness = null or 'ok')",
+        "Does not appear when funds are set and fresh"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Discovery spec: '[Update my cash]' action on swipe impact card."
+    },
+    {
+      "id": "EF-01",
+      "title": "Wire current-cycle transaction sum into home screen engine",
+      "phase": 3,
+      "group": "Engine Fixes",
+      "description": "As a user who logs transactions, I want the SAFE/CAUTION/RISKY status on the home screen to reflect my logged current-cycle purchases so that my verdict is accurate, not just based on my last statement balance.",
+      "acceptanceCriteria": [
+        "app/(tabs)/index.tsx computes currentCycleTxSum per card using computeCurrentCycleTxSum() from decisionEngine",
+        "computeNetAvailableCash and calculateCardStatus calls on home screen pass currentCycleTxSum for each card",
+        "scoreCard and calculateBestCard calls also incorporate currentCycleTxSum",
+        "If no transactions logged for a card, currentCycleTxSum defaults to 0 (backward compat \u2014 identical to current behavior)",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "TL-06 was marked passing but currentCycleTxSum is never passed in home screen engine calls \u2014 all default to 0."
+    },
+    {
+      "id": "EF-02",
+      "title": "Wire current-cycle transaction sum into SwipeImpactPanel",
+      "phase": 3,
+      "group": "Engine Fixes",
+      "description": "As a user who logs transactions, I want the Swipe Impact calculator to factor in my logged purchases so that the projected statement balance is accurate when I simulate a new swipe.",
+      "acceptanceCriteria": [
+        "SwipeImpactPanel fetches current-cycle transactions for the card from transactionStore",
+        "Computes currentCycleTxSum using computeCurrentCycleTxSum()",
+        "Passes currentCycleTxSum to calculateSwipeImpact and projectedStatementBalance",
+        "Breakdown shows a 'Logged this cycle' row (e.g. '+\u20b13,450') when currentCycleTxSum > 0",
+        "Row is hidden (not shown as \u20b10) when no transactions logged",
+        "If transactions are logged, shows a subtle badge or label: 'Includes \u20b1X logged this cycle'",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Companion to EF-01. Makes the TL integration actually meaningful."
+    },
+    {
+      "id": "EF-03",
+      "title": "Balance staleness warning on home card status badge",
+      "phase": 3,
+      "group": "Engine Fixes",
+      "description": "As a user, I want to see a staleness indicator on my card status when my outstanding balance is outdated so that I know the SAFE/CAUTION/RISKY verdict may not reflect reality.",
+      "acceptanceCriteria": [
+        "CreditCardFace or status badge shows a \u26a0\ufe0f indicator when card.balanceUpdatedAt is > 5 days old",
+        "Tapping the \u26a0\ufe0f navigates to /update-balance?cardId=<id>",
+        "Indicator disappears once balance is updated",
+        "Staleness threshold uses the existing getStalenessLevel() utility from utils/staleness.ts",
+        "Does not appear if balance was updated within 5 days",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "CL-07 only tracks cashOnHand staleness. Balance staleness on the card status badge is unimplemented per discovery spec."
+    },
+    {
+      "id": "UX-01",
+      "title": "Gantt timeline accessible from card detail",
+      "phase": 3,
+      "group": "UX Polish",
+      "description": "As a user, I want to see the billing cycle Gantt chart for a card without having to navigate away from the card detail so that I can understand my cycle timing at a glance.",
+      "acceptanceCriteria": [
+        "GanttTimeline is rendered inline within the SwipeImpactPanel or as a collapsible section below the breakdown",
+        "Defaults to collapsed on first render to keep the card detail compact",
+        "User can expand/collapse with a labeled tap target (e.g. 'Billing Cycle \u25be')",
+        "State persists for the session (if expanded, stays expanded on scroll back)",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "GanttTimeline is only accessible via AllCardsOverview tap handler \u2014 not visible from single card detail."
+    },
+    {
+      "id": "UX-02",
+      "title": "Hint text on FinanceCard when funds not set",
+      "phase": 3,
+      "group": "UX Polish",
+      "description": "As a new user who hasn't set their finances, I want to see a clear explanation of why the FinanceCard matters so that I understand the value before filling it in.",
+      "acceptanceCriteria": [
+        "When all four fields (fundsAvailable, monthlyIncome, payday, committedExpenses) are null, FinanceCard shows a one-line explainer at the top: 'Fill this in to see if you can cover your payments.'",
+        "Explainer disappears once at least fundsAvailable is set",
+        "Explainer does not appear if the user has dismissed it (persisted in AsyncStorage/DB)",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "New users see an empty FinanceCard with no context. Low effort, high first-run clarity."
+    },
+    {
+      "id": "UX-03",
+      "title": "Inline income split hint in FinanceCard",
+      "phase": 3,
+      "group": "UX Polish",
+      "description": "As a user with two paydays set, I want to see a live summary of how my income is split so that I can verify the calculation is correct before relying on it.",
+      "acceptanceCriteria": [
+        "When both payday and payday2 are set AND monthlyIncome > 0, a hint line appears below the Second Payday field",
+        "Hint reads: 'Split evenly: \u20b1[X] on the [N]th \u00b7 \u20b1[X] on the [M]th' using actual store values",
+        "Hint uses currencySymbol from store (not hardcoded \u20b1)",
+        "Hint disappears if payday2 is cleared",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "CASH.md plan included this hint \u2014 wiggum didn't implement it in FF-06."
+    },
+    {
+      "id": "UX-04",
+      "title": "Empty state on card-transactions screen",
+      "phase": 3,
+      "group": "UX Polish",
+      "description": "As a user who hasn't logged any transactions yet, I want to see a helpful empty state on the transactions screen so that I understand what to do next.",
+      "acceptanceCriteria": [
+        "card-transactions.tsx shows an empty state when no transactions exist for the card",
+        "Empty state includes: icon, heading ('No transactions yet'), and a subtext explaining the value ('Log a purchase to see which bill it lands on')",
+        "A prominent 'Log Transaction' button is visible in the empty state",
+        "Empty state matches existing EmptyState component pattern",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "Currently shows a blank screen with no guidance when no transactions exist."
+    },
+    {
+      "id": "UX-05",
+      "title": "First-transaction teachable moment",
+      "phase": 3,
+      "group": "UX Polish",
+      "description": "As a user logging their first transaction, I want a one-time explainer about billing cycles so that I understand how Falcly classifies my purchases.",
+      "acceptanceCriteria": [
+        "When a user logs their first ever transaction (transactionStore has 0 transactions before this log), show a one-time bottom sheet or modal after save",
+        "Content: title 'How Falcly organizes your transactions', brief explanation of current/next/previous cycle, and a [Got it] button",
+        "Never shown again after dismissed (persisted in DB/AsyncStorage)",
+        "Does not block the transaction save \u2014 appears after success",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": "Discovery doc 19 section 4.1 specifies this teachable moment explicitly."
+    },
+    {
+      "id": "CH-01",
+      "title": "Fix hint text referencing old 'cash on hand' in SwipeImpactPanel",
+      "phase": 3,
+      "group": "Code Health",
+      "description": "As a user, I want all in-app text to use the updated 'Funds Available' terminology consistently so that the experience feels polished.",
+      "acceptanceCriteria": [
+        "SwipeImpactPanel hint 'Set your cash on hand in Settings to see payoff projections.' is updated to 'Set your funds available to see payoff projections.'",
+        "Any other remaining references to 'cash on hand' in user-facing text (labels, captions, hints, alerts) are updated to 'Funds Available' or 'funds available'",
+        "grep -ri 'cash on hand' app/ components/ returns 0 results",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": "FF-02 missed at least one instance in SwipeImpactPanel hint text."
+    },
+    {
+      "id": "CH-02",
+      "title": "Remove unused BillingTimeline duplicate render in onboarding",
+      "phase": 3,
+      "group": "Code Health",
+      "description": "As a developer, I want the codebase to be clean and consistent so that future changes are predictable.",
+      "acceptanceCriteria": [
+        "Audit all usages of BillingTimeline \u2014 confirm it renders correctly in SwipeImpactPanel and onboarding-result",
+        "Verify GanttTimeline vs BillingTimeline are distinct components with distinct purposes (document in a comment at top of each file if not already clear)",
+        "No duplicate rendering of the same timeline in a single scroll view",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": "Audited: BillingTimeline (single-card bar) and GanttTimeline (multi-card chart) are distinct and both usages are intentional. Added clarifying JSDoc comments to both files."
+    },
+    {
+      "id": "PK-01",
+      "title": "RevenueCat SDK integration \u2014 real IAP",
+      "phase": 99,
+      "group": "Parked",
+      "description": "Replace simulated purchasePro() in subscriptionStore with real react-native-purchases SDK calls. Requires RevenueCat project + App Store Connect / Play Console products to exist first.",
+      "acceptanceCriteria": [
+        "Install react-native-purchases",
+        "Configure RevenueCat project with iOS and Android entitlements",
+        "Purchases.configure() on app launch",
+        "Purchases.getOfferings() replaces hardcoded plan list",
+        "Purchases.purchasePackage() replaces set({ tier: 'pro' })",
+        "Purchases.getCustomerInfo() used in verifyEntitlement() on app launch",
+        "Trial period managed by RevenueCat, not local state",
+        "TypeScript compiles cleanly"
+      ],
+      "priority": 99,
+      "passes": false,
+      "notes": "PARKED \u2014 needs RevenueCat project + App Store Connect / Play Console products set up first. Do not implement until those exist."
+    },
+    {
+      "id": "PN-01",
+      "title": "Real push notifications with notifee",
+      "phase": 4,
+      "group": "Push Notifications",
+      "description": "As a user, I want to receive real push notifications for statement reminders and due date reminders so that I never miss a payment or get caught off guard by a closing cycle.",
+      "acceptanceCriteria": [
+        "Install @notifee/react-native via npm",
+        "Add @notifee/react-native to app.config.js plugins (Expo CNG config plugin)",
+        "Create utils/notifications.ts with: requestPermission(), createChannels(), scheduleStatementReminder(card), scheduleDueReminder(card), cancelCardNotifications(cardId), scheduleAllReminders(cards)",
+        "Android: create two notification channels \u2014 'statement-reminders' (high importance) and 'due-reminders' (high importance)",
+        "Statement reminder: fires 3 days before statementDay each month \u2014 'Your [Bank] statement closes in 3 days'",
+        "Due date reminder: fires 3 days before due date (statementDay + dueDayOffset) \u2014 'Your [Bank] payment is due in 3 days. Minimum: \u20b1X'",
+        "scheduleAllReminders() called on app launch (after cards load) and whenever a card is added, edited, or deleted",
+        "cancelCardNotifications(cardId) called when a card is deleted \u2014 removes its pending notifications",
+        "Notification permission requested during onboarding (OB-08 already has the UI \u2014 wire it to notifee.requestPermission())",
+        "Settings toggles (notifyStatementReminder, notifyDueReminder, notifyHighUtilization) gate scheduling \u2014 if toggle is off, do not schedule that notification type",
+        "High utilization alert (notifyHighUtilization): triggered when any card exceeds 80% utilization \u2014 check on app foreground and card balance update",
+        "Remove expo-notifications from package.json if present (it is not \u2014 just confirm)",
+        "TypeScript compiles cleanly, 0 lint errors"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Use notifee over expo-notifications \u2014 better Android channel support, same ecosystem as Phase 2 SMS reader (NotificationListenerService). Requires EAS Build to compile native module."
+    }
+  ]
+}

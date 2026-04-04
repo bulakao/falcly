@@ -66,13 +66,12 @@ Tracking findings, issues, and things to review after wiggum completes.
 - **No Firebase integration** — everything is local AsyncStorage despite Firebase being the intended data layer
 
 ### Must-do before launch
-1. Replace AsyncStorage with Firestore offline persistence
-2. Integrate RevenueCat (currently simulated)
-3. Wire up real PostHog project
-4. Verify Crashlytics source maps via EAS Build
-5. Add test coverage for decision engine (pure functions, easy to test)
-6. Manual QA on real devices (iOS + Android)
-7. Review all screens for accessibility (color-only indicators, screen reader support)
+1. Integrate RevenueCat (currently simulated) — PK-01 parked
+2. ~~Wire up real PostHog project~~ — parked
+3. ~~Verify Crashlytics source maps via EAS Build~~ — gone (replaced by PostHog, which is parked)
+4. Add test coverage for decision engine (pure functions, easy to test)
+5. Manual QA on real devices (iOS + Android)
+6. Review all screens for accessibility (color-only indicators, screen reader support)
 
 ## Run 4 (9 commits, OB-03 through OB-09)
 
@@ -132,7 +131,7 @@ Tracking findings, issues, and things to review after wiggum completes.
 
 ## TODO
 
-- [ ] Set up RevenueCat project + integrate SDK (replace simulated purchase logic in subscriptionStore)
-- [ ] Set up PostHog project (EU region) + add real API key to analytics.ts
-- [ ] Install expo-notifications package for OB-08 to work on device
-- [ ] Migrate auth from Supabase to @react-native-firebase/auth
+- [ ] Set up RevenueCat project + integrate SDK (replace simulated purchase logic in subscriptionStore) — parked
+- [ ] ~~Set up PostHog project~~ — parked (taking Crashlytics with it)
+- [ ] ~~Install expo-notifications~~ — using notifee (already installed)
+- [ ] ~~Migrate auth from Supabase to @react-native-firebase/auth~~ — staying on Supabase
