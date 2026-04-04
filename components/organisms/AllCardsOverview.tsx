@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { StyleSheet, Pressable, Image, View as RNView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Text, View } from '@/components/Themed';
@@ -18,6 +18,8 @@ import type { Card } from '@/types/card';
 
 type SortMode = 'urgency' | 'utilization' | 'dueDate';
 const SORT_KEY = '@falcly/card_sort';
+const GUEST_BANNER_KEY = '@falcly/guest_banner_dismissed';
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const SORT_OPTIONS: { label: string; value: SortMode }[] = [
   { label: 'Urgency', value: 'urgency' },
   { label: 'Utilization', value: 'utilization' },
@@ -61,11 +63,31 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
   const bestCard = cards.length > 0 ? calculateBestCard(cards, new Date(), getNetAvailableCash, getCurrentCycleTxSum) : null;
 
   const [sortMode, setSortMode] = useState<SortMode>('urgency');
+  const [showGuestBanner, setShowGuestBanner] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(SORT_KEY).then((v) => {
       if (v === 'urgency' || v === 'utilization' || v === 'dueDate') setSortMode(v);
     });
+  }, []);
+
+  useEffect(() => {
+    if (user || allCards.length === 0) {
+      setShowGuestBanner(false);
+      return;
+    }
+    AsyncStorage.getItem(GUEST_BANNER_KEY).then((v) => {
+      if (v) {
+        const dismissed = parseInt(v, 10);
+        if (Date.now() - dismissed < SEVEN_DAYS_MS) return;
+      }
+      setShowGuestBanner(true);
+    });
+  }, [user, allCards.length]);
+
+  const dismissGuestBanner = useCallback(() => {
+    setShowGuestBanner(false);
+    AsyncStorage.setItem(GUEST_BANNER_KEY, String(Date.now()));
   }, []);
 
   function handleSortChange(mode: SortMode) {
@@ -134,6 +156,31 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
     <View style={styles.container}>
       {/* Personalized greeting */}
       <Text style={[styles.greeting, { color: t.textPrimary }]}>{getGreeting()}</Text>
+
+      {/* Guest data warning banner */}
+      {showGuestBanner && (
+        <Pressable
+          style={[styles.guestBanner, { backgroundColor: t.accentBg, borderColor: t.accent }]}
+          onPress={() => router.push('/sign-in')}
+          accessibilityRole="button"
+          accessibilityLabel="Sign in to back up your cards"
+        >
+          <RNView style={styles.guestBannerContent}>
+            <FontAwesome name="cloud-upload" size={16} color={t.accent} />
+            <Text style={[styles.guestBannerText, { color: t.textPrimary }]}>
+              Your cards are saved on this device only. Sign in to back them up.
+            </Text>
+          </RNView>
+          <Pressable
+            onPress={(e) => { e.stopPropagation(); dismissGuestBanner(); }}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="Dismiss backup banner"
+          >
+            <FontAwesome name="close" size={14} color={t.textMuted} />
+          </Pressable>
+        </Pressable>
+      )}
 
       {/* Top row: avatar + tier badge + offline chip */}
       <View style={styles.topRow}>
@@ -320,5 +367,26 @@ const styles = StyleSheet.create({
   ganttSkeletonBar: {
     height: 12,
     borderRadius: 4,
+  },
+  guestBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginBottom: 12,
+    gap: 10,
+  },
+  guestBannerContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  guestBannerText: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: fonts.interMedium,
+    lineHeight: 18,
   },
 });
