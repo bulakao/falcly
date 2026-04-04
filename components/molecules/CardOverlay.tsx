@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
 import { StyleSheet, Pressable, View as RNView } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { Text } from '@/components/Themed';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
@@ -34,16 +33,7 @@ interface CardOverlayProps {
 
 export function CardOverlay({ item, onDismiss, onAction }: CardOverlayProps) {
   const t = useAppTheme();
-  const opacity = useSharedValue(0);
   const tint = TYPE_TINTS[item.type] ?? TYPE_TINTS.tip;
-
-  useEffect(() => {
-    opacity.value = withTiming(1, { duration: 300 });
-  }, [opacity]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-  }));
 
   return (
     <Animated.View
@@ -51,7 +41,6 @@ export function CardOverlay({ item, onDismiss, onAction }: CardOverlayProps) {
       style={[
         styles.container,
         { backgroundColor: tint.bg, borderColor: tint.border },
-        animatedStyle,
       ]}
     >
       {/* Header row */}
