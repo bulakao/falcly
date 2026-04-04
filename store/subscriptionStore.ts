@@ -16,7 +16,6 @@ import type { CustomerInfo, PurchasesPackage, PurchasesOffering } from 'react-na
 export type SubscriptionTier = 'free' | 'pro' | 'pro_plus';
 
 const FREE_CARD_LIMIT = 2;
-const DATA_RETENTION_DAYS = 90;
 
 interface SubscriptionStore {
   tier: SubscriptionTier;
@@ -24,8 +23,6 @@ interface SubscriptionStore {
   error: string | null;
   offerings: PurchasesOffering | null;
   customerInfo: CustomerInfo | null;
-  proExpiredAt: number | null;
-
   // RevenueCat actions
   initialize: () => Promise<void>;
   refreshCustomerInfo: () => Promise<void>;
@@ -34,14 +31,13 @@ interface SubscriptionStore {
   restore: () => Promise<boolean>;
   reset: () => void;
 
-  // Derived helpers (backward compat for consumers)
+  // Derived helpers
   isPro: () => boolean;
   isProPlus: () => boolean;
   hasAIAccess: () => boolean;
   hasFullCardAccess: () => boolean;
   canAddCard: (currentCardCount: number) => boolean;
   isCardReadOnly: (cardIndex: number) => boolean;
-  daysUntilDataDeletion: () => number | null;
   getExpirationDate: () => Date | null;
 }
 
@@ -53,7 +49,6 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
       error: null,
       offerings: null,
       customerInfo: null,
-      proExpiredAt: null as number | null,
 
       initialize: async () => {
         set({ isLoading: true, error: null });
@@ -61,16 +56,7 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
           const customerInfo = await getCustomerInfo();
           const tier = getTierFromCustomerInfo(customerInfo);
 
-          // Track when Pro expires for data retention countdown
-          const prev = get();
-          const proExpiredAt =
-            prev.tier !== 'free' && tier === 'free'
-              ? Date.now()
-              : tier !== 'free'
-                ? null
-                : prev.proExpiredAt;
-
-          set({ tier, customerInfo, proExpiredAt, isLoading: false });
+          set({ tier, customerInfo, isLoading: false });
 
           if (tier === 'free') {
             useCardStore.getState().enforceActiveLimit(FREE_CARD_LIMIT);
@@ -79,14 +65,7 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
           // Listen for updates (subscription renewed, cancelled, etc.)
           addCustomerInfoListener((info) => {
             const newTier = getTierFromCustomerInfo(info);
-            const current = get();
-            const newProExpiredAt =
-              current.tier !== 'free' && newTier === 'free'
-                ? Date.now()
-                : newTier !== 'free'
-                  ? null
-                  : current.proExpiredAt;
-            set({ tier: newTier, customerInfo: info, proExpiredAt: newProExpiredAt });
+            set({ tier: newTier, customerInfo: info });
             if (newTier === 'free') {
               useCardStore.getState().enforceActiveLimit(FREE_CARD_LIMIT);
               // Reset overlay prefs to defaults (all on)
@@ -125,7 +104,7 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
         try {
           const customerInfo = await purchasePackage(pkg);
           const tier = getTierFromCustomerInfo(customerInfo);
-          set({ tier, customerInfo, proExpiredAt: null, isLoading: false });
+          set({ tier, customerInfo, isLoading: false });
           return true;
         } catch (error: unknown) {
           const err = error as { userCancelled?: boolean; message?: string };
@@ -143,7 +122,7 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
         try {
           const customerInfo = await restorePurchases();
           const tier = getTierFromCustomerInfo(customerInfo);
-          set({ tier, customerInfo, proExpiredAt: tier !== 'free' ? null : get().proExpiredAt, isLoading: false });
+          set({ tier, customerInfo, isLoading: false });
           return tier !== 'free';
         } catch (error) {
           set({ isLoading: false, error: (error as Error).message });
@@ -152,7 +131,7 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
       },
 
       reset: () => {
-        set({ tier: 'free', customerInfo: null, offerings: null, error: null, proExpiredAt: null });
+        set({ tier: 'free', customerInfo: null, offerings: null, error: null });
       },
 
       // Derived helpers
@@ -178,14 +157,6 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
         return !get().hasFullCardAccess() && cardIndex >= FREE_CARD_LIMIT;
       },
 
-      daysUntilDataDeletion: () => {
-        const { tier, proExpiredAt } = get();
-        if (tier === 'pro' || tier === 'pro_plus' || proExpiredAt === null) return null;
-        const elapsed = Date.now() - proExpiredAt;
-        const remaining = DATA_RETENTION_DAYS - Math.floor(elapsed / (24 * 60 * 60 * 1000));
-        return Math.max(0, remaining);
-      },
-
       getExpirationDate: () => {
         const { customerInfo } = get();
         if (!customerInfo) return null;
@@ -197,10 +168,9 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         tier: state.tier,
-        proExpiredAt: state.proExpiredAt,
       }),
     },
   ),
 );
 
-export { FREE_CARD_LIMIT, DATA_RETENTION_DAYS };
+export { FREE_CARD_LIMIT };
