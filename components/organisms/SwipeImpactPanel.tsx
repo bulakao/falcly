@@ -357,6 +357,18 @@ export function SwipeImpactPanel({
         </Link>
       </View>
 
+      {/* Payoff Planner link */}
+      <Link href={subscriptionTier === 'free' ? '/pro-paywall' : '/payoff-planner'} asChild>
+        <Pressable style={[styles.navButton, { backgroundColor: t.surface, borderColor: t.border }]} accessibilityRole="button" accessibilityLabel="Payoff Planner">
+          <View style={styles.plannerLinkRow}>
+            <Text style={[styles.navButtonText, { color: t.primary }]}>Payoff Planner ›</Text>
+            {subscriptionTier === 'free' && (
+              <Text style={[styles.proBadge, { color: t.accent, backgroundColor: t.accentBg }]}>PRO</Text>
+            )}
+          </View>
+        </Pressable>
+      </Link>
+
       {/* Try a different card */}
       {activeCards.length > 1 && (
         <>
@@ -539,6 +551,19 @@ const styles = StyleSheet.create({
   },
   projectionContent: {
     paddingTop: 4,
+  },
+  plannerLinkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  proBadge: {
+    fontSize: 11,
+    fontFamily: fonts.interBold,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    overflow: 'hidden',
   },
   tryCardButton: {
     borderRadius: 8,

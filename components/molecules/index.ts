@@ -15,3 +15,6 @@ export { StackedCardsPreview } from './StackedCardsPreview';
 export { BestCardBanner } from './BestCardBanner';
 export { FinanceCard } from './FinanceCard';
 export { CardOverlay } from './CardOverlay';
+export { PayoffComparisonCard } from './PayoffComparisonCard';
+export { PayoffTimeline } from './PayoffTimeline';
+export { CardPayoffBreakdown } from './CardPayoffBreakdown';

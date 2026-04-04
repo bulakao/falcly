@@ -192,6 +192,7 @@ function RootLayoutNav() {
           <Stack.Screen name="manage-installments" options={{ presentation: 'modal', title: 'Installments' }} />
           <Stack.Screen name="manage-subscriptions" options={{ presentation: 'modal', title: 'Subscriptions' }} />
           <Stack.Screen name="statement-advisor" options={{ presentation: 'modal', title: 'Statement Advisor' }} />
+          <Stack.Screen name="payoff-planner" options={{ presentation: 'modal', title: 'Payoff Planner' }} />
           <Stack.Screen name="component-showcase" options={{ presentation: 'modal', title: 'Component Showcase' }} />
         </Stack>
       </ThemeProvider>
