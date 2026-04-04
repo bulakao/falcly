@@ -111,22 +111,40 @@ Renders as an animated overlay on top of `CreditCardFace`, matching card dimensi
 
 New section in Settings: **"Card Tips & Alerts"**
 
-### Controls
+### Tier Access
+
+| Setting | Free | Pro |
+|---------|------|-----|
+| Master on/off switch | ❌ Locked on | ✅ Can turn off |
+| Alerts (due date, high util) | ✅ Always on | ✅ Always on |
+| Statement tips toggle | ❌ Locked on | ✅ Configurable |
+| Educational tips toggle | ❌ Locked on | ✅ Configurable |
+| Promotions toggle | ❌ Locked on | ✅ Can turn off |
+| Affiliate offers toggle | ❌ Locked on | ✅ Can turn off |
+| Tip frequency | ❌ Fixed (every 3 days) | ✅ Configurable |
+| Reset dismissed tips | ✅ Available | ✅ Available |
+
+**Free tier rationale:** Overlays are always on for free users — this is the monetization surface (promos, affiliates, educational upsells). Pro users earn the right to control what they see and how often.
+
+**Upsell hook:** Show a "🔒 Pro only" lock icon next to locked settings. Tapping shows: "Upgrade to Pro to control your card tips and turn off promotions."
+
+### Controls (Pro only unless noted)
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
 | Show card overlays | Toggle | On | Master switch — turns off all non-alert overlays |
-| Alerts | Toggle | On | Due date / high utilization alerts (always on recommended) |
+| Alerts | Toggle | On | Due date / high utilization alerts (always on) |
 | Statement tips | Toggle | On | Statement date insights |
 | Educational tips | Toggle | On | Grace period, timing, wiki cards |
-| Promotions | Toggle | Off | App feature highlights |
-| Affiliate offers | Toggle | Off | Partner offers (future) |
-| Tip frequency | Picker | Every 3 days | Options: Daily / Every 3 days / Weekly / Monthly |
-| Reset dismissed tips | Button | — | Re-show all previously dismissed tips |
+| Promotions | Toggle | On | App feature highlights |
+| Affiliate offers | Toggle | On | Partner offers (future) |
+| Tip frequency | Picker | Every 3 days | Daily / Every 3 days / Weekly / Monthly |
+| Reset dismissed tips | Button (free + pro) | — | Re-show all previously dismissed tips |
 
 ### Persistence
 - All settings stored in `userStore` (persisted via AsyncStorage)
 - `overlayPrefs: { enabled, alerts, statements, tips, promos, affiliates, frequencyDays }`
 - Dismissed overlay IDs stored separately in AsyncStorage: `@falcly/dismissed_overlays`
+- On tier downgrade (Pro → Free): overlay prefs reset to defaults (all on)
 
 ---
 
@@ -342,16 +360,30 @@ Rendered over `CreditCardFace`, matching card dimensions and border radius. Anim
 
 ---
 
+## Monetization Model
+
+Card overlays are the primary **free-tier monetization surface**:
+
+- **Free users** — overlays always on, no control. Sees tips, promos, affiliates, wiki cards.
+- **Pro users** — full control. Can turn off promos, affiliates, reduce frequency, or disable entirely.
+- **Upsell** — free users see a 🔒 lock on settings → tapping shows Pro upgrade prompt.
+- **Affiliate overlays** — shown to free users after educational/tip overlays (lower priority, not spam). Revenue when user taps through to partner offer.
+- **Future ad slot** — lowest-priority overlay type, opt-out for Pro only.
+
+This creates a natural value exchange: free users get a great app + occasional relevant overlays; Pro users get full control + no interruptions.
+
+---
+
 ## Constraints & Non-Goals
 
 - ❌ No "Change my statement date" button — can't do it for most PH banks
 - ❌ No bank deep links — URLs change, we'd have to maintain them
-- ❌ No persistent nag — spaced out per user preference, always dismissible
+- ❌ No spam — overlays are spaced out, always dismissible, relevant to the card shown
 - ❌ Not a debt advisor — we don't tell people whether to pay minimum or full
 - ✅ Educational — explain why, not just what
 - ✅ Versatile — all 4 modes work independently
 - ✅ Always accessible — not just a one-time prompt
-- ✅ User-controlled — full overlay settings in preferences
+- ✅ Pro-gated control — free tier sees overlays, Pro controls them
 - ✅ Generic — algorithm is pure date math, works for any market
 - ✅ In-app wiki — bite-sized, browsable, contextually delivered
 
