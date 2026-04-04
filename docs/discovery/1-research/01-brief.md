@@ -1,7 +1,7 @@
 # Falcly — Discovery Brief
 
 > **"Is it safe to use my card right now?"**
-> Last updated: 2026-04-04
+> Last updated: 2026-04-05
 
 ---
 
@@ -16,10 +16,10 @@ Falcly is a credit card billing cycle intelligence app — the first tool that a
 ## Current State (April 2026)
 
 ### Implementation Status
-- **Stories:** 95/99 passing
-- **Tests:** 70 passing (decision engine + statement advisor)
+- **Stories:** 97/99 passing
+- **Tests:** 89 passing (decision engine + statement advisor + payoff planner)
 - **Platform:** React Native (Expo CNG), Android-first, iOS parity
-- **Stack:** SQLite + Drizzle (local-first), Supabase Auth, Zustand
+- **Stack:** SQLite + Drizzle (local-first), Supabase Auth, RevenueCat, Zustand
 
 ### What's Built
 | Feature | Status |
@@ -33,16 +33,15 @@ Falcly is a credit card billing cycle intelligence app — the first tool that a
 | Statement Advisor | ✅ Complete |
 | Card Overlay System | ✅ Complete |
 | Onboarding flow | ✅ Complete |
-| Subscription tiers | ✅ Simulated (RevenueCat pending) |
+| RevenueCat IAP integration | ✅ Complete |
+| Payoff Planner (Avalanche + Snowball) | ✅ Complete |
 | Accessibility | ✅ Audited |
 
-### What's Left
-| Story | Description | Phase |
+### Parked (Phase 2)
+| Story | Description | Notes |
 |-------|-------------|-------|
-| PK-01 | RevenueCat SDK integration (real payments) | Pre-launch |
-| P2-01 | SMS listener (auto-detect transactions) | Phase 2 |
-| P2-02 | Payoff planner (avalanche/snowball) | Phase 2 |
-| P2-03 | NL queries (AI advisor) | Phase 2 |
+| P2-01 | SMS listener (auto-detect transactions) | Requires Kotlin native module |
+| P2-03 | NL queries (AI advisor) | Gemini API — Phase 3 |
 
 ---
 
@@ -177,24 +176,25 @@ Score = utilization% + days penalty + status penalty. Lowest-scoring SAFE card w
 | Auth | Supabase Auth + Google Sign-In |
 | Testing | Jest + ts-jest |
 | Analytics | (parked — PostHog) |
-| Payments | (pending — RevenueCat) |
+| Payments | RevenueCat (integrated ✅) |
 
 ---
 
 ## Roadmap
 
 ### Phase 1 ✅ COMPLETE
-Core loop, decision engine, multi-card, transactions, sync, statement advisor, overlays.
+Core loop, decision engine, multi-card, transactions, sync, statement advisor, overlays, RevenueCat IAP, payoff planner (avalanche + snowball).
+
+**Credit Score Optimized** payoff strategy evaluated and deferred — Card Overlays already nudge utilization per card. Revisit post-launch if users request it.
 
 ### Phase 2 (Next)
-- PK-01: RevenueCat integration (real payments)
 - Launch to Google Play (PH)
+- Set up products in Play Console + RevenueCat dashboard
 - User feedback collection
 
 ### Phase 3 (Future)
 - P2-01: SMS listener (Android)
-- P2-02: Payoff planner
-- P2-03: AI advisor
+- P2-03: AI advisor (Gemini)
 - iOS App Store launch
 - US market expansion
 
@@ -225,7 +225,9 @@ Core loop, decision engine, multi-card, transactions, sync, statement advisor, o
 
 ### Recommended Next Steps
 1. ✅ Complete Phase 1 (done)
-2. ⏳ Integrate RevenueCat (PK-01)
-3. ⏳ Launch to Google Play (PH)
-4. ⏳ Collect user feedback, iterate
-5. ⏳ Expand to iOS, then US
+2. ✅ Integrate RevenueCat (PK-01 done)
+3. ✅ Payoff Planner — Avalanche + Snowball (P2-02 done)
+4. ⏳ Set up products in Play Console + RevenueCat dashboard
+5. ⏳ Launch to Google Play (PH)
+6. ⏳ Collect user feedback, iterate
+7. ⏳ Expand to iOS, then US
