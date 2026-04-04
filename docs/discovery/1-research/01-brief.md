@@ -1,21 +1,48 @@
 # Falcly — Discovery Brief
 
 > **"Is it safe to use my card right now?"**
-> Last updated: 2026-03-30
+> Last updated: 2026-04-04
 
 ---
 
 ## What is Falcly?
 
-Falcly is a credit card timing and payment intelligence app — the first tool that answers *"Is it safe to use my card right now?"* with cycle-aware, cash-aware, deterministic logic. It is NOT a budgeting app, expense tracker, or rewards optimizer.
+Falcly is a credit card billing cycle intelligence app — the first tool that answers *"Is it safe to use my card right now?"* with cycle-aware, cash-aware, deterministic logic. It is NOT a budgeting app, expense tracker, or rewards optimizer.
 
 **Domain:** falcly.com — ✅ Acquired (~$11/yr, Porkbun)
 
 ---
 
-## Current State
+## Current State (April 2026)
 
-A fully functional HTML prototype (`index.html`) exists with: credit card dashboard, "best card to use today" recommendation with scoring algorithm, billing cycle Gantt chart, safe-to-swipe indicator (SAFE/CAUTION/RISKY), utilization tracking, cycle timeline, key dates, balances & projections, cash awareness, and card rates/fees. Data loads from `data.json` with 2 test cards (BPI Petron, UB Rewards). PH defaults baked in (₱ currency, 2% interest, ₱500 min payment floor).
+### Implementation Status
+- **Stories:** 95/99 passing
+- **Tests:** 70 passing (decision engine + statement advisor)
+- **Platform:** React Native (Expo CNG), Android-first, iOS parity
+- **Stack:** SQLite + Drizzle (local-first), Supabase Auth, Zustand
+
+### What's Built
+| Feature | Status |
+|---------|--------|
+| Core decision engine (SAFE/CAUTION/RISKY) | ✅ Complete |
+| Swipe impact analysis | ✅ Complete |
+| Multi-card management | ✅ Complete |
+| Cash flow awareness (multi-payday) | ✅ Complete |
+| Transaction logging | ✅ Complete |
+| Cloud sync (Supabase) | ✅ Complete |
+| Statement Advisor | ✅ Complete |
+| Card Overlay System | ✅ Complete |
+| Onboarding flow | ✅ Complete |
+| Subscription tiers | ✅ Simulated (RevenueCat pending) |
+| Accessibility | ✅ Audited |
+
+### What's Left
+| Story | Description | Phase |
+|-------|-------------|-------|
+| PK-01 | RevenueCat SDK integration (real payments) | Pre-launch |
+| P2-01 | SMS listener (auto-detect transactions) | Phase 2 |
+| P2-02 | Payoff planner (avalanche/snowball) | Phase 2 |
+| P2-03 | NL queries (AI advisor) | Phase 2 |
 
 ---
 
@@ -23,57 +50,58 @@ A fully functional HTML prototype (`index.html`) exists with: credit card dashbo
 
 **Core question:** "Is it safe to use this card right now — and can I afford the consequences?"
 
-### Safe-to-Swipe (with Swipe Impact Analysis)
-When user checks a card (with or without a proposed spend amount), Falcly projects:
-- Projected statement balance = outstanding + pending + installments + subscriptions + proposed swipe
-- Net available cash = liquid cash + income before due date - committed expenses - auto-payments - subscriptions this cycle
-- Payoff plan based on user's strategy (full / minimum / fixed / aggressive / avalanche / snowball)
+### SAFE/CAUTION/RISKY Engine
+8 conditions evaluated in priority order (first match wins):
 
-Output: SAFE / CAUTION / RISKY + explanation of why + what carrying a balance would cost in interest.
+**RISKY triggers:**
+1. Net available cash < minimum payment
+2. Proposed swipe exceeds credit limit
+3. Days to statement ≤ 2
+4. Utilization > 80%
 
-### Flexible Horizon (not a fixed 2-month window)
-Falcly projects as far forward as the data is reliable:
-- **Known:** Current cycle — full detail
-- **Predictable:** Future cycles with known fixed events (installments, subscriptions, annual fees)
-- **Uncertain:** Beyond known events — signal only (On Track / At Risk / Unknown)
+**CAUTION triggers:**
+5. Will carry balance to next month (strategy != minimum)
+6. Days to statement ≤ 7
+7. Utilization > 50%
 
-The horizon extends naturally based on what's in the system. A 12-month installment shows 12 months of impact. An annual fee due in 4 months surfaces 4 months out. No fabricated projections.
+**SAFE:**
+8. All else
 
-### RISKY triggers (first match wins)
-- Net available cash < minimum payment
-- Proposed swipe exceeds credit limit
-- Days to statement ≤ 2
-- Utilization > 80%
-- Net available cash < projected balance (on full-pay strategy)
+### Swipe Impact Analysis
+Real-time projection when user enters an amount:
+- Projected statement balance
+- Net available cash (payday-aware)
+- Minimum payment
+- Carried balance + interest if applicable
 
-### CAUTION triggers
-- Will carry balance to next month
-- Days to statement ≤ 7
-- Utilization > 50%
-- Cash buffer < 20% after payoff
-
-### Best Card Scoring (multi-card)
-Score = utilization% + days penalty + status penalty + cash coverage penalty. Lowest-scoring SAFE card wins.
+### Best Card Scoring
+Score = utilization% + days penalty + status penalty. Lowest-scoring SAFE card wins.
 
 ---
 
-## Discovery Documents
+## Features
 
-| # | Document | What It Covers |
-|---|----------|---------------|
-| 01 | [Market Research](01-market-research.md) | TAM/SAM/SOM, key regions (PH primary, US secondary), growth drivers, market timing |
-| 02 | [Competitor Deep Dive](02-competitor-deep-dive.md) | CardPointers, MaxRewards, YNAB, Monarch, Copilot, Kudos, GCash/Maya, bank apps — none have billing cycle intelligence |
-| 03 | [Feature Matrix](03-feature-matrix.md) | Feature-by-feature comparison — Falcly owns the entire billing cycle column |
-| 04 | [Ideal Customer Profile](04-icp.md) | 5 personas: Multi-Card Filipino Pro, US Rewards Maximizer, OFW Family Manager, Gen Z First-Timer, Post-Mint Budgeter |
-| 05 | [Keywords & SEO/ASO](05-keywords-seo-aso.md) | PH keywords are goldmine (zero competition). US keywords moderate competition. ASO recommendations included. |
-| 06 | [Pricing Validation](06-pricing-validation.md) | Free / $9.99 Standard / $19.99 Premium. PH: ₱149–199/mo. "Cheaper than one late fee." |
-| 07 | [Go-to-Market](07-go-to-market.md) | PH first (Google Play, r/PHCreditCards, TikTok), US second (Reddit, Product Hunt, SEO). 12-month timeline. |
-| 08 | [Regulatory Landscape](08-regulatory-landscape.md) | No BSP license needed. NPC registration required. COPPA age gate. Light regulatory path. |
-| 09 | [Discovery Summary](09-discovery-summary.md) | Opportunity scores (PH 8.5/10, Global 7.5/10), risks, roadmap, metrics, tech stack, next steps |
-| 10 | [Payment Intelligence](10-payment-intelligence.md) | Installment tracking, subscription tracking, payment planning strategies, auto-payments |
-| 11 | [Branding](11-branding.md) | Name rationale, domain, color system (light/dark), typography, voice & tone |
-| 12 | [Financial Projections](12-financial-projections.md) | MRR/MAU scenarios PH Year 1 + US Year 2, 100-user milestone, combined ARR |
-| 13 | [Decision Logic](13-decision-logic.md) | Full input model, swipe impact analysis, flexible horizon, SAFE/CAUTION/RISKY conditions, multi-card scoring |
+### Statement Advisor (SD-01 through SD-07)
+- **Spread Score:** 0–100 rating of card portfolio timing
+- **Gap Analysis:** Dead zones (14+ days with no reset)
+- **Clustering Detection:** Cards too close together
+- **Payday Alignment:** Cards should close 2–5 days after payday
+- **Timeline Visualization:** 30-day view with all cards marked
+- **In-App Wiki:** W-01 through W-13 educational cards
+
+### Card Overlay System
+- Dismissible overlays on card face
+- 7 content types: alert, advisory, tip, statement, wiki, promo, affiliate
+- Priority queue (alerts highest, affiliates lowest)
+- Contextual triggers (e.g., show W-04 when swiping close to statement)
+- Free tier: overlays always on (monetization surface)
+- Pro tier: full control
+
+### Cloud Sync (SC-01 through SC-07)
+- Upload on sign-in
+- Restore on reinstall
+- Merge prompt on conflict
+- Guest data warning banner
 
 ---
 
@@ -90,256 +118,114 @@ Score = utilization% + days penalty + status penalty + cash coverage penalty. Lo
 
 ---
 
-## Pricing
+## Pricing (Implemented)
 
-| Plan | US | PH | Max Cards |
-|------|----|----|-----------|
-| Free | $0 | ₱0 | 2 |
-| Pro | $4.99/mo or $39.99/yr | ₱149/mo or ₱999/yr | Unlimited |
+| Plan | Monthly | Annual | Cards | Overlays |
+|------|---------|--------|-------|----------|
+| Free | $0 | $0 | 2 | Always on |
+| Pro | $4.99 | $39.99 | Unlimited | Configurable |
+| Pro+ | $9.99 | $79.99 | Unlimited + Priority | Full control |
 
 ---
 
-## Roadmap
+## Target Users
 
-**Phase 1 — MVP:** React Native (Expo), manual card entry, safe-to-swipe, best card recommendation, Gantt chart, utilization, reminders, data export. Free/Standard/Premium tiers.
+### Primary: Multi-Card Filipino Professional
+- 2–4 credit cards
+- Semi-monthly pay (15th & 30th)
+- Responsible but occasionally surprised by statements
+- Uses GCash/Maya but no billing cycle tools
 
-**Phase 2 — Payment Intelligence:** Installment tracking, subscription tracking, annual fee reminders, payment planning (avalanche/snowball/minimum/full), auto-payment awareness, cash-dependent payoff projections, SMS/email parsing, push notifications.
+### Secondary: Post-Mint US User
+- Displaced by Mint shutdown (March 2024)
+- Wants simple tool, not full budgeting suite
+- 3.9 cards average
 
-**Phase 3 — Platform:** Workspace (household cards), web app, bank API integration, multi-currency.
+### Tertiary: First-Time Credit Card User
+- Just got their first card
+- Needs education on billing cycles
+- In-app wiki serves this persona
+
+---
+
+## Market Position
+
+**What Falcly is:**
+- Billing cycle intelligence
+- "Safe to swipe" signal
+- Cash flow timing
+- Statement date optimizer
+
+**What Falcly is NOT:**
+- Budgeting app (not YNAB)
+- Expense tracker (not Mint)
+- Rewards optimizer (not CardPointers)
+- Bank aggregator (no account linking)
+
+**Differentiator:** No competitor has billing cycle intelligence. They all optimize rewards or track spending. Falcly is the only app that tells you *which card to use today* based on where you are in your billing cycle.
 
 ---
 
 ## Tech Stack
 
-React Native (Expo) · Android primary (85% PH) + iOS · Local-first data · Cloud NLP for Phase 2 · Email + biometric auth · In-app purchase
+| Layer | Technology |
+|-------|------------|
+| Framework | Expo CNG (React Native 0.81+, New Architecture) |
+| Language | TypeScript (strict) |
+| State | Zustand (persisted via AsyncStorage + Drizzle) |
+| Database | expo-sqlite + Drizzle ORM |
+| Auth | Supabase Auth + Google Sign-In |
+| Testing | Jest + ts-jest |
+| Analytics | (parked — PostHog) |
+| Payments | (pending — RevenueCat) |
 
 ---
 
-## Bottom Line
+## Roadmap
 
-PH market scores 8.5/10 opportunity. Zero competition in billing cycle intelligence — globally. The window is open. Build MVP, launch PH first via Google Play + r/PHCreditCards + TikTok, validate with 1,000 users, then expand to US.
-# Falcly — Discovery Summary
+### Phase 1 ✅ COMPLETE
+Core loop, decision engine, multi-card, transactions, sync, statement advisor, overlays.
 
-> **Date:** 2026-03-30
+### Phase 2 (Next)
+- PK-01: RevenueCat integration (real payments)
+- Launch to Google Play (PH)
+- User feedback collection
 
----
-
-## One-Line Brief
-
-**Falcly is the first app that answers "Is it safe to use this card right now — and can I afford the consequences?" — a question 14M+ Filipino cardholders and 175M+ US cardholders ask every month, with no good tool to answer it.**
-
----
-
-## What We Know
-
-- **Global personal finance app market:** $1.4B–$25.8B (2026, varies by scope), growing 15–25% CAGR
-- **Philippines fintech market:** $1.16B (2025), growing at 16.75% CAGR → $4.66B by 2034
-- **PH credit cards in force:** 13.9M (March 2024 CCAP) — 29% receivables growth YoY
-- **PH Gen Z cardholders:** doubled from 9% to 22%+ of new originations (2019–2023)
-- **PH BNPL users:** 28.4M by end-2024, 40% YoY jump — credit culture accelerating
-- **PH consumer loan growth:** 24.1% in Feb 2025, outpacing business loans at 11.2%
-- **Zero existing apps** solve billing cycle timing intelligence — globally or in PH
-- **Zero existing apps** combine installment tracking + subscription tracking + payment planning + cycle intelligence in one place (confirmed across YNAB, Monarch, Copilot, CardPointers, Debt Payoff Planner, all PH apps)
-- **Mint shutdown (March 2024):** displaced 3.6M users; no migration app covered billing cycles
-- **Android = 85% of PH smartphones** → Google Play is primary distribution
-- **YNAB/Monarch/Copilot explicitly don't track billing cycles** — confirmed by users and support docs
-- **r/PHCreditCards** full of people manually tracking cutoff dates — clear pain signal
-- **BSP Open Finance Framework** in sandbox phase — future bank API access possible
-- **CardPointers** now $90/yr, **MaxRewards** $54–108/yr, **Kudos** free — all rewards-focused, zero timing features
+### Phase 3 (Future)
+- P2-01: SMS listener (Android)
+- P2-02: Payoff planner
+- P2-03: AI advisor
+- iOS App Store launch
+- US market expansion
 
 ---
 
-## Current Prototype
+## Discovery Summary
 
-A fully functional HTML prototype (`../index.html`) with:
-- Credit card dashboard with visual card components (bank, last 4, network, color, status dot)
-- "Best card to use today" recommendation with scoring algorithm
-- Billing cycle Gantt chart (60-day timeline, all cards, due dates, today marker)
-- Safe-to-swipe indicator (SAFE/CAUTION/RISKY with reasoning)
-- Utilization tracking with 30%/50%/80% thresholds
-- Key dates, balances, projections, cash awareness, rates & fees
-- Data persistence via `data.json` with 2 test cards (BPI Petron ₱256K limit, UB Rewards ₱15K)
-- Add/edit/remove cards with full modal form
-- PH defaults (2% monthly interest, 5% min payment, ₱500 floor)
-
----
-
-## Decision Logic
-
-**Core question:** "Is it safe to use this card right now — and can I afford the consequences?"
-
-See [13-decision-logic.md](13-decision-logic.md) for the full specification. Summary:
-
-- **Swipe Impact Analysis:** Enter a proposed spend → Falcly projects your next statement, compares against net available cash, and shows your payoff plan with interest cost if carrying a balance.
-- **Flexible Horizon:** Projects as far forward as the data is reliable — not a fixed window. 12-month installment? Shows 12 months of impact. Annual fee in 4 months? Surfaces it.
-- **RISKY/CAUTION/SAFE** determined by net available cash vs. minimum payment, utilization thresholds, days to statement, and cash buffer after payoff.
-- **Best Card Scoring:** Score = utilization% + days penalty + status penalty + cash coverage penalty. Lowest-scoring SAFE card wins.
-
----
-
-## Market Opportunity Scores
-
-### Global Market: 7.5 / 10
+### Opportunity Score: 8.5/10 (PH)
 
 | Factor | Score | Notes |
 |--------|-------|-------|
-| Market size | 8/10 | $2B+ TAM, 175M+ US cardholders, 3.9 cards avg |
-| Problem clarity | 9/10 | Validated pain on Reddit, forums, review sites |
-| Competition | 7/10 | White space exists; indirect competitors strong but different category |
-| Willingness to pay | 7/10 | $5–$15/mo validated by YNAB/Monarch/CardPointers benchmarks |
-| Distribution difficulty | 6/10 | US market crowded; requires SEO/Reddit organic |
-| Timing | 8/10 | Mint shutdown + Gen Z entering credit = window open |
+| Market Size | 7 | 13.9M cards, growing 20% YoY |
+| Problem Clarity | 9 | "Which card?" is universal |
+| Competition | 10 | Zero direct competitors |
+| WTP Signal | 7 | "Cheaper than one late fee" resonates |
+| Distribution | 8 | Reddit, TikTok, ASO — no gatekeepers |
+| Timing | 9 | Post-Mint, fintech boom, card growth |
 
-### Philippines Market: 8.5 / 10
+### Top 3 Opportunities
+1. **PH first-mover:** No billing cycle tool exists for Filipino market
+2. **Mint refugees:** 3.6M displaced users seeking alternatives
+3. **Card overlay monetization:** Educational content + affiliates = revenue without subscriptions
 
-| Factor | Score | Notes |
-|--------|-------|-------|
-| Market size | 7/10 | 13.9M cards, growing fast — smaller than US but accessible |
-| Problem clarity | 10/10 | Cutoff confusion endemic; r/PHCreditCards validates daily |
-| Competition | 10/10 | No PH-specific competitor exists — completely open |
-| Willingness to pay | 7/10 | Lower ARPU (₱149–199/mo) but large volume potential |
-| Distribution difficulty | 9/10 | Android-first; TikTok/Facebook/Reddit easy organic reach |
-| Timing | 9/10 | Credit card adoption accelerating + Gen Z entering market |
+### Top 3 Risks
+1. **RevenueCat integration:** Can't monetize until real payments work
+2. **User acquisition:** Need to prove organic growth before paid
+3. **Retention:** Daily utility required to justify subscription
 
----
-
-## Feature Domains
-
-Falcly addresses two distinct but deeply connected problems:
-
-### Domain 1: Cycle Intelligence *(Phase 1 — MVP)*
-*"Is it safe to use this card right now — and can I afford the consequences?"*
-- Safe-to-swipe indicator (SAFE / CAUTION / RISKY)
-- Billing cycle timeline and Gantt chart
-- Statement balance projection
-- Days-to-statement countdown
-- Utilization tracking with thresholds
-- Cash-aware decision logic
-- Payment timing recommendations
-
-#### Swipe Impact Analysis *(key differentiator — no competitor has this)*
-When a user checks a card, they can enter a proposed spend amount. Falcly then:
-- Projects what the next statement balance will be (outstanding + pending + installments + subscriptions + proposed swipe)
-- Calculates net available cash: liquid cash + income before due date - committed expenses - auto-payments - subscriptions this cycle
-- Runs the user's payoff strategy against that cash figure
-- Shows the result: how long to pay off, what method, and what interest it would cost if carrying a balance
-
-**No app anywhere does this.** The user sees: "If you swipe ₱5,000, your next bill is ₱18,500. At your fixed ₱15,000/month strategy, you'll carry ₱3,500 at 2%/mo = ₱70 interest."
-
-#### Flexible Horizon Projection *(data-driven, not a fixed window)*
-Falcly projects forward as far as fixed known events exist — not a hardcoded 2-month window:
-- **Known:** Current cycle — full detail
-- **Predictable:** Future cycles with known fixed events (installments, subscriptions, annual fees)
-- **Uncertain:** Beyond known events — signal only (On Track / At Risk / Unknown)
-
-Annual fee due in 4 months? Surfaces it 4 months out. 12-month installment? Shows the full 12-month impact. No fabricated projections — certainty fades naturally as the horizon extends.
-
-### Domain 2: Payment Intelligence *(Phase 2)*
-*"How do I manage and pay off what I owe?"*
-- **Installment tracking** — fixed monthly obligations from BDO/BPI/Metrobank/RCBC installment plans; committed against available credit
-- **Subscription / recurring charge tracking** — Netflix ₱619, Spotify ₱179, iCloud, gym, insurance; tied to billing day and cycle calendar
-- **Annual fee reminders** — 30-day advance notice; waiver window optimization
-- **Auto-payment awareness** — committed cash outflows; net available cash = liquid cash minus all auto-pays due
-- **Payment planning** — avalanche (highest rate first) and snowball (lowest balance first); payoff timeline with interest projections ("at ₱5,000/month, debt-free in 8 months, ₱3,200 in interest")
-- **Cycle-committed scoring** — safe-to-swipe now accounts for upcoming subscriptions and installments, not just current balance
-
-**Why this matters:** Expanding from Cycle Intelligence to Payment Intelligence means Falcly is no longer just a timing tool — it's the credit card command center. The addressable use case doubles: from "should I swipe?" to "how do I manage my total credit card situation?"
-
----
-
-## Top 3 Opportunities
-
-1. **Philippines first-mover:** Zero competition, endemic pain, 14M+ addressable cards, Android-first distribution. Falcly can own the PH credit card timing market before anyone else shows up. Payment Intelligence deepens retention — users who track installments and payoff plans check in daily, not just when swiping.
-
-2. **Post-Mint vacuum (US):** 3.6M displaced users. Monarch/YNAB captured the budgeters, but nobody captured the billing cycle + payment intelligence segment. Content marketing + Reddit + ASO can capture this organically.
-
-3. **"Cheaper than one late fee" positioning:** One prevented late fee ($25–$41 US, ₱500–₱1,500 PH) pays for months of subscription. Payment Intelligence adds a second ROI hook: *"Falcly's avalanche planner saved me ₱18,000 in interest."*
-
-4. **Swipe Impact Analysis + Flexible Horizon = the most actionable credit card tool ever built. No competitor is close.** Every other app tells you what you owe. Falcly tells you what swiping right now will actually cost you — and exactly how to recover.
-
----
-
-## Top 3 Risks
-
-1. **Feature creep:** The temptation to add budgeting, expense tracking, or rewards optimization would dilute the core value. Falcly must stay focused on timing intelligence.
-
-2. **Bank API dependency (future):** SMS/email parsing is a fragile data source. Long-term value requires bank API integration (BSP Open Finance when available, Plaid for US). This adds complexity but is critical for Phase 2+.
-
-3. **Low PH ARPU:** At ₱149–199/mo, Falcly needs volume. 100K paid users at ₱199/mo = ~$346K/mo. Free tier must convert at 3–5%+.
-
----
-
-## Features Roadmap
-
-### Phase 1 — MVP (Prototype → Native App)
-*Cycle Intelligence — the core timing product*
-- React Native (Expo) — port prototype logic
-- Manual card entry with all current fields
-- Safe-to-swipe indicator per card
-- Best card recommendation
-- Billing cycle timeline + Gantt chart
-- Utilization tracking with thresholds
-- Key dates (statement, due date, countdowns)
-- Cash awareness (liquid cash, income)
-- Payment logging
-- Push notification reminders
-- Data export/import
-- Free: 2 cards / Standard: 5 / Premium: 10
-
-### Phase 2 — Payment Intelligence *(new domain)*
-*Adds the "how do I pay this off?" layer — see [10-payment-intelligence.md](10-payment-intelligence.md)*
-- **Installment tracker** — add BDO/BPI/Metrobank/RCBC installments by name, amount, term, months remaining
-- **Subscription tracker** — recurring charges with billing day; committed spend overlay on cycle Gantt
-- **Annual fee reminders** — per-card, 30-day advance notice, waiver window flagging
-- **Auto-payment awareness** — type (min/full/fixed), amount, day; net cash calculation subtracts auto-pays
-- **Cash-flow warnings** — "Auto-pay of ₱8,000 hits Thursday; you have ₱6,500 available"
-- **Payoff calculator** — single card: minimum / fixed / full / aggressive timelines with interest projections
-- **Multi-card payoff planner** — avalanche vs. snowball comparison; debt-free date; total interest paid
-- **Cycle-committed safe-to-swipe** — enhanced scoring that includes installments + subscriptions due before statement date
-- SMS/email statement parsing (Android first)
-- Smart alerts (installment completion, subscription price changes, annual fee due)
-
-### Phase 3 — Platform
-- AI-assisted transaction detection and projected statement balance
-- Workspace (household cards, shared income)
-- Web companion app
-- Bank API integration (BSP Open Finance / Plaid)
-- Multi-currency (OFW users)
-
----
-
-## Technical Stack
-
-- **Framework:** React Native with Expo
-- **Platforms:** Android (primary — 85% PH) + iOS
-- **Data:** Local-first (on-device, no server-side card data for MVP)
-- **AI:** Cloud NLP for SMS/email parsing (Phase 2)
-- **Auth:** Email + password, biometric
-- **Payments:** In-app purchase (Google Play / App Store)
-
----
-
-## Key Metrics Targets
-
-| Metric | Month 6 | Month 12 |
-|--------|---------|----------|
-| Downloads | 50K | 200K |
-| Active users | 10K | 50K |
-| Paid users | 500 | 3K |
-| Conversion rate | 3–5% | 5–7% |
-| Retention (Day 30) | 40% | 50% |
-
----
-
-## Recommended Next Steps
-
-1. **Build MVP** — React Native (Expo), port prototype logic, manual card entry
-2. **Launch PH first** — Google Play, r/PHCreditCards, TikTok PH
-3. **Validate with 1,000 PH users** — measure engagement, conversion, retention
-4. **Soft-launch US** — Product Hunt, r/CreditCards, blog content
-5. **Add AI features after validation** — SMS parsing, projections, smart alerts (Phase 2)
-6. **Don't build:** budgeting, expense categorization, rewards optimization, or bank connections in v1
-
----
-
-*This document synthesizes findings from the full Falcly discovery package (01–10). See [00-BRIEF.md](00-BRIEF.md) for the quick reference. Payment Intelligence section added 2026-03-30 — see [10-payment-intelligence.md](10-payment-intelligence.md) for full research.*
+### Recommended Next Steps
+1. ✅ Complete Phase 1 (done)
+2. ⏳ Integrate RevenueCat (PK-01)
+3. ⏳ Launch to Google Play (PH)
+4. ⏳ Collect user feedback, iterate
+5. ⏳ Expand to iOS, then US
