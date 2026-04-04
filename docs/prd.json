@@ -1045,8 +1045,8 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 99,
-      "passes": false,
-      "notes": "PARKED \u2014 needs RevenueCat project + App Store Connect / Play Console products set up first. Do not implement until those exist."
+      "passes": true,
+      "notes": "RevenueCat SDK integrated. Needs Play Console setup for real purchases."
     },
     {
       "id": "PN-01",
@@ -1533,11 +1533,11 @@
       "title": "analyzeSpread() engine",
       "phase": 7,
       "group": "Statement Advisor",
-      "description": "Core spread analysis engine — gap analysis, clustering detection, payday alignment, spread score, and recommendations.",
+      "description": "Core spread analysis engine \u2014 gap analysis, clustering detection, payday alignment, spread score, and recommendations.",
       "acceptanceCriteria": [
         "analyzeSpread() returns SpreadAnalysis with score, issues, tips, gaps, nextCardTarget",
         "calculateGaps() handles circular month (day 30 wraps to day 1)",
-        "checkPaydayAlignment() returns true when card is 2–5 days after payday",
+        "checkPaydayAlignment() returns true when card is 2\u20135 days after payday",
         "getOptimalSwipeDays() returns correct swipe window",
         "Test suite covers empty, single, evenly spaced, clustered, dead zone, payday, and wrap-around cases"
       ],
@@ -1547,12 +1547,12 @@
     },
     {
       "id": "SD-02",
-      "title": "Statement Advisor screen — score + timeline",
+      "title": "Statement Advisor screen \u2014 score + timeline",
       "phase": 7,
       "group": "Statement Advisor",
       "description": "Statement Advisor screen with spread score ring and 30-day timeline visualization.",
       "acceptanceCriteria": [
-        "SpreadScoreRing shows 0–100 score with color coding (green/yellow/red)",
+        "SpreadScoreRing shows 0\u2013100 score with color coding (green/yellow/red)",
         "MonthTimeline shows cards as colored dots on a 30-day bar",
         "Dead zones shaded in warning color",
         "Entry point added to Settings under Education section"
