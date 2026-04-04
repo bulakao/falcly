@@ -79,3 +79,30 @@ Started: Sat Apr  4 01:34:00 PST 2026
 - Settings: global currency picker
 - Add-card/edit-card: per-card currency picker
 - Drizzle migration for currency column
+---
+
+## 2026-04-04 - SC-01 through SC-07
+- SC-01: Supabase user_cards migration + sync utility (uploadCard, fetchCloudCards, softDelete, syncOnSignIn)
+- SC-02: Auto-upload local cards on first sign-in
+- SC-03: Restore cloud cards on new/fresh device
+- SC-04: Merge prompt for data conflict resolution
+- SC-05: Incremental cloud sync on card mutations
+- SC-06: Sync status + manual sync in Settings
+- SC-07: Guest data warning banner
+- Files changed:
+  - `supabase/migrations/20260404_user_cards.sql` — user_cards table + RLS + indexes
+  - `utils/sync.ts` — uploadCard, fetchCloudCards, softDeleteCloudCard, syncOnSignIn, fullSync
+  - `store/cardStore.ts` — bulkImport, fire-and-forget sync on add/update/delete
+  - `store/userStore.ts` — lastSyncedAt field + setter
+  - `app/sign-in.tsx` — post-sign-in sync flow, merge handling
+  - `components/organisms/MergePrompt.tsx` — merge conflict modal
+  - `app/settings.tsx` — Cloud Backup section with last synced + manual sync
+  - `components/organisms/AllCardsOverview.tsx` — guest data warning banner
+  - `docs/prd.json` — marked SC-01 through SC-07 passes: true
+- **Learnings for future iterations:**
+  - Supabase upsert uses `onConflict: 'id'` for the JS client, Drizzle uses `.onConflictDoUpdate({ target })`
+  - cardStore uses `require()` pattern to avoid circular imports between stores — same pattern for accessing authStore
+  - Cloud sync calls must be fire-and-forget (.catch(() => {})) to never block UI
+  - MergePrompt: Modal with onRequestClose={() => {}} prevents dismissal on Android back button
+  - Guest banner uses AsyncStorage with 7-day expiry — store timestamp, not boolean
+  - Settings Cloud Sync section now keyed on `user` (signed in), not subscription tier
