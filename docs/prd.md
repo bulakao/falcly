@@ -93,7 +93,7 @@ AI serves the engine; it never replaces it. In Phase 2, AI acts as a data extrac
 
 6. **Flexible horizon projection:** Projects as far forward as data is reliable — 6-month installment? Shows 6 months of impact. Annual fee in 4 months? Surfaces it 4 months out. No fabricated projections beyond known events.
 
-8. **Payment intelligence (Phase 2):** Installment tracking tied to billing cycles, subscription-to-cycle mapping, payoff strategy comparison (avalanche vs. snowball vs. minimum), interest cost projections.
+8. **Payment intelligence (Phase 1.5 ✅):** Payoff Planner implemented — Avalanche (math-optimal) + Snowball (motivation-optimal) shown side-by-side, Pro-gated. Credit Score Optimized strategy was evaluated and deferred: the Card Overlay System already nudges users toward healthy utilization per card, making a separate strategy redundant for most users. If user demand emerges post-launch, revisit. Installment tracking, subscription mapping remain Phase 2.
 
 9. **AI as data extractor (Phase 2) and advisor (Phase 3):** Android notification listener auto-detects bank transactions; conversational queries answer "Can I buy this today?" — all grounded in the deterministic engine.
 
@@ -837,7 +837,7 @@ Own: "credit card cutoff date tracker Philippines", "safe to swipe credit card",
 |-------|----------|-------|
 | **Phase 1 — MVP** | Weeks 1–8 | Core loop, SAFE/CAUTION/RISKY engine, Swipe Impact, cash awareness, best card recommendation, Gantt timeline, Free/Trial/Pro/Pro+ IAP (RevenueCat), 30-day trial, hard paywall at card 3, onboarding (3-field minimum) |
 | **Phase 1.5 — Transaction Layer** | Weeks 9–14 | Manual transaction log, cycle auto-classification (Current/Next/Previous/Excluded), "Lands on" labels, near-cutoff warnings, cycle-grouped view, payment summary screen ("What to Pay"), transaction engine integration, payment logging, exclude transactions, first-transaction education flow |
-| **Phase 2 — Intelligence** | Weeks 15–26 (Months 4–6) | Payment planning (avalanche/snowball/fixed/aggressive), installment tracking, subscription tracking, annual fee reminders, payoff timeline visualizer, Android notification listener (auto-detect transactions from BDO/BPI/Metrobank/Maya/GCash), local push notifications (Notifee), data staleness nudges, subscription auto-detection |
+| **Phase 2 — Intelligence** | Weeks 15–26 (Months 4–6) | ~~Payoff planner (done ✅)~~ Installment tracking, subscription tracking, annual fee reminders, Android notification listener (auto-detect transactions from BDO/BPI/Metrobank/Maya/GCash), local push notifications (Notifee), data staleness nudges, subscription auto-detection. Note: Credit Score Optimized payoff strategy deferred — overlays already handle utilization nudges. |
 | **Phase 3 — AI + US** | Month 6+ | Conversational AI (Gemini Nano on-device + cloud fallback), NL queries over transaction log ("What did I spend on BDO this cycle?"), spending pattern recognition, cross-card reward optimization, statement date arbitrage advice, US App Store launch, ProductHunt launch |
 
 ---

@@ -1,14 +1,16 @@
 # PAYOFF.md — Debt Payoff Strategies Research
 
-> **Last Updated:** 2026-04-04
-> **Status:** Research complete
-> **For:** P2-02 implementation planning
+> **Last Updated:** 2026-04-05
+> **Status:** Research complete — Avalanche + Snowball implemented (P2-02 ✅)
+> **Decision:** Credit Score Optimized strategy deferred — overlays already handle utilization nudges
 
 ---
 
 ## Executive Summary
 
-There are 7+ recognized debt payoff strategies, but only 2 are universally recommended (Avalanche, Snowball). Research shows **Snowball has higher completion rates** despite costing more in interest, because motivation matters more than math for most people. For Falcly, we should implement Avalanche + Snowball first, with Credit Score Optimized as a differentiator.
+There are 7+ recognized debt payoff strategies, but only 2 are universally recommended (Avalanche, Snowball). Research shows **Snowball has higher completion rates** despite costing more in interest, because motivation matters more than math for most people.
+
+**Falcly implements Avalanche + Snowball** (P2-02 ✅). Credit Score Optimized was considered but deferred — the Card Overlay System already nudges users toward healthier utilization per card. Overlays do the credit score guidance job without adding a separate strategy with marginal reach. If users request it post-launch, revisit.
 
 ---
 
@@ -293,7 +295,7 @@ This is the "small victories" effect that powers snowball's success despite high
 
 | Strategy | Priority | Rationale |
 |----------|----------|-----------|
-| **Credit Score Optimized** | P1 | Unique to Falcly, leverages existing utilization tracking |
+| **Credit Score Optimized** | ❌ Deferred | Overlays already nudge utilization per card — separate strategy has thin reach |
 
 ### Phase 3 (Optional)
 
@@ -382,10 +384,10 @@ All three are computationally trivial — no performance concerns.
 ## Next Steps
 
 1. ✅ Complete this research doc
-2. ⏳ Implement Avalanche + Snowball (P2-02)
-3. ⏳ Add Credit Score Optimized as Falcly differentiator
+2. ✅ Implement Avalanche + Snowball (P2-02)
+3. ❌ Credit Score Optimized — deferred (overlays handle utilization nudges)
 4. ⏳ User testing to validate UX
-5. ⏳ Consider Hybrid if users request
+5. ⏳ Consider Hybrid or Credit Score Optimized if users request post-launch
 
 ---
 
