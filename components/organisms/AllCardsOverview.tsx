@@ -59,8 +59,6 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
   const allCards = useCardStore((s) => s.cards);
   const tier = useSubscriptionStore((s) => s.tier);
   const user = useAuthStore((s) => s.user);
-  const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
-  const getTrialEndDate = useSubscriptionStore((s) => s.getTrialEndDate);
   const bestCard = cards.length > 0 ? calculateBestCard(cards, new Date(), getNetAvailableCash, getCurrentCycleTxSum) : null;
 
   const [sortMode, setSortMode] = useState<SortMode>('urgency');
@@ -122,14 +120,8 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
   }, [cards, sortMode, getNetAvailableCash, getCurrentCycleTxSum]);
 
   function getBadgeLabel() {
+    if (tier === 'pro_plus') return 'PRO+';
     if (tier === 'pro') return 'PRO';
-    if (isTrialActive()) {
-      const endDate = getTrialEndDate();
-      if (endDate) {
-        const days = Math.ceil((endDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
-        if (days > 0) return `${days}d trial left`;
-      }
-    }
     return 'FREE';
   }
 

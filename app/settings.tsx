@@ -52,13 +52,10 @@ export default function SettingsScreen() {
   const deleteAccount = useAuthStore((s) => s.deleteAccount);
   const clearLocalData = useAuthStore((s) => s.clearLocalData);
 
-  const isTrialActive = useSubscriptionStore((s) => s.isTrialActive);
   const isPro = useSubscriptionStore((s) => s.isPro);
   const isProPlus = useSubscriptionStore((s) => s.isProPlus);
-  const planType = useSubscriptionStore((s) => s.planType);
-  const trialDaysRemaining = useSubscriptionStore((s) => s.trialDaysRemaining);
-  const getTrialEndDate = useSubscriptionStore((s) => s.getTrialEndDate);
-  const trialEndDate = getTrialEndDate();
+  const tier = useSubscriptionStore((s) => s.tier);
+  const subExpirationDate = useSubscriptionStore((s) => s.getExpirationDate);
 
   const analyticsOptOut = useUserStore((s) => s.analyticsOptOut);
   const setAnalyticsOptOutStore = useUserStore((s) => s.setAnalyticsOptOut);
@@ -94,7 +91,7 @@ export default function SettingsScreen() {
   const overlayPrefs = useOverlayStore((s) => s.overlayPrefs);
   const setOverlayPrefs = useOverlayStore((s) => s.setOverlayPrefs);
   const resetDismissed = useOverlayStore((s) => s.resetDismissed);
-  const proUser = isPro() || isProPlus() || isTrialActive();
+  const proUser = isPro() || isProPlus();
 
   const defaultInterestRate = useUserStore((s) => s.defaultInterestRate);
   const setDefaultInterestRate = useUserStore((s) => s.setDefaultInterestRate);
@@ -179,44 +176,49 @@ export default function SettingsScreen() {
         )}
 
         {/* Subscription — inline if active */}
-        {(isTrialActive() || isPro() || isProPlus()) && (
+        {(isPro() || isProPlus()) && (
           <>
             <RNView style={[styles.divider, { backgroundColor: t.border }]} />
             <RNView style={styles.proBadgeRow}>
               <Badge label={isProPlus() ? 'PRO+' : 'PRO'} variant="pro" />
               <Text style={[styles.proStatusText, { color: t.accentText }]}>
-                {isTrialActive()
-                  ? `Free Trial · ${trialDaysRemaining()} days left`
-                  : planType === 'pro_annual' ? 'Pro — Annual'
-                  : planType === 'pro_quarterly' ? 'Pro — Quarterly'
-                  : planType === 'pro_monthly' ? 'Pro — Monthly'
-                  : planType === 'pro_plus_annual' ? 'Pro+ — Annual'
-                  : planType === 'pro_plus_quarterly' ? 'Pro+ — Quarterly'
-                  : planType === 'pro_plus_monthly' ? 'Pro+ — Monthly'
-                  : 'Active'}
+                {isProPlus() ? 'Pro+' : 'Pro'} — Active
               </Text>
             </RNView>
-            {isTrialActive() && trialEndDate && (
+            {subExpirationDate() && (
               <Text style={[styles.trialEndText, { color: t.accent }]}>
-                Trial ends{' '}
-                {trialEndDate.toLocaleDateString('en-PH', {
+                Renews{' '}
+                {subExpirationDate()!.toLocaleDateString('en-PH', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
                 })}
               </Text>
             )}
-            {/* TODO: pricing strings are PH-specific — update when multi-currency pricing is implemented */}
-            {!isTrialActive() && planType && (
-              <Text style={[styles.trialEndText, { color: t.accent }]}>
-                {planType === 'pro_annual' ? '₱999/yr'
-                  : planType === 'pro_quarterly' ? '₱399/qtr'
-                  : planType === 'pro_monthly' ? '₱149/mo'
-                  : planType === 'pro_plus_annual' ? '₱1,699/yr'
-                  : planType === 'pro_plus_quarterly' ? '₱649/qtr'
-                  : '₱249/mo'} · Cancel anytime
-              </Text>
-            )}
+            <Pressable
+              onPress={async () => {
+                try {
+                  const RevenueCatUI = (await import('react-native-purchases-ui')).default;
+                  await RevenueCatUI.presentCustomerCenter();
+                } catch (e) {
+                  console.error('Customer Center error:', e);
+                }
+              }}
+              style={styles.manageSubButton}
+            >
+              <Text style={[styles.manageSubText, { color: t.primary }]}>Manage Subscription</Text>
+            </Pressable>
+          </>
+        )}
+        {tier === 'free' && (
+          <>
+            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+            <Pressable
+              onPress={() => router.push('/pro-paywall')}
+              style={styles.manageSubButton}
+            >
+              <Text style={[styles.manageSubText, { color: t.primary }]}>Upgrade to Pro</Text>
+            </Pressable>
           </>
         )}
       </SurfaceCard>
@@ -893,6 +895,14 @@ const styles = StyleSheet.create({
   trialEndText: {
     fontSize: 13,
     marginTop: 8,
+  },
+  manageSubButton: {
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  manageSubText: {
+    fontSize: 15,
+    fontFamily: fonts.interSemiBold,
   },
   valueRow: {
     flexDirection: 'row',

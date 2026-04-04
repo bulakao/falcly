@@ -10,6 +10,7 @@ import 'react-native-reanimated';
 import { useSubscriptionStore, FREE_CARD_LIMIT } from '@/store/subscriptionStore';
 import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
+import { initializeRevenueCat, identifyUser, logoutUser } from '@/utils/revenuecat';
 import { useTransactionStore } from '@/store/transactionStore';
 import { useInstallmentStore } from '@/store/installmentStore';
 import { useSubscriptionItemStore } from '@/store/subscriptionItemStore';
@@ -97,6 +98,20 @@ function RootLayout() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Identify/logout user with RevenueCat when auth state changes
+  const authUser = useAuthStore((s) => s.user);
+  useEffect(() => {
+    if (authUser?.id) {
+      identifyUser(authUser.id).then(() => {
+        useSubscriptionStore.getState().initialize();
+      });
+    } else {
+      logoutUser().then(() => {
+        useSubscriptionStore.getState().reset();
+      });
+    }
+  }, [authUser?.id]);
+
   // Load data from SQLite once migrations complete
   useEffect(() => {
     if (dbReady) {
@@ -105,11 +120,6 @@ function RootLayout() {
       useInstallmentStore.getState().loadInstallments();
       useSubscriptionItemStore.getState().loadSubscriptions();
       useUserStore.getState().loadProfile();
-      // Enforce free-tier active card limit on load
-      const { tier } = useSubscriptionStore.getState();
-      if (tier === 'free') {
-        useCardStore.getState().enforceActiveLimit(FREE_CARD_LIMIT);
-      }
       // Schedule push notifications after cards + profile are loaded
       const cards = useCardStore.getState().cards;
       const { notifyStatementReminder, notifyDueReminder, notifyHighUtilization } =
@@ -127,8 +137,10 @@ function RootLayout() {
       initLogger();
       initCrashHandler(logger);
       installNetworkLogger();
-      // Verify Pro entitlement on app launch
-      useSubscriptionStore.getState().verifyEntitlement();
+      // Initialize RevenueCat + subscription state
+      initializeRevenueCat().then(() => {
+        useSubscriptionStore.getState().initialize();
+      });
       // Initialize PostHog analytics
       initAnalytics();
       // Restore opt-out preference
@@ -179,6 +191,7 @@ function RootLayoutNav() {
           <Stack.Screen name="update-balance" options={{ presentation: 'modal', title: 'Update Balance' }} />
           <Stack.Screen name="edit-card" options={{ presentation: 'modal', title: 'Edit Card' }} />
           <Stack.Screen name="pro-paywall" options={{ presentation: 'modal', title: 'Upgrade to Pro' }} />
+          <Stack.Screen name="paywall-manual" options={{ presentation: 'modal', title: 'Upgrade to Pro' }} />
           <Stack.Screen name="onboarding" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_right' }} />
           <Stack.Screen name="onboarding-result" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_right' }} />
           <Stack.Screen name="settings" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_left' }} />
