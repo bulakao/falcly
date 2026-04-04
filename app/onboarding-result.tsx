@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   View as RNView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -14,33 +15,66 @@ import { Badge, Button } from '@/components/atoms';
 import { StatusTooltip, SurfaceCard } from '@/components/molecules';
 import { BillingTimeline } from '@/components/organisms';
 import { useCardStore } from '@/store/cardStore';
+import { useUserStore } from '@/store/userStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
 import { calculateCardStatus, utilization } from '@/utils/decisionEngine';
-import type { CardStatus } from '@/types/card';
+import type { Card, CardStatus } from '@/types/card';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { trackOnboardingFirstStatusViewed, trackOnboardingNotificationsGranted, trackOnboardingNotificationsDeclined } from '@/utils/analytics';
 import { requestPermission } from '@/utils/notifications';
 
 const STATUS_ICONS: Record<CardStatus, string> = {
-  SAFE: '✓',
-  CAUTION: '⚠',
-  RISKY: '✕',
+  SAFE: '\u2713',
+  CAUTION: '\u26A0',
+  RISKY: '\u2715',
 };
 
 const BADGE_VARIANT = { SAFE: 'safe', CAUTION: 'caution', RISKY: 'risky' } as const;
 
 const STATUS_EXPLANATIONS: Record<CardStatus, string> = {
-  SAFE: 'Good news — swiping now is unlikely to cause payment stress this cycle.',
-  CAUTION: 'Be careful — your statement is closing soon or utilization is getting high.',
-  RISKY: 'Hold off — swiping now could make it hard to pay your bill on time.',
+  SAFE: 'Good news \u2014 swiping now is unlikely to cause payment stress this cycle.',
+  CAUTION: 'Be careful \u2014 your statement is closing soon or utilization is getting high.',
+  RISKY: 'Hold off \u2014 swiping now could make it hard to pay your bill on time.',
 };
 
 export default function OnboardingResultScreen() {
   const t = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { cardId } = useLocalSearchParams<{ cardId: string }>();
-  const card = useCardStore((s) => s.cards.find((c) => c.id === cardId));
+  const {
+    bankName,
+    creditLimit: creditLimitStr,
+    outstandingBalance: outstandingBalanceStr,
+    statementDay: statementDayStr,
+    dueDayOffset: dueDayOffsetStr,
+  } = useLocalSearchParams<{
+    bankName: string;
+    creditLimit: string;
+    outstandingBalance: string;
+    statementDay: string;
+    dueDayOffset: string;
+  }>();
+
+  const inMemoryCard: Card = useMemo(() => ({
+    id: 'preview',
+    bankName: bankName ?? '',
+    creditLimit: parseFloat(creditLimitStr ?? '0'),
+    outstandingBalance: parseFloat(outstandingBalanceStr ?? '0'),
+    statementDay: parseInt(statementDayStr ?? '1', 10),
+    dueDayOffset: parseInt(dueDayOffsetStr ?? '21', 10),
+    isActive: true,
+    interestRate: 0.03,
+    minPaymentPct: 0.02,
+    minPaymentFloor: 500,
+    customFinancials: false,
+    pendingTransactions: 0,
+    installmentsMonthlyAmount: 0,
+    subscriptionsThisCycle: 0,
+    annualFee: 0,
+    annualFeeMonth: 0,
+    balanceUpdatedAt: Date.now(),
+    createdAt: Date.now(),
+  }), [bankName, creditLimitStr, outstandingBalanceStr, statementDayStr, dueDayOffsetStr]);
 
   const STATUS_COLORS: Record<CardStatus, string> = {
     SAFE: t.safe,
@@ -48,32 +82,52 @@ export default function OnboardingResultScreen() {
     RISKY: t.risky,
   };
 
-  const statusResult = card ? calculateCardStatus(card, new Date()) : null;
-  const util = card ? utilization(card.outstandingBalance, card.creditLimit) : 0;
+  const statusResult = calculateCardStatus(inMemoryCard, new Date());
+  const util = utilization(inMemoryCard.outstandingBalance, inMemoryCard.creditLimit);
   const utilPct = Math.round(util * 100);
 
   useEffect(() => {
     if (statusResult) trackOnboardingFirstStatusViewed(statusResult.status);
   }, [statusResult]);
 
-  if (!card || !statusResult) {
-    return (
-      <View style={styles.container}>
-        <Text>Card not found.</Text>
-      </View>
-    );
-  }
-
   const { status } = statusResult;
   const color = STATUS_COLORS[status];
 
-  async function handleContinue() {
+  async function handleSaveCard() {
+    router.push({
+      pathname: '/sign-in',
+      params: {
+        pendingCard: JSON.stringify({
+          bankName,
+          creditLimit: creditLimitStr,
+          outstandingBalance: outstandingBalanceStr,
+          statementDay: statementDayStr,
+          dueDayOffset: dueDayOffsetStr,
+        }),
+        fromOnboarding: 'true',
+      },
+    });
+  }
+
+  async function handleSkip() {
+    const { addCard } = useCardStore.getState();
+    const { defaultInterestRate, defaultMinPaymentPct, defaultMinPaymentFloor } = useUserStore.getState();
+
+    addCard({
+      bankName: bankName ?? '',
+      creditLimit: parseFloat(creditLimitStr ?? '0'),
+      outstandingBalance: parseFloat(outstandingBalanceStr ?? '0'),
+      statementDay: parseInt(statementDayStr ?? '1', 10),
+      dueDayOffset: parseInt(dueDayOffsetStr ?? '21', 10),
+      interestRate: defaultInterestRate,
+      minPaymentPct: defaultMinPaymentPct,
+      minPaymentFloor: defaultMinPaymentFloor,
+    });
+
     const granted = await requestPermission();
-    if (granted) {
-      trackOnboardingNotificationsGranted();
-    } else {
-      trackOnboardingNotificationsDeclined();
-    }
+    if (granted) trackOnboardingNotificationsGranted();
+    else trackOnboardingNotificationsDeclined();
+
     useOnboardingStore.getState().complete();
     router.replace('/');
   }
@@ -94,7 +148,7 @@ export default function OnboardingResultScreen() {
         </View>
 
         <SurfaceCard>
-          <Text style={styles.cardName}>{card.bankName}</Text>
+          <Text style={styles.cardName}>{inMemoryCard.bankName}</Text>
           <RNView style={[styles.divider, { backgroundColor: t.border }]} />
 
           {/* Credit usage bar */}
@@ -116,7 +170,7 @@ export default function OnboardingResultScreen() {
             </RNView>
             <RNView style={styles.usageFooter}>
               <Text style={[styles.usageAmount, { color: t.textMuted }]}>
-                {card.outstandingBalance.toLocaleString()} / {card.creditLimit.toLocaleString()}
+                {inMemoryCard.outstandingBalance.toLocaleString()} / {inMemoryCard.creditLimit.toLocaleString()}
               </Text>
             </RNView>
           </RNView>
@@ -124,13 +178,16 @@ export default function OnboardingResultScreen() {
 
         {/* Billing cycle timeline */}
         <SurfaceCard>
-          <BillingTimeline card={card} />
+          <BillingTimeline card={inMemoryCard} />
         </SurfaceCard>
 
       </ScrollView>
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
-        <Button label="Go to Dashboard" onPress={handleContinue} />
+        <Button label="Save my card" onPress={handleSaveCard} />
+        <Pressable onPress={handleSkip} style={styles.skipButton}>
+          <Text style={[styles.skipText, { color: t.textMuted }]}>Skip for now</Text>
+        </Pressable>
       </View>
     </KeyboardAvoidingView>
   );
@@ -206,5 +263,12 @@ const styles = StyleSheet.create({
   usageAmount: {
     fontSize: 12,
     fontFamily: fonts.interRegular,
+  },
+  skipButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  skipText: {
+    fontSize: 14,
   },
 });

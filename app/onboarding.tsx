@@ -11,29 +11,18 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/Themed';
-import { useCardStore } from '@/store/cardStore';
-import { useUserStore } from '@/store/userStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
 import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
-import { trackCardAdded, trackOnboardingCardEntryCompleted } from '@/utils/analytics';
+import { trackOnboardingCardEntryCompleted } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
 import { Button, Heading, Label } from '@/components/atoms';
-import { BankPicker, DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
+import { BankPicker, DayInput, MoneyInput, parseMoney } from '@/components/molecules';
 
 
 export default function OnboardingScreen() {
   const t = useAppTheme();
   const insets = useSafeAreaInsets();
-  const addCard = useCardStore((s) => s.addCard);
-  const updateCard = useCardStore((s) => s.updateCard);
-  const defaultInterestRate = useUserStore((s) => s.defaultInterestRate);
-  const defaultMinPaymentPct = useUserStore((s) => s.defaultMinPaymentPct);
-  const defaultMinPaymentFloor = useUserStore((s) => s.defaultMinPaymentFloor);
 
-  const existingCards = useCardStore((s) => s.cards);
-  const [onboardingCardId, setOnboardingCardId] = useState<string | null>(
-    existingCards.length > 0 ? existingCards[existingCards.length - 1].id : null,
-  );
   const [accountName, setAccountName] = useState('');
   const [statementDay, setStatementDay] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -73,37 +62,18 @@ export default function OnboardingScreen() {
 
     const balance = parseMoney(outstandingBalance);
 
-    let cardId = onboardingCardId;
-
-    if (cardId) {
-      // Update existing onboarding card instead of creating a duplicate
-      updateCard(cardId, {
-        bankName: accountName.trim(),
-        creditLimit: limit,
-        outstandingBalance: balance,
-        statementDay: stmtDay,
-        dueDayOffset: offset,
-      });
-    } else {
-      addCard({
-        bankName: accountName.trim(),
-        creditLimit: limit,
-        outstandingBalance: balance,
-        statementDay: stmtDay,
-        dueDayOffset: offset,
-        interestRate: defaultInterestRate,
-        minPaymentPct: defaultMinPaymentPct,
-        minPaymentFloor: defaultMinPaymentFloor,
-      });
-      const cards = useCardStore.getState().cards;
-      cardId = cards[cards.length - 1].id;
-      setOnboardingCardId(cardId);
-      trackCardAdded('onboarding');
-    }
-
     trackOnboardingCardEntryCompleted(accountName.trim(), balance > 0);
     useOnboardingStore.getState().setStep('first_status');
-    router.push({ pathname: '/onboarding-result', params: { cardId } });
+    router.push({
+      pathname: '/onboarding-result',
+      params: {
+        bankName: accountName.trim(),
+        creditLimit: String(limit),
+        outstandingBalance: String(balance),
+        statementDay: String(stmtDay),
+        dueDayOffset: String(offset),
+      },
+    });
   }
 
   return (

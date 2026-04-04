@@ -17,12 +17,15 @@ import { Text } from '@/components/Themed';
 import { Button, FormInput } from '@/components/atoms';
 import { useAuthStore } from '@/store/authStore';
 import { useCardStore } from '@/store/cardStore';
+import { useUserStore } from '@/store/userStore';
+import { useOnboardingStore } from '@/store/onboardingStore';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { syncOnSignIn, uploadCard, type SyncResult } from '@/utils/sync';
 import { supabase } from '@/utils/supabase';
 import { MergePrompt } from '@/components/organisms/MergePrompt';
 import type { Card } from '@/types/card';
+import { trackCardAdded } from '@/utils/analytics';
 
 function mapAuthError(message: string): string {
   const lower = message.toLowerCase();
@@ -44,7 +47,11 @@ function showToast(message: string) {
 export default function SignInScreen() {
   const t = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { mode: initialMode } = useLocalSearchParams<{ mode?: string }>();
+  const { mode: initialMode, pendingCard, fromOnboarding } = useLocalSearchParams<{
+    mode?: string;
+    pendingCard?: string;
+    fromOnboarding?: string;
+  }>();
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
   const signInWithEmail = useAuthStore((s) => s.signInWithEmail);
   const signUpWithEmail = useAuthStore((s) => s.signUpWithEmail);
@@ -83,6 +90,38 @@ export default function SignInScreen() {
     return true;
   }
 
+  function savePendingCard() {
+    if (!pendingCard || fromOnboarding !== 'true') return;
+    try {
+      const cardData = JSON.parse(pendingCard);
+      const { addCard } = useCardStore.getState();
+      const { defaultInterestRate, defaultMinPaymentPct, defaultMinPaymentFloor } = useUserStore.getState();
+
+      addCard({
+        bankName: cardData.bankName,
+        creditLimit: parseFloat(cardData.creditLimit),
+        outstandingBalance: parseFloat(cardData.outstandingBalance),
+        statementDay: parseInt(cardData.statementDay, 10),
+        dueDayOffset: parseInt(cardData.dueDayOffset, 10),
+        interestRate: defaultInterestRate,
+        minPaymentPct: defaultMinPaymentPct,
+        minPaymentFloor: defaultMinPaymentFloor,
+      });
+
+      trackCardAdded('onboarding');
+    } catch (e) {
+      console.warn('Failed to save pending card:', e);
+    }
+  }
+
+  function navigateAfterAuth() {
+    if (fromOnboarding === 'true') {
+      savePendingCard();
+      useOnboardingStore.getState().complete();
+    }
+    router.replace('/');
+  }
+
   async function handleKeepLocal() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -94,7 +133,7 @@ export default function SignInScreen() {
       showToast('Sync failed');
     }
     setSyncResult(null);
-    router.back();
+    navigateAfterAuth();
   }
 
   async function handleRestoreCloud() {
@@ -103,7 +142,7 @@ export default function SignInScreen() {
     useCardStore.getState().bulkImport(syncResult.cloudCards);
     showToast('Sync complete');
     setSyncResult(null);
-    router.back();
+    navigateAfterAuth();
   }
 
   async function handleMergeBoth() {
@@ -137,7 +176,7 @@ export default function SignInScreen() {
       showToast('Sync failed');
     }
     setSyncResult(null);
-    router.back();
+    navigateAfterAuth();
   }
 
   const isSignUp = mode === 'signup';
@@ -169,7 +208,7 @@ export default function SignInScreen() {
         await signInWithEmail(email.trim(), password);
       }
       const shouldNavigate = await handlePostSignInSync();
-      if (shouldNavigate) router.back();
+      if (shouldNavigate) navigateAfterAuth();
     } catch (e: unknown) {
       const msg = mapAuthError(e instanceof Error ? e.message : 'Authentication failed');
       if (msg.toLowerCase().includes('email') || msg.toLowerCase().includes('account')) {
@@ -188,7 +227,7 @@ export default function SignInScreen() {
     try {
       await signInWithGoogle();
       const shouldNavigate = await handlePostSignInSync();
-      if (shouldNavigate) router.back();
+      if (shouldNavigate) navigateAfterAuth();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Google Sign-In failed';
       setEmailError(msg);
@@ -221,9 +260,20 @@ export default function SignInScreen() {
         contentContainerStyle={[styles.container, { paddingTop: insets.top + 80 }]}
         keyboardShouldPersistTaps="handled"
       >
+        {fromOnboarding === 'true' && (
+          <Pressable onPress={() => router.back()} style={styles.backLink}>
+            <Text style={{ color: t.textMuted }}>{'\u2190'} Back</Text>
+          </Pressable>
+        )}
+
         <Text style={[styles.title, { color: t.textPrimary }]}>
           {isSignUp ? 'Create Account' : 'Welcome back'}
         </Text>
+        {fromOnboarding === 'true' && (
+          <Text style={[styles.savePrompt, { color: t.textSecondary }]}>
+            Create an account to save your card and sync across devices.
+          </Text>
+        )}
         <Text style={[styles.subtitle, { color: resetSent ? t.safe : t.textSecondary }]}>
           {resetSent
             ? `Password reset link sent to ${email.trim()}.`
@@ -379,5 +429,13 @@ const styles = StyleSheet.create({
   },
   spinner: {
     marginTop: 16,
+  },
+  backLink: {
+    marginBottom: 16,
+  },
+  savePrompt: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 8,
   },
 });
