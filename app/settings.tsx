@@ -28,6 +28,7 @@ import { Button, Badge } from '@/components/atoms';
 import { AlertBanner, SurfaceCard, PercentInput, MoneyInput, parseMoney } from '@/components/molecules';
 import type { PayoffStrategy } from '@/store/userStore';
 import { scheduleAllReminders } from '@/utils/notifications';
+import { useOverlayStore } from '@/store/overlayStore';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
 import { fullSync } from '@/utils/sync';
 import { supabase } from '@/utils/supabase';
@@ -89,6 +90,12 @@ export default function SettingsScreen() {
   function setNotifyHighUtilization(v: boolean) {
     _setNotifyHighUtilization(v);
   }
+
+  const overlayPrefs = useOverlayStore((s) => s.overlayPrefs);
+  const setOverlayPrefs = useOverlayStore((s) => s.setOverlayPrefs);
+  const resetDismissed = useOverlayStore((s) => s.resetDismissed);
+  const proUser = isPro() || isProPlus() || isTrialActive();
+
   const defaultInterestRate = useUserStore((s) => s.defaultInterestRate);
   const setDefaultInterestRate = useUserStore((s) => s.setDefaultInterestRate);
   const defaultMinPaymentPct = useUserStore((s) => s.defaultMinPaymentPct);
@@ -292,6 +299,119 @@ export default function SettingsScreen() {
           </RNView>
           <Switch value={notifyHighUtilization} onValueChange={setNotifyHighUtilization} />
         </RNView>
+      </SurfaceCard>
+
+      {/* ── Card Tips & Alerts ── */}
+      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Card Tips & Alerts</Text>
+      <SurfaceCard>
+        <RNView style={styles.valueRow}>
+          <RNView style={{ flex: 1 }}>
+            <RNView style={styles.lockRow}>
+              <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Show card overlays</Text>
+              {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
+            </RNView>
+            <Text style={[styles.itemHint, { color: t.textMuted }]}>
+              {proUser ? 'Master switch for all overlay types' : 'Upgrade to Pro to control overlays'}
+            </Text>
+          </RNView>
+          <Switch
+            value={overlayPrefs.enabled}
+            onValueChange={(v) => { if (proUser) setOverlayPrefs({ enabled: v }); }}
+            disabled={!proUser}
+          />
+        </RNView>
+
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        <RNView style={styles.valueRow}>
+          <RNView style={styles.lockRow}>
+            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Alerts</Text>
+            {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
+          </RNView>
+          <Switch value={overlayPrefs.alerts} onValueChange={(v) => { if (proUser) setOverlayPrefs({ alerts: v }); }} disabled={!proUser} />
+        </RNView>
+
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        <RNView style={styles.valueRow}>
+          <RNView style={styles.lockRow}>
+            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Statement tips</Text>
+            {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
+          </RNView>
+          <Switch value={overlayPrefs.statements} onValueChange={(v) => { if (proUser) setOverlayPrefs({ statements: v }); }} disabled={!proUser} />
+        </RNView>
+
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        <RNView style={styles.valueRow}>
+          <RNView style={styles.lockRow}>
+            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Educational tips</Text>
+            {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
+          </RNView>
+          <Switch value={overlayPrefs.tips} onValueChange={(v) => { if (proUser) setOverlayPrefs({ tips: v }); }} disabled={!proUser} />
+        </RNView>
+
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        <RNView style={styles.valueRow}>
+          <RNView style={styles.lockRow}>
+            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Promotions</Text>
+            {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
+          </RNView>
+          <Switch value={overlayPrefs.promos} onValueChange={(v) => { if (proUser) setOverlayPrefs({ promos: v }); }} disabled={!proUser} />
+        </RNView>
+
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        <RNView style={styles.valueRow}>
+          <RNView style={styles.lockRow}>
+            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Partner offers</Text>
+            {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
+          </RNView>
+          <Switch value={overlayPrefs.affiliates} onValueChange={(v) => { if (proUser) setOverlayPrefs({ affiliates: v }); }} disabled={!proUser} />
+        </RNView>
+
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        {/* Frequency picker */}
+        <Pressable
+          style={styles.defaultRow}
+          onPress={() => {
+            if (!proUser) { router.push('/pro-paywall'); return; }
+            const options = [
+              { label: 'Daily', value: 1 },
+              { label: 'Every 3 days', value: 3 },
+              { label: 'Weekly', value: 7 },
+              { label: 'Monthly', value: 30 },
+            ];
+            const current = overlayPrefs.frequencyDays;
+            const idx = options.findIndex((o) => o.value === current);
+            const next = options[(idx + 1) % options.length];
+            setOverlayPrefs({ frequencyDays: next.value });
+          }}
+          accessibilityRole="button"
+          accessibilityLabel={`Tip frequency: ${overlayPrefs.frequencyDays === 1 ? 'Daily' : overlayPrefs.frequencyDays === 3 ? 'Every 3 days' : overlayPrefs.frequencyDays === 7 ? 'Weekly' : 'Monthly'}`}
+        >
+          <RNView style={styles.lockRow}>
+            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Tip frequency</Text>
+            {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
+          </RNView>
+          <Text style={[styles.defaultValue, { color: proUser ? t.primary : t.textMuted }]}>
+            {overlayPrefs.frequencyDays === 1 ? 'Daily' : overlayPrefs.frequencyDays === 3 ? 'Every 3 days' : overlayPrefs.frequencyDays === 7 ? 'Weekly' : 'Monthly'}
+          </Text>
+        </Pressable>
+
+        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+
+        {/* Reset dismissed */}
+        <Button
+          label="Reset dismissed tips"
+          variant="secondary"
+          onPress={() => {
+            resetDismissed();
+            Alert.alert('Tips Reset', 'All dismissed tips have been restored.');
+          }}
+        />
       </SurfaceCard>
 
       {/* ── Education ── */}
@@ -788,6 +908,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 2,
+  },
+  lockRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   defaultValue: {
     fontSize: 14,

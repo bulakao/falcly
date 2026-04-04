@@ -152,6 +152,37 @@ Tracking findings, issues, and things to review after wiggum completes.
 
 ---
 
+## Run 7 — Statement Advisor Batch 2 (Card Overlay System)
+
+### Stories completed
+- SD-05 (CardOverlay component + queue system)
+- SD-06 (Overlay preferences in Settings)
+- SD-07 (Contextual wiki delivery)
+
+### New files
+- types/overlay.ts
+- store/overlayStore.ts
+- components/molecules/CardOverlay.tsx
+- utils/overlayTriggers.ts
+
+### Modified files
+- store/userStore.ts — no changes needed (overlay prefs live in overlayStore)
+- store/subscriptionStore.ts — tier downgrade resets overlay prefs
+- app/settings.tsx — Card Tips & Alerts section with Pro-gated toggles
+- components/organisms/CardPager.tsx — overlay integration + contextual wiki triggers
+- components/organisms/SwipeImpactPanel.tsx — contextual triggers on amount entry
+- components/organisms/AllCardsOverview.tsx — portfolio-level overlay rendering
+- components/molecules/index.ts — CardOverlay barrel export
+
+### Findings
+- Overlay prefs stored in overlayStore (Zustand + AsyncStorage) rather than userStore (Drizzle/SQLite) to avoid schema migration
+- CardOverlay positioned absolute on top of CreditCardFace — matches card dimensions via container bounds
+- Wiki deduplication uses wikiId+cardId prefix matching against dismissedIds
+- Pre-existing lint warning in SwipeImpactPanel (react-hooks/exhaustive-deps for transactions) — not introduced by this batch
+- 70 existing tests continue to pass (no new tests needed — overlay system is UI-only with no pure business logic to unit test)
+
+---
+
 ## TODO
 
 - [ ] Set up RevenueCat project + integrate SDK (replace simulated purchase logic in subscriptionStore) — parked

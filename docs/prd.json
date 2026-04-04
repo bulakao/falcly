@@ -1592,6 +1592,58 @@
       "priority": 4,
       "passes": true,
       "notes": ""
+    },
+    {
+      "id": "SD-05",
+      "title": "CardOverlay component + queue system",
+      "phase": 7,
+      "group": "Statement Advisor",
+      "description": "Non-blocking card overlay component with priority queue, dismiss persistence, and frequency gating.",
+      "acceptanceCriteria": [
+        "CardOverlayItem type with 7 overlay types and priority constants",
+        "overlayStore with enqueue, dismiss, getNextOverlay, shouldShowOverlay actions",
+        "CardOverlay molecule component with type-based icon, tint, dismiss button, and CTA",
+        "Overlay renders on top of CreditCardFace in CardPager",
+        "Portfolio-level overlay renders at top of AllCardsOverview",
+        "Dismissed IDs persisted to AsyncStorage"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "SD-06",
+      "title": "Overlay preferences in Settings",
+      "phase": 7,
+      "group": "Statement Advisor",
+      "description": "Pro-gated overlay preference toggles in Settings, frequency picker, and tier downgrade handling.",
+      "acceptanceCriteria": [
+        "Card Tips & Alerts section in settings with master toggle and per-type toggles",
+        "All toggles locked for free users with lock icon",
+        "Frequency picker cycles through Daily/Every 3 days/Weekly/Monthly",
+        "Reset dismissed tips button available to all users",
+        "Tier downgrade resets overlay prefs to defaults"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "SD-07",
+      "title": "Contextual wiki delivery",
+      "phase": 7,
+      "group": "Statement Advisor",
+      "description": "Contextual wiki overlay triggers based on card state, timing, and user actions.",
+      "acceptanceCriteria": [
+        "getContextualWikiOverlay evaluates trigger conditions for W-04, W-10, W-11, W-12",
+        "Triggers fire when card is viewed in CardPager",
+        "Triggers fire when user enters amount in SwipeImpactPanel",
+        "Wiki overlays convert to CardOverlayItem with correct priority and actionRoute",
+        "Deduplication prevents re-queuing dismissed wiki overlays"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
     }
   ]
 }

@@ -5,7 +5,7 @@ import { Text, View } from '@/components/Themed';
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { SectionHeader, OfflineChip, Badge } from '@/components/atoms';
-import { BestCardBanner, FinanceCard, SurfaceCard } from '@/components/molecules';
+import { BestCardBanner, FinanceCard, SurfaceCard, CardOverlay } from '@/components/molecules';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useAuthStore } from '@/store/authStore';
 import { GanttTimeline } from '@/components/organisms/GanttTimeline';
@@ -14,6 +14,7 @@ import { calculateBestCard, calculateCardStatus, getCycleDates } from '@/utils/d
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';
+import { useOverlayStore } from '@/store/overlayStore';
 import type { Card } from '@/types/card';
 
 type SortMode = 'urgency' | 'utilization' | 'dueDate';
@@ -136,8 +137,24 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
     (c) => c.installmentsMonthlyAmount > 0 || c.subscriptionsThisCycle > 0 || (c.annualFee > 0 && c.annualFeeMonth > 0),
   );
 
+  const getNextOverlay = useOverlayStore((s) => s.getNextOverlay);
+  const dismissOverlay = useOverlayStore((s) => s.dismiss);
+  const shouldShowOverlay = useOverlayStore((s) => s.shouldShowOverlay);
+  const portfolioOverlay = shouldShowOverlay() ? getNextOverlay() : null;
+
   return (
     <View style={styles.container}>
+      {/* Portfolio-level overlay */}
+      {portfolioOverlay && (
+        <RNView style={styles.portfolioOverlay}>
+          <CardOverlay
+            item={portfolioOverlay}
+            onDismiss={() => dismissOverlay(portfolioOverlay.id)}
+            onAction={() => dismissOverlay(portfolioOverlay.id)}
+          />
+        </RNView>
+      )}
+
       {/* Guest data warning banner */}
       {showGuestBanner && (
         <Pressable
@@ -255,6 +272,11 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
 const styles = StyleSheet.create({
   container: {
     paddingTop: 16,
+  },
+  portfolioOverlay: {
+    position: 'relative',
+    height: 120,
+    marginBottom: 12,
   },
   sortRow: {
     flexDirection: 'row',

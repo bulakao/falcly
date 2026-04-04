@@ -1,4 +1,4 @@
-import { useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useCallback, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import {
   StyleSheet,
   FlatList,
@@ -6,20 +6,23 @@ import {
   Pressable,
   Dimensions,
   Keyboard,
+  View as RNView,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View as RNView } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { LayoutGrid } from 'lucide-react-native';
 import { Text, View } from '@/components/Themed';
 import { CreditCardFace, EmptyCardFace } from '@/components/atoms';
-import { ImpactSkeleton } from '@/components/molecules';
+import { ImpactSkeleton, CardOverlay } from '@/components/molecules';
 import { SwipeImpactPanel } from '@/components/organisms/SwipeImpactPanel';
 import { AllCardsOverview } from '@/components/organisms/AllCardsOverview';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { useOverlayStore } from '@/store/overlayStore';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
+import { getCycleDates } from '@/utils/decisionEngine';
+import { getContextualWikiOverlay } from '@/utils/overlayTriggers';
 import type { Card } from '@/types/card';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -44,6 +47,41 @@ type PageItem =
   | { type: 'overview' }
   | { type: 'card'; card: Card; index: number }
   | { type: 'empty' };
+
+function CardOverlayLayer({ cardId, card }: { cardId?: string; card?: Card }) {
+  const getNextOverlay = useOverlayStore((s) => s.getNextOverlay);
+  const dismiss = useOverlayStore((s) => s.dismiss);
+  const shouldShow = useOverlayStore((s) => s.shouldShowOverlay);
+  const enqueue = useOverlayStore((s) => s.enqueue);
+
+  // Trigger contextual wiki overlays when card is viewed
+  useEffect(() => {
+    if (!card) return;
+    const cycle = getCycleDates(card);
+    const utilization = card.creditLimit > 0 ? card.outstandingBalance / card.creditLimit : 0;
+    const overlay = getContextualWikiOverlay({
+      card,
+      today: new Date(),
+      daysToStatement: cycle.daysToStatement,
+      utilization,
+    });
+    if (overlay) enqueue(overlay);
+  }, [card, enqueue]);
+
+  const overlay = shouldShow() ? getNextOverlay(cardId) : null;
+  if (!overlay) return null;
+
+  return (
+    <CardOverlay
+      item={overlay}
+      onDismiss={() => dismiss(overlay.id)}
+      onAction={() => {
+        dismiss(overlay.id);
+        if (overlay.actionRoute) router.push(overlay.actionRoute as never);
+      }}
+    />
+  );
+}
 
 export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
   function CardPager({ cards, onAddCard, getNetAvailableCash, getCurrentCycleTxSum, initialIndex = 0, onBannerPress, hasHiddenCards = false }, ref) {
@@ -146,6 +184,7 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
           >
             <View style={styles.cardWrapper}>
               <CreditCardFace card={card} netAvailableCash={getNetAvailableCash(card)} currentCycleTxSum={getCurrentCycleTxSum ? getCurrentCycleTxSum(card) : 0} />
+              <CardOverlayLayer cardId={card.id} card={card} />
             </View>
             <SwipeImpactPanel card={card} readOnly={readOnly} />
           </ScrollView>

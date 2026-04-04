@@ -89,6 +89,10 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
           // Trial expired → fall back to free
           set({ tier: 'free', trialEndsAt: null, proExpiredAt: Date.now() });
           useCardStore.getState().enforceActiveLimit(FREE_CARD_LIMIT);
+          // Reset overlay prefs to defaults (all on)
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
+          const { useOverlayStore } = require('@/store/overlayStore');
+          useOverlayStore.getState().resetOverlayPrefs();
         }
       },
 

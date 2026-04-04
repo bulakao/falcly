@@ -15,6 +15,8 @@ import { calculateSwipeImpact, calculateCardStatus, computeNetAvailableCash, com
 import { getStalenessLevel } from '@/utils/staleness';
 import type { Card } from '@/types/card';
 import { trackSwipeCheckPerformed, trackDataStalenessWarningShown } from '@/utils/analytics';
+import { useOverlayStore } from '@/store/overlayStore';
+import { getContextualWikiOverlay } from '@/utils/overlayTriggers';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -107,6 +109,26 @@ export function SwipeImpactPanel({
     }
     prevAmountRef.current = proposedAmount;
   }, [proposedAmount, impact]);
+
+  // Trigger contextual wiki overlays when user enters an amount
+  const enqueueOverlay = useOverlayStore((s) => s.enqueue);
+  useEffect(() => {
+    if (proposedAmount > 0) {
+      const cycle = getCycleDates(card);
+      const projectedUtil = card.creditLimit > 0
+        ? (card.outstandingBalance + proposedAmount) / card.creditLimit
+        : 0;
+      const overlay = getContextualWikiOverlay({
+        card,
+        today: new Date(),
+        daysToStatement: cycle.daysToStatement,
+        utilization: projectedUtil,
+        justSwiped: true,
+        proposedAmount,
+      });
+      if (overlay) enqueueOverlay(overlay);
+    }
+  }, [proposedAmount, card, enqueueOverlay]);
 
   // Track staleness warning shown once per mount
   const stalenessTrackedRef = useRef(false);
