@@ -16,8 +16,8 @@ import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
 import { trackCardAdded } from '@/utils/analytics';
-import { Button } from '@/components/atoms';
-import { DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
+import { Button, Label } from '@/components/atoms';
+import { BankPicker, DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 
@@ -94,13 +94,14 @@ export default function AddCardScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>
-        <FormFieldGroup
-          label="Card Name"
-          value={bankName}
-          onChangeText={setBankName}
-          placeholder="BDO, BPI, Metrobank"
-          autoFocus
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Card Name</Label>
+          <BankPicker
+            value={bankName}
+            onSelect={setBankName}
+            placeholder="BDO, BPI, Metrobank"
+          />
+        </View>
 
         <MoneyInput
           label="Credit Limit"
@@ -155,6 +156,9 @@ const styles = StyleSheet.create({
   container: {
     padding: 24,
     paddingBottom: 48,
+  },
+  fieldGroup: {
+    marginTop: 16,
   },
   buttonWrapper: {
     marginTop: 32,

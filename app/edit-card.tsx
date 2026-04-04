@@ -16,8 +16,8 @@ import { useInstallmentStore } from '@/store/installmentStore';
 import { useSubscriptionItemStore } from '@/store/subscriptionItemStore';
 import { useAppTheme } from '@/theme';
 import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
-import { Button, Heading } from '@/components/atoms';
-import { FormFieldGroup } from '@/components/molecules';
+import { Button, Heading, Label } from '@/components/atoms';
+import { BankPicker, FormFieldGroup } from '@/components/molecules';
 import { fonts } from '@/theme/fonts';
 
 export default function EditCardScreen() {
@@ -121,12 +121,14 @@ export default function EditCardScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <Heading>Edit Card</Heading>
 
-        <FormFieldGroup
-          label="Card Name"
-          value={bankName}
-          onChangeText={setBankName}
-          placeholder="BDO, BPI, Metrobank"
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Card Name</Label>
+          <BankPicker
+            value={bankName}
+            onSelect={setBankName}
+            placeholder="BDO, BPI, Metrobank"
+          />
+        </View>
 
         <FormFieldGroup
           label="Credit Limit"
@@ -257,6 +259,9 @@ const styles = StyleSheet.create({
   container: {
     padding: 24,
     paddingBottom: 48,
+  },
+  fieldGroup: {
+    marginTop: 16,
   },
   managedField: {
     marginTop: 16,

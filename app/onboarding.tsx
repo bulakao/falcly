@@ -17,8 +17,8 @@ import { useOnboardingStore } from '@/store/onboardingStore';
 import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
 import { trackCardAdded, trackOnboardingCardEntryCompleted } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
-import { Button, Heading } from '@/components/atoms';
-import { DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
+import { Button, Heading, Label } from '@/components/atoms';
+import { BankPicker, DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
 
 
 export default function OnboardingScreen() {
@@ -118,13 +118,14 @@ export default function OnboardingScreen() {
         </Text>
 
         {/* Account Name */}
-        <FormFieldGroup
-          label="Account Name"
-          value={accountName}
-          onChangeText={setAccountName}
-          placeholder="My Credit Card"
-          autoCapitalize="words"
-        />
+        <View style={styles.fieldGroup}>
+          <Label>Account Name</Label>
+          <BankPicker
+            value={accountName}
+            onSelect={setAccountName}
+            placeholder="My Credit Card"
+          />
+        </View>
 
         {/* Credit Limit */}
         <MoneyInput
@@ -170,6 +171,9 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 24,
     paddingBottom: 48,
+  },
+  fieldGroup: {
+    marginTop: 16,
   },
   subtitle: {
     fontSize: 15,

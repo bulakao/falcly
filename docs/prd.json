@@ -1152,7 +1152,7 @@
         "TypeScript compiles cleanly"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Plain text bank name is the current weak point in first-run quality."
     },
     {
