@@ -5,6 +5,12 @@
 
 ---
 
+## ❓ Open Questions
+
+- [ ] **Trial reset on reinstall** — Users who uninstall/reinstall could reset their trial. RevenueCat tracks trial state server-side per Apple ID / Google account, but anonymous users (no sign-in) are vulnerable. Need to decide: require sign-in to start trial, or accept the risk at launch?
+
+---
+
 ## 🚀 Pre-Launch (Blockers)
 
 - [ ] Set up products in Google Play Console
