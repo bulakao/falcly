@@ -100,9 +100,9 @@ Priority order (highest first):
 
 ### Targeting
 
-- **Card-specific** — overlay tied to a specific card (e.g. clustering alert for BDO)
-- **Portfolio-level** — shown on first card in pager (e.g. spread score drop)
-- **Global** — shown on all cards in rotation (e.g. wiki tips)
+- **Overview page (all cards)** — portfolio-level overlays about the whole spread (e.g. clustering, dead zones, spread score)
+- **Per-card page** — card-specific overlays about that card only (e.g. "BDO just reset — good time to swipe", due date alert)
+- Context determines which: overview = portfolio, card detail = that card
 
 ### Component: `CardOverlay`
 
@@ -132,12 +132,12 @@ New section in Settings: **"Card Tips & Alerts"**
 | Setting                      | Free                   | Pro            |
 | ---------------------------- | ---------------------- | -------------- |
 | Master on/off switch         | ❌ Locked on            | ✅ Can turn off |
-| Alerts (due date, high util) | ✅ Always on            | ✅ Always on    |
+| Alerts (due date, high util) | ✅ Always on            | ✅ Full control (can turn off) |
 | Statement tips toggle        | ❌ Locked on            | ✅ Configurable |
 | Educational tips toggle      | ❌ Locked on            | ✅ Configurable |
 | Promotions toggle            | ❌ Locked on            | ✅ Can turn off |
 | Affiliate offers toggle      | ❌ Locked on            | ✅ Can turn off |
-| Tip frequency                | ❌ Fixed (every 3 days) | ✅ Configurable |
+| Tip frequency                | ❌ Fixed (daily, max 1/day) | ✅ Configurable |
 | Reset dismissed tips         | ✅ Available            | ✅ Available    |
 
 
@@ -151,12 +151,12 @@ New section in Settings: **"Card Tips & Alerts"**
 | Setting              | Type                | Default      | Description                                      |
 | -------------------- | ------------------- | ------------ | ------------------------------------------------ |
 | Show card overlays   | Toggle              | On           | Master switch — turns off all non-alert overlays |
-| Alerts               | Toggle              | On           | Due date / high utilization alerts (always on)   |
+| Alerts               | Toggle              | On           | Due date / high utilization alerts (Pro can turn off) |
 | Statement tips       | Toggle              | On           | Statement date insights                          |
 | Educational tips     | Toggle              | On           | Grace period, timing, wiki cards                 |
 | Promotions           | Toggle              | On           | App feature highlights                           |
 | Affiliate offers     | Toggle              | On           | Partner offers (future)                          |
-| Tip frequency        | Picker              | Every 3 days | Daily / Every 3 days / Weekly / Monthly          |
+| Tip frequency        | Picker              | Daily (1/day) | Daily / Every 3 days / Weekly / Monthly / Off   |
 | Reset dismissed tips | Button (free + pro) | —            | Re-show all previously dismissed tips            |
 
 
@@ -207,8 +207,8 @@ Each wiki entry:
 ### Wiki Delivery
 
 - Shown as `CardOverlay` with `type: 'wiki'`
-- Rotates through wiki cards based on relevance (e.g. W-04 shown after user swipes close to statement date)
-- Contextual delivery: W-07 shown when user has a clustered portfolio
+- Shown only when relevant situation is detected (e.g. W-04 shown when user swipes close to statement date)
+- Contextual delivery only — no random rotation. Relevance > volume.
 - Can also be browsed manually in Statement Advisor → "Credit Card 101" section
 - Future: `falcly.com/learn` for full web versions
 
@@ -399,16 +399,20 @@ Rendered over `CreditCardFace`, matching card dimensions and border radius. Anim
 
 ## User Stories
 
-
+### Batch 1 — Statement Advisor Core (SD-01 to SD-04)
 | ID    | Title                                                   | Notes             |
 | ----- | ------------------------------------------------------- | ----------------- |
 | SD-01 | `analyzeSpread()` engine in `utils/statementAdvisor.ts` | Core algorithm    |
 | SD-02 | Statement Advisor screen — score + timeline             | Visual            |
 | SD-03 | Issues list + recommendations section                   | Logic display     |
 | SD-04 | Timing guide + bank reference + Credit Card 101 wiki    | Educational       |
+
+### Batch 2 — Card Overlay System (SD-05 to SD-07)
+| ID    | Title                                                   | Notes             |
+| ----- | ------------------------------------------------------- | ----------------- |
 | SD-05 | `CardOverlay` component + overlay queue system          | Infrastructure    |
-| SD-06 | Overlay preferences in Settings                         | User control      |
-| SD-07 | Contextual wiki delivery via `CardOverlay`              | W-01 through W-12 |
+| SD-06 | Overlay preferences in Settings (+ notification rework) | User control      |
+| SD-07 | Contextual wiki delivery via `CardOverlay`              | W-01 through W-13 |
 
 
 ---
