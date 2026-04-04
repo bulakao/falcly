@@ -106,3 +106,10 @@ Started: Sat Apr  4 01:34:00 PST 2026
   - MergePrompt: Modal with onRequestClose={() => {}} prevents dismissal on Android back button
   - Guest banner uses AsyncStorage with 7-day expiry — store timestamp, not boolean
   - Settings Cloud Sync section now keyed on `user` (signed in), not subscription tier
+---
+
+## 2026-04-04 - Decision Engine Tests
+- Set up Jest with ts-jest
+- Added __tests__/decisionEngine.test.ts covering all core functions
+- Tests: daysToStatement, getCycleDates, utilization, projectedStatementBalance, calculateCardStatus, calculateSwipeImpact, computeNetAvailableCash, calculateBestCard, computePayoffProjection
+- All tests passing — decision engine logic verified
