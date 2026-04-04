@@ -1,1 +1,0 @@
-/Users/ramidem/Code/wiggum/ralph.sh
