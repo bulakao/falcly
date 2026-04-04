@@ -8,6 +8,8 @@ import Purchases, {
 const API_KEY = 'test_QoIpmFHMVFDxuzrrCalJEmHXOMK';
 const ENTITLEMENT_ID = 'Falcly Pro';
 
+let configured = false;
+
 /**
  * Initialize RevenueCat SDK — call once at app startup
  */
@@ -16,6 +18,11 @@ export async function initializeRevenueCat(): Promise<void> {
     Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
   }
   Purchases.configure({ apiKey: API_KEY });
+  configured = true;
+}
+
+export function isRevenueCatConfigured(): boolean {
+  return configured;
 }
 
 /**
@@ -27,9 +34,13 @@ export async function identifyUser(userId: string): Promise<CustomerInfo> {
 }
 
 /**
- * Log out user (call on sign-out)
+ * Log out user (call on sign-out).
+ * No-op if the current user is already anonymous.
  */
 export async function logoutUser(): Promise<CustomerInfo> {
+  if (await Purchases.isAnonymous()) {
+    return await Purchases.getCustomerInfo();
+  }
   return await Purchases.logOut();
 }
 

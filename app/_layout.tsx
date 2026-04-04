@@ -10,7 +10,7 @@ import 'react-native-reanimated';
 import { useSubscriptionStore, FREE_CARD_LIMIT } from '@/store/subscriptionStore';
 import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
-import { initializeRevenueCat, identifyUser, logoutUser } from '@/utils/revenuecat';
+import { initializeRevenueCat, isRevenueCatConfigured, identifyUser, logoutUser } from '@/utils/revenuecat';
 import { useTransactionStore } from '@/store/transactionStore';
 import { useInstallmentStore } from '@/store/installmentStore';
 import { useSubscriptionItemStore } from '@/store/subscriptionItemStore';
@@ -101,6 +101,7 @@ function RootLayout() {
   // Identify/logout user with RevenueCat when auth state changes
   const authUser = useAuthStore((s) => s.user);
   useEffect(() => {
+    if (!isRevenueCatConfigured()) return;
     if (authUser?.id) {
       identifyUser(authUser.id).then(() => {
         useSubscriptionStore.getState().initialize();
