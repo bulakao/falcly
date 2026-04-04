@@ -122,8 +122,7 @@ Score = utilization% + days penalty + status penalty. Lowest-scoring SAFE card w
 | Plan | Monthly | Annual | Cards | Overlays |
 |------|---------|--------|-------|----------|
 | Free | $0 | $0 | 2 | Always on |
-| Pro | $4.99 | $39.99 | Unlimited | Configurable |
-| Pro+ | $9.99 | $79.99 | Unlimited + Priority | Full control |
+| Pro | $4.99/mo · $39.99/yr · Lifetime (TBD) | — | Unlimited | Configurable |
 
 ---
 

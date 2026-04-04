@@ -17,7 +17,7 @@ export default function PayoffPlannerScreen() {
   const t = useAppTheme();
   const cards = useCardStore((s) => s.cards);
   const tier = useSubscriptionStore((s) => s.tier);
-  const isPro = tier === 'pro' || tier === 'pro_plus';
+  const isPro = tier === 'pro';
   const { format } = useCurrency();
 
   const [budget, setBudget] = useState('');

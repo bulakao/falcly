@@ -60,14 +60,13 @@ export async function hasProAccess(): Promise<boolean> {
 }
 
 /**
- * Get subscription tier based on entitlements
+ * Get subscription tier based on entitlements.
+ * Products: monthly ($4.99/mo), yearly ($39.99/yr), lifetime (one-time)
+ * All 3 unlock the same 'Falcly Pro' entitlement. No Pro+ tier.
  */
-export function getTierFromCustomerInfo(customerInfo: CustomerInfo): 'free' | 'pro' | 'pro_plus' {
+export function getTierFromCustomerInfo(customerInfo: CustomerInfo): 'free' | 'pro' {
   const entitlement = customerInfo.entitlements.active[ENTITLEMENT_ID];
   if (!entitlement) return 'free';
-
-  const productId = entitlement.productIdentifier;
-  if (productId.includes('pro_plus')) return 'pro_plus';
   return 'pro';
 }
 

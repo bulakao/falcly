@@ -415,14 +415,13 @@
       "group": "Monetization",
       "description": "As Ria, I want to subscribe quarterly, so that I can commit to more than one month without paying for a full year upfront.",
       "acceptanceCriteria": [
-        "Paywall shows three billing options per tier: Annual (Best Value), Quarterly (Most Flexible), Monthly \u2014 in that order",
-        "Pro quarterly: \u20b1399/qtr (\u20b1133/mo effective, ~11% off monthly); Pro+ quarterly: \u20b1649/qtr (\u20b1216/mo effective, ~13% off monthly)",
-        "RevenueCat planType values 'pro_quarterly' and 'pro_plus_quarterly' are granted the correct entitlement on purchase",
-        "Settings screen displays 'Quarterly' plan label and correct price (\u20b1399/qtr or \u20b1649/qtr)"
+        "Paywall shows three billing options: Monthly ($4.99/mo), Yearly ($39.99/yr, Best Value), Lifetime (one-time, price TBD)",
+        "All 3 options unlock the same 'Falcly Pro' entitlement in RevenueCat",
+        "Settings screen displays correct plan label and price"
       ],
       "priority": 25,
       "passes": true,
-      "notes": ""
+      "notes": "Updated: quarterly removed, replaced with monthly/yearly/lifetime. No Pro+ tier."
     },
     {
       "id": "MO-06",
@@ -432,13 +431,13 @@
       "description": "As Marcus, I want to subscribe to Pro+ to access AI features, so that I can use natural language queries and smart alerts in addition to all Pro features.",
       "acceptanceCriteria": [
         "Pro+ is shown as a distinct tier on the paywall with AI features listed (AI-powered alerts, NL queries, spending insights)",
-        "Pro+ monthly: \u20b1249/mo \u00b7 quarterly: \u20b1649/qtr \u00b7 annual: \u20b11,699/yr (\u20b1142/mo)",
         "hasAIAccess() returns true only for pro_plus tier; all AI feature entry points check this before rendering",
         "Pro users see an upsell-only screen (not the full paywall) when navigating to pro-paywall"
       ],
       "priority": 26,
       "passes": true,
-      "notes": ""
+      "parked": true,
+      "notes": "Parked — no Pro+ tier until AI demand signals. All features ship under single Pro tier."
     },
     {
       "id": "OB-03",
@@ -1277,7 +1276,8 @@
       ],
       "priority": 3,
       "passes": false,
-      "notes": "Phase 2 \u2014 post-launch. Pro+ differentiator. Requires server-side infrastructure for Gemini API. Do not implement until Pro+ tier has paying users."
+      "parked": true,
+      "notes": "Parked — no Pro+ tier until AI demand signals. Revisit when NL query feature ships."
     },
     {
       "id": "CU-01",

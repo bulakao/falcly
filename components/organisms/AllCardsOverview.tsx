@@ -97,7 +97,6 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
   }, [cards, sortMode, getNetAvailableCash, getCurrentCycleTxSum]);
 
   function getBadgeLabel() {
-    if (tier === 'pro_plus') return 'PRO+';
     if (tier === 'pro') return 'PRO';
     return 'FREE';
   }

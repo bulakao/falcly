@@ -13,7 +13,7 @@ import {
 } from '@/utils/revenuecat';
 import type { CustomerInfo, PurchasesPackage, PurchasesOffering } from 'react-native-purchases';
 
-export type SubscriptionTier = 'free' | 'pro' | 'pro_plus';
+export type SubscriptionTier = 'free' | 'pro';
 
 const FREE_CARD_LIMIT = 2;
 
@@ -33,8 +33,6 @@ interface SubscriptionStore {
 
   // Derived helpers
   isPro: () => boolean;
-  isProPlus: () => boolean;
-  hasAIAccess: () => boolean;
   hasFullCardAccess: () => boolean;
   canAddCard: (currentCardCount: number) => boolean;
   isCardReadOnly: (cardIndex: number) => boolean;
@@ -135,19 +133,9 @@ export const useSubscriptionStore = create<SubscriptionStore>()(
       },
 
       // Derived helpers
-      isPro: () => {
-        const { tier } = get();
-        return tier === 'pro' || tier === 'pro_plus';
-      },
+      isPro: () => get().tier === 'pro',
 
-      isProPlus: () => get().tier === 'pro_plus',
-
-      hasAIAccess: () => get().tier === 'pro_plus',
-
-      hasFullCardAccess: () => {
-        const { tier } = get();
-        return tier === 'pro' || tier === 'pro_plus';
-      },
+      hasFullCardAccess: () => get().tier === 'pro',
 
       canAddCard: (currentCardCount: number) => {
         return get().hasFullCardAccess() || currentCardCount < FREE_CARD_LIMIT;

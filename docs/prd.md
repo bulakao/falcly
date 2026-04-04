@@ -229,7 +229,7 @@ As a developer, I want new users automatically routed through onboarding after s
 As a new user who just saw their first status, I want to be offered a free trial at the moment I understand Falcly's value, so that I can make an informed decision about upgrading.
 - Trial paywall shown as Step 6 of onboarding (after first status + optional enrichment)
 - Shows free tier summary + [Start Free Trial] primary CTA + [Continue with Free] ghost button
-- Trial/Pro/Pro+ users skip this screen entirely
+- Trial/Pro users skip this screen entirely
 - Fine print: "Payment method required. No charge for 30 days. Cancel anytime."
 - PostHog events: `onboarding_paywall_viewed`, `onboarding_trial_started`, `onboarding_paywall_dismissed`
 
@@ -253,25 +253,20 @@ As a developer, I want PostHog events at every onboarding step, so that I can id
 As Ria, I want to start a free 30-day trial without being charged upfront, so that I can experience all Pro features (minus AI) before deciding to subscribe.
 - Trial is presented at the card 3 paywall trigger and in the payoff planner entry point
 - "Try Free for 30 Days" is the primary CTA; plan details shown below
-- Trial grants full access to all features except AI (Pro+ only)
+- Trial grants full access to all Pro features
 - RevenueCat handles trial mechanics; payment method is required but not charged for 30 days
 - On trial expiry: user falls back to Free tier; cards 3+ become read-only; data preserved for 90 days
 
 **MO-02: Upgrade to Pro**
 As Ria, I want to upgrade to Pro after my trial, so that I can keep managing all my cards with payment planning.
-- Paywall shows three billing options: monthly, quarterly ("Most Flexible"), annual ("Best Value")
-- Annual plan (₱83/mo, billed ₱999/yr) is the hero CTA with "Save 44%" badge
-- Quarterly plan (₱399/qtr, ₱133/mo effective) shown as middle option
-- Monthly plan (₱149/mo) shown as lowest-commitment option
+- Paywall shows three billing options: monthly ($4.99/mo), yearly ($39.99/yr, "Best Value"), lifetime (one-time, price TBD)
+- Yearly plan is the hero CTA with savings badge
+- All 3 options unlock the same 'Falcly Pro' entitlement in RevenueCat
 - "Less than one late payment fee" copy appears beneath the price
 - RevenueCat entitlement `pro` is checked on app launch and gates Pro features
 
-**MO-03: Upgrade to Pro+**
-As Marcus, I want to upgrade to Pro+ to access AI features, so that I can use natural language queries and smart alerts.
-- Pro+ is shown as a distinct upsell on the paywall and in AI feature entry points
-- Pro+ monthly: ₱249/mo · quarterly: ₱649/qtr · annual: ₱1,699/yr (₱142/mo)
-- AI features are the sole differentiator between Pro and Pro+
-- RevenueCat entitlement `pro_plus` gates all AI features
+**MO-03: ~~Upgrade to Pro+~~ (PARKED)**
+Pro+ tier deferred indefinitely. AI features (P2-03) will be re-evaluated when user demand signals readiness. All current features ship under a single Pro tier.
 
 **MO-04: Add 3rd card (paywall trigger)**
 As Ria, I want to be prompted to upgrade when I try to add a 3rd card, so that I understand what Pro unlocks before committing.
@@ -476,7 +471,7 @@ Seven core scenarios the engine must handle correctly:
 
 **Pro (P1 + P1.5):** Unlimited cards, full multi-month timeline, unlimited transaction history, cash-aware projections. Pro also unlocks all P2 features as they ship.
 
-**Pro+ (P1 + P1.5):** Everything in Pro + AI features (Phase 2+): auto-detect transactions from notifications, NL queries, pattern recognition.
+**Note:** Pro+ tier deferred indefinitely. AI features (P2-03) will be re-evaluated when user demand signals readiness. All current features ship under a single Pro tier.
 
 ---
 
@@ -699,7 +694,7 @@ Screen 7: Notifications   Pre-permission screen → native OS dialog
 **Rules:**
 - Welcome screen shown before sign-up — value before commitment
 - Paywall shown AFTER value moment (Screen 6), not before — ~50% of trial starts happen here (RevenueCat data)
-- Trial/Pro/Pro+ users skip Screen 6
+- Trial/Pro users skip Screen 6
 - `[Continue with Free]` always available on Screen 6 — never trap users
 - 3 fields minimum to get first answer (statement day + credit limit + balance)
 - Onboarding state persisted — resumes at last step if app is closed mid-flow
@@ -713,15 +708,12 @@ Screen 7: Notifications   Pre-permission screen → native OS dialog
 
 ### Pricing
 
-| Plan | PH Monthly | PH Quarterly | PH Annual | Max Cards | AI |
-|------|-----------|-------------|-----------|-----------|-----|
-| Free | ₱0 | — | — | 2 | ✗ |
-| Pro | ₱149/mo | ₱399/qtr (₱133/mo) | ₱999/yr (₱83/mo) | Unlimited | ✗ |
-| Pro+ | ₱249/mo | ₱649/qtr (₱216/mo) | ₱1,699/yr (₱142/mo) | Unlimited | ✓ |
+| Plan | PH Monthly | PH Annual | Lifetime | Max Cards |
+|------|-----------|-----------|----------|-----------|
+| Free | ₱0 | — | — | 2 |
+| Pro | $4.99/mo | $39.99/yr | TBD | Unlimited |
 
-**Trial:** 30 days full Pro access (no AI). Payment method required at trial start; no charge until day 31. On expiry, falls back to Free.
-
-**Quarterly discount:** ~10–13% off 3× monthly. Positioned as "Most Flexible" — lower barrier than annual, higher commitment than monthly.
+**Trial:** 30 days full Pro access. Payment method required at trial start; no charge until day 31. On expiry, falls back to Free.
 **Annual discount:** ~44% off monthly. Positioned as "Best Value" — hero CTA on all paywall screens.
 
 Annual subscribers churn at ~5% vs. 15–40% for monthly.
@@ -732,7 +724,7 @@ Annual subscribers churn at ~5% vs. 15–40% for monthly.
 
 **Pro (gate multi-card power features):** Unlimited cards, full multi-month timeline, payment planning (avalanche/snowball/fixed/aggressive), installment tracking, subscription tracking, annual fee reminders, cash-aware payoff projections, priority notification timing.
 
-**Pro+ (AI layer):** Everything in Pro + AI-powered alerts, Android notification listener (bank SMS/push auto-detection), natural language status queries (Phase 3), spending pattern recognition (Phase 3).
+**Note:** Pro+ tier deferred indefinitely. AI features (P2-03) will be re-evaluated when user demand signals readiness.
 
 **Critical:** Do NOT gate the core SAFE/CAUTION/RISKY logic or reminders for the 2 free cards. The core promise must work on Free. Crippling core features kills word of mouth.
 
@@ -752,19 +744,18 @@ Paywall **never** appears on first launch or before the first card is added.
 
 ### Free Trial
 
-30-day free trial (Pro access, no AI) with payment method required. RevenueCat handles mechanics across iOS and Android. On trial expiry: user falls back to Free tier; cards 3+ become read-only; data preserved for 90 days; soft banner prompts reactivation. The app is never bricked.
+30-day free trial (full Pro access) with payment method required. RevenueCat handles mechanics across iOS and Android. On trial expiry: user falls back to Free tier; cards 3+ become read-only; data preserved for 90 days; soft banner prompts reactivation. The app is never bricked.
 
 ### Unit Economics
 
-| Metric | PH Pro (monthly) | PH Pro+ (monthly) |
-|--------|-----------------|------------------|
-| Gross revenue | ₱149 (~$2.62) | ₱249 (~$4.37) |
-| After 15% store cut | $2.23 | $3.71 |
-| After RevenueCat (1%), infra | ~$2.18 | ~$3.64 |
-| After AI costs (Pro+ only) | — | ~$3.20–3.50 |
-| **Net margin** | **~83%** | **~73–80%** |
+| Metric | PH Pro (monthly) |
+|--------|-----------------|
+| Gross revenue | ₱149 (~$2.62) |
+| After 15% store cut | $2.23 |
+| After RevenueCat (1%), infra | ~$2.18 |
+| **Net margin** | **~83%** |
 
-Break-even: 1 paying PH Pro user covers all Year 1 fixed costs (~$135/yr). Revenue is near-pure profit from month 1. Pro+ AI costs vary with usage but remain high-margin at PH volumes.
+Break-even: 1 paying PH Pro user covers all Year 1 fixed costs (~$135/yr). Revenue is near-pure profit from month 1.
 
 ---
 
@@ -835,7 +826,7 @@ Own: "credit card cutoff date tracker Philippines", "safe to swipe credit card",
 
 | Phase | Timeline | Scope |
 |-------|----------|-------|
-| **Phase 1 — MVP** | Weeks 1–8 | Core loop, SAFE/CAUTION/RISKY engine, Swipe Impact, cash awareness, best card recommendation, Gantt timeline, Free/Trial/Pro/Pro+ IAP (RevenueCat), 30-day trial, hard paywall at card 3, onboarding (3-field minimum) |
+| **Phase 1 — MVP** | Weeks 1–8 | Core loop, SAFE/CAUTION/RISKY engine, Swipe Impact, cash awareness, best card recommendation, Gantt timeline, Free/Trial/Pro IAP (RevenueCat) with monthly/yearly/lifetime, 30-day trial, hard paywall at card 3, onboarding (3-field minimum) |
 | **Phase 1.5 — Transaction Layer** | Weeks 9–14 | Manual transaction log, cycle auto-classification (Current/Next/Previous/Excluded), "Lands on" labels, near-cutoff warnings, cycle-grouped view, payment summary screen ("What to Pay"), transaction engine integration, payment logging, exclude transactions, first-transaction education flow |
 | **Phase 2 — Intelligence** | Weeks 15–26 (Months 4–6) | ~~Payoff planner (done ✅)~~ Installment tracking, subscription tracking, annual fee reminders, Android notification listener (auto-detect transactions from BDO/BPI/Metrobank/Maya/GCash), local push notifications (Notifee), data staleness nudges, subscription auto-detection. Note: Credit Score Optimized payoff strategy deferred — overlays already handle utilization nudges. |
 | **Phase 3 — AI + US** | Month 6+ | Conversational AI (Gemini Nano on-device + cloud fallback), NL queries over transaction log ("What did I spend on BDO this cycle?"), spending pattern recognition, cross-card reward optimization, statement date arbitrage advice, US App Store launch, ProductHunt launch |

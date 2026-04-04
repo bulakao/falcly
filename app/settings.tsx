@@ -53,7 +53,6 @@ export default function SettingsScreen() {
   const clearLocalData = useAuthStore((s) => s.clearLocalData);
 
   const isPro = useSubscriptionStore((s) => s.isPro);
-  const isProPlus = useSubscriptionStore((s) => s.isProPlus);
   const tier = useSubscriptionStore((s) => s.tier);
   const subExpirationDate = useSubscriptionStore((s) => s.getExpirationDate);
 
@@ -91,7 +90,7 @@ export default function SettingsScreen() {
   const overlayPrefs = useOverlayStore((s) => s.overlayPrefs);
   const setOverlayPrefs = useOverlayStore((s) => s.setOverlayPrefs);
   const resetDismissed = useOverlayStore((s) => s.resetDismissed);
-  const proUser = isPro() || isProPlus();
+  const proUser = isPro();
 
   const defaultInterestRate = useUserStore((s) => s.defaultInterestRate);
   const setDefaultInterestRate = useUserStore((s) => s.setDefaultInterestRate);
@@ -176,13 +175,13 @@ export default function SettingsScreen() {
         )}
 
         {/* Subscription — inline if active */}
-        {(isPro() || isProPlus()) && (
+        {isPro() && (
           <>
             <RNView style={[styles.divider, { backgroundColor: t.border }]} />
             <RNView style={styles.proBadgeRow}>
-              <Badge label={isProPlus() ? 'PRO+' : 'PRO'} variant="pro" />
+              <Badge label="PRO" variant="pro" />
               <Text style={[styles.proStatusText, { color: t.accentText }]}>
-                {isProPlus() ? 'Pro+' : 'Pro'} — Active
+                Pro — Active
               </Text>
             </RNView>
             {subExpirationDate() && (

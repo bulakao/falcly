@@ -162,7 +162,7 @@ export default function ManageCardsScreen() {
       <Text style={[styles.subtitle, { color: t.textMuted }]}>
         {tier === 'free'
           ? `${activeCount}/${FREE_CARD_LIMIT} active · Free plan`
-          : `${activeCount} active · ${tier === 'pro_plus' ? 'Pro+' : 'Pro'}`}
+          : `${activeCount} active · Pro`}
       </Text>
 
       <DraggableFlatList
