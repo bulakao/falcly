@@ -17,6 +17,15 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.bulakao.falcly',
+      infoPlist: {
+        CFBundleURLTypes: [
+          {
+            CFBundleURLSchemes: [
+              'com.googleusercontent.apps.1043997904657-0pclf8v0b2m2jirs495n4d5nvca2t15g',
+            ],
+          },
+        ],
+      },
       splash: {
         image: './assets/images/splash-icon.png',
         resizeMode: 'contain',

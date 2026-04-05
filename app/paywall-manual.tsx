@@ -75,7 +75,7 @@ export default function ManualPaywallScreen() {
         Alert.alert(
           'You\'re in! 🎉',
           'Create your account to save your Pro access and sync across devices.',
-          [{ text: 'Create Account', onPress: () => router.replace('/sign-in?fromPaywall=true') }],
+          [{ text: 'Create Account', onPress: () => router.replace('/sign-in?mode=signup&fromPaywall=true') }],
         );
       } else {
         Alert.alert('Welcome to Falcly Pro! 🎉', 'All features are now unlocked.', [
@@ -317,9 +317,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   heading: {
-    fontSize: 18,
+    fontSize: 15,
     fontFamily: fonts.nunitoBold,
-    lineHeight: 26,
+    lineHeight: 22,
     fontStyle: 'italic',
   },
 

@@ -73,6 +73,7 @@ export default function SignInScreen() {
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [generalError, setGeneralError] = useState('');
   const [resetSent, setResetSent] = useState(false);
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
 
@@ -198,6 +199,7 @@ export default function SignInScreen() {
   function clearErrors() {
     setEmailError('');
     setPasswordError('');
+    setGeneralError('');
   }
 
   async function handleEmailAuth() {
@@ -260,8 +262,17 @@ export default function SignInScreen() {
       const shouldNavigate = await handlePostSignInSync();
       if (shouldNavigate) navigateAfterAuth();
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Google Sign-In failed';
-      setEmailError(msg);
+      const raw = e instanceof Error ? e.message : '';
+      const lower = raw.toLowerCase();
+      if (lower.includes('cancel')) {
+        // User cancelled — no error to show
+      } else if (lower.includes('url scheme') || lower.includes('missing support')) {
+        setGeneralError('Google Sign-In is not configured for this device.');
+      } else if (lower.includes('network')) {
+        setGeneralError('Network error. Check your connection and try again.');
+      } else {
+        setGeneralError('Google Sign-In failed. Try email instead.');
+      }
     } finally {
       setLoading(false);
     }
@@ -293,7 +304,7 @@ export default function SignInScreen() {
       >
 
         <Text style={[styles.title, { color: t.textPrimary }]}>
-          {isSignUp ? 'Create Account' : 'Welcome back'}
+          {isSignUp ? 'Create Account' : 'Sign In'}
         </Text>
         {fromOnboarding === 'true' && (
           <Text style={[styles.savePrompt, { color: t.textSecondary }]}>
@@ -313,6 +324,9 @@ export default function SignInScreen() {
           onPress={handleGoogleSignIn}
           disabled={loading}
         />
+        <Text style={[styles.generalError, { color: generalError ? t.risky : 'transparent' }]}>
+          {generalError || ' '}
+        </Text>
 
         <View style={styles.dividerRow}>
           <View style={[styles.dividerLine, { backgroundColor: t.border }]} />
@@ -455,6 +469,13 @@ const styles = StyleSheet.create({
   },
   spinner: {
     marginTop: 16,
+  },
+  generalError: {
+    fontSize: 14,
+    fontFamily: fonts.interMedium,
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 0,
   },
   savePrompt: {
     fontSize: 14,
