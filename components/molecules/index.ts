@@ -11,7 +11,6 @@ export { EmptyState } from './EmptyState';
 export { ChipSelector } from './ChipSelector';
 export { default as StatusTooltip } from './StatusTooltip';
 export { ImpactSkeleton } from './ImpactSkeleton';
-export { StackedCardsPreview } from './StackedCardsPreview';
 export { BestCardBanner } from './BestCardBanner';
 export { FinanceCard } from './FinanceCard';
 export { CardOverlay } from './CardOverlay';

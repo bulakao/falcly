@@ -5,5 +5,4 @@ export { Heading, SectionHeader, Label, Caption } from './Typography';
 export { OfflineChip } from './OfflineChip';
 export { CreditCardFace } from './CreditCardFace';
 export { EmptyCardFace } from './EmptyCardFace';
-export { PageDots } from './PageDots';
 export { UtilizationBar } from './UtilizationBar';

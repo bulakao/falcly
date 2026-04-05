@@ -254,21 +254,10 @@ Currently using `test_QoIpmFHMVFDxuzrrCalJEmHXOMK`. Before Google Play release:
 2. Move to `.env`: `REVENUECAT_API_KEY=goog_xxxx`
 3. Read via `Constants.expoConfig.extra.revenuecatApiKey`
 
-### 3. Dead Code
+### ~~3. Dead Code~~ ✅ Fixed
 
-**Unused components (0 references):**
-| Component | LOC | Action |
-|-----------|-----|--------|
-| `StackedCardsPreview.tsx` | ~100 | Delete or trash |
-| `PageDots.tsx` | ~50 | Delete or trash |
-
-**Unused utils (0 references):**
-| Util | LOC | Notes | Action |
-|------|-----|-------|--------|
-| `crashReporting.ts` | ~30 | Replaced by PostHog + logger system | Delete or trash |
-| `secureLogger.ts` | ~70 | Replaced by `utils/logger/` system | Delete or trash |
-
-These add dead weight and confuse future readers.
+Removed 4 unused files and their barrel exports (2026-04-05):
+- `PageDots.tsx`, `StackedCardsPreview.tsx`, `crashReporting.ts`, `secureLogger.ts`
 
 ---
 
@@ -384,7 +373,7 @@ SwipeImpactPanel → [Payoff Planner] → Paywall (if free)
 |---|--------|--------|--------|
 | 1 | Move RevenueCat key to env var | 10 min | Security hygiene |
 | 2 | Add `cycleUtils.ts` tests | 30 min | Prevent billing cycle bugs |
-| 3 | Remove dead code (4 files) | 5 min | Clean codebase |
+| ~~3~~ | ~~Remove dead code (4 files)~~ | ~~5 min~~ | ✅ Done |
 | 4 | Gate component-showcase behind `__DEV__` | 5 min | No dev tools in prod |
 | 5 | Connect RevenueCat → PostHog (dashboard) | 10 min | Full revenue attribution |
 | 6 | Set up Play Console products + RevenueCat | 30 min | Can't launch without it |
@@ -464,7 +453,7 @@ Logger subsystem: 8 files in `utils/logger/` (core, breadcrumbs, crash, sanitize
 Falcly is a well-structured, well-tested app with a clean architecture and solid feature set. The codebase is professional-grade with consistent patterns, proper security hygiene, and comprehensive analytics. The main gaps are:
 
 1. **Test coverage** — 3 of 18 utils tested (but the 3 most critical engines are fully covered)
-2. **Dead code** — 4 unused files to clean up
+2. ~~**Dead code** — 4 unused files to clean up~~ ✅ Removed
 3. **API key management** — works but should be env-var'd before production
 
 None of these are blockers. The app is launch-ready once Play Console products are configured and sandbox purchases are verified.
