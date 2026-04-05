@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useLayoutEffect } from 'react';
 import {
   StyleSheet,
   Pressable,
@@ -9,7 +9,7 @@ import {
   ToastAndroid,
   Alert,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/Themed';
@@ -52,13 +52,23 @@ function showToast(message: string) {
 export default function SignInScreen() {
   const t = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { mode: initialMode, pendingCard, fromOnboarding, fromPaywall, toPaywall } = useLocalSearchParams<{
+  const { mode: initialMode, pendingCard, fromOnboarding, fromPaywall, toPaywall, locked } = useLocalSearchParams<{
     mode?: string;
     pendingCard?: string;
     fromOnboarding?: string;
     fromPaywall?: string;
     toPaywall?: string;  // after auth, show paywall before dashboard
+    locked?: string;     // no back button, returning user must sign in
   }>(); 
+  const navigation = useNavigation();
+
+  // Hide back button when user signed out (locked mode) — must sign in to continue
+  useLayoutEffect(() => {
+    if (locked === 'true') {
+      navigation.setOptions({ headerBackVisible: false, gestureEnabled: false });
+    }
+  }, [locked, navigation]);
+
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
   const signInWithEmail = useAuthStore((s) => s.signInWithEmail);
   const signUpWithEmail = useAuthStore((s) => s.signUpWithEmail);

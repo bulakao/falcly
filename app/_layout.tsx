@@ -167,6 +167,7 @@ function RootLayoutNav() {
   useNavigationLogger();
   const colorScheme = useEffectiveColorScheme();
   const isOnboardingComplete = useOnboardingStore((s) => s.isComplete);
+  const authUser = useAuthStore((s) => s.user);
   const segments = useSegments();
   const router = useRouter();
   const pathname = usePathname();
@@ -181,13 +182,12 @@ function RootLayoutNav() {
     }
   }, [pathname, params]);
 
-  // Redirect based on onboarding state (no auth gate)
+  // Redirect based on onboarding + auth state
   useEffect(() => {
     const currentSegment = segments[0];
     // Screens allowed before onboarding is complete
     const onboardingPaths = ['welcome', 'onboarding', 'onboarding-result', 'sign-in', 'paywall-manual'];
-    // Screens that should redirect to dashboard once onboarding is done
-    // (sign-in and paywall-manual are reachable post-onboarding from settings/dashboard)
+    // Screens only for pre-onboarding (redirect away once done)
     const onboardingOnlyPaths = ['welcome', 'onboarding', 'onboarding-result'];
     const onOnboardingScreen =
       onboardingPaths.includes(currentSegment as string) ||
@@ -195,13 +195,19 @@ function RootLayoutNav() {
     const onOnboardingOnlyScreen =
       onboardingOnlyPaths.includes(currentSegment as string) ||
       onboardingOnlyPaths.some((p) => pathname.startsWith(`/${p}`));
+    const onSignIn = currentSegment === 'sign-in';
 
     if (!isOnboardingComplete && !onOnboardingScreen) {
+      // Not onboarded yet → welcome
       router.replace('/welcome');
-    } else if (isOnboardingComplete && onOnboardingOnlyScreen) {
+    } else if (isOnboardingComplete && !authUser && !onSignIn && !onOnboardingScreen) {
+      // Onboarded but signed out → sign-in (no back to welcome)
+      router.replace('/sign-in?mode=signin&locked=true' as any);
+    } else if (isOnboardingComplete && authUser && onOnboardingOnlyScreen) {
+      // Onboarded + signed in but on a pre-onboarding screen → dashboard
       router.replace('/');
     }
-  }, [isOnboardingComplete, segments, pathname]);
+  }, [isOnboardingComplete, authUser, segments, pathname]);
 
   return (
     <PostHogProvider

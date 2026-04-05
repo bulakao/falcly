@@ -93,11 +93,11 @@ export const useAuthStore = create<AuthStore>()((set) => ({
     try { await GoogleSignin.signOut(); } catch { /* not signed in via Google */ }
     try { await logoutUser(); } catch { /* RC logout — resets to anonymous */ }
     set({ user: null, loading: false });
-    // Clear all local data on sign out (data lives in Supabase, not deleted)
+    // Clear local data but keep onboarding complete
+    // User stays on sign-in screen, not sent back through onboarding
     useCardStore.getState().reset();
     useUserStore.getState().reset();
     useSubscriptionStore.getState().reset();
-    useOnboardingStore.getState().reset();
   },
   deleteAccount: async () => {
     const { error } = await supabase.rpc('delete_own_account');
