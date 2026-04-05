@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAppTheme, type SemanticTokens } from '@/theme';
 import { fonts } from '@/theme/fonts';
 
@@ -10,6 +10,7 @@ interface ButtonProps {
   variant?: ButtonVariant;
   disabled?: boolean;
   fullWidth?: boolean;
+  loading?: boolean;
 }
 
 function getVariantStyles(variant: ButtonVariant, t: SemanticTokens, disabled: boolean) {
@@ -36,9 +37,10 @@ function getVariantStyles(variant: ButtonVariant, t: SemanticTokens, disabled: b
   }
 }
 
-export function Button({ label, onPress, variant = 'primary', disabled = false, fullWidth = true }: ButtonProps) {
+export function Button({ label, onPress, variant = 'primary', disabled = false, fullWidth = true, loading = false }: ButtonProps) {
   const t = useAppTheme();
-  const v = getVariantStyles(variant, t, disabled);
+  const isDisabled = disabled || loading;
+  const v = getVariantStyles(variant, t, isDisabled);
 
   return (
     <Pressable
@@ -48,17 +50,21 @@ export function Button({ label, onPress, variant = 'primary', disabled = false, 
           backgroundColor: v.bg,
           borderColor: v.border,
           borderWidth: v.borderWidth,
-          opacity: disabled ? 0.6 : 1,
+          opacity: isDisabled ? 0.6 : 1,
           alignSelf: fullWidth ? 'stretch' : 'flex-start',
         },
       ]}
       onPress={onPress}
-      disabled={disabled}
+      disabled={isDisabled}
       accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ disabled }}
+      accessibilityLabel={loading ? 'Loading' : label}
+      accessibilityState={{ disabled: isDisabled, busy: loading }}
     >
-      <Text style={[styles.label, { color: v.text }]}>{label}</Text>
+      {loading ? (
+        <ActivityIndicator size="small" color={v.text} />
+      ) : (
+        <Text style={[styles.label, { color: v.text }]}>{label}</Text>
+      )}
     </Pressable>
   );
 }

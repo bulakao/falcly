@@ -6,7 +6,6 @@ import {
   Platform,
   ScrollView,
   View,
-  ActivityIndicator,
   ToastAndroid,
   Alert,
 } from 'react-native';
@@ -320,9 +319,9 @@ export default function SignInScreen() {
         </Text>
 
         <Button
-          label={loading ? 'Please wait...' : 'Continue with Google'}
+          label="Continue with Google"
           onPress={handleGoogleSignIn}
-          disabled={loading}
+          loading={loading}
         />
         <Text style={[styles.generalError, { color: generalError ? t.risky : 'transparent' }]}>
           {generalError || ' '}
@@ -371,17 +370,13 @@ export default function SignInScreen() {
           </View>
           <View style={styles.buttonWrapper}>
             <Button
-              label={loading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
+              label={isSignUp ? 'Create Account' : 'Sign In'}
               onPress={handleEmailAuth}
-              disabled={loading}
+              loading={loading}
               variant="secondary"
             />
           </View>
         </View>
-
-        {loading && (
-          <ActivityIndicator style={styles.spinner} color={t.primary} />
-        )}
 
         <Pressable
           onPress={() => { setMode(isSignUp ? 'signin' : 'signup'); clearErrors(); setResetSent(false); }}
@@ -466,9 +461,6 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     fontSize: 13,
-  },
-  spinner: {
-    marginTop: 16,
   },
   generalError: {
     fontSize: 14,

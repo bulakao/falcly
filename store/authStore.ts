@@ -36,19 +36,22 @@ export const useAuthStore = create<AuthStore>()((set) => ({
     if (!response.data?.idToken) {
       throw new Error('Google Sign-In failed: no ID token');
     }
-    const { error } = await supabase.auth.signInWithIdToken({
+    const { data, error } = await supabase.auth.signInWithIdToken({
       provider: 'google',
       token: response.data.idToken,
     });
     if (error) throw error;
+    if (data.user) set({ user: data.user, loading: false });
   },
   signInWithEmail: async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
+    if (data.user) set({ user: data.user, loading: false });
   },
   signUpWithEmail: async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
+    if (data.user) set({ user: data.user, loading: false });
   },
   resetPassword: async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email);
@@ -57,6 +60,7 @@ export const useAuthStore = create<AuthStore>()((set) => ({
   signOut: async () => {
     await supabase.auth.signOut();
     try { await GoogleSignin.signOut(); } catch { /* not signed in via Google */ }
+    set({ user: null, loading: false });
     // Local data (cards, profile, onboarding) persists — sign-out only clears auth
     useSubscriptionStore.getState().reset();
   },
@@ -64,6 +68,7 @@ export const useAuthStore = create<AuthStore>()((set) => ({
     const { error } = await supabase.rpc('delete_own_account');
     if (error) throw error;
     try { await GoogleSignin.signOut(); } catch { /* not signed in via Google */ }
+    set({ user: null, loading: false });
     // Delete account wipes everything
     useCardStore.getState().reset();
     useUserStore.getState().reset();
