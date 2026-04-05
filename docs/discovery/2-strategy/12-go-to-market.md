@@ -115,7 +115,7 @@ Reviews are critical — they directly impact Play Store search ranking and conv
 - After successful payoff planner calculation
 - **Never** on first open, never after an error, never more than once per 30 days
 
-**Implementation:** Use `expo-store-review` (already in Expo ecosystem). Call `StoreReview.requestReview()` at the right moment — iOS uses native prompt, Android opens Play Store.
+**Implementation:** Use `expo-store-review` (already in Expo ecosystem). Call `StoreReview.requestReview()` at the right moment — iOS uses native prompt, Android opens Play Store. **Status: pending implementation (TODO tracked in TODO.md).**
 
 **Review seeding (first 100 users):**
 - Personally message early adopters from r/PHCreditCards launch thread
@@ -234,6 +234,36 @@ Reviews are critical — they directly impact Play Store search ranking and conv
 | Annual mix | >35% | Higher LTV, lower churn |
 | Reviews (Play Store) | 50 before US launch | ASO + trust signal |
 | DAU/MAU | >40% | Healthy retention |
+
+---
+
+---
+
+## 11. App Store Assets (Pending)
+
+> **Status:** To be written. Tracked in TODO.md under "Code — Ready to Implement."
+
+### Play Store Listing Copy
+- **Title** (30 chars): TBD — keyword-optimized for "credit card billing cycle Philippines"
+- **Short description** (80 chars): TBD
+- **Full description** (4,000 chars): TBD — cover core value prop, PH-specific framing, feature list
+- **Keywords** (see `docs/discovery/5-launch/40-keywords-seo-aso.md`)
+
+### Screenshot Captions (8 screens)
+Each screenshot needs a headline + sub-caption that sells the feature:
+1. Dashboard — SAFE/CAUTION/RISKY status
+2. Swipe impact — "See the effect before you spend"
+3. Billing timeline — "Know exactly which cycle it lands on"
+4. Multi-card — "All your cards, one view"
+5. Payoff planner — "Avalanche vs snowball, side by side"
+6. Statement advisor — "Spread your spending, protect your score"
+7. Onboarding — "Set up in 30 seconds"
+8. Paywall — "Try free for 30 days"
+
+### ASO Notes
+- Screenshots in Tagalog/Filipino for PH Play Store listing (separate listing locale)
+- English screenshots for US/global
+- Feature graphic: falcon mascot + "Know before you swipe" tagline
 
 ---
 
