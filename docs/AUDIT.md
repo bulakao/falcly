@@ -148,21 +148,7 @@ _layout.tsx (root Stack)
 
 ## 🟡 Warnings (Non-Critical)
 
-### 1. Watchman Recrawl Warning
-
-```
-Recrawled this watch 283 times
-```
-
-Causes slower test runs and hot reloads.
-
-**Fix:**
-```bash
-watchman watch-del '/Users/ramidem/Code/bulakao/falcly'
-watchman watch-project '/Users/ramidem/Code/bulakao/falcly'
-```
-
-### 2. Hardcoded Colors (3 instances)
+### 1. Hardcoded Colors (3 instances)
 
 | File | Color | Usage |
 |------|-------|-------|
@@ -333,7 +319,6 @@ SwipeImpactPanel → [Payoff Planner] → Paywall (if free)
 | 8 | Add user properties to PostHog identify | 20 min | Better segmentation |
 | 9 | Enable PostHog session replay | 15 min | Watch real user sessions |
 | 10 | Wire up feature flags (plumbing) | 30 min | Remote control |
-| 11 | Fix watchman recrawl | 1 min | Faster dev experience |
 
 ---
 
