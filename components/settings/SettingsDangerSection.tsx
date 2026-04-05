@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { StyleSheet, Alert, View as RNView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Text } from '@/components/Themed';
@@ -17,6 +18,7 @@ export function SettingsDangerSection() {
   const deleteAccount = useAuthStore((s) => s.deleteAccount);
   const clearLocalData = useAuthStore((s) => s.clearLocalData);
   const tier = useSubscriptionStore((s) => s.tier);
+  const [busy, setBusy] = useState(false);
 
   return (
     <>
@@ -25,13 +27,15 @@ export function SettingsDangerSection() {
         {user && (
           <>
             <Button
-              label="Sign Out"
+              label={busy ? 'Signing out...' : 'Sign Out'}
+              disabled={busy}
               onPress={() => {
                 Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
                   { text: 'Cancel', style: 'cancel' },
                   {
                     text: 'Sign Out',
                     onPress: async () => {
+                      setBusy(true);
                       try {
                         trackUserSignedOut();
                         posthog.reset();
@@ -39,6 +43,8 @@ export function SettingsDangerSection() {
                       } catch (e: unknown) {
                         const msg = e instanceof Error ? e.message : 'Sign out failed';
                         Alert.alert('Error', msg);
+                      } finally {
+                        setBusy(false);
                       }
                     },
                   },
@@ -50,8 +56,9 @@ export function SettingsDangerSection() {
           </>
         )}
         <Button
-          label={user ? 'Delete Account' : 'Clear All Data'}
+          label={busy ? 'Deleting...' : user ? 'Delete Account' : 'Clear All Data'}
           variant="destructive-outline"
+          disabled={busy}
           onPress={() => {
             const hasSubscription = user && tier === 'pro';
             Alert.alert(
@@ -65,6 +72,7 @@ export function SettingsDangerSection() {
                   text: user ? 'Delete' : 'Clear',
                   style: 'destructive',
                   onPress: async () => {
+                    setBusy(true);
                     try {
                       if (user) {
                         await deleteAccount();
@@ -75,6 +83,8 @@ export function SettingsDangerSection() {
                     } catch (e: unknown) {
                       const msg = e instanceof Error ? e.message : 'Failed to delete data';
                       Alert.alert('Error', msg);
+                    } finally {
+                      setBusy(false);
                     }
                   },
                 },
