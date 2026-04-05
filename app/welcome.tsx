@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ShieldCheck, CalendarDays, CreditCard, Sparkles } from 'lucide-react-native';
@@ -25,6 +26,17 @@ const BENEFITS = [
 export default function WelcomeScreen() {
   const t = useAppTheme();
   const insets = useSafeAreaInsets();
+  const offerings = useSubscriptionStore((s) => s.offerings);
+
+  const trialCtaLabel = useMemo(() => {
+    const pkg = offerings?.availablePackages.find((p) => p.packageType === 'MONTHLY' || p.packageType === 'ANNUAL');
+    const intro = pkg?.product.introPrice;
+    if (!intro || intro.price !== 0) return 'Unlock Pro features';
+    const { periodUnit, periodNumberOfUnits } = intro;
+    const unit = periodUnit?.toLowerCase() ?? 'day';
+    const unitLabel = periodNumberOfUnits === 1 ? unit : `${unit}s`;
+    return `Try Pro free for ${periodNumberOfUnits} ${unitLabel}`;
+  }, [offerings]);
 
   useEffect(() => {
     trackOnboardingWelcomeViewed();
@@ -84,11 +96,11 @@ export default function WelcomeScreen() {
           ]}
           onPress={() => router.push('/paywall-manual' as any)}
           accessibilityRole="button"
-          accessibilityLabel="See more Pro features"
+          accessibilityLabel={trialCtaLabel}
         >
           <Sparkles size={22} color={t.primary} strokeWidth={2} />
           <Text style={[styles.benefitLabel, { color: t.primary }]}>
-            See more Pro features
+            {trialCtaLabel}
           </Text>
         </Pressable>
         </View>

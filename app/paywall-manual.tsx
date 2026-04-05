@@ -65,7 +65,7 @@ export default function ManualPaywallScreen() {
     if (success) {
       trackProPurchaseCompleted(selectedPackage.packageType);
       Alert.alert('Welcome to Falcly Pro! 🎉', 'All features are now unlocked.', [
-        { text: 'Let\'s go', onPress: () => router.back() },
+        { text: 'Let\'s go', onPress: () => router.replace('/') },
       ]);
     }
   }
@@ -76,7 +76,7 @@ export default function ManualPaywallScreen() {
     setIsPurchasing(false);
     if (success) {
       Alert.alert('Restored!', 'Your purchases have been restored.', [
-        { text: 'OK', onPress: () => router.back() },
+        { text: 'OK', onPress: () => router.replace('/') },
       ]);
     } else {
       Alert.alert('No Purchases Found', 'No previous purchases were found for this account.');
