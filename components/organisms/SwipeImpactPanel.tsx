@@ -436,8 +436,8 @@ export function SwipeImpactPanel({
       {/* Trial CTA */}
       {subscriptionTier === 'free' && (
         <Link href={"/paywall-manual" as any} asChild>
-          <Pressable style={[styles.trialCta, { backgroundColor: t.accentBg, borderColor: t.accent }]} accessibilityRole="button" accessibilityLabel="Try free for 14 days — unlock payment planning, installment tracking, and more">
-            <Text style={[styles.trialCtaText, { color: t.accent }]}>Try Free for 14 Days</Text>
+          <Pressable style={[styles.trialCta, { backgroundColor: t.accentBg, borderColor: t.accent }]} accessibilityRole="button" accessibilityLabel="Try free for 30 days — unlock payment planning, installment tracking, and more">
+            <Text style={[styles.trialCtaText, { color: t.accent }]}>Try Free for 30 Days</Text>
             <Text style={[styles.trialCtaSubtext, { color: t.accent }]}>
               Unlock payment planning, installment tracking & more
             </Text>

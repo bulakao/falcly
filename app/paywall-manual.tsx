@@ -238,7 +238,7 @@ export default function ManualPaywallScreen() {
 
       {selectedPackage?.packageType !== 'LIFETIME' && (
         <Text style={[styles.trialNote, { color: t.textSecondary }]}>
-          14-day free trial · Cancel anytime
+          30-day free trial · Cancel anytime
         </Text>
       )}
 
