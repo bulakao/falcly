@@ -152,17 +152,12 @@ _layout.tsx (root Stack)
 
 ## 🟡 Warnings (Non-Critical)
 
-### 1. Hardcoded API Keys (3 files)
+### ~~1. Hardcoded API Keys (3 files)~~ ✅ Fixed
 
-| File | Key | Risk |
-|------|-----|------|
-| `utils/revenuecat.ts` | RevenueCat test API key | Low (test key), but must change for production |
-| `utils/supabase.ts` | Supabase URL + anon key | Low (public keys), cleaner in env |
-| `store/authStore.ts` | Google OAuth web + iOS client IDs | Low (public keys), cleaner in env |
-
-**Fix:** Move all to `.env` → `app.config.js` extras → `Constants.expoConfig.extra.*`
-
-PostHog already uses this pattern correctly — follow the same approach for the others.
+All keys moved to `.env` → `app.config.js` extras → `Constants.expoConfig.extra.*` (2026-04-05):
+- `utils/revenuecat.ts` — reads `revenuecatApiKey`
+- `utils/supabase.ts` — reads `supabaseUrl`, `supabaseAnonKey`
+- `store/authStore.ts` — reads `googleWebClientId`, `googleIosClientId`
 
 ### 2. Two Paywall Screens
 
@@ -313,7 +308,7 @@ Removed 4 unused files and their barrel exports (2026-04-05):
 
 | Area | Status | Notes |
 |------|--------|-------|
-| API keys in code | ⚠️ | 3 files with hardcoded keys (all public/test — not leaked secrets) |
+| API keys in code | ✅ | All keys moved to `.env` → `app.config.js` extras |
 | `.env` protection | ✅ | 4 patterns in `.gitignore` |
 | Log sanitization | ✅ | Auto-redacts 9 sensitive field patterns |
 | Supabase RLS | ✅ | Row-level security on user data |
@@ -371,7 +366,7 @@ SwipeImpactPanel → [Payoff Planner] → Paywall (if free)
 
 | # | Action | Effort | Impact |
 |---|--------|--------|--------|
-| 1 | Move RevenueCat key to env var | 10 min | Security hygiene |
+| ~~1~~ | ~~Move RevenueCat key to env var~~ | ~~10 min~~ | ✅ Done (all 3 files) |
 | 2 | Add `cycleUtils.ts` tests | 30 min | Prevent billing cycle bugs |
 | ~~3~~ | ~~Remove dead code (4 files)~~ | ~~5 min~~ | ✅ Done |
 | 4 | Gate component-showcase behind `__DEV__` | 5 min | No dev tools in prod |
@@ -384,7 +379,7 @@ SwipeImpactPanel → [Payoff Planner] → Paywall (if free)
 
 | # | Action | Effort | Impact |
 |---|--------|--------|--------|
-| 9 | Move Supabase + Google creds to env | 15 min | Consistency |
+| ~~9~~ | ~~Move Supabase + Google creds to env~~ | ~~15 min~~ | ✅ Done |
 | 10 | Add tests for `overlayTriggers.ts`, `sync.ts` | 45 min | More coverage |
 | 11 | Decide paywall: one screen or A/B flag | 10 min | Simpler nav |
 | 12 | Split `settings.tsx` into sections | 30 min | Maintainability |
@@ -454,6 +449,6 @@ Falcly is a well-structured, well-tested app with a clean architecture and solid
 
 1. **Test coverage** — 3 of 18 utils tested (but the 3 most critical engines are fully covered)
 2. ~~**Dead code** — 4 unused files to clean up~~ ✅ Removed
-3. **API key management** — works but should be env-var'd before production
+3. ~~**API key management** — works but should be env-var'd before production~~ ✅ All keys in env
 
 None of these are blockers. The app is launch-ready once Play Console products are configured and sandbox purchases are verified.
