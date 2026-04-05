@@ -1,69 +1,79 @@
 # Falcly — Go-to-Market Strategy
 
-> **Date:** 2026-03-30
-> **For:** Falcly discovery
+> **Date:** 2026-04-05 (updated from 2026-03-30)
+> **Changes:** Finalized pricing, 30-day trial, lean budget, review strategy, Tagalog emphasis
 
 ---
 
 ## Executive Summary
 
-Falcly's GTM strategy centers on two markets: Philippines (primary, zero competition, high pain signal) and US (secondary, higher WTP, larger TAM). Distribution is organic-first: Reddit communities, TikTok finance creators, and app store search. The Mint shutdown created an unfilled vacuum that Falcly can exploit with targeted content marketing.
+Falcly's GTM strategy centers on two markets: Philippines (primary, zero competition, high pain signal) and US/West (secondary, higher WTP, larger TAM). Distribution is organic-first: Reddit communities, TikTok finance creators, and app store search. The Mint shutdown created an unfilled vacuum that Falcly can exploit with targeted content marketing.
 
 ---
 
-## 1. Distribution Channels
+## 1. Finalized Pricing
+
+| Plan | PH + Global | 🇺🇸 US | 🇪🇺 EU | 🇨🇦 CA | 🇦🇺 AU |
+|------|------------|--------|--------|--------|--------|
+| Monthly | $4.99 | $6.99 | €5.99 | CA$8.99 | A$10.99 |
+| Annual | $47.99 | $55.99 | €47.99 | CA$71.99 | A$87.99 |
+| Lifetime | $99.99 | $99.99 | €89.99 | CA$129.99 | A$149.99 |
+| Trial | 30 days free | 30 days free | 30 days free | 30 days free | 30 days free |
+
+**Annual saves ~20% vs monthly** (computed live from RevenueCat — no hardcoded label).
+**Lifetime = ~16 months payback** at PH price, strong launch incentive.
+**Prices set per-country in Play Console / App Store Connect** — RevenueCat reads them automatically, no app code changes needed for price updates.
+
+---
+
+## 2. Distribution Channels
 
 ### Philippines (Primary Market)
 
 | Channel | Action | Priority | Timeline |
 |---------|--------|----------|----------|
-| **Google Play** | ASO for "credit card app Philippines," "cutoff date tracker" | P0 | Launch |
+| **Google Play** | ASO for "credit card app Philippines," "cutoff date tracker," "billing cycle tracker" | P0 | Launch |
 | **r/PHCreditCards** | Authentic engagement, answer cutoff date questions, soft product mentions | P0 | Pre-launch |
-| **TikTok PH** | Short-form credit card tips: "Is it safe to swipe today?" format | P0 | Launch |
-| **Facebook Groups** | Credit card tips groups, "Mga Manlalakbay," financial literacy groups | P1 | Month 1 |
+| **TikTok PH (Tagalog)** | Short-form tips in Filipino: "Safe ba mag-swipe ngayon?" format | P0 | Launch |
+| **Facebook Groups** | PH credit card tips groups, financial literacy groups | P1 | Month 1 |
 | **YouTube PH** | Partner with PH finance creators (1M+ sub channels exist) | P1 | Month 2 |
-| **App Store (iOS)** | Secondary — 14% PH share but higher-income users | P2 | Launch |
+| **App Store (iOS)** | Secondary — 14% PH share but higher-income users | P2 | Post-Android |
 
-### United States (Secondary Market)
+### United States / West (Secondary Market)
 
 | Channel | Action | Priority | Timeline |
 |---------|--------|----------|----------|
 | **r/CreditCards** | Organic engagement (3M+ members) | P0 | Pre-launch |
 | **r/personalfinance** | Content about billing cycle management (18M+ members) | P1 | Launch |
-| **App Store Search** | ASO for "credit card tracker," "billing cycle app" | P0 | Launch |
+| **App Store Search** | ASO for "credit card tracker," "billing cycle app," "Mint alternative" | P0 | Launch |
 | **Content/SEO** | Blog targeting "Mint alternative," "credit card billing cycle" | P1 | Month 1 |
-| **Product Hunt** | Launch for tech-savvy early adopters | P1 | Month 1 |
+| **Product Hunt** | Launch for tech-savvy early adopters | P1 | Month 2 |
 | **YouTube finance** | Partner with credit card review channels | P2 | Month 3 |
 | **NerdWallet/TPG** | Affiliate/partnership with credit card review sites | P3 | Month 6 |
 
 ---
 
-## 2. Reddit Strategy (Primary Acquisition Channel)
+## 3. Content Strategy
 
-Reddit is Falcly's most important organic channel. The pain is expressed daily on these subs.
+### Tagalog Content — Biggest Untapped Advantage
 
-### Target Subreddits
+Most PH finance content is in English. Tagalog content has significantly less competition in search and TikTok. This is Falcly's moat in the PH market.
 
-| Subreddit | Members | Pain Signal | Strategy |
-|-----------|---------|-------------|----------|
-| r/PHCreditCards | ~100K | Cutoff date confusion, billing cycle questions | Answer questions with expertise, become trusted voice |
-| r/CreditCards | 3M+ | Utilization timing, multi-card management | Educational content, link to free tool |
-| r/personalfinance | 18M+ | Post-Mint migration, credit card management | "How I track my billing cycles" posts |
-| r/YNAB | 300K+ | YNAB doesn't track billing cycles | Complementary tool positioning |
-| r/churning | 500K+ | Multi-card cycle management | Power user acquisition |
-| r/CreditCardsIndia | ~50K | Billing cycle tracker requests | Future market signal |
+**Core Tagalog content pieces (do these first):**
 
-### Approach
-- **Don't advertise.** Provide genuine value. Answer questions about cutoff dates, utilization timing, payment strategies.
-- **Build authority.** Post educational content about billing cycle management.
-- **Soft introduce.** "I built a tool for this..." only after establishing credibility.
-- **Track common questions.** These become blog topics and feature ideas.
+| Format | Topic | Channel |
+|--------|-------|---------|
+| TikTok 60s | "Safe ba mag-swipe ngayon?" — billing cycle explained visually | TikTok PH |
+| TikTok 60s | "Bakit na-late charge ako kahit nagbayad na ako?" | TikTok PH |
+| TikTok 60s | "Paano i-track ang tatlo mong credit cards" | TikTok PH |
+| Blog | "Ano ang cutoff date ng credit card?" | SEO |
+| Blog | "Kailan ang tamang oras mag-swipe para hindi masungkit sa next statement" | SEO |
+| Blog | "BDO, BPI, Metrobank — kailan ang kanilang cutoff dates?" | SEO |
+| YouTube | "Credit card billing cycle explained in Filipino" (10 min) | YouTube PH |
 
----
+**Tone:** Kuya/Ate energy — helpful, no-judgment, assumes they're smart but just didn't know this. Not a financial advisor. Not a brand. A friend who knows credit cards.
 
-## 3. Content Marketing
-
-### Blog Strategy (2 posts/week)
+### English Blog Strategy (2 posts/week after Tagalog foundation)
 
 | Cluster | Topics | Market |
 |---------|--------|--------|
@@ -74,94 +84,157 @@ Reddit is Falcly's most important organic channel. The pain is expressed daily o
 | **Post-Mint** | Mint alternative for credit cards, what's missing from Monarch | US |
 | **Product** | Falcly vs YNAB, vs CardPointers (comparison pages) | US |
 
-### Content in Filipino/Tagalog
-- Critical for PH market. Most PH finance content is in English — Tagalog content has less competition.
-- Topics: "Ano ang cutoff date?", "Kailan safe mag-swipe?", "Paano i-track ang credit card bills"
+---
+
+## 4. Reddit Strategy (Primary Acquisition Channel)
+
+### Target Subreddits
+
+| Subreddit | Members | Pain Signal | Strategy |
+|-----------|---------|-------------|----------|
+| r/PHCreditCards | ~261K | Cutoff date confusion, billing cycle questions | Answer questions with expertise, become trusted voice |
+| r/CreditCards | 3M+ | Utilization timing, multi-card management | Educational content, link to free tool |
+| r/personalfinance | 18M+ | Post-Mint migration, credit card management | "How I track my billing cycles" posts |
+| r/YNAB | 300K+ | YNAB doesn't track billing cycles | Complementary tool positioning |
+| r/churning | 500K+ | Multi-card cycle management | Power user acquisition |
+
+### Approach
+- **Don't advertise.** Provide genuine value. Answer questions about cutoff dates, utilization timing, payment strategies.
+- **Build authority first.** Post educational content for 4–6 weeks before mentioning Falcly.
+- **One well-timed launch post** outperforms ten mediocre ones. Time it to a real pain thread.
 
 ---
 
-## 4. Social Media
+## 5. App Store Review Strategy
+
+Reviews are critical — they directly impact Play Store search ranking and conversion from listing page. This is often neglected until too late.
+
+**In-app review prompt triggers:**
+- After 7 days of active use (not just installs)
+- After user avoids a CAUTION/RISKY status and checks back in (positive outcome moment)
+- After successful payoff planner calculation
+- **Never** on first open, never after an error, never more than once per 30 days
+
+**Implementation:** Use `expo-store-review` (already in Expo ecosystem). Call `StoreReview.requestReview()` at the right moment — iOS uses native prompt, Android opens Play Store.
+
+**Review seeding (first 100 users):**
+- Personally message early adopters from r/PHCreditCards launch thread
+- "Hey, loving your feedback — if you have 30 seconds, a review on Play Store really helps other PH credit card users find the app"
+- Target: 50 reviews before US launch. Reviews with keywords (billing cycle, credit card, Philippines) improve ASO.
+
+**Responding to reviews:**
+- Reply to every 1-star within 24 hours
+- Reply to 5-stars with a short, personal note (not copy-paste)
+- Reviews with replies rank better and convert better
+
+---
+
+## 6. Social Media
 
 | Platform | Audience | Content | Priority |
 |----------|----------|---------|----------|
-| **TikTok PH** | Gen Z first-time cardholders | 30-sec tips: "Is it safe to swipe?" scenarios | P0 |
+| **TikTok PH (Tagalog)** | Gen Z + Millennial first-time cardholders | 60s tips in Filipino | P0 |
 | **TikTok US** | Young credit card users | Billing cycle explainers, utilization tips | P1 |
-| **Instagram** | Millennial multi-card users | Carousel posts: "5 things your credit card app doesn't tell you" | P2 |
-| **Twitter/X** | Finance Twitter, fintech community | Product updates, credit card tips | P2 |
-
-### Tone
-- **Not:** Financial advisor, corporate, preachy
-- **Yes:** Smart friend who's really good with credit cards. Casual, helpful, no-judgment.
-- **PH tone:** "Kuya/Ate energy" — helpful older sibling who knows their stuff
+| **Instagram** | Millennial multi-card users | Carousel: "5 things your credit card app doesn't tell you" | P2 |
+| **Twitter/X** | Finance Twitter, fintech community | Product updates, credit card tips | P3 |
 
 ---
 
-## 5. Influencer Strategy
+## 7. Influencer Strategy
 
 ### Tier 1: Micro-Influencers (PH, 10K–100K followers)
 - PH finance TikTokers and YouTubers
-- $100–$300 per sponsored post
-- Focus on authentic use — "Here's how I track my 4 credit cards"
+- $100–$300 per sponsored post or barter (free Pro lifetime)
+- Focus: authentic use — "Here's how I track my 4 credit cards"
 
 ### Tier 2: Mid-Tier (US, 50K–500K followers)
-- Credit card review YouTubers (Points Guy adjacent creators)
+- Credit card review YouTubers
 - $500–$2,000 per integration
-- Focus on "tool that fills the gap CardPointers/YNAB don't cover"
-
-### Tier 3: Partnerships
-- NerdWallet, The Points Guy — affiliate/featured tool listing
-- PH banks — cross-promotion (unlikely at early stage but plan for it)
+- Focus: "tool that fills the gap YNAB and CardPointers don't cover"
 
 ---
 
-## 6. Phased Launch Timeline
+## 8. Phased Launch Timeline
 
-### Pre-Launch (Weeks -4 to 0)
+### Pre-Launch (Weeks −4 to 0)
 - Start posting on r/PHCreditCards and r/CreditCards (building credibility)
-- Set up blog with 5 SEO-optimized posts
-- Create TikTok account, post 10 short-form videos
+- Publish 5 Tagalog SEO blog posts
+- Create TikTok account, post 10 Tagalog short-form videos
 - Set up ASO for both app stores
+- Enroll in Apple Small Business Program (15% store cut instead of 30%)
 
 ### Month 1: PH Launch
-- Google Play launch (primary)
-- iOS App Store launch (secondary)
-- r/PHCreditCards launch post
-- TikTok PH creator partnerships (3–5 micro-influencers)
-- Facebook Group engagement
-- **Goal:** 10K downloads, 1K active users
+- Google Play launch
+- r/PHCreditCards launch post (after credibility built)
+- TikTok PH micro-influencer partnerships (3–5 creators)
+- Facebook group engagement
+- **Goal:** 500 installs, 50 trial starts, 20 paid
 
-### Month 2–3: US Soft Launch
+### Month 2–3: Growth + US Soft Launch
 - Product Hunt launch
 - r/CreditCards, r/personalfinance engagement
 - Blog content ramp (2/week)
-- Paid search: "credit card tracker" + "Mint alternative" keywords
-- **Goal:** 25K total downloads, 5K active users
+- App store review push (target 50 PH reviews)
+- **Goal:** 2,000 total installs, 200 active, 80 paid
 
-### Month 4–6: Growth
+### Month 4–6: Scale
 - YouTube partnerships (PH + US)
-- Expanded paid search
-- Referral program
-- **Goal:** 100K downloads, 20K active users, 1K paid
+- Referral program: "Give 1 month, get 1 month"
+- iOS App Store launch (US)
+- **Goal:** 10K installs, 1K active, 200–300 paid, ~$1.5K MRR
 
-### Month 7–12: Scale
-- NerdWallet/TPG partnerships
-- PH bank partnership exploration
-- India market testing (r/CreditCardsIndia signal)
-- **Goal:** 500K downloads, 100K active users, 5K–10K paid
+### Month 7–12: Independence Push
+- Consistent content cadence (2 blog/week, 3 TikTok/week)
+- US paid search at $5K MRR threshold
+- NerdWallet/TPG partnership exploration
+- **Goal:** 500+ paid, $2.5K–$5K MRR
 
----
-
-## 7. Budget Allocation (Year 1: $50K–$100K)
-
-| Category | Allocation | Notes |
-|----------|-----------|-------|
-| **Content creation** | 30% | Blog, social, video |
-| **PH influencers** | 20% | TikTok, YouTube, Facebook |
-| **Paid search** | 20% | Google Ads, Apple Search Ads |
-| **US influencers** | 15% | YouTube, Reddit |
-| **Tools/platforms** | 10% | SEO tools, analytics, hosting |
-| **Events/misc** | 5% | Product Hunt, community events |
+### Month 13–24: US Expansion
+- Full US marketing push
+- Localized US content (billing cycle, Mint replacement angle)
+- Paid acquisition: Google UAC + Apple Search Ads
+- **Goal:** ~$10K MRR by end of Month 24
 
 ---
 
-*Sources: Reddit community sizes, TikTok PH finance community, Google Play/App Store data, Statista PH smartphone share, NerdWallet, The Points Guy, TransUnion PH, r/PHCreditCards topic analysis.*
+## 9. Budget
+
+### Lean Version (Bootstrapped, <$5K Year 1)
+
+| Category | Monthly | Annual | Notes |
+|----------|---------|--------|-------|
+| Apple Developer | — | $99 | One-time/year |
+| Google Play | — | $25 | One-time |
+| Domain + hosting | $10 | $120 | Vercel free tier for blog |
+| SEO tools | $10 | $120 | Ahrefs Lite or free alternatives |
+| TikTok micro-influencers | $100–300 | $1,200–$3,600 | 1 per month at launch |
+| **Total** | **~$120–$430** | **~$1,600–$3,900** | |
+
+> RevenueCat free until $2.5K MRR. Supabase free tier covers early scale. No paid ads until $5K MRR.
+
+### Growth Version (At $5K MRR, reinvest 20%)
+
+| Category | Monthly | Notes |
+|----------|---------|-------|
+| Paid search (Google UAC + ASA) | $1,000 | Target CAC < 3-month payback |
+| Content creators | $500 | 2–3 mid-tier |
+| SEO tools | $50 | Ahrefs |
+| RevenueCat | ~$50 | 1% of MRR |
+| **Total** | **~$1,600** | 32% of $5K MRR |
+
+---
+
+## 10. Key Metrics to Track
+
+| Metric | Target | Why |
+|--------|--------|-----|
+| Install → trial start | >15% | Paywall placement working |
+| Trial → paid | >25% | 30-day trial + hard card gate |
+| Monthly churn | <5% | Utility apps retain well |
+| Annual mix | >35% | Higher LTV, lower churn |
+| Reviews (Play Store) | 50 before US launch | ASO + trust signal |
+| DAU/MAU | >40% | Healthy retention |
+
+---
+
+*Sources: Reddit community sizes, TikTok PH finance community, Google Play/App Store data, r/PHCreditCards topic analysis, RevenueCat SOSA 2025, Apple Small Business Program docs.*

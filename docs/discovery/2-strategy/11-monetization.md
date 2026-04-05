@@ -19,11 +19,14 @@ Key targets: $19.8K ARR at PH Year 1 baseline; $140K ARR combined at end of Year
 
 ### Confirmed Pricing
 
-| Plan | US | PH | Cards |
-|------|----|----|-------|
-| Free | $0 | ₱0 | 2 |
-| Pro Monthly | $4.99/mo | ₱149/mo | Unlimited |
-| Pro Annual | $39.99/yr ($3.33/mo) | ₱999/yr (₱83/mo) | Unlimited |
+| Plan | PH + Global | 🇺🇸 US / 🇪🇺 EU / 🇨🇦 CA / 🇦🇺 AU | Cards |
+|------|------------|--------------------------------------|-------|
+| Free | $0 | $0 | 2 |
+| Pro Monthly | $4.99/mo | $6.99 / €5.99 / CA$8.99 / A$10.99 | Unlimited |
+| Pro Annual | $47.99/yr (~20% off) | $55.99 / €47.99 / CA$71.99 / A$87.99 | Unlimited |
+| Pro Lifetime | $99.99 one-time | $99.99 flat globally | Unlimited |
+
+**Trial:** 30 days free (set in Play Console / App Store Connect — fetched dynamically in app via RevenueCat `introPrice`, no hardcoded value).
 
 ### Free vs. Pro Feature Gating
 
@@ -89,16 +92,17 @@ const isPro = customerInfo.entitlements.active['pro'] !== undefined;
 
 ## 3. Free Trial Strategy
 
-### Recommendation: 14-Day Free Trial, No Upfront Payment Required
+### Recommendation: 30-Day Free Trial, No Upfront Payment Required
 
 **Platform implementation:**
-- **iOS (StoreKit 2 via RevenueCat):** Set introductory offer in App Store Connect — "14-day free trial" on Pro Monthly. RevenueCat surfaces this automatically via `StoreProduct.introductoryDiscount`.
+- **iOS (StoreKit 2 via RevenueCat):** Set introductory offer in App Store Connect — "30-day free trial" on Pro Monthly. RevenueCat surfaces this automatically via `StoreProduct.introductoryDiscount`.
 - **Android (Play Billing v5 via RevenueCat):** Set free trial in Play Console subscription editor. Same entitlement check in app — RevenueCat handles it.
+- **In-app display:** Trial label is fetched dynamically from `pkg.product.introPrice` — changing it in the store automatically updates the app UI with no release needed.
 
 **Payment method upfront vs. not:**
 - **With payment method (standard subscription trial):** Higher conversion, 15–25% trial-to-paid. Users forget to cancel = good for revenue, potentially bad for trust.
 - **Without payment method:** Lower conversion (8–12%), but lower refund requests.
-- **Recommendation:** Go with standard subscription trial (payment method required). Finance app users are accustomed to this pattern. Clearly label "No charge for 14 days — cancel anytime."
+- **Recommendation:** Go with standard subscription trial (payment method required). Finance app users are accustomed to this pattern. Clearly label "No charge for 30 days — cancel anytime."
 
 **Trial-to-paid benchmarks (finance apps):**
 - Industry average: 10–20% trial-to-paid
@@ -148,14 +152,14 @@ Google Play's pricing tool accepts local currency amounts directly — no tier m
 | Plan | Monthly cost | Yearly cost | Savings |
 |------|-------------|-------------|---------|
 | Monthly | $4.99 | $59.88 | — |
-| Annual | $3.33/mo | $39.99 | 33% ($19.89) |
+| Annual | $4.00/mo | $47.99 | 20% ($19.89) |
 | PH Monthly | ₱149 | ₱1,788 | — |
-| PH Annual | ₱83/mo | ₱999 | 44% (₱789) |
+| PH Annual | ₱99/mo | ₱999 | 44% (₱789) |
 
 **Annual churn is dramatically lower:** Monthly plans churn at 15–40% on first renewal; annual subscribers churn at ~5% on renewal (RevenueCat SOSA 2025). Annual subscribers also have 3–4x higher LTV.
 
 **Paywall CTA strategy:**
-1. **Lead with annual** — show annual price monthly-equivalent as headline ("₱83/month, billed yearly")
+1. **Lead with annual** — show annual price monthly-equivalent as headline ("₱99/month, billed yearly")
 2. Monthly plan shown below, smaller
 3. Savings badge: "Save 44%" or "2 months free"
 4. Default selection: annual plan pre-selected
@@ -196,7 +200,7 @@ Google Play's pricing tool accepts local currency amounts directly — no tier m
 │                                 │
 │  [Try Free for 14 Days] ← CTA1  │
 │                                 │
-│  ₱83/mo   ●──────────────────   │
+│  ₱99/mo   ●──────────────────   │
 │  billed as ₱999/year   SAVE 44% │
 │                                 │
 │  or ₱149/month                  │
@@ -290,7 +294,7 @@ At $0.044/user/month, Gemini Flash keeps AI costs at <1% of Pro revenue per user
 | **Net margin per PH user** | **~$2.15 (~82%)** |
 
 **Annual plan economics (higher LTV, same cost base):**
-- US annual user: $39.99/year → $33.99 after 15% store cut → ~$33/yr net → **$2.75/mo effective net**
+- US annual user: $47.99/year → $33.99 after 15% store cut → ~$33/yr net → **$2.75/mo effective net**
 - Amortized AI is the same; annual users have lower churn → LTV is ~4x monthly users
 
 **RevenueCat threshold note:** Below $2.5K MRR, RevenueCat is completely free. At $2.5K MRR (PH: ~953 Pro users, US: ~501 Pro users), the 1% fee kicks in — only $25/month at exactly $2.5K MRR. Not a meaningful cost until ~$10K+ MRR.
