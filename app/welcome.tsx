@@ -3,7 +3,7 @@ import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ShieldCheck, CalendarDays, CreditCard } from 'lucide-react-native';
+import { ShieldCheck, CalendarDays, CreditCard, Sparkles } from 'lucide-react-native';
 
 import { Text } from '@/components/Themed';
 import { Button } from '@/components/atoms';
@@ -46,21 +46,22 @@ export default function WelcomeScreen() {
         },
       ]}
     >
-      <View style={styles.hero}>
-        <View style={styles.logoContainer}>
-          <Image source={falclyLogo} style={styles.logo} resizeMode="contain" accessible={true} accessibilityLabel="Falcly logo" />
+      <View style={styles.top}>
+        <View style={styles.hero}>
+          <View style={styles.logoContainer}>
+            <Image source={falclyLogo} style={styles.logo} resizeMode="contain" accessible={true} accessibilityLabel="Falcly logo" />
+          </View>
+
+          <Text style={[styles.headline, { color: t.textPrimary }]}>
+            Know before{'\n'}you swipe.
+          </Text>
+
+          <Text style={[styles.subheadline, { color: t.textSecondary }]}>
+            Falcly tells you if it&apos;s safe to use your credit card — before you swipe.
+          </Text>
         </View>
 
-        <Text style={[styles.headline, { color: t.textPrimary }]}>
-          Know before{'\n'}you swipe.
-        </Text>
-
-        <Text style={[styles.subheadline, { color: t.textSecondary }]}>
-          Falcly tells you if it&apos;s safe to use your credit card — before you swipe.
-        </Text>
-      </View>
-
-      <View style={[styles.benefits, { backgroundColor: t.surface }]}>
+        <View style={[styles.benefits, { backgroundColor: t.surface }]}>
         {BENEFITS.map((b, i) => (
           <View
             key={b.label}
@@ -75,6 +76,22 @@ export default function WelcomeScreen() {
             </Text>
           </View>
         ))}
+
+        <Pressable
+          style={[
+            styles.benefitRow,
+            { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border },
+          ]}
+          onPress={() => router.push('/pro-paywall')}
+          accessibilityRole="button"
+          accessibilityLabel="See more Pro features"
+        >
+          <Sparkles size={22} color={t.primary} strokeWidth={2} />
+          <Text style={[styles.benefitLabel, { color: t.primary }]}>
+            See more Pro features
+          </Text>
+        </Pressable>
+        </View>
       </View>
 
       <View style={styles.cta}>
@@ -95,6 +112,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 28,
     justifyContent: 'space-between',
+  },
+  top: {
+    gap: 24,
   },
   hero: {
     alignItems: 'center',
