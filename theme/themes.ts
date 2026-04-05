@@ -46,6 +46,9 @@ export const lightTheme: SemanticTokens = {
   // Overlay
   overlay: 'rgba(18, 18, 31, 0.5)',
 
+  // Shadow
+  shadow: '#000000',
+
   // Tab bar
   tabIconDefault: palette.borderLight,
   tabIconSelected: palette.amberGold,
@@ -96,6 +99,9 @@ export const darkTheme: SemanticTokens = {
 
   // Overlay
   overlay: 'rgba(18, 18, 31, 0.7)',
+
+  // Shadow
+  shadow: '#000000',
 
   // Tab bar
   tabIconDefault: palette.warmTaupe,

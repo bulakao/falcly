@@ -34,7 +34,7 @@ export function BestCardBanner({ bestCard, hasCards, hasActiveCards, onPress, on
   const showWhy = hasActiveCards;
 
   return (
-    <RNView style={styles.cardShadow}>
+    <RNView style={[styles.cardShadow, { shadowColor: t.shadow }]}>
       <RNView style={[styles.cardFace, { backgroundColor: t.surfaceElevated, borderColor: t.border }]}>
         <RNView style={styles.cardFaceContent}>
           {/* Top */}
@@ -108,7 +108,6 @@ const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 85.6 / 53.98,
     borderRadius: 16,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,

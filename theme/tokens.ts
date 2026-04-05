@@ -92,6 +92,9 @@ export type SemanticTokens = {
   // Overlay
   overlay: string;
 
+  // Shadow
+  shadow: string;
+
   // Tab bar
   tabIconDefault: string;
   tabIconSelected: string;

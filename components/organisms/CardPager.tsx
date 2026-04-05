@@ -243,7 +243,7 @@ export const CardPager = forwardRef<CardPagerRef, CardPagerProps>(
           snapToInterval={PAGE_WIDTH}
           decelerationRate="fast"
         />
-        <Animated.View style={[styles.overviewButton, { top: insets.top + 4, backgroundColor: t.surface }, buttonStyle]}>
+        <Animated.View style={[styles.overviewButton, { top: insets.top + 4, backgroundColor: t.surface, shadowColor: t.shadow }, buttonStyle]}>
           <Pressable
             style={styles.overviewButtonInner}
             onPress={scrollToOverview}
@@ -290,7 +290,6 @@ const styles = StyleSheet.create({
     height: 48,
     borderTopRightRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
     shadowOffset: { width: 1, height: 1 },
     shadowOpacity: 0.06,
     shadowRadius: 2,

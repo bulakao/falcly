@@ -146,20 +146,6 @@ _layout.tsx (root Stack)
 
 ---
 
-## 🟡 Warnings (Non-Critical)
-
-### 1. Hardcoded Colors (3 instances)
-
-| File | Color | Usage |
-|------|-------|-------|
-| `BestCardBanner.tsx` | `'#000'` | Shadow |
-| `CreditCardFace.tsx` | `'#000'` | Shadow |
-| `CardPager.tsx` | `'#000'` | Shadow |
-
-All are shadow colors. Minor inconsistency with theme system.
-
-**Fix:** Use `t.shadow` from theme tokens.
-
 ---
 
 ## 🔴 Should Fix Before Launch
@@ -315,10 +301,9 @@ SwipeImpactPanel → [Payoff Planner] → Paywall (if free)
 | # | Action | Effort | Impact |
 |---|--------|--------|--------|
 | 6 | Add tests for `overlayTriggers.ts`, `sync.ts` | 45 min | More coverage |
-| 7 | Fix 3 hardcoded shadow colors | 5 min | Theme consistency |
-| 8 | Add user properties to PostHog identify | 20 min | Better segmentation |
-| 9 | Enable PostHog session replay | 15 min | Watch real user sessions |
-| 10 | Wire up feature flags (plumbing) | 30 min | Remote control |
+| 7 | Add user properties to PostHog identify | 20 min | Better segmentation |
+| 8 | Enable PostHog session replay | 15 min | Watch real user sessions |
+| 9 | Wire up feature flags (plumbing) | 30 min | Remote control |
 
 ---
 

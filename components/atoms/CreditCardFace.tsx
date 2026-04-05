@@ -30,7 +30,7 @@ export function CreditCardFace({ card, netAvailableCash, currentCycleTxSum = 0 }
   const accentColor = staleness === 'stale' ? t.textMuted : statusColorMap[status];
 
   return (
-    <View style={styles.cardShadow}>
+    <View style={[styles.cardShadow, { shadowColor: t.shadow }]}>
       <View style={[styles.card, { backgroundColor: t.surfaceElevated, borderColor: t.border }]}>
         <View style={styles.content}>
         {/* Top row: bank name + status dot */}
@@ -102,7 +102,6 @@ const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 85.6 / 53.98,
     borderRadius: 16,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
