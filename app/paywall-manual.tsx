@@ -101,10 +101,22 @@ export default function ManualPaywallScreen() {
     return pct > 0 ? pct : null;
   })();
 
+  // Pull trial info from RevenueCat introPrice (set in Play Console / App Store Connect)
+  const trialLabel = (() => {
+    if (!selectedPackage || selectedPackage.packageType === 'LIFETIME') return null;
+    const intro = selectedPackage.product.introPrice;
+    if (!intro || intro.price !== 0) return null; // only show for free trials
+    const { periodUnit, periodNumberOfUnits } = intro;
+    const unit = periodUnit?.toLowerCase() ?? 'day';
+    const unitLabel = periodNumberOfUnits === 1 ? unit : `${unit}s`;
+    return `${periodNumberOfUnits}-${unitLabel} free trial · Cancel anytime`;
+  })();
+
   const ctaLabel = () => {
     if (!selectedPackage) return 'Select a Plan';
     if (selectedPackage.packageType === 'LIFETIME') return 'Get Lifetime Access';
-    return 'Start Free Trial';
+    if (trialLabel) return 'Start Free Trial';
+    return 'Subscribe Now';
   };
 
   return (
@@ -236,9 +248,9 @@ export default function ManualPaywallScreen() {
         )}
       </TouchableOpacity>
 
-      {selectedPackage?.packageType !== 'LIFETIME' && (
+      {trialLabel && (
         <Text style={[styles.trialNote, { color: t.textSecondary }]}>
-          30-day free trial · Cancel anytime
+          {trialLabel}
         </Text>
       )}
 
