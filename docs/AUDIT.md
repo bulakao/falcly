@@ -12,10 +12,10 @@
 |--------|-------|
 | Total LOC | 16,896 |
 | Source files | 96 (.ts/.tsx) |
-| Screens | 24 |
-| Components | 28 (8 atoms · 14 molecules · 6 organisms) |
+| Screens | 23 |
+| Components | 26 (7 atoms · 13 molecules · 6 organisms) |
 | Stores | 9 (Zustand) |
-| Utility modules | 18 |
+| Utility modules | 16 |
 | Test files | 3 |
 | Tests passing | 89/89 |
 | TypeScript errors | 0 |
@@ -53,7 +53,6 @@ _layout.tsx (root Stack)
 ├── manage-installments.tsx        — Installment list (modal)
 ├── manage-subscriptions.tsx       — Subscription list (modal)
 ├── pro-paywall.tsx                — RevenueCat UI paywall (modal)
-├── paywall-manual.tsx             — Custom paywall (modal)
 ├── settings.tsx                   — All settings
 ├── component-showcase.tsx         — Dev component gallery (modal)
 └── +not-found.tsx                 — 404
@@ -113,7 +112,6 @@ _layout.tsx (root Stack)
 | `payment-summary.tsx` | 244 | Monthly payment breakdown |
 | `onboarding-result.tsx` | 241 | Status display + save/sign-in CTA |
 | `_layout.tsx` | 236 | Root layout, providers, RevenueCat + PostHog init |
-| `paywall-manual.tsx` | 233 | Custom paywall with package selection |
 | `payoff-planner.tsx` | 231 | Strategy comparison + timeline |
 | All others | < 200 | Healthy size |
 
@@ -131,7 +129,7 @@ _layout.tsx (root Stack)
 ### Security
 - **Sanitized logging** — `utils/logger/sanitizer.ts` auto-redacts: password, token, secret, apiKey, authorization, creditCard, ssn, balance
 - **`.env` in `.gitignore`** — 4 matching patterns, secrets not committed
-- **Supabase anon key** — public key (safe to commit), but cleaner in env
+- **All API keys in env vars** — RevenueCat, Supabase, Google OAuth via `.env` → `app.config.js` extras
 - **No PII in analytics events** — PostHog events contain no card numbers, balances, or personal data
 
 ### Accessibility
@@ -152,25 +150,7 @@ _layout.tsx (root Stack)
 
 ## 🟡 Warnings (Non-Critical)
 
-### ~~1. Hardcoded API Keys (3 files)~~ ✅ Fixed
-
-All keys moved to `.env` → `app.config.js` extras → `Constants.expoConfig.extra.*` (2026-04-05):
-- `utils/revenuecat.ts` — reads `revenuecatApiKey`
-- `utils/supabase.ts` — reads `supabaseUrl`, `supabaseAnonKey`
-- `store/authStore.ts` — reads `googleWebClientId`, `googleIosClientId`
-
-### 2. Two Paywall Screens
-
-| Screen | Approach | LOC |
-|--------|----------|-----|
-| `pro-paywall.tsx` | RevenueCat UI (native) | 68 |
-| `paywall-manual.tsx` | Custom React Native UI | 233 |
-
-Both are registered in the navigation stack. Before launch, either:
-- Pick one and remove the other
-- Keep both and A/B test via PostHog feature flag (`paywall_variant`)
-
-### 3. `component-showcase.tsx` in Production Nav
+### 1. `component-showcase.tsx` in Production Nav
 
 Dev tool (325 LOC) registered as a navigable screen. Users could theoretically reach it.
 
@@ -179,7 +159,7 @@ Dev tool (325 LOC) registered as a navigable screen. Users could theoretically r
 {__DEV__ && <Stack.Screen name="component-showcase" ... />}
 ```
 
-### 4. `settings.tsx` at 1,018 Lines
+### 2. `settings.tsx` at 1,018 Lines
 
 Largest file in the app. Contains: profile, subscription management, overlay preferences, card defaults, data management, theme, analytics opt-out, sign-out, danger zone.
 
@@ -189,7 +169,7 @@ Largest file in the app. Contains: profile, subscription management, overlay pre
 - `SettingsDataSection.tsx`
 - `SettingsPreferencesSection.tsx`
 
-### 5. Watchman Recrawl Warning
+### 3. Watchman Recrawl Warning
 
 ```
 Recrawled this watch 283 times
@@ -203,19 +183,17 @@ watchman watch-del '/Users/ramidem/Code/bulakao/falcly'
 watchman watch-project '/Users/ramidem/Code/bulakao/falcly'
 ```
 
-### 6. Hardcoded Colors (5 instances)
+### 4. Hardcoded Colors (3 instances)
 
 | File | Color | Usage |
 |------|-------|-------|
-| `paywall-manual.tsx` | `'#fff'` | Button text |
 | `BestCardBanner.tsx` | `'#000'` | Shadow |
-| `StackedCardsPreview.tsx` | `'#000'` | Shadow |
 | `CreditCardFace.tsx` | `'#000'` | Shadow |
 | `CardPager.tsx` | `'#000'` | Shadow |
 
-All are shadow colors or white text on primary buttons. Minor inconsistency with theme system.
+All are shadow colors. Minor inconsistency with theme system.
 
-**Fix:** Use `t.shadow` or `t.buttonText` from theme tokens.
+**Fix:** Use `t.shadow` from theme tokens.
 
 ---
 
@@ -248,11 +226,6 @@ Currently using `test_QoIpmFHMVFDxuzrrCalJEmHXOMK`. Before Google Play release:
 1. Create production API key in RevenueCat dashboard
 2. Move to `.env`: `REVENUECAT_API_KEY=goog_xxxx`
 3. Read via `Constants.expoConfig.extra.revenuecatApiKey`
-
-### ~~3. Dead Code~~ ✅ Fixed
-
-Removed 4 unused files and their barrel exports (2026-04-05):
-- `PageDots.tsx`, `StackedCardsPreview.tsx`, `crashReporting.ts`, `secureLogger.ts`
 
 ---
 
@@ -366,34 +339,30 @@ SwipeImpactPanel → [Payoff Planner] → Paywall (if free)
 
 | # | Action | Effort | Impact |
 |---|--------|--------|--------|
-| ~~1~~ | ~~Move RevenueCat key to env var~~ | ~~10 min~~ | ✅ Done (all 3 files) |
-| 2 | Add `cycleUtils.ts` tests | 30 min | Prevent billing cycle bugs |
-| ~~3~~ | ~~Remove dead code (4 files)~~ | ~~5 min~~ | ✅ Done |
-| 4 | Gate component-showcase behind `__DEV__` | 5 min | No dev tools in prod |
-| 5 | Connect RevenueCat → PostHog (dashboard) | 10 min | Full revenue attribution |
-| 6 | Set up Play Console products + RevenueCat | 30 min | Can't launch without it |
-| 7 | `npx expo prebuild --clean` + EAS build | 15 min | Dev client for testing |
-| 8 | Test sandbox purchases on real device | 30 min | Verify payment flow |
+| 1 | Add `cycleUtils.ts` tests | 30 min | Prevent billing cycle bugs |
+| 2 | Gate component-showcase behind `__DEV__` | 5 min | No dev tools in prod |
+| 3 | Connect RevenueCat → PostHog (dashboard) | 10 min | Full revenue attribution |
+| 4 | Set up Play Console products + RevenueCat | 30 min | Can't launch without it |
+| 5 | `npx expo prebuild --clean` + EAS build | 15 min | Dev client for testing |
+| 6 | Test sandbox purchases on real device | 30 min | Verify payment flow |
 
 ### Post-Launch (Recommended)
 
 | # | Action | Effort | Impact |
 |---|--------|--------|--------|
-| ~~9~~ | ~~Move Supabase + Google creds to env~~ | ~~15 min~~ | ✅ Done |
-| 10 | Add tests for `overlayTriggers.ts`, `sync.ts` | 45 min | More coverage |
-| 11 | Decide paywall: one screen or A/B flag | 10 min | Simpler nav |
-| 12 | Split `settings.tsx` into sections | 30 min | Maintainability |
-| 13 | Fix 5 hardcoded shadow colors | 5 min | Theme consistency |
-| 14 | Add user properties to PostHog identify | 20 min | Better segmentation |
-| 15 | Enable PostHog session replay | 15 min | Watch real user sessions |
-| 16 | Wire up feature flags (plumbing) | 30 min | Remote control |
-| 17 | Fix watchman recrawl | 1 min | Faster dev experience |
+| 7 | Add tests for `overlayTriggers.ts`, `sync.ts` | 45 min | More coverage |
+| 8 | Split `settings.tsx` into sections | 30 min | Maintainability |
+| 9 | Fix 3 hardcoded shadow colors | 5 min | Theme consistency |
+| 10 | Add user properties to PostHog identify | 20 min | Better segmentation |
+| 11 | Enable PostHog session replay | 15 min | Watch real user sessions |
+| 12 | Wire up feature flags (plumbing) | 30 min | Remote control |
+| 13 | Fix watchman recrawl | 1 min | Faster dev experience |
 
 ---
 
 ## File Inventory
 
-### Screens (24)
+### Screens (23)
 
 | Screen | LOC | Purpose | Pro-Gated |
 |--------|-----|---------|-----------|
@@ -418,19 +387,16 @@ SwipeImpactPanel → [Payoff Planner] → Paywall (if free)
 | `manage-installments.tsx` | ~150 | Installment list | No |
 | `manage-subscriptions.tsx` | ~150 | Subscription list | No |
 | `pro-paywall.tsx` | 68 | RevenueCat native paywall | — |
-| `paywall-manual.tsx` | 233 | Custom paywall | — |
 | `settings.tsx` | 1,018 | All settings + subscription mgmt | Partial |
 | `component-showcase.tsx` | 325 | Dev tool | — |
 
-### Components (28)
+### Components (26)
 
-**Atoms (8):** Badge, Button, CreditCardFace, EmptyCardFace, FormInput, OfflineChip, PageDots*, Typography, UtilizationBar
+**Atoms (7):** Badge, Button, CreditCardFace, EmptyCardFace, FormInput, OfflineChip, Typography, UtilizationBar
 
-**Molecules (14):** AlertBanner, BankPicker, BestCardBanner, BreakdownRow, CardOverlay, CardPayoffBreakdown, ChipSelector, DayInput, EmptyState, FinanceCard, FormFieldGroup, ImpactSkeleton, MoneyInput, PayoffComparisonCard, PayoffTimeline, PercentInput, SectionCard, StackedCardsPreview*, StatusTooltip, SurfaceCard
+**Molecules (13):** AlertBanner, BankPicker, BestCardBanner, BreakdownRow, CardOverlay, CardPayoffBreakdown, ChipSelector, DayInput, EmptyState, FinanceCard, FormFieldGroup, ImpactSkeleton, MoneyInput, PayoffComparisonCard, PayoffTimeline, PercentInput, SectionCard, StatusTooltip, SurfaceCard
 
 **Organisms (6):** AllCardsOverview, BillingTimeline, CardPager, FutureTimeline, GanttTimeline, MergePrompt, SwipeImpactPanel
-
-*\* = unused (0 references)*
 
 ### Stores (9)
 
@@ -438,7 +404,7 @@ All Zustand with persist middleware. Total: 1,459 LOC.
 
 ### Utils (18)
 
-Core engines (3 tested) + helpers (15 untested). Total: 2,257 LOC.
+Core engines (3 tested) + helpers (13 untested). Total: ~2,157 LOC.
 Logger subsystem: 8 files in `utils/logger/` (core, breadcrumbs, crash, sanitizer, transports, middleware).
 
 ---
@@ -448,7 +414,5 @@ Logger subsystem: 8 files in `utils/logger/` (core, breadcrumbs, crash, sanitize
 Falcly is a well-structured, well-tested app with a clean architecture and solid feature set. The codebase is professional-grade with consistent patterns, proper security hygiene, and comprehensive analytics. The main gaps are:
 
 1. **Test coverage** — 3 of 18 utils tested (but the 3 most critical engines are fully covered)
-2. ~~**Dead code** — 4 unused files to clean up~~ ✅ Removed
-3. ~~**API key management** — works but should be env-var'd before production~~ ✅ All keys in env
 
-None of these are blockers. The app is launch-ready once Play Console products are configured and sandbox purchases are verified.
+The app is launch-ready once Play Console products are configured and sandbox purchases are verified.
