@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
@@ -28,15 +28,7 @@ export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();
   const offerings = useSubscriptionStore((s) => s.offerings);
 
-  const trialCtaLabel = useMemo(() => {
-    const pkg = offerings?.availablePackages.find((p) => p.packageType === 'MONTHLY' || p.packageType === 'ANNUAL');
-    const intro = pkg?.product.introPrice;
-    if (!intro || intro.price !== 0) return 'Unlock Pro features';
-    const { periodUnit, periodNumberOfUnits } = intro;
-    const unit = periodUnit?.toLowerCase() ?? 'day';
-    const unitLabel = periodNumberOfUnits === 1 ? unit : `${unit}s`;
-    return `Try Pro free for ${periodNumberOfUnits} ${unitLabel}`;
-  }, [offerings]);
+  const trialCtaLabel = 'Unlock Pro features';
 
   useEffect(() => {
     trackOnboardingWelcomeViewed();
