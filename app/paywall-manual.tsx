@@ -94,7 +94,9 @@ export default function ManualPaywallScreen() {
         { text: 'OK', onPress: () => router.replace('/') },
       ]);
     } else {
-      Alert.alert('No Purchases Found', 'No previous purchases were found for this account.');
+      Alert.alert('No Purchases Found', 'No previous purchases were found for this account.', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
     }
   }
 
