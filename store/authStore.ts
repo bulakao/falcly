@@ -19,7 +19,7 @@ interface AuthStore {
   setUser: (user: User | null) => void;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string, name?: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<void>;
@@ -48,8 +48,12 @@ export const useAuthStore = create<AuthStore>()((set) => ({
     if (error) throw error;
     if (data.user) set({ user: data.user, loading: false });
   },
-  signUpWithEmail: async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+  signUpWithEmail: async (email: string, password: string, name?: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: name ? { data: { full_name: name } } : undefined,
+    });
     if (__DEV__) {
       console.log('[AUTH] signUp response:', JSON.stringify({
         error: error?.message,

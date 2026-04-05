@@ -67,6 +67,7 @@ export default function SignInScreen() {
   const [mode, setMode] = useState<'signin' | 'signup'>(
     initialMode === 'signup' || fromOnboarding === 'true' ? 'signup' : 'signin',
   );
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -203,6 +204,10 @@ export default function SignInScreen() {
 
   async function handleEmailAuth() {
     clearErrors();
+    if (isSignUp && !fullName.trim()) {
+      setGeneralError('Enter your name.');
+      return;
+    }
     if (!email.trim()) {
       setEmailError('Enter your email.');
       return;
@@ -218,10 +223,10 @@ export default function SignInScreen() {
     setLoading(true);
     try {
       if (isSignUp) {
-        await signUpWithEmail(email.trim(), password);
+        await signUpWithEmail(email.trim(), password, fullName.trim());
         const { data: { user: newUser } } = await supabase.auth.getUser();
         if (newUser) {
-          posthog.identify(newUser.id, { $set: { email: newUser.email ?? '' } });
+          posthog.identify(newUser.id, { $set: { email: newUser.email ?? '', name: fullName.trim() } });
           trackUserSignedUp('email');
           if (fromOnboarding === 'true') trackOnboardingSignupCompleted('email');
         }
@@ -334,6 +339,19 @@ export default function SignInScreen() {
         </View>
 
         <View style={styles.form}>
+          {isSignUp && (
+            <>
+              <FormInput
+                value={fullName}
+                onChangeText={(v) => { setFullName(v); setGeneralError(''); }}
+                placeholder="Full name"
+                autoCapitalize="words"
+                autoCorrect={false}
+                accessibilityLabel="Full name"
+              />
+              <View style={styles.spacer} />
+            </>
+          )}
           <FormInput
             value={email}
             onChangeText={(v) => { setEmail(v); setEmailError(''); }}
