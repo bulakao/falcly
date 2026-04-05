@@ -80,8 +80,9 @@ export default function WelcomeScreen() {
       <View style={styles.cta}>
         <Button label="Get Started" onPress={handleGetStarted} />
         <Pressable onPress={() => router.push('/sign-in')}>
-          <Text style={[styles.loginLink, { color: t.primary }]}>
-            Already have an account? <Text style={{ fontFamily: fonts.interBold }}>Log in</Text>
+          <Text style={[styles.loginLink, { color: t.textSecondary }]}>
+            Already have an account?{' '}
+            <Text style={{ color: t.primary, fontFamily: fonts.interBold }}>Log in</Text>
           </Text>
         </Pressable>
       </View>
