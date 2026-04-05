@@ -114,7 +114,7 @@ export default function ManualPaywallScreen() {
                 )}
               </Text>
               {pkg.packageType === 'ANNUAL' && (
-                <Text style={[styles.savings, { color: t.safe }]}>Save 33%</Text>
+                <Text style={[styles.savings, { color: t.safe }]}>Save 20%</Text>
               )}
             </TouchableOpacity>
           );

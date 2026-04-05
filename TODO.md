@@ -13,10 +13,11 @@
 
 ## 🚀 Pre-Launch (Blockers)
 
+- [ ] **[IMPORTANT] Enroll in Apple Small Business Program** — cuts App Store commission from 30% → 15% (free, apply at developer.apple.com/app-store/small-business-program/)
 - [ ] Set up products in Google Play Console
   - `falcly_pro_monthly` — $4.99/month
-  - `falcly_pro_yearly` — $39.99/year
-  - `falcly_pro_lifetime` — one-time (price TBD)
+  - `falcly_pro_yearly` — $47.99/year *(was $39.99 — tightened to 20% off monthly)*
+  - `falcly_pro_lifetime` — $79.99 one-time *(16-month payback after 15% cut)*
 - [ ] Link Play Console to RevenueCat dashboard
   - Create entitlement: `Falcly Pro`
   - Create offering: `default` (monthly + yearly + lifetime packages)
@@ -64,3 +65,8 @@
 - [x] Drop Pro+ tier — Free/Pro only with monthly/yearly/lifetime
 - [x] Accessibility audit
 - [x] All docs updated
+
+
+- from status page to login, it should be account creation. if they reach status page, it means they might be new.
+- from status page to sign in, there is extra back button. it's weird that it says welcom back if i am new. 
+- revisit pricing so we dont get hurt by store's cut ✅ revised: $4.99/mo · $47.99/yr · $79.99 lifetime
