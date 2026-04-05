@@ -63,6 +63,11 @@ module.exports = {
     extra: {
       posthogProjectToken: process.env.POSTHOG_PROJECT_TOKEN,
       posthogHost: process.env.POSTHOG_HOST,
+      revenuecatApiKey: process.env.REVENUECAT_API_KEY,
+      supabaseUrl: process.env.SUPABASE_URL,
+      supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
+      googleWebClientId: process.env.GOOGLE_WEB_CLIENT_ID,
+      googleIosClientId: process.env.GOOGLE_IOS_CLIENT_ID,
     },
     experiments: {
       typedRoutes: true,

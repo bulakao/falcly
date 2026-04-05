@@ -4,8 +4,9 @@ import Purchases, {
   type PurchasesPackage,
   type CustomerInfo,
 } from 'react-native-purchases';
+import Constants from 'expo-constants';
 
-const API_KEY = 'test_QoIpmFHMVFDxuzrrCalJEmHXOMK';
+const API_KEY: string = Constants.expoConfig?.extra?.revenuecatApiKey ?? '';
 const ENTITLEMENT_ID = 'Falcly Pro';
 
 let configured = false;
