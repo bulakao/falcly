@@ -20,7 +20,7 @@ import { useSubscriptionItemStore } from '@/store/subscriptionItemStore';
 import { useAppTheme } from '@/theme';
 import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
 import { Button, Heading, Label } from '@/components/atoms';
-import { BankPicker, FormFieldGroup } from '@/components/molecules';
+import { FormFieldGroup } from '@/components/molecules';
 import { fonts } from '@/theme/fonts';
 import { useCurrency } from '@/hooks/useCurrency';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
@@ -140,10 +140,23 @@ export default function EditCardScreen() {
 
         <View style={styles.fieldGroup}>
           <Label>Card Name</Label>
-          <BankPicker
+          <TextInput
+            style={[
+              styles.nameInput,
+              {
+                backgroundColor: t.inputBg,
+                borderColor: t.inputBorder,
+                color: t.inputText,
+              },
+            ]}
             value={bankName}
-            onSelect={setBankName}
-            placeholder="BDO, BPI, Metrobank"
+            onChangeText={setBankName}
+            placeholder="e.g. BDO Rewards, Citi PremierMiles"
+            placeholderTextColor={t.placeholder}
+            autoCapitalize="words"
+            autoCorrect={false}
+            returnKeyType="next"
+            accessibilityLabel="Card name"
           />
         </View>
 
@@ -344,6 +357,14 @@ const styles = StyleSheet.create({
   },
   fieldGroup: {
     marginTop: 16,
+  },
+  nameInput: {
+    borderRadius: 8,
+    borderWidth: 2,
+    padding: 14,
+    fontSize: 20,
+    fontFamily: fonts.interBold,
+    textAlign: 'center',
   },
   managedField: {
     marginTop: 16,

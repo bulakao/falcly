@@ -1,4 +1,3 @@
-export { BankPicker } from './BankPicker';
 export { DayInput } from './DayInput';
 export { FormFieldGroup } from './FormFieldGroup';
 export { SurfaceCard } from './SurfaceCard';

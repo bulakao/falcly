@@ -6,6 +6,7 @@ import {
   ScrollView,
   Alert,
   View,
+  TextInput,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,7 +17,8 @@ import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
 import { trackOnboardingCardEntryCompleted } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
 import { Button, Heading, Label } from '@/components/atoms';
-import { BankPicker, DayInput, MoneyInput, parseMoney } from '@/components/molecules';
+import { DayInput, MoneyInput, parseMoney } from '@/components/molecules';
+import { fonts } from '@/theme/fonts';
 
 
 export default function OnboardingScreen() {
@@ -89,11 +91,24 @@ export default function OnboardingScreen() {
 
         {/* Account Name */}
         <View style={styles.fieldGroup}>
-          <Label>Account Name</Label>
-          <BankPicker
+          <Label>Card Name</Label>
+          <TextInput
+            style={[
+              styles.nameInput,
+              {
+                backgroundColor: t.inputBg,
+                borderColor: t.inputBorder,
+                color: t.inputText,
+              },
+            ]}
             value={accountName}
-            onSelect={setAccountName}
-            placeholder="My Credit Card"
+            onChangeText={setAccountName}
+            placeholder="e.g. BDO Rewards, Citi PremierMiles"
+            placeholderTextColor={t.placeholder}
+            autoCapitalize="words"
+            autoCorrect={false}
+            returnKeyType="next"
+            accessibilityLabel="Card name"
           />
         </View>
 
@@ -144,6 +159,14 @@ const styles = StyleSheet.create({
   },
   fieldGroup: {
     marginTop: 16,
+  },
+  nameInput: {
+    borderRadius: 8,
+    borderWidth: 2,
+    padding: 14,
+    fontSize: 20,
+    fontFamily: fonts.interBold,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 15,

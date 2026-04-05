@@ -20,7 +20,7 @@ import { useUserStore } from '@/store/userStore';
 import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
 import { trackCardAdded } from '@/utils/analytics';
 import { Button, Label } from '@/components/atoms';
-import { BankPicker, DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
+import { DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
@@ -111,10 +111,23 @@ export default function AddCardScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.fieldGroup}>
           <Label>Card Name</Label>
-          <BankPicker
+          <TextInput
+            style={[
+              styles.nameInput,
+              {
+                backgroundColor: t.inputBg,
+                borderColor: t.inputBorder,
+                color: t.inputText,
+              },
+            ]}
             value={bankName}
-            onSelect={setBankName}
-            placeholder="BDO, BPI, Metrobank"
+            onChangeText={setBankName}
+            placeholder="e.g. BDO Rewards, Citi PremierMiles"
+            placeholderTextColor={t.placeholder}
+            autoCapitalize="words"
+            autoCorrect={false}
+            returnKeyType="next"
+            accessibilityLabel="Card name"
           />
         </View>
 
@@ -239,6 +252,14 @@ const styles = StyleSheet.create({
   },
   fieldGroup: {
     marginTop: 16,
+  },
+  nameInput: {
+    borderRadius: 8,
+    borderWidth: 2,
+    padding: 14,
+    fontSize: 20,
+    fontFamily: fonts.interBold,
+    textAlign: 'center',
   },
   buttonWrapper: {
     marginTop: 32,
