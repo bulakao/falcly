@@ -6,6 +6,7 @@ import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
+import { logoutUser } from '@/utils/revenuecat';
 import Constants from 'expo-constants';
 
 GoogleSignin.configure({
@@ -90,9 +91,13 @@ export const useAuthStore = create<AuthStore>()((set) => ({
   signOut: async () => {
     await supabase.auth.signOut();
     try { await GoogleSignin.signOut(); } catch { /* not signed in via Google */ }
+    try { await logoutUser(); } catch { /* RC logout — resets to anonymous */ }
     set({ user: null, loading: false });
-    // Local data (cards, profile, onboarding) persists — sign-out only clears auth
+    // Clear all local data on sign out (data lives in Supabase, not deleted)
+    useCardStore.getState().reset();
+    useUserStore.getState().reset();
     useSubscriptionStore.getState().reset();
+    useOnboardingStore.getState().reset();
   },
   deleteAccount: async () => {
     const { error } = await supabase.rpc('delete_own_account');
