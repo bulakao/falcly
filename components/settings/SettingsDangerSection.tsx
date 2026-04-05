@@ -2,6 +2,7 @@ import { StyleSheet, Alert, View as RNView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Text } from '@/components/Themed';
 import { useAuthStore } from '@/store/authStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { posthog, trackUserSignedOut } from '@/utils/analytics';
@@ -15,6 +16,7 @@ export function SettingsDangerSection() {
   const signOut = useAuthStore((s) => s.signOut);
   const deleteAccount = useAuthStore((s) => s.deleteAccount);
   const clearLocalData = useAuthStore((s) => s.clearLocalData);
+  const tier = useSubscriptionStore((s) => s.tier);
 
   return (
     <>
@@ -51,10 +53,11 @@ export function SettingsDangerSection() {
           label={user ? 'Delete Account' : 'Clear All Data'}
           variant="destructive-outline"
           onPress={() => {
+            const hasSubscription = user && tier === 'pro';
             Alert.alert(
               user ? 'Delete Account' : 'Clear All Data',
               user
-                ? 'This will permanently delete your account and all your data. This cannot be undone.'
+                ? `This will permanently delete your account and all your data. This cannot be undone.${hasSubscription ? '\n\n⚠️ You have an active Pro subscription. Deleting your account will NOT cancel it — you must cancel in Google Play Store or App Store first to avoid being charged.' : ''}`
                 : 'This will erase all your cards and data from this device. This cannot be undone.',
               [
                 { text: 'Cancel', style: 'cancel' },

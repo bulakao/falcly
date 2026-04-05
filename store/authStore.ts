@@ -100,14 +100,18 @@ export const useAuthStore = create<AuthStore>()((set) => ({
     useSubscriptionStore.getState().reset();
   },
   deleteAccount: async () => {
+    // Check if user has active subscription — warn them first
+    const tier = useSubscriptionStore.getState().tier;
     const { error } = await supabase.rpc('delete_own_account');
     if (error) throw error;
     try { await GoogleSignin.signOut(); } catch { /* not signed in via Google */ }
+    try { await logoutUser(); } catch { /* RC logout — resets to anonymous */ }
     set({ user: null, loading: false });
-    // Delete account wipes everything
+    // Delete account wipes everything local + resets onboarding
     useCardStore.getState().reset();
     useUserStore.getState().reset();
     useSubscriptionStore.getState().reset();
+    useOnboardingStore.getState().reset();
   },
   clearLocalData: () => {
     useCardStore.getState().reset();
