@@ -60,7 +60,7 @@ export default function PayoffPlannerScreen() {
           </Text>
           <Pressable
             style={[styles.upgradeButton, { backgroundColor: t.primary }]}
-            onPress={() => router.push('/pro-paywall')}
+            onPress={() => router.push('/paywall-manual' as any)}
             accessibilityRole="button"
             accessibilityLabel="Upgrade to Pro"
           >

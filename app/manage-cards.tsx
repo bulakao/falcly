@@ -42,7 +42,7 @@ export default function ManageCardsScreen() {
         `You can only have ${FREE_CARD_LIMIT} active cards on the free plan. Disable another card first, or upgrade to Pro.`,
         [
           { text: 'OK', style: 'cancel' },
-          { text: 'Upgrade', onPress: () => router.push('/pro-paywall') },
+          { text: 'Upgrade', onPress: () => router.push('/paywall-manual' as any) },
         ],
       );
       return;
@@ -58,7 +58,7 @@ export default function ManageCardsScreen() {
     if (canAddCard(cards.length)) {
       router.push('/add-card');
     } else {
-      router.push('/pro-paywall');
+      router.push('/paywall-manual' as any);
     }
   }
 

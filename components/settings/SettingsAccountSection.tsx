@@ -91,7 +91,7 @@ export function SettingsAccountSection() {
           <>
             <RNView style={[styles.divider, { backgroundColor: t.border }]} />
             <Pressable
-              onPress={() => router.push('/pro-paywall')}
+              onPress={() => router.push('/paywall-manual' as any)}
               style={styles.manageSubButton}
             >
               <Text style={[styles.manageSubText, { color: t.primary }]}>Upgrade to Pro</Text>

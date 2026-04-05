@@ -82,7 +82,7 @@ export default function WelcomeScreen() {
             styles.benefitRow,
             { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border },
           ]}
-          onPress={() => router.push('/pro-paywall')}
+          onPress={() => router.push('/paywall-manual' as any)}
           accessibilityRole="button"
           accessibilityLabel="See more Pro features"
         >

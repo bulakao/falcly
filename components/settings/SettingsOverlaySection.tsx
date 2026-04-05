@@ -94,7 +94,7 @@ export function SettingsOverlaySection() {
         <Pressable
           style={styles.defaultRow}
           onPress={() => {
-            if (!proUser) { router.push('/pro-paywall'); return; }
+            if (!proUser) { router.push('/paywall-manual' as any); return; }
             const options = [
               { label: 'Daily', value: 1 },
               { label: 'Every 3 days', value: 3 },

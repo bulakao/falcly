@@ -174,7 +174,7 @@ export function SwipeImpactPanel({
     <View style={styles.container}>
       {/* Read-only upgrade banner */}
       {readOnly && (
-        <Link href="/pro-paywall" asChild>
+        <Link href={"/paywall-manual" as any} asChild>
           <AlertBanner message="Reactivate Pro to manage all cards" variant="accent" centered />
         </Link>
       )}
@@ -358,7 +358,7 @@ export function SwipeImpactPanel({
       </View>
 
       {/* Payoff Planner link */}
-      <Link href={subscriptionTier === 'free' ? '/pro-paywall' : '/payoff-planner'} asChild>
+      <Link href={(subscriptionTier === 'free' ? '/paywall-manual' : '/payoff-planner') as any} asChild>
         <Pressable style={[styles.navButton, { backgroundColor: t.surface, borderColor: t.border }]} accessibilityRole="button" accessibilityLabel="Payoff Planner">
           <View style={styles.plannerLinkRow}>
             <Text style={[styles.navButtonText, { color: t.primary }]}>Payoff Planner ›</Text>
@@ -435,7 +435,7 @@ export function SwipeImpactPanel({
 
       {/* Trial CTA */}
       {subscriptionTier === 'free' && (
-        <Link href="/pro-paywall" asChild>
+        <Link href={"/paywall-manual" as any} asChild>
           <Pressable style={[styles.trialCta, { backgroundColor: t.accentBg, borderColor: t.accent }]} accessibilityRole="button" accessibilityLabel="Try free for 14 days — unlock payment planning, installment tracking, and more">
             <Text style={[styles.trialCtaText, { color: t.accent }]}>Try Free for 14 Days</Text>
             <Text style={[styles.trialCtaSubtext, { color: t.accent }]}>

@@ -40,7 +40,7 @@ export default function HomeScreen() {
     if (canAddCard(cards.length)) {
       router.push('/add-card');
     } else {
-      router.push('/pro-paywall');
+      router.push('/paywall-manual' as any);
     }
   }
 

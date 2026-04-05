@@ -140,7 +140,7 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
         </Pressable>
         <View style={styles.spacer} />
         <OfflineChip />
-        <Pressable onPress={() => router.push('/pro-paywall')} accessibilityRole="button" accessibilityLabel={`${getBadgeLabel()} membership`}>
+        <Pressable onPress={() => router.push('/paywall-manual' as any)} accessibilityRole="button" accessibilityLabel={`${getBadgeLabel()} membership`}>
           <Badge label={getBadgeLabel()} variant={tier === 'pro' ? 'pro' : 'outline'} />
         </Pressable>
       </View>
