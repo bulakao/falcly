@@ -16,8 +16,8 @@
 | Components | 26 (7 atoms · 13 molecules · 6 organisms) |
 | Stores | 9 (Zustand) |
 | Utility modules | 16 |
-| Test files | 3 |
-| Tests passing | 89/89 |
+| Test files | 4 |
+| Tests passing | 112/112 |
 | TypeScript errors | 0 |
 | Dependencies | 36 prod · 9 dev |
 | Accessibility attributes | 159 |
@@ -150,26 +150,24 @@ _layout.tsx (root Stack)
 
 ## 🔴 Should Fix Before Launch
 
-### 1. Test Coverage Gaps
+### 1. Test Coverage
 
-**Tested (3 files, 89 tests):**
+**Tested (4 files, 112 tests):**
 | File | Tests | Coverage |
 |------|-------|----------|
 | `decisionEngine.ts` | 45 | Full — all 8 conditions, edge cases |
 | `statementAdvisor.ts` | 25 | Full — spread, gaps, clustering, payday |
 | `payoffPlanner.ts` | 19 | Full — avalanche, snowball, comparison |
+| `cycleUtils.ts` | 23 | Full — classification, formatting, edge cases |
 
-**Not tested (critical):**
+**Not tested (lower priority):**
 | File | LOC | Risk | Priority |
 |------|-----|------|----------|
-| `cycleUtils.ts` | 101 | **High** — billing cycle math, date calculations | 🔴 |
 | `overlayTriggers.ts` | — | Medium — overlay display logic | 🟡 |
 | `sync.ts` | 88 | Medium — cloud sync merge logic | 🟡 |
 | `csvExport.ts` | 125 | Low — data export formatting | 🟢 |
 | `notifications.ts` | 220 | Low — wrapper around Notifee | 🟢 |
 | `analytics.ts` | 163 | Low — PostHog wrapper | 🟢 |
-
-**`cycleUtils.ts` is the priority** — it's the foundation for cycle classification ("Which cycle does this transaction land on?"). A bug here silently misclassifies transactions.
 
 ### 2. RevenueCat Production Key
 
@@ -290,11 +288,10 @@ SwipeImpactPanel → [Payoff Planner] → Paywall (if free)
 
 | # | Action | Effort | Impact |
 |---|--------|--------|--------|
-| 1 | Add `cycleUtils.ts` tests | 30 min | Prevent billing cycle bugs |
-| 2 | Connect RevenueCat → PostHog (dashboard) | 10 min | Full revenue attribution |
-| 3 | Set up Play Console products + RevenueCat | 30 min | Can't launch without it |
-| 4 | `npx expo prebuild --clean` + EAS build | 15 min | Dev client for testing |
-| 5 | Test sandbox purchases on real device | 30 min | Verify payment flow |
+| 1 | Connect RevenueCat → PostHog (dashboard) | 10 min | Full revenue attribution |
+| 2 | Set up Play Console products + RevenueCat | 30 min | Can't launch without it |
+| 3 | `npx expo prebuild --clean` + EAS build | 15 min | Dev client for testing |
+| 4 | Test sandbox purchases on real device | 30 min | Verify payment flow |
 
 ### Post-Launch (Recommended)
 
