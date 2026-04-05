@@ -2,9 +2,7 @@ import { useState, useMemo } from 'react';
 import {
   StyleSheet,
   Pressable,
-  Image,
   ScrollView,
-  Alert,
   Switch,
   Share,
   View as RNView,
@@ -18,44 +16,24 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Text } from '@/components/Themed';
 import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
-import { useSubscriptionStore } from '@/store/subscriptionStore';
-import { useAuthStore } from '@/store/authStore';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
-import { useNetworkStatus } from '@/hooks/useNetworkStatus';
-import { exportDataAsCSV } from '@/utils/csvExport';
-import { Button, Badge } from '@/components/atoms';
-import { AlertBanner, SurfaceCard, PercentInput, MoneyInput, parseMoney } from '@/components/molecules';
+import { Button } from '@/components/atoms';
+import { SurfaceCard, PercentInput, MoneyInput, parseMoney } from '@/components/molecules';
 import type { PayoffStrategy } from '@/store/userStore';
 import { scheduleAllReminders } from '@/utils/notifications';
-import { useOverlayStore } from '@/store/overlayStore';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
-import { fullSync } from '@/utils/sync';
-import { supabase } from '@/utils/supabase';
-import { posthog, trackUserSignedOut } from '@/utils/analytics';
-
-function timeAgo(ts: number): string {
-  const seconds = Math.floor((Date.now() - ts) / 1000);
-  if (seconds < 60) return 'Just now';
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
-  const days = Math.floor(hours / 24);
-  return `${days} day${days === 1 ? '' : 's'} ago`;
-}
+import {
+  SettingsAccountSection,
+  SettingsOverlaySection,
+  SettingsDataSection,
+  SettingsDangerSection,
+} from '@/components/settings';
 
 export default function SettingsScreen() {
   const t = useAppTheme();
   const insets = useSafeAreaInsets();
-  const user = useAuthStore((s) => s.user);
-  const signOut = useAuthStore((s) => s.signOut);
-  const deleteAccount = useAuthStore((s) => s.deleteAccount);
-  const clearLocalData = useAuthStore((s) => s.clearLocalData);
-
-  const isPro = useSubscriptionStore((s) => s.isPro);
-  const tier = useSubscriptionStore((s) => s.tier);
-  const subExpirationDate = useSubscriptionStore((s) => s.getExpirationDate);
+  const router = useRouter();
 
   const analyticsOptOut = useUserStore((s) => s.analyticsOptOut);
   const setAnalyticsOptOutStore = useUserStore((s) => s.setAnalyticsOptOut);
@@ -88,11 +66,6 @@ export default function SettingsScreen() {
     _setNotifyHighUtilization(v);
   }
 
-  const overlayPrefs = useOverlayStore((s) => s.overlayPrefs);
-  const setOverlayPrefs = useOverlayStore((s) => s.setOverlayPrefs);
-  const resetDismissed = useOverlayStore((s) => s.resetDismissed);
-  const proUser = isPro();
-
   const defaultInterestRate = useUserStore((s) => s.defaultInterestRate);
   const setDefaultInterestRate = useUserStore((s) => s.setDefaultInterestRate);
   const defaultMinPaymentPct = useUserStore((s) => s.defaultMinPaymentPct);
@@ -117,15 +90,7 @@ export default function SettingsScreen() {
   const committedExpenses = useUserStore((s) => s.committedExpenses);
 
   const cards = useCardStore((s) => s.cards);
-  const router = useRouter();
 
-  const lastSyncedAt = useUserStore((s) => s.lastSyncedAt);
-  const setLastSyncedAt = useUserStore((s) => s.setLastSyncedAt);
-  const [syncingNow, setSyncingNow] = useState(false);
-  const [syncFeedback, setSyncFeedback] = useState<'synced' | 'failed' | null>(null);
-
-  const { isOffline } = useNetworkStatus();
-  const [exporting, setExporting] = useState(false);
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
   const [currencySearch, setCurrencySearch] = useState('');
   const filteredCurrencies = useMemo(() => {
@@ -140,88 +105,7 @@ export default function SettingsScreen() {
   return (
     <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 56 }]}>
 
-      {/* ── Account & Subscription ── */}
-      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Account</Text>
-      <SurfaceCard>
-        {user ? (
-          <RNView style={styles.accountRow}>
-            <RNView style={styles.accountAvatar}>
-              {user.user_metadata?.avatar_url ? (
-                <Image source={{ uri: user.user_metadata.avatar_url }} style={styles.accountAvatarImage} />
-              ) : (
-                <FontAwesome name="user" size={18} color={t.textMuted} />
-              )}
-            </RNView>
-            <RNView style={styles.accountInfo}>
-              <Text style={[styles.accountName, { color: t.textPrimary }]}>{user.user_metadata?.full_name ?? 'User'}</Text>
-              <Text style={[styles.accountEmail, { color: t.textMuted }]}>{user.email}</Text>
-            </RNView>
-          </RNView>
-        ) : (
-          <>
-            <RNView style={styles.accountPromptRow}>
-              <FontAwesome name="shield" size={24} color={t.primary} />
-              <RNView style={styles.accountPromptText}>
-                <Text style={[styles.accountName, { color: t.textPrimary }]}>Back up your data</Text>
-                <Text style={[styles.accountPromptSubtitle, { color: t.textSecondary }]}>
-                  Create a free account to sync across devices and keep your data safe.
-                </Text>
-              </RNView>
-            </RNView>
-            <RNView style={styles.accountPromptButtons}>
-              <Button label="Create Account" onPress={() => router.push({ pathname: '/sign-in', params: { mode: 'signup' } })} />
-              <Button label="Sign In" variant="secondary" onPress={() => router.push('/sign-in')} />
-            </RNView>
-          </>
-        )}
-
-        {/* Subscription — inline if active */}
-        {isPro() && (
-          <>
-            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
-            <RNView style={styles.proBadgeRow}>
-              <Badge label="PRO" variant="pro" />
-              <Text style={[styles.proStatusText, { color: t.accentText }]}>
-                Pro — Active
-              </Text>
-            </RNView>
-            {subExpirationDate() && (
-              <Text style={[styles.trialEndText, { color: t.accent }]}>
-                Renews{' '}
-                {subExpirationDate()!.toLocaleDateString('en-PH', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </Text>
-            )}
-            <Pressable
-              onPress={async () => {
-                try {
-                  const RevenueCatUI = (await import('react-native-purchases-ui')).default;
-                  await RevenueCatUI.presentCustomerCenter();
-                } catch (e) {
-                  console.error('Customer Center error:', e);
-                }
-              }}
-              style={styles.manageSubButton}
-            >
-              <Text style={[styles.manageSubText, { color: t.primary }]}>Manage Subscription</Text>
-            </Pressable>
-          </>
-        )}
-        {tier === 'free' && (
-          <>
-            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
-            <Pressable
-              onPress={() => router.push('/pro-paywall')}
-              style={styles.manageSubButton}
-            >
-              <Text style={[styles.manageSubText, { color: t.primary }]}>Upgrade to Pro</Text>
-            </Pressable>
-          </>
-        )}
-      </SurfaceCard>
+      <SettingsAccountSection />
 
       {/* ── Appearance ── */}
       <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Appearance</Text>
@@ -303,118 +187,7 @@ export default function SettingsScreen() {
         </RNView>
       </SurfaceCard>
 
-      {/* ── Card Tips & Alerts ── */}
-      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Card Tips & Alerts</Text>
-      <SurfaceCard>
-        <RNView style={styles.valueRow}>
-          <RNView style={{ flex: 1 }}>
-            <RNView style={styles.lockRow}>
-              <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Show card overlays</Text>
-              {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
-            </RNView>
-            <Text style={[styles.itemHint, { color: t.textMuted }]}>
-              {proUser ? 'Master switch for all overlay types' : 'Upgrade to Pro to control overlays'}
-            </Text>
-          </RNView>
-          <Switch
-            value={overlayPrefs.enabled}
-            onValueChange={(v) => { if (proUser) setOverlayPrefs({ enabled: v }); }}
-            disabled={!proUser}
-          />
-        </RNView>
-
-        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
-
-        <RNView style={styles.valueRow}>
-          <RNView style={styles.lockRow}>
-            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Alerts</Text>
-            {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
-          </RNView>
-          <Switch value={overlayPrefs.alerts} onValueChange={(v) => { if (proUser) setOverlayPrefs({ alerts: v }); }} disabled={!proUser} />
-        </RNView>
-
-        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
-
-        <RNView style={styles.valueRow}>
-          <RNView style={styles.lockRow}>
-            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Statement tips</Text>
-            {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
-          </RNView>
-          <Switch value={overlayPrefs.statements} onValueChange={(v) => { if (proUser) setOverlayPrefs({ statements: v }); }} disabled={!proUser} />
-        </RNView>
-
-        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
-
-        <RNView style={styles.valueRow}>
-          <RNView style={styles.lockRow}>
-            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Educational tips</Text>
-            {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
-          </RNView>
-          <Switch value={overlayPrefs.tips} onValueChange={(v) => { if (proUser) setOverlayPrefs({ tips: v }); }} disabled={!proUser} />
-        </RNView>
-
-        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
-
-        <RNView style={styles.valueRow}>
-          <RNView style={styles.lockRow}>
-            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Promotions</Text>
-            {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
-          </RNView>
-          <Switch value={overlayPrefs.promos} onValueChange={(v) => { if (proUser) setOverlayPrefs({ promos: v }); }} disabled={!proUser} />
-        </RNView>
-
-        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
-
-        <RNView style={styles.valueRow}>
-          <RNView style={styles.lockRow}>
-            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Partner offers</Text>
-            {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
-          </RNView>
-          <Switch value={overlayPrefs.affiliates} onValueChange={(v) => { if (proUser) setOverlayPrefs({ affiliates: v }); }} disabled={!proUser} />
-        </RNView>
-
-        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
-
-        {/* Frequency picker */}
-        <Pressable
-          style={styles.defaultRow}
-          onPress={() => {
-            if (!proUser) { router.push('/pro-paywall'); return; }
-            const options = [
-              { label: 'Daily', value: 1 },
-              { label: 'Every 3 days', value: 3 },
-              { label: 'Weekly', value: 7 },
-              { label: 'Monthly', value: 30 },
-            ];
-            const current = overlayPrefs.frequencyDays;
-            const idx = options.findIndex((o) => o.value === current);
-            const next = options[(idx + 1) % options.length];
-            setOverlayPrefs({ frequencyDays: next.value });
-          }}
-          accessibilityRole="button"
-          accessibilityLabel={`Tip frequency: ${overlayPrefs.frequencyDays === 1 ? 'Daily' : overlayPrefs.frequencyDays === 3 ? 'Every 3 days' : overlayPrefs.frequencyDays === 7 ? 'Weekly' : 'Monthly'}`}
-        >
-          <RNView style={styles.lockRow}>
-            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Tip frequency</Text>
-            {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
-          </RNView>
-          <Text style={[styles.defaultValue, { color: proUser ? t.primary : t.textMuted }]}>
-            {overlayPrefs.frequencyDays === 1 ? 'Daily' : overlayPrefs.frequencyDays === 3 ? 'Every 3 days' : overlayPrefs.frequencyDays === 7 ? 'Weekly' : 'Monthly'}
-          </Text>
-        </Pressable>
-
-        <RNView style={[styles.divider, { backgroundColor: t.border }]} />
-
-        {/* Reset dismissed */}
-        <Button
-          label="Reset dismissed tips"
-          variant="secondary"
-          onPress={() => {
-            resetDismissed();
-            Alert.alert('Tips Reset', 'All dismissed tips have been restored.');
-          }}
-        />
-      </SurfaceCard>
+      <SettingsOverlaySection />
 
       {/* ── Education ── */}
       <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Education</Text>
@@ -586,84 +359,7 @@ export default function SettingsScreen() {
         </Pressable>
       </SurfaceCard>
 
-      {/* ── Data ── */}
-      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Data</Text>
-      <SurfaceCard>
-        <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Export</Text>
-        <Text style={[styles.itemHint, { color: t.textMuted, marginBottom: 12 }]}>
-          Cards, installments, subscriptions, and profile as CSV.
-        </Text>
-        <Button
-          label={exporting ? 'Exporting...' : 'Export as CSV'}
-          variant="secondary"
-          onPress={() => {
-            setExporting(true);
-            exportDataAsCSV(cards, {
-              cashOnHand,
-              monthlyIncome,
-              payday,
-              committedExpenses,
-            })
-              .catch((e: unknown) => {
-                const message = e instanceof Error ? e.message : 'Export failed';
-                Alert.alert('Export Error', message);
-              })
-              .finally(() => {
-                setExporting(false);
-              });
-          }}
-          disabled={exporting}
-        />
-
-        {user && (
-          <>
-            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
-            <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Cloud Backup</Text>
-            {isOffline ? (
-              <AlertBanner message="You are offline. Data is saved locally." variant="stale" />
-            ) : (
-              <Pressable
-                style={styles.defaultRow}
-                onPress={async () => {
-                  if (syncingNow) return;
-                  setSyncingNow(true);
-                  setSyncFeedback(null);
-                  try {
-                    const { data: { user: authUser } } = await supabase.auth.getUser();
-                    if (!authUser) throw new Error('Not signed in');
-                    await fullSync(authUser.id, cards);
-                    setLastSyncedAt(Date.now());
-                    setSyncFeedback('synced');
-                    setTimeout(() => setSyncFeedback(null), 2000);
-                  } catch {
-                    setSyncFeedback('failed');
-                  } finally {
-                    setSyncingNow(false);
-                  }
-                }}
-                accessibilityRole="button"
-                accessibilityLabel="Sync now"
-              >
-                <RNView>
-                  <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Last synced</Text>
-                  <Text style={[styles.itemHint, { color: t.textMuted }]}>
-                    {syncingNow
-                      ? 'Syncing...'
-                      : syncFeedback === 'synced'
-                      ? 'Synced'
-                      : syncFeedback === 'failed'
-                      ? 'Sync failed. Try again.'
-                      : lastSyncedAt
-                      ? timeAgo(lastSyncedAt)
-                      : 'Never'}
-                  </Text>
-                </RNView>
-                <FontAwesome name="refresh" size={14} color={t.textMuted} />
-              </Pressable>
-            )}
-          </>
-        )}
-      </SurfaceCard>
+      <SettingsDataSection />
 
       {/* ── Dev / Showcase ── */}
       {__DEV__ && (
@@ -704,69 +400,7 @@ export default function SettingsScreen() {
         </>
       )}
 
-      {/* ── Danger Zone ── */}
-      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Danger Zone</Text>
-      <SurfaceCard>
-        {user && (
-          <>
-            <Button
-              label="Sign Out"
-              onPress={() => {
-                Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-                  { text: 'Cancel', style: 'cancel' },
-                  {
-                    text: 'Sign Out',
-                    onPress: async () => {
-                      try {
-                        trackUserSignedOut();
-                        posthog.reset();
-                        await signOut();
-                      } catch (e: unknown) {
-                        const msg = e instanceof Error ? e.message : 'Sign out failed';
-                        Alert.alert('Error', msg);
-                      }
-                    },
-                  },
-                ]);
-              }}
-              variant="secondary"
-            />
-            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
-          </>
-        )}
-        <Button
-          label={user ? 'Delete Account' : 'Clear All Data'}
-          variant="destructive-outline"
-          onPress={() => {
-            Alert.alert(
-              user ? 'Delete Account' : 'Clear All Data',
-              user
-                ? 'This will permanently delete your account and all your data. This cannot be undone.'
-                : 'This will erase all your cards and data from this device. This cannot be undone.',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: user ? 'Delete' : 'Clear',
-                  style: 'destructive',
-                  onPress: async () => {
-                    try {
-                      if (user) {
-                        await deleteAccount();
-                      } else {
-                        clearLocalData();
-                      }
-                      router.replace('/welcome');
-                    } catch (e: unknown) {
-                      const msg = e instanceof Error ? e.message : 'Failed to delete data';
-                      Alert.alert('Error', msg);
-                    }
-                  },
-                },
-              ],
-            );
-          }}
-        />
-      </SurfaceCard>
+      <SettingsDangerSection />
       {/* Currency picker modal */}
       <Modal
         visible={currencyModalVisible}
@@ -840,91 +474,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 17,
   },
-  accountRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  accountAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  accountAvatarImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  accountInfo: {
-    flex: 1,
-  },
-  accountPromptRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    marginBottom: 16,
-  },
-  accountPromptText: {
-    flex: 1,
-  },
-  accountPromptSubtitle: {
-    fontSize: 13,
-    marginTop: 4,
-    lineHeight: 18,
-  },
-  accountPromptButtons: {
-    gap: 10,
-  },
-  accountName: {
-    fontSize: 15,
-    fontFamily: fonts.interBold,
-  },
-  accountEmail: {
-    fontSize: 12,
-  },
-  proBadgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  proStatusText: {
-    fontSize: 15,
-    fontFamily: fonts.interSemiBold,
-  },
-  trialEndText: {
-    fontSize: 13,
-    marginTop: 8,
-  },
-  manageSubButton: {
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  manageSubText: {
-    fontSize: 15,
-    fontFamily: fonts.interSemiBold,
-  },
   valueRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  cloudOnlineText: {
-    fontSize: 13,
-    fontFamily: fonts.interSemiBold,
   },
   defaultRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 2,
-  },
-  lockRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
   },
   defaultValue: {
     fontSize: 14,

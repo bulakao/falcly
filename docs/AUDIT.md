@@ -100,7 +100,7 @@ _layout.tsx (root Stack)
 
 | Screen | LOC | Notes |
 |--------|-----|-------|
-| `settings.tsx` | 1,018 | ⚠️ Largest — should split into sections |
+| `settings.tsx` | 577 | Split into 4 section components |
 | `statement-advisor.tsx` | 704 | Complex — score ring, timeline, wiki |
 | `sign-in.tsx` | 464 | Email + Google + pending card from onboarding |
 | `log-transaction.tsx` | 456 | Form with cycle classification |
@@ -159,17 +159,7 @@ Dev tool (325 LOC) registered as a navigable screen. Users could theoretically r
 {__DEV__ && <Stack.Screen name="component-showcase" ... />}
 ```
 
-### 2. `settings.tsx` at 1,018 Lines
-
-Largest file in the app. Contains: profile, subscription management, overlay preferences, card defaults, data management, theme, analytics opt-out, sign-out, danger zone.
-
-**Fix (when time allows):** Extract into section components:
-- `SettingsProfileSection.tsx`
-- `SettingsSubscriptionSection.tsx`
-- `SettingsDataSection.tsx`
-- `SettingsPreferencesSection.tsx`
-
-### 3. Watchman Recrawl Warning
+### 2. Watchman Recrawl Warning
 
 ```
 Recrawled this watch 283 times
@@ -183,7 +173,7 @@ watchman watch-del '/Users/ramidem/Code/bulakao/falcly'
 watchman watch-project '/Users/ramidem/Code/bulakao/falcly'
 ```
 
-### 4. Hardcoded Colors (3 instances)
+### 3. Hardcoded Colors (3 instances)
 
 | File | Color | Usage |
 |------|-------|-------|
@@ -351,12 +341,11 @@ SwipeImpactPanel → [Payoff Planner] → Paywall (if free)
 | # | Action | Effort | Impact |
 |---|--------|--------|--------|
 | 7 | Add tests for `overlayTriggers.ts`, `sync.ts` | 45 min | More coverage |
-| 8 | Split `settings.tsx` into sections | 30 min | Maintainability |
-| 9 | Fix 3 hardcoded shadow colors | 5 min | Theme consistency |
-| 10 | Add user properties to PostHog identify | 20 min | Better segmentation |
-| 11 | Enable PostHog session replay | 15 min | Watch real user sessions |
-| 12 | Wire up feature flags (plumbing) | 30 min | Remote control |
-| 13 | Fix watchman recrawl | 1 min | Faster dev experience |
+| 8 | Fix 3 hardcoded shadow colors | 5 min | Theme consistency |
+| 9 | Add user properties to PostHog identify | 20 min | Better segmentation |
+| 10 | Enable PostHog session replay | 15 min | Watch real user sessions |
+| 11 | Wire up feature flags (plumbing) | 30 min | Remote control |
+| 12 | Fix watchman recrawl | 1 min | Faster dev experience |
 
 ---
 
@@ -387,7 +376,7 @@ SwipeImpactPanel → [Payoff Planner] → Paywall (if free)
 | `manage-installments.tsx` | ~150 | Installment list | No |
 | `manage-subscriptions.tsx` | ~150 | Subscription list | No |
 | `pro-paywall.tsx` | 68 | RevenueCat native paywall | — |
-| `settings.tsx` | 1,018 | All settings + subscription mgmt | Partial |
+| `settings.tsx` | 577 | Settings (split into section components) | Partial |
 | `component-showcase.tsx` | 325 | Dev tool | — |
 
 ### Components (26)
