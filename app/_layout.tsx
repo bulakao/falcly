@@ -184,14 +184,21 @@ function RootLayoutNav() {
   // Redirect based on onboarding state (no auth gate)
   useEffect(() => {
     const currentSegment = segments[0];
+    // Screens allowed before onboarding is complete
     const onboardingPaths = ['welcome', 'onboarding', 'onboarding-result', 'sign-in', 'paywall-manual'];
+    // Screens that should redirect to dashboard once onboarding is done
+    // (sign-in and paywall-manual are reachable post-onboarding from settings/dashboard)
+    const onboardingOnlyPaths = ['welcome', 'onboarding', 'onboarding-result'];
     const onOnboardingScreen =
       onboardingPaths.includes(currentSegment as string) ||
       onboardingPaths.some((p) => pathname.startsWith(`/${p}`));
+    const onOnboardingOnlyScreen =
+      onboardingOnlyPaths.includes(currentSegment as string) ||
+      onboardingOnlyPaths.some((p) => pathname.startsWith(`/${p}`));
 
     if (!isOnboardingComplete && !onOnboardingScreen) {
       router.replace('/welcome');
-    } else if (isOnboardingComplete && onOnboardingScreen) {
+    } else if (isOnboardingComplete && onOnboardingOnlyScreen) {
       router.replace('/');
     }
   }, [isOnboardingComplete, segments, pathname]);
