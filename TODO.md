@@ -14,10 +14,12 @@
 ## 🚀 Pre-Launch (Blockers)
 
 - [ ] **[IMPORTANT] Enroll in Apple Small Business Program** — cuts App Store commission from 30% → 15% (free, apply at developer.apple.com/app-store/small-business-program/)
-- [ ] Set up products in Google Play Console
-  - `falcly_pro_monthly` — $4.99/month
-  - `falcly_pro_yearly` — $47.99/year *(was $39.99 — tightened to 20% off monthly)*
-  - `falcly_pro_lifetime` — $79.99 one-time *(16-month payback after 15% cut)*
+- [ ] Set up products in Google Play Console with localized pricing
+  - `falcly_pro_monthly` — $4.99/mo (PH + global default) · $6.99/mo (US)
+  - `falcly_pro_yearly` — $47.99/yr (PH + global default) · $55.99/yr (US)
+  - `falcly_pro_lifetime` — $99.99 flat globally
+  - Set PH + global manually; use store auto-convert for remaining markets; override US manually
+  - RevenueCat reads localized prices automatically — no app code changes needed
 - [ ] Link Play Console to RevenueCat dashboard
   - Create entitlement: `Falcly Pro`
   - Create offering: `default` (monthly + yearly + lifetime packages)
