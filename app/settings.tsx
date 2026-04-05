@@ -390,12 +390,6 @@ export default function SettingsScreen() {
                 Share.share({ message: JSON.stringify(state, null, 2) });
               }}
             />
-            <RNView style={{ height: 8 }} />
-            <Button
-              label="Open Showcase"
-              onPress={() => router.push('/component-showcase')}
-              variant="secondary"
-            />
           </SurfaceCard>
         </>
       )}

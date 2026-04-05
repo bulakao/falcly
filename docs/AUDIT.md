@@ -12,7 +12,7 @@
 |--------|-------|
 | Total LOC | 16,896 |
 | Source files | 96 (.ts/.tsx) |
-| Screens | 23 |
+| Screens | 22 |
 | Components | 26 (7 atoms · 13 molecules · 6 organisms) |
 | Stores | 9 (Zustand) |
 | Utility modules | 16 |
@@ -54,7 +54,6 @@ _layout.tsx (root Stack)
 ├── manage-subscriptions.tsx       — Subscription list (modal)
 ├── pro-paywall.tsx                — RevenueCat UI paywall (modal)
 ├── settings.tsx                   — All settings
-├── component-showcase.tsx         — Dev component gallery (modal)
 └── +not-found.tsx                 — 404
 ```
 
@@ -106,7 +105,6 @@ _layout.tsx (root Stack)
 | `log-transaction.tsx` | 456 | Form with cycle classification |
 | `edit-card.tsx` | 433 | Full card edit form |
 | `card-transactions.tsx` | 344 | Transaction history with filters |
-| `component-showcase.tsx` | 325 | Dev tool — not for production |
 | `add-card.tsx` | 305 | Card creation form |
 | `manage-cards.tsx` | 275 | Drag-to-reorder card list |
 | `payment-summary.tsx` | 244 | Monthly payment breakdown |
@@ -150,16 +148,7 @@ _layout.tsx (root Stack)
 
 ## 🟡 Warnings (Non-Critical)
 
-### 1. `component-showcase.tsx` in Production Nav
-
-Dev tool (325 LOC) registered as a navigable screen. Users could theoretically reach it.
-
-**Fix:** Gate behind `__DEV__`:
-```tsx
-{__DEV__ && <Stack.Screen name="component-showcase" ... />}
-```
-
-### 2. Watchman Recrawl Warning
+### 1. Watchman Recrawl Warning
 
 ```
 Recrawled this watch 283 times
@@ -173,7 +162,7 @@ watchman watch-del '/Users/ramidem/Code/bulakao/falcly'
 watchman watch-project '/Users/ramidem/Code/bulakao/falcly'
 ```
 
-### 3. Hardcoded Colors (3 instances)
+### 2. Hardcoded Colors (3 instances)
 
 | File | Color | Usage |
 |------|-------|-------|
@@ -330,28 +319,27 @@ SwipeImpactPanel → [Payoff Planner] → Paywall (if free)
 | # | Action | Effort | Impact |
 |---|--------|--------|--------|
 | 1 | Add `cycleUtils.ts` tests | 30 min | Prevent billing cycle bugs |
-| 2 | Gate component-showcase behind `__DEV__` | 5 min | No dev tools in prod |
-| 3 | Connect RevenueCat → PostHog (dashboard) | 10 min | Full revenue attribution |
-| 4 | Set up Play Console products + RevenueCat | 30 min | Can't launch without it |
-| 5 | `npx expo prebuild --clean` + EAS build | 15 min | Dev client for testing |
-| 6 | Test sandbox purchases on real device | 30 min | Verify payment flow |
+| 2 | Connect RevenueCat → PostHog (dashboard) | 10 min | Full revenue attribution |
+| 3 | Set up Play Console products + RevenueCat | 30 min | Can't launch without it |
+| 4 | `npx expo prebuild --clean` + EAS build | 15 min | Dev client for testing |
+| 5 | Test sandbox purchases on real device | 30 min | Verify payment flow |
 
 ### Post-Launch (Recommended)
 
 | # | Action | Effort | Impact |
 |---|--------|--------|--------|
-| 7 | Add tests for `overlayTriggers.ts`, `sync.ts` | 45 min | More coverage |
-| 8 | Fix 3 hardcoded shadow colors | 5 min | Theme consistency |
-| 9 | Add user properties to PostHog identify | 20 min | Better segmentation |
-| 10 | Enable PostHog session replay | 15 min | Watch real user sessions |
-| 11 | Wire up feature flags (plumbing) | 30 min | Remote control |
-| 12 | Fix watchman recrawl | 1 min | Faster dev experience |
+| 6 | Add tests for `overlayTriggers.ts`, `sync.ts` | 45 min | More coverage |
+| 7 | Fix 3 hardcoded shadow colors | 5 min | Theme consistency |
+| 8 | Add user properties to PostHog identify | 20 min | Better segmentation |
+| 9 | Enable PostHog session replay | 15 min | Watch real user sessions |
+| 10 | Wire up feature flags (plumbing) | 30 min | Remote control |
+| 11 | Fix watchman recrawl | 1 min | Faster dev experience |
 
 ---
 
 ## File Inventory
 
-### Screens (23)
+### Screens (22)
 
 | Screen | LOC | Purpose | Pro-Gated |
 |--------|-----|---------|-----------|
@@ -377,7 +365,6 @@ SwipeImpactPanel → [Payoff Planner] → Paywall (if free)
 | `manage-subscriptions.tsx` | ~150 | Subscription list | No |
 | `pro-paywall.tsx` | 68 | RevenueCat native paywall | — |
 | `settings.tsx` | 577 | Settings (split into section components) | Partial |
-| `component-showcase.tsx` | 325 | Dev tool | — |
 
 ### Components (26)
 
