@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/components/Themed';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
-import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
+import { DEFAULT_DUE_DAY_OFFSET, MIN_DUE_DAY_OFFSET } from '@/types/card';
 import { trackCardAdded } from '@/utils/analytics';
 import { Button, Label } from '@/components/atoms';
 import { DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
@@ -68,10 +68,10 @@ export default function AddCardScreen() {
     }
 
     const offset = parseInt(dueDayOffset, 10);
-    if (!isNaN(offset) && offset < 20) {
+    if (!isNaN(offset) && offset < MIN_DUE_DAY_OFFSET) {
       Alert.alert(
         'Due Date Too Soon',
-        'Due date must be at least 20 days after your statement date.',
+        'Due date must be at least 15 days after your statement date.',
       );
       return;
     }
@@ -143,6 +143,7 @@ export default function AddCardScreen() {
           value={outstandingBalance}
           onChangeText={setOutstandingBalance}
           placeholder="1,000"
+          allowNegative
         />
 
         <DayInput value={statementDay} onChangeText={setStatementDay} />
@@ -153,7 +154,7 @@ export default function AddCardScreen() {
           onChangeText={setDueDayOffset}
           placeholder={String(DEFAULT_DUE_DAY_OFFSET)}
           keyboardType="numeric"
-          hint="Minimum 20 days (BSP regulation). Most PH banks use 20–25 days."
+          hint="Most banks use 21–25 days."
         />
 
         <View style={styles.fieldGroup}>

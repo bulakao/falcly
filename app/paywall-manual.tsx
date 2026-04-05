@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  Platform,
   Alert,
   ScrollView,
+  Image,
   View as RNView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -17,12 +19,14 @@ import { fonts } from '@/theme/fonts';
 import type { PurchasesPackage } from 'react-native-purchases';
 import { trackProPurchaseCompleted } from '@/utils/analytics';
 
+const falclyLogo = require('@/assets/images/icon.png');
+
 // ─── Feature list ─────────────────────────────────────────────────────────────
 
 const FEATURES = [
   { icon: CreditCard, label: 'Unlimited cards', sub: 'Track as many cards as you need' },
   { icon: Zap,        label: 'Swipe impact analysis', sub: 'See the effect before you spend' },
-  { icon: LayoutDashboard, label: 'Payoff planner', sub: 'Avalanche & snowball strategies' },
+  { icon: LayoutDashboard, label: 'Payoff planner', sub: 'Clear your balances faster' },
   { icon: ShieldCheck, label: 'Card overlays', sub: 'Smart alerts at a glance' },
 ];
 
@@ -31,7 +35,6 @@ const FEATURES = [
 export default function ManualPaywallScreen() {
   const router = useRouter();
   const t = useAppTheme();
-
   const { fromOnboarding } = useLocalSearchParams<{ fromOnboarding?: string }>();
   const { offerings, isLoading, error, loadOfferings, purchase, restore, tier } =
     useSubscriptionStore();
@@ -53,11 +56,12 @@ export default function ManualPaywallScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [offerings]);
 
+  const initialTierRef = useRef(tier);
   useEffect(() => {
-    if (tier !== 'free') {
+    // Only dismiss if tier changed after mount (purchase/restore happened)
+    if (tier !== 'free' && tier !== initialTierRef.current) {
       router.back();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tier]);
 
   async function handlePurchase() {
@@ -68,7 +72,6 @@ export default function ManualPaywallScreen() {
     if (success) {
       trackProPurchaseCompleted(selectedPackage.packageType);
       if (!user) {
-        // No account yet — send to sign-in so RevenueCat can alias anon → real user
         Alert.alert(
           'You\'re in! 🎉',
           'Create your account to save your Pro access and sync across devices.',
@@ -104,20 +107,20 @@ export default function ManualPaywallScreen() {
   }
 
   const packages = offerings?.availablePackages ?? [];
+  const monthlyPkg = packages.find((p) => p.packageType === 'MONTHLY');
+  const annualPkg = packages.find((p) => p.packageType === 'ANNUAL');
+  const lifetimePkg = packages.find((p) => p.packageType === 'LIFETIME');
 
   const annualSavingsPct = (() => {
-    const monthly = packages.find((p) => p.packageType === 'MONTHLY');
-    const annual = packages.find((p) => p.packageType === 'ANNUAL');
-    if (!monthly || !annual) return null;
-    const pct = Math.round((1 - annual.product.price / (monthly.product.price * 12)) * 100);
+    if (!monthlyPkg || !annualPkg) return null;
+    const pct = Math.round((1 - annualPkg.product.price / (monthlyPkg.product.price * 12)) * 100);
     return pct > 0 ? pct : null;
   })();
 
-  // Pull trial info from RevenueCat introPrice (set in Play Console / App Store Connect)
   const trialLabel = (() => {
     if (!selectedPackage || selectedPackage.packageType === 'LIFETIME') return null;
     const intro = selectedPackage.product.introPrice;
-    if (!intro || intro.price !== 0) return null; // only show for free trials
+    if (!intro || intro.price !== 0) return null;
     const { periodUnit, periodNumberOfUnits } = intro;
     const unit = periodUnit?.toLowerCase() ?? 'day';
     const unitLabel = periodNumberOfUnits === 1 ? unit : `${unit}s`;
@@ -131,39 +134,96 @@ export default function ManualPaywallScreen() {
     return 'Subscribe Now';
   };
 
+  function renderPackageCard(pkg: PurchasesPackage, isAnnual = false, isLifetime = false) {
+    const isSelected = selectedPackage?.identifier === pkg.identifier;
+    return (
+      <TouchableOpacity
+        key={pkg.identifier}
+        activeOpacity={0.8}
+        style={[
+          styles.packageCard,
+          !isLifetime && styles.packageCardHalf,
+          { borderColor: isSelected ? t.primary : t.border, backgroundColor: t.surface },
+          isSelected && { borderColor: t.primary, backgroundColor: t.accentBg },
+        ]}
+        onPress={() => setSelectedPackage(pkg)}
+        accessibilityRole="radio"
+        accessibilityState={{ selected: isSelected }}
+        accessibilityLabel={`${pkg.packageType} plan, ${pkg.product.priceString}`}
+      >
+        {isAnnual && (
+          <RNView style={[styles.badge, { backgroundColor: t.primary }]}>
+            <Text style={[styles.badgeText, { color: t.primaryText }]}>BEST VALUE</Text>
+          </RNView>
+        )}
+
+        {isLifetime ? (
+          <RNView style={styles.lifetimeContent}>
+            <RNView style={styles.lifetimeLogo}>
+              <Image source={falclyLogo} style={styles.lifetimeLogoImg} resizeMode="contain" />
+            </RNView>
+            <RNView style={styles.lifetimeInfo}>
+              <Text style={[styles.packageTitle, { color: t.textPrimary }]}>Lifetime</Text>
+              <RNView style={styles.lifetimeRow}>
+                <Infinity size={12} color={t.textSecondary} strokeWidth={2} />
+                <Text style={[styles.lifetimeSub, { color: t.textSecondary }]}> One-time payment</Text>
+              </RNView>
+            </RNView>
+            <Text style={[styles.packagePrice, { color: isSelected ? t.primary : t.textPrimary }]}>
+              {pkg.product.priceString}
+            </Text>
+          </RNView>
+        ) : (
+          <>
+            <Text style={[styles.packageTitle, { color: t.textPrimary }]}>
+              {isAnnual ? 'Yearly' : 'Monthly'}
+            </Text>
+            <Text style={[styles.packagePrice, { color: isSelected ? t.primary : t.textPrimary }]}>
+              {pkg.product.priceString}
+            </Text>
+            <Text style={[styles.packagePeriod, { color: t.textSecondary }]}>
+              /{isAnnual ? 'yr' : 'mo'}
+            </Text>
+            {isAnnual && annualSavingsPct !== null && (
+              <Text style={[styles.savings, { color: t.safe }]}>Save {annualSavingsPct}%</Text>
+            )}
+          </>
+        )}
+
+        {isSelected && (
+          <RNView style={[styles.selectedDot, { backgroundColor: t.primary }]} />
+        )}
+      </TouchableOpacity>
+    );
+  }
+
   return (
     <ScrollView
       style={{ backgroundColor: t.background }}
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
     >
-      {/* ── Hero ── */}
-      <View style={styles.hero}>
-        <RNView style={[styles.iconWrap, { backgroundColor: t.accentBg }]}>
-          <Text style={styles.iconEmoji}>🦅</Text>
-        </RNView>
-        <Text style={[styles.title, { color: t.textPrimary }]}>Upgrade to Pro</Text>
-        <Text style={[styles.subtitle, { color: t.textSecondary }]}>
-          Know exactly when it's safe to swipe — on every card.
+      {/* ── Heading ── */}
+      <View style={[styles.quoteCard, { backgroundColor: t.surface, borderLeftColor: t.primary }]}>
+        <Text style={[styles.heading, { color: t.textPrimary }]}>
+          Know exactly when it's safe to swipe — on{' '}
+          <Text style={{ color: t.primary }}>every card</Text>.
         </Text>
       </View>
 
       {/* ── Features ── */}
       <View style={[styles.featuresCard, { backgroundColor: t.surface }]}>
         {FEATURES.map(({ icon: Icon, label, sub }, i) => (
-          <RNView
-            key={label}
-            style={[
-              styles.featureRow,
-              i < FEATURES.length - 1 && { borderBottomWidth: 1, borderBottomColor: t.border },
-            ]}
-          >
-            <RNView style={[styles.featureIcon, { backgroundColor: t.accentBg }]}>
-              <Icon size={18} color={t.accent} strokeWidth={2} />
-            </RNView>
-            <RNView style={styles.featureText}>
-              <Text style={[styles.featureLabel, { color: t.textPrimary }]}>{label}</Text>
-              <Text style={[styles.featureSub, { color: t.textSecondary }]}>{sub}</Text>
+          <RNView key={label}>
+            {i > 0 && <RNView style={[styles.featureRowDivider, { backgroundColor: t.border }]} />}
+            <RNView style={styles.featureRow}>
+              <RNView style={[styles.featureIcon, { backgroundColor: t.accentBg }]}>
+                <Icon size={18} color={t.accent} strokeWidth={2} />
+              </RNView>
+              <RNView style={styles.featureText}>
+                <Text style={[styles.featureLabel, { color: t.textPrimary }]}>{label}</Text>
+                <Text style={[styles.featureSub, { color: t.textSecondary }]}>{sub}</Text>
+              </RNView>
             </RNView>
           </RNView>
         ))}
@@ -171,73 +231,11 @@ export default function ManualPaywallScreen() {
 
       {/* ── Packages ── */}
       <View style={styles.packages}>
-        {packages.map((pkg) => {
-          const isSelected = selectedPackage?.identifier === pkg.identifier;
-          const isAnnual = pkg.packageType === 'ANNUAL';
-          const isLifetime = pkg.packageType === 'LIFETIME';
-
-          return (
-            <TouchableOpacity
-              key={pkg.identifier}
-              activeOpacity={0.8}
-              style={[
-                styles.packageCard,
-                { borderColor: isSelected ? t.primary : t.border, backgroundColor: t.surface },
-                isSelected && { borderColor: t.primary, backgroundColor: t.accentBg },
-              ]}
-              onPress={() => setSelectedPackage(pkg)}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: isSelected }}
-              accessibilityLabel={`${pkg.packageType} plan, ${pkg.product.priceString}`}
-            >
-              {/* Recommended badge */}
-              {isAnnual && (
-                <RNView style={[styles.badge, { backgroundColor: t.primary }]}>
-                  <Text style={[styles.badgeText, { color: t.primaryText }]}>BEST VALUE</Text>
-                </RNView>
-              )}
-
-              <RNView style={styles.packageRow}>
-                <RNView style={styles.packageLeft}>
-                  <Text style={[styles.packageTitle, { color: t.textPrimary }]}>
-                    {pkg.packageType === 'MONTHLY' && 'Monthly'}
-                    {isAnnual && 'Yearly'}
-                    {isLifetime && 'Lifetime'}
-                  </Text>
-                  {isLifetime && (
-                    <RNView style={styles.lifetimeRow}>
-                      <Infinity size={12} color={t.textSecondary} strokeWidth={2} />
-                      <Text style={[styles.lifetimeSub, { color: t.textSecondary }]}>
-                        {' '}One-time payment
-                      </Text>
-                    </RNView>
-                  )}
-                  {isAnnual && annualSavingsPct !== null && (
-                    <Text style={[styles.savings, { color: t.safe }]}>
-                      Save {annualSavingsPct}% vs monthly
-                    </Text>
-                  )}
-                </RNView>
-
-                <RNView style={styles.packageRight}>
-                  <Text style={[styles.packagePrice, { color: isSelected ? t.primary : t.textPrimary }]}>
-                    {pkg.product.priceString}
-                  </Text>
-                  {!isLifetime && (
-                    <Text style={[styles.packagePeriod, { color: t.textSecondary }]}>
-                      /{pkg.packageType === 'MONTHLY' ? 'mo' : 'yr'}
-                    </Text>
-                  )}
-                </RNView>
-              </RNView>
-
-              {/* Selected indicator */}
-              {isSelected && (
-                <RNView style={[styles.selectedDot, { backgroundColor: t.primary }]} />
-              )}
-            </TouchableOpacity>
-          );
-        })}
+        <RNView style={styles.packagesRow}>
+          {monthlyPkg && renderPackageCard(monthlyPkg)}
+          {annualPkg && renderPackageCard(annualPkg, true)}
+        </RNView>
+        {lifetimePkg && renderPackageCard(lifetimePkg, false, true)}
       </View>
 
       {/* ── CTA ── */}
@@ -266,14 +264,14 @@ export default function ManualPaywallScreen() {
         </Text>
       )}
 
-      {/* ── Restore ── */}
+      {/* ── Footer ── */}
       <TouchableOpacity
         onPress={handleRestore}
         disabled={isPurchasing}
         accessibilityRole="button"
         accessibilityLabel="Restore purchases"
       >
-        <Text style={[styles.restoreText, { color: t.textMuted }]}>Restore Purchases</Text>
+        <Text style={[styles.restoreText, { color: t.primary }]}>Restore Purchases</Text>
       </TouchableOpacity>
 
       {fromOnboarding === 'true' && (
@@ -289,8 +287,9 @@ export default function ManualPaywallScreen() {
       {error && <Text style={[styles.error, { color: t.risky }]}>{error}</Text>}
 
       <Text style={[styles.terms, { color: t.textMuted }]}>
-        Payment charged to your Google Play account at confirmation. Subscription renews
-        automatically unless cancelled at least 24 hours before the end of the period.
+        Payment charged to your {Platform.OS === 'ios' ? 'Apple ID' : 'Google Play account'} at
+        confirmation. Subscription renews automatically unless cancelled at least 24 hours before
+        the end of the period.
       </Text>
     </ScrollView>
   );
@@ -305,38 +304,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   container: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 16,
     paddingBottom: 48,
   },
 
-  // Hero
-  hero: {
-    alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 24,
+  // Heading
+  quoteCard: {
+    borderRadius: 14,
+    borderLeftWidth: 3,
+    padding: 16,
+    marginBottom: 20,
   },
-  iconWrap: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  iconEmoji: {
-    fontSize: 36,
-  },
-  title: {
-    fontSize: 26,
+  heading: {
+    fontSize: 18,
     fontFamily: fonts.nunitoBold,
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 15,
-    textAlign: 'center',
-    lineHeight: 22,
-    paddingHorizontal: 16,
+    lineHeight: 26,
+    fontStyle: 'italic',
   },
 
   // Features card
@@ -351,6 +335,10 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     gap: 12,
+  },
+  featureRowDivider: {
+    height: StyleSheet.hairlineWidth,
+    marginHorizontal: 16,
   },
   featureIcon: {
     width: 36,
@@ -377,6 +365,10 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 20,
   },
+  packagesRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
   packageCard: {
     borderRadius: 14,
     borderWidth: 2,
@@ -384,21 +376,14 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
-  packageRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  packageLeft: {
+  packageCardHalf: {
     flex: 1,
-  },
-  packageRight: {
-    alignItems: 'flex-end',
+    alignItems: 'center',
   },
   packageTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: fonts.interSemiBold,
-    marginBottom: 2,
+    marginBottom: 6,
   },
   packagePrice: {
     fontSize: 22,
@@ -409,9 +394,27 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   savings: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: fonts.interSemiBold,
-    marginTop: 2,
+    marginTop: 4,
+  },
+  lifetimeContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  lifetimeLogo: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  lifetimeLogoImg: {
+    width: 48,
+    height: 48,
+  },
+  lifetimeInfo: {
+    flex: 1,
   },
   lifetimeRow: {
     flexDirection: 'row',
@@ -425,12 +428,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderBottomLeftRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderBottomLeftRadius: 8,
   },
   badgeText: {
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: fonts.interBold,
     letterSpacing: 0.5,
   },

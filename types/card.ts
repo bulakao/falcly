@@ -79,3 +79,6 @@ export interface PayoffProjection {
 }
 
 export const DEFAULT_DUE_DAY_OFFSET = 21;
+export const MIN_DUE_DAY_OFFSET = 15;
+export const MAX_DUE_DAY_OFFSET = 30;
+export const MIN_CREDIT_LIMIT = 200;

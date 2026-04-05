@@ -18,7 +18,7 @@ import { useUserStore } from '@/store/userStore';
 import { useInstallmentStore } from '@/store/installmentStore';
 import { useSubscriptionItemStore } from '@/store/subscriptionItemStore';
 import { useAppTheme } from '@/theme';
-import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
+import { DEFAULT_DUE_DAY_OFFSET, MIN_DUE_DAY_OFFSET } from '@/types/card';
 import { Button, Heading, Label } from '@/components/atoms';
 import { FormFieldGroup } from '@/components/molecules';
 import { fonts } from '@/theme/fonts';
@@ -86,10 +86,10 @@ export default function EditCardScreen() {
     }
 
     const offset = parseInt(dueDayOffset, 10);
-    if (!isNaN(offset) && offset < 20) {
+    if (!isNaN(offset) && offset < MIN_DUE_DAY_OFFSET) {
       Alert.alert(
         'Due Date Too Soon',
-        'BSP regulations require at least 20 days between your statement date and payment due date. Please enter 20 or more.',
+        'Due date must be at least 15 days after your statement date.',
       );
       return;
     }
@@ -185,7 +185,7 @@ export default function EditCardScreen() {
           placeholder={String(DEFAULT_DUE_DAY_OFFSET)}
           keyboardType="numeric"
           selectTextOnFocus
-          hint="Minimum 20 days (BSP regulation). Most PH banks use 20–25 days."
+          hint="Most banks use 21–25 days."
         />
 
         <FormFieldGroup

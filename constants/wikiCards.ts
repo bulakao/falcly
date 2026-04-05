@@ -21,7 +21,7 @@ export const WIKI_CARDS: WikiCard[] = [
   {
     id: 'W-03',
     title: 'What is a grace period?',
-    body: 'The interest-free window between your statement close and due date. In the Philippines, banks must give at least 20 days (BSP requirement). Pay in full = zero interest.',
+    body: 'The interest-free window between your statement close and due date. Most banks give 21–25 days. Pay in full = zero interest.',
     example: 'Close on the 15th, due on the 5th (20 days) = free. Miss it = interest from day 1.',
   },
   {

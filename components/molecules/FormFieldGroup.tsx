@@ -28,7 +28,11 @@ export function FormFieldGroup({ label, error, focused, compact, hint, ...inputP
     <View style={styles.fieldGroup}>
       <Label>{label}</Label>
       <FormInput error={error} focused={focused} {...inputProps} />
-      {hint && <Text style={[styles.hint, { color: t.textMuted }]}>{hint}</Text>}
+      {hint !== undefined && (
+        <Text style={[styles.hint, { color: hint ? (error ? t.risky : t.textMuted) : 'transparent' }]}>
+          {hint || ' '}
+        </Text>
+      )}
     </View>
   );
 }

@@ -6,6 +6,8 @@ import { Stack, useRouter, useSegments, usePathname, useGlobalSearchParams } fro
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef } from 'react';
 import { PostHogProvider } from 'posthog-react-native';
+import { Pressable } from 'react-native';
+import { X } from 'lucide-react-native';
 import 'react-native-reanimated';
 
 import { useSubscriptionStore, FREE_CARD_LIMIT } from '@/store/subscriptionStore';
@@ -182,15 +184,17 @@ function RootLayoutNav() {
   // Redirect based on onboarding state (no auth gate)
   useEffect(() => {
     const currentSegment = segments[0];
-    const onboardingScreens = ['welcome', 'onboarding', 'onboarding-result', 'sign-in', 'paywall-manual'];
-    const onOnboardingScreen = onboardingScreens.includes(currentSegment as string);
+    const onboardingPaths = ['welcome', 'onboarding', 'onboarding-result', 'sign-in', 'paywall-manual'];
+    const onOnboardingScreen =
+      onboardingPaths.includes(currentSegment as string) ||
+      onboardingPaths.some((p) => pathname.startsWith(`/${p}`));
 
     if (!isOnboardingComplete && !onOnboardingScreen) {
       router.replace('/welcome');
     } else if (isOnboardingComplete && onOnboardingScreen) {
       router.replace('/');
     }
-  }, [isOnboardingComplete, segments]);
+  }, [isOnboardingComplete, segments, pathname]);
 
   return (
     <PostHogProvider
@@ -211,7 +215,7 @@ function RootLayoutNav() {
           <Stack.Screen name="swipe-impact" options={{ presentation: 'modal', title: 'Swipe Impact' }} />
           <Stack.Screen name="update-balance" options={{ presentation: 'modal', title: 'Update Balance' }} />
           <Stack.Screen name="edit-card" options={{ presentation: 'modal', title: 'Edit Card' }} />
-          <Stack.Screen name="paywall-manual" options={{ presentation: 'modal', title: 'Upgrade to Pro' }} />
+          <Stack.Screen name="paywall-manual" options={({ navigation }) => ({ presentation: 'modal', title: 'Upgrade to Pro', headerTitleAlign: 'center', headerLeft: () => <Pressable onPress={() => navigation.goBack()} hitSlop={8} style={{ padding: 8, alignItems: 'center', justifyContent: 'center' }} accessibilityRole="button" accessibilityLabel="Close"><X size={22} color={colorScheme === 'dark' ? darkTheme.textSecondary : lightTheme.textSecondary} strokeWidth={1.5} /></Pressable> })} />
           <Stack.Screen name="onboarding" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_right' }} />
           <Stack.Screen name="onboarding-result" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_right' }} />
           <Stack.Screen name="settings" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_left' }} />

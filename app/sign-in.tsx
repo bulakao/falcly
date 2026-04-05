@@ -66,7 +66,7 @@ export default function SignInScreen() {
   const resetPassword = useAuthStore((s) => s.resetPassword);
 
   const [mode, setMode] = useState<'signin' | 'signup'>(
-    initialMode === 'signup' ? 'signup' : 'signin',
+    initialMode === 'signup' || fromOnboarding === 'true' ? 'signup' : 'signin',
   );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -291,11 +291,6 @@ export default function SignInScreen() {
         contentContainerStyle={[styles.container, { paddingTop: insets.top + 80 }]}
         keyboardShouldPersistTaps="handled"
       >
-        {fromOnboarding === 'true' && (
-          <Pressable onPress={() => router.back()} style={styles.backLink}>
-            <Text style={{ color: t.textMuted }}>{'\u2190'} Back</Text>
-          </Pressable>
-        )}
 
         <Text style={[styles.title, { color: t.textPrimary }]}>
           {isSignUp ? 'Create Account' : 'Welcome back'}
@@ -460,9 +455,6 @@ const styles = StyleSheet.create({
   },
   spinner: {
     marginTop: 16,
-  },
-  backLink: {
-    marginBottom: 16,
   },
   savePrompt: {
     fontSize: 14,

@@ -4,7 +4,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
   View,
   TextInput,
 } from 'react-native';
@@ -13,11 +12,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/Themed';
 import { useOnboardingStore } from '@/store/onboardingStore';
-import { DEFAULT_DUE_DAY_OFFSET } from '@/types/card';
+import { DEFAULT_DUE_DAY_OFFSET, MIN_DUE_DAY_OFFSET, MAX_DUE_DAY_OFFSET, MIN_CREDIT_LIMIT } from '@/types/card';
 import { trackOnboardingCardEntryCompleted } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
 import { Button, Heading, Label } from '@/components/atoms';
-import { DayInput, MoneyInput, parseMoney } from '@/components/molecules';
+import { DayInput, FormFieldGroup, formatMoney, MoneyInput, parseMoney } from '@/components/molecules';
 import { fonts } from '@/theme/fonts';
 
 
@@ -27,41 +26,29 @@ export default function OnboardingScreen() {
 
   const [accountName, setAccountName] = useState('');
   const [statementDay, setStatementDay] = useState('');
-  const [dueDate, setDueDate] = useState('');
+  const [dueDayOffset, setDueDayOffset] = useState(String(DEFAULT_DUE_DAY_OFFSET));
   const [creditLimit, setCreditLimit] = useState('');
   const [outstandingBalance, setOutstandingBalance] = useState('');
 
 
+  const offset = parseInt(dueDayOffset, 10);
+  const offsetTooLow = !isNaN(offset) && offset > 0 && offset < MIN_DUE_DAY_OFFSET;
+  const offsetTooHigh = !isNaN(offset) && offset > MAX_DUE_DAY_OFFSET;
+  const offsetError = offsetTooLow || offsetTooHigh;
+
+  const limit = parseMoney(creditLimit);
+  const limitTooLow = limit > 0 && limit < MIN_CREDIT_LIMIT;
+
+  const stmtDay = parseInt(statementDay, 10);
+
+  const isFormValid =
+    accountName.trim().length > 0 &&
+    limit >= MIN_CREDIT_LIMIT &&
+    !isNaN(stmtDay) && stmtDay >= 1 && stmtDay <= 31 &&
+    dueDayOffset.trim().length > 0 &&
+    !offsetError;
+
   function handleSave() {
-    if (!accountName.trim()) {
-      Alert.alert('Required', 'Enter an account name.');
-      return;
-    }
-    const stmtDay = parseInt(statementDay, 10);
-    if (isNaN(stmtDay) || stmtDay < 1 || stmtDay > 31) {
-      Alert.alert('Required', 'Enter a valid statement day (1–31).');
-      return;
-    }
-    const dueDayNum = parseInt(dueDate, 10);
-    let offset: number = DEFAULT_DUE_DAY_OFFSET;
-    if (!isNaN(dueDayNum) && dueDayNum >= 1 && dueDayNum <= 31) {
-      offset = (dueDayNum - stmtDay + 30) % 30 || 30;
-      if (offset < 20) {
-        Alert.alert(
-          'Due Date Too Soon',
-          'Due date must be at least 20 days after your statement date.',
-        );
-        return;
-      }
-    }
-
-    const limit = parseMoney(creditLimit);
-
-    if (limit <= 0) {
-      Alert.alert('Required', 'Enter a valid credit limit.');
-      return;
-    }
-
     const balance = parseMoney(outstandingBalance);
 
     trackOnboardingCardEntryCompleted(accountName.trim(), balance > 0);
@@ -73,7 +60,7 @@ export default function OnboardingScreen() {
         creditLimit: String(limit),
         outstandingBalance: String(balance),
         statementDay: String(stmtDay),
-        dueDayOffset: String(offset),
+        dueDayOffset: String(isNaN(offset) ? DEFAULT_DUE_DAY_OFFSET : offset),
       },
     });
   }
@@ -103,21 +90,26 @@ export default function OnboardingScreen() {
             ]}
             value={accountName}
             onChangeText={setAccountName}
-            placeholder="e.g. BDO Rewards, Citi PremierMiles"
+            placeholder="My Credit Card"
             placeholderTextColor={t.placeholder}
             autoCapitalize="words"
             autoCorrect={false}
             returnKeyType="next"
+            maxLength={40}
             accessibilityLabel="Card name"
           />
         </View>
 
         {/* Credit Limit */}
-        <MoneyInput
+        <FormFieldGroup
           label="Credit Limit"
           value={creditLimit}
-          onChangeText={setCreditLimit}
+          onChangeText={(text: string) => setCreditLimit(formatMoney(text))}
           placeholder="50,000"
+          keyboardType="decimal-pad"
+          maxLength={11}
+          error={limitTooLow}
+          hint={limitTooLow ? `Minimum ${MIN_CREDIT_LIMIT.toLocaleString()}` : ' '}
         />
 
         {/* Outstanding Balance */}
@@ -126,25 +118,35 @@ export default function OnboardingScreen() {
           value={outstandingBalance}
           onChangeText={setOutstandingBalance}
           placeholder="1,000"
+          allowNegative
         />
         <Text style={[styles.hint, { color: t.textMuted }]}>
           Approximate is fine — you can update anytime.
         </Text>
 
-        {/* Statement Day & Due Date */}
+        {/* Statement Day & Due Day Offset */}
         <View style={styles.row}>
           <View style={styles.rowHalf}>
             <DayInput value={statementDay} onChangeText={setStatementDay} />
           </View>
           <View style={styles.rowHalf}>
-            <DayInput label="Due Date (1–31)" value={dueDate} onChangeText={setDueDate} placeholder="21" />
+            <FormFieldGroup
+              label="Due Day Offset"
+              value={dueDayOffset}
+              onChangeText={setDueDayOffset}
+              placeholder={String(DEFAULT_DUE_DAY_OFFSET)}
+              keyboardType="numeric"
+              maxLength={2}
+              error={offsetError}
+              hint={offsetTooLow ? `Min ${MIN_DUE_DAY_OFFSET} days` : offsetTooHigh ? `Max ${MAX_DUE_DAY_OFFSET} days` : 'Days after statement'}
+            />
           </View>
         </View>
 
       </ScrollView>
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
-        <Button label="See My Status" onPress={handleSave} />
+        <Button label="See My Status" onPress={handleSave} disabled={!isFormValid} />
       </View>
 
     </KeyboardAvoidingView>
