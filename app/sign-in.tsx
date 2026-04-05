@@ -53,11 +53,12 @@ function showToast(message: string) {
 export default function SignInScreen() {
   const t = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { mode: initialMode, pendingCard, fromOnboarding } = useLocalSearchParams<{
+  const { mode: initialMode, pendingCard, fromOnboarding, fromPaywall } = useLocalSearchParams<{
     mode?: string;
     pendingCard?: string;
     fromOnboarding?: string;
-  }>();
+    fromPaywall?: string;
+  }>(); 
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
   const signInWithEmail = useAuthStore((s) => s.signInWithEmail);
   const signUpWithEmail = useAuthStore((s) => s.signUpWithEmail);
@@ -123,6 +124,8 @@ export default function SignInScreen() {
   function navigateAfterAuth() {
     if (fromOnboarding === 'true') {
       savePendingCard();
+      useOnboardingStore.getState().complete();
+    } else if (fromPaywall === 'true') {
       useOnboardingStore.getState().complete();
     }
     router.replace('/');

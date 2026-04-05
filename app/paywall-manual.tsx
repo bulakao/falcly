@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router';
 import { CreditCard, Zap, LayoutDashboard, ShieldCheck, Infinity } from 'lucide-react-native';
 import { Text, View } from '@/components/Themed';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { useAuthStore } from '@/store/authStore';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import type { PurchasesPackage } from 'react-native-purchases';
@@ -33,6 +34,7 @@ export default function ManualPaywallScreen() {
 
   const { offerings, isLoading, error, loadOfferings, purchase, restore, tier } =
     useSubscriptionStore();
+  const user = useAuthStore((s) => s.user);
   const [selectedPackage, setSelectedPackage] = useState<PurchasesPackage | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
 
@@ -64,9 +66,18 @@ export default function ManualPaywallScreen() {
     setIsPurchasing(false);
     if (success) {
       trackProPurchaseCompleted(selectedPackage.packageType);
-      Alert.alert('Welcome to Falcly Pro! 🎉', 'All features are now unlocked.', [
-        { text: 'Let\'s go', onPress: () => router.replace('/') },
-      ]);
+      if (!user) {
+        // No account yet — send to sign-in so RevenueCat can alias anon → real user
+        Alert.alert(
+          'You\'re in! 🎉',
+          'Create your account to save your Pro access and sync across devices.',
+          [{ text: 'Create Account', onPress: () => router.replace('/sign-in?fromPaywall=true') }],
+        );
+      } else {
+        Alert.alert('Welcome to Falcly Pro! 🎉', 'All features are now unlocked.', [
+          { text: 'Let\'s go', onPress: () => router.replace('/') },
+        ]);
+      }
     }
   }
 
