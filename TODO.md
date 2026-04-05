@@ -46,6 +46,14 @@
 
 ---
 
+## 🛠️ Code — Ready to Implement
+
+- [ ] **`expo-store-review` integration** — in-app native review prompt (after 7 days active use or positive outcome). Directly impacts Play Store ranking.
+- [ ] **App store listing copy** — Play Store title, short description, full description, keyword-optimized
+- [ ] **Screenshot captions** — copy/frame text for each Play Store screenshot
+
+---
+
 ## 📋 Phase 2 (Post-Launch)
 
 - [ ] P2-01: SMS/notification listener (Android auto-detect transactions) — requires Kotlin native module
