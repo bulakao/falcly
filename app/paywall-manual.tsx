@@ -65,6 +65,14 @@ export default function ManualPaywallScreen() {
 
   const packages = offerings?.availablePackages ?? [];
 
+  const annualSavingsPct = (() => {
+    const monthly = packages.find((p) => p.packageType === 'MONTHLY');
+    const annual = packages.find((p) => p.packageType === 'ANNUAL');
+    if (!monthly || !annual) return null;
+    const pct = Math.round((1 - annual.product.price / (monthly.product.price * 12)) * 100);
+    return pct > 0 ? pct : null;
+  })();
+
   return (
     <ScrollView
       style={{ backgroundColor: t.background }}
@@ -113,8 +121,8 @@ export default function ManualPaywallScreen() {
                   </Text>
                 )}
               </Text>
-              {pkg.packageType === 'ANNUAL' && (
-                <Text style={[styles.savings, { color: t.safe }]}>Save 20%</Text>
+              {pkg.packageType === 'ANNUAL' && annualSavingsPct !== null && (
+                <Text style={[styles.savings, { color: t.safe }]}>Save {annualSavingsPct}%</Text>
               )}
             </TouchableOpacity>
           );
