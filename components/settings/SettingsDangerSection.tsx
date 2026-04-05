@@ -57,7 +57,7 @@ export function SettingsDangerSection() {
             Alert.alert(
               user ? 'Delete Account' : 'Clear All Data',
               user
-                ? `This will permanently delete your account and all your data. This cannot be undone.${hasSubscription ? '\n\n⚠️ You have an active Pro subscription. Deleting your account will NOT cancel it — you must cancel in Google Play Store or App Store first to avoid being charged.' : ''}`
+                ? `This will permanently delete your account and all your data. This cannot be undone.${hasSubscription ? '\n\nNote: This won\'t cancel your subscription. Please cancel it in your device settings first.' : ''}`
                 : 'This will erase all your cards and data from this device. This cannot be undone.',
               [
                 { text: 'Cancel', style: 'cancel' },
