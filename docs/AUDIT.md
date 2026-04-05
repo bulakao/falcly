@@ -169,13 +169,6 @@ _layout.tsx (root Stack)
 | `notifications.ts` | 220 | Low — wrapper around Notifee | 🟢 |
 | `analytics.ts` | 163 | Low — PostHog wrapper | 🟢 |
 
-### 2. RevenueCat Production Key
-
-Currently using `test_QoIpmFHMVFDxuzrrCalJEmHXOMK`. Before Google Play release:
-1. Create production API key in RevenueCat dashboard
-2. Move to `.env`: `REVENUECAT_API_KEY=goog_xxxx`
-3. Read via `Constants.expoConfig.extra.revenuecatApiKey`
-
 ---
 
 ## 📦 Dependency Health

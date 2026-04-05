@@ -30,6 +30,12 @@
   - Create entitlement: `Falcly Pro`
   - Create offering: `default` (monthly + yearly + lifetime packages)
   - Attach products to entitlement
+- [ ] Create RevenueCat production API key + swap in `.env`
+  1. RevenueCat dashboard → API Keys → + New → Google Play → name "Production"
+  2. Copy key (starts with `goog_`)
+  3. Upload Play Store service credentials JSON (Google Cloud → Service Accounts)
+  4. Replace in `.env`: `REVENUECAT_API_KEY=goog_xxxxxxxxxxxx`
+  5. Code already reads from `Constants.expoConfig.extra.revenuecatApiKey` — no code changes
 - [ ] Run `npx expo prebuild --clean` to regenerate native code
 - [ ] `eas build --platform android --profile development` — build dev client
 - [ ] Test sandbox purchases on real device
