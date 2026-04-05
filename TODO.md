@@ -15,10 +15,16 @@
 
 - [ ] **[IMPORTANT] Enroll in Apple Small Business Program** — cuts App Store commission from 30% → 15% (free, apply at developer.apple.com/app-store/small-business-program/)
 - [ ] Set up products in Google Play Console with localized pricing
-  - `falcly_pro_monthly` — $4.99/mo (PH + global default) · $6.99/mo (US)
-  - `falcly_pro_yearly` — $47.99/yr (PH + global default) · $55.99/yr (US)
-  - `falcly_pro_lifetime` — $99.99 flat globally
-  - Set PH + global manually; use store auto-convert for remaining markets; override US manually
+  - `falcly_pro_monthly`:
+    - 🇵🇭 PH + global default: $4.99
+    - 🇺🇸 US: $6.99 · 🇪🇺 EU: €5.99 · 🇨🇦 CA: CA$8.99 · 🇦🇺 AU: A$10.99
+  - `falcly_pro_yearly`:
+    - 🇵🇭 PH + global default: $47.99
+    - 🇺🇸 US: $55.99 · 🇪🇺 EU: €47.99 · 🇨🇦 CA: CA$71.99 · 🇦🇺 AU: A$87.99
+  - `falcly_pro_lifetime`:
+    - 🇵🇭 PH + global default: $99.99
+    - 🇺🇸 US: $99.99 · 🇪🇺 EU: €89.99 · 🇨🇦 CA: CA$129.99 · 🇦🇺 AU: A$149.99
+  - Set each market manually; use store auto-convert for remaining markets
   - RevenueCat reads localized prices automatically — no app code changes needed
 - [ ] Link Play Console to RevenueCat dashboard
   - Create entitlement: `Falcly Pro`
