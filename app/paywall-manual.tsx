@@ -7,7 +7,7 @@ import {
   ScrollView,
   View as RNView,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { CreditCard, Zap, LayoutDashboard, ShieldCheck, Infinity } from 'lucide-react-native';
 import { Text, View } from '@/components/Themed';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
@@ -32,6 +32,7 @@ export default function ManualPaywallScreen() {
   const router = useRouter();
   const t = useAppTheme();
 
+  const { fromOnboarding } = useLocalSearchParams<{ fromOnboarding?: string }>();
   const { offerings, isLoading, error, loadOfferings, purchase, restore, tier } =
     useSubscriptionStore();
   const user = useAuthStore((s) => s.user);
@@ -275,6 +276,16 @@ export default function ManualPaywallScreen() {
         <Text style={[styles.restoreText, { color: t.textMuted }]}>Restore Purchases</Text>
       </TouchableOpacity>
 
+      {fromOnboarding === 'true' && (
+        <TouchableOpacity
+          onPress={() => router.replace('/')}
+          accessibilityRole="button"
+          accessibilityLabel="Skip for now and continue free"
+        >
+          <Text style={[styles.skipText, { color: t.textMuted }]}>Maybe later — continue free</Text>
+        </TouchableOpacity>
+      )}
+
       {error && <Text style={[styles.error, { color: t.risky }]}>{error}</Text>}
 
       <Text style={[styles.terms, { color: t.textMuted }]}>
@@ -453,7 +464,13 @@ const styles = StyleSheet.create({
   restoreText: {
     textAlign: 'center',
     fontSize: 13,
+    marginBottom: 12,
+  },
+  skipText: {
+    textAlign: 'center',
+    fontSize: 12,
     marginBottom: 20,
+    textDecorationLine: 'underline',
   },
   error: {
     textAlign: 'center',

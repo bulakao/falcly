@@ -21,48 +21,58 @@ Both paths converge at the Dashboard. Account creation is mandatory before reach
 Install
   │
   ▼
-┌─────────────────────────────────────────────────────┐
-│                   Welcome Screen                    │
-│  ┌──────────────┐           ┌─────────────────────┐ │
-│  │ Get Started  │           │ Unlock Pro features │ │
-│  └──────────────┘           └─────────────────────┘ │
-│  Already have account? → Sign In                    │
-└──────────────┬──────────────────────┬───────────────┘
-               │                      │
-               ▼                      ▼
-     ┌──────────────────┐    ┌────────────────────┐
-     │   FREE PATH      │    │    PRO PATH        │
-     └──────────────────┘    └────────────────────┘
-               │                      │
-               ▼                      ▼
-     ┌──────────────────┐    ┌────────────────────┐
-     │  Onboarding      │    │  Paywall           │
-     │  (3 fields)      │    │  (monthly/yearly/  │
-     │                  │    │   lifetime)        │
-     └────────┬─────────┘    └────────┬───────────┘
-              │                       │
-              ▼                       │ Purchase
-     ┌──────────────────┐             │ success
-     │  Status Result   │             │
-     │  (in-memory card)│             ▼
-     │                  │    ┌────────────────────┐
-     │  [Save my card]  │    │  Sign-in / Create  │
-     └────────┬─────────┘    │  Account           │
+┌──────────────────────────────────────────────────────┐
+│                    Welcome Screen                    │
+│  ┌──────────────┐            ┌─────────────────────┐ │
+│  │ Get Started  │            │ Unlock Pro features │ │
+│  └──────────────┘            └─────────────────────┘ │
+│  Already have account? → Sign In                     │
+└──────────────┬───────────────────────┬───────────────┘
+               │                       │
+               ▼                       ▼
+     ┌──────────────────┐    ┌─────────────────────┐
+     │    FREE PATH     │    │      PRO PATH       │
+     └──────────────────┘    └─────────────────────┘
+               │                       │
+               ▼                       ▼
+     ┌──────────────────┐    ┌─────────────────────┐
+     │  Onboarding      │    │  Paywall            │
+     │  (3 fields)      │    │  (monthly/yearly/   │
+     └────────┬─────────┘    │   lifetime)         │
+              │              └──────────┬──────────┘
+              ▼                         │ Purchase success
+     ┌──────────────────┐               │
+     │  Status Result   │               ▼
+     │  (in-memory card)│    ┌─────────────────────┐
+     │  [Save my card]  │    │  Sign-in / Create   │
+     └────────┬─────────┘    │  Account            │
               │              │  (fromPaywall=true) │
-              ▼              └────────┬───────────┘
-     ┌──────────────────┐            │
-     │  Sign-in /       │            │ Auth success
-     │  Create Account  │◄───────────┘
+              ▼              └──────────┬──────────┘
+     ┌──────────────────┐               │ Auth success
+     │  Sign-in /       │               └──→ router.replace('/')
+     │  Create Account  │
      │  (fromOnboarding │
      │   =true,         │
-     │   pendingCard)   │
+     │   pendingCard,   │
+     │   toPaywall=true)│
      └────────┬─────────┘
-              │
               │ Auth success
               │ → save pending card
               │ → onboarding.complete()
-              │ → identifyUser(supabase_id)  ← aliases RC anon → real user
+              │ → identifyUser(supabase_id)
+              │ → router.replace('/paywall-manual?fromOnboarding=true')
               ▼
+     ┌──────────────────────────────────┐
+     │  Paywall (post-signup)           │
+     │  (fromOnboarding=true)           │
+     │                                  │
+     │  [Subscribe]                     │
+     │  [Restore]                       │
+     │  [Maybe later — continue free] ──┼──→ router.replace('/')
+     └──────────────┬───────────────────┘
+                    │ Purchase success (user already logged in)
+                    │ → router.replace('/')
+                    ▼
      ┌──────────────────────────────┐
      │         Dashboard            │
      │  (isOnboardingComplete=true) │
@@ -120,11 +130,20 @@ Install
 
 **Savings %:** Computed live from `product.price` — no hardcoded values.
 
+**Params:**
+
+| Param | Source | Effect |
+|-------|--------|--------|
+| `fromOnboarding=true` | Free path (post-signup) | Shows "Maybe later — continue free" skip link |
+| *(none)* | Pro path (from welcome) | No skip link — user explicitly chose Pro |
+
 **On purchase success:**
 - If user **not logged in** → mandatory sign-in: `router.replace('/sign-in?fromPaywall=true')`
 - If user **already logged in** → `router.replace('/')` (dashboard)
 
-**On restore success:** Same logic as purchase — route to sign-in if no account, dashboard if logged in.
+**On restore success:** Same logic as purchase.
+
+**Skip link** (`fromOnboarding=true` only): "Maybe later — continue free" → `router.replace('/')`. User goes to dashboard as free tier.
 
 **Gate:** Exempt from layout's onboarding redirect (listed in `onboardingScreens`).
 
@@ -141,12 +160,15 @@ Install
 | Param | Source | Effect |
 |-------|--------|--------|
 | `fromOnboarding=true` | Onboarding result | Saves `pendingCard` to DB after auth, calls `onboarding.complete()` |
-| `fromPaywall=true` | Paywall purchase | Calls `onboarding.complete()`, skips card save |
+| `fromPaywall=true` | Paywall purchase (Pro path) | Calls `onboarding.complete()`, skips card save, goes to dashboard |
+| `toPaywall=true` | Onboarding result (free path) | After auth → route to paywall instead of dashboard |
 | `pendingCard=<json>` | Onboarding result | Card data to persist after signup |
 
 **MergePrompt:** If user signs in (not up) with a pending card from onboarding — asks whether to keep local card or discard. Prevents duplicate cards.
 
-**On success:** `navigateAfterAuth()` → `router.replace('/')` → Dashboard
+**On success:** `navigateAfterAuth()`
+- Default → `router.replace('/')`
+- `toPaywall=true` → `router.replace('/paywall-manual?fromOnboarding=true')`
 
 **RevenueCat alias:** Handled in `_layout.tsx` via auth state listener:
 ```

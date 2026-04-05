@@ -103,6 +103,7 @@ export default function OnboardingResultScreen() {
           dueDayOffset: dueDayOffsetStr,
         }),
         fromOnboarding: 'true',
+        toPaywall: 'true',
       },
     });
   }

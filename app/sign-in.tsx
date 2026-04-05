@@ -53,11 +53,12 @@ function showToast(message: string) {
 export default function SignInScreen() {
   const t = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { mode: initialMode, pendingCard, fromOnboarding, fromPaywall } = useLocalSearchParams<{
+  const { mode: initialMode, pendingCard, fromOnboarding, fromPaywall, toPaywall } = useLocalSearchParams<{
     mode?: string;
     pendingCard?: string;
     fromOnboarding?: string;
     fromPaywall?: string;
+    toPaywall?: string;  // after auth, show paywall before dashboard
   }>(); 
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
   const signInWithEmail = useAuthStore((s) => s.signInWithEmail);
@@ -128,7 +129,11 @@ export default function SignInScreen() {
     } else if (fromPaywall === 'true') {
       useOnboardingStore.getState().complete();
     }
-    router.replace('/');
+    if (toPaywall === 'true') {
+      router.replace(('/paywall-manual?fromOnboarding=true') as any);
+    } else {
+      router.replace('/');
+    }
   }
 
   async function handleKeepLocal() {
