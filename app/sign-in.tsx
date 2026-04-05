@@ -126,10 +126,11 @@ export default function SignInScreen() {
   function navigateAfterAuth() {
     if (fromOnboarding === 'true') {
       savePendingCard();
-      useOnboardingStore.getState().complete();
-    } else if (fromPaywall === 'true') {
-      useOnboardingStore.getState().complete();
     }
+    // Always mark onboarding complete after any successful auth
+    // Returning users (sign-in) skip onboarding; new users already went through it
+    useOnboardingStore.getState().complete();
+
     if (toPaywall === 'true') {
       router.replace(('/paywall-manual?fromOnboarding=true') as any);
     } else {
