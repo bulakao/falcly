@@ -182,7 +182,7 @@ function RootLayoutNav() {
   // Redirect based on onboarding state (no auth gate)
   useEffect(() => {
     const currentSegment = segments[0];
-    const onboardingScreens = ['welcome', 'onboarding', 'onboarding-result', 'sign-in'];
+    const onboardingScreens = ['welcome', 'onboarding', 'onboarding-result', 'sign-in', 'paywall-manual'];
     const onOnboardingScreen = onboardingScreens.includes(currentSegment as string);
 
     if (!isOnboardingComplete && !onOnboardingScreen) {
