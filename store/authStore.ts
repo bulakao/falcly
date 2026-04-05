@@ -50,11 +50,32 @@ export const useAuthStore = create<AuthStore>()((set) => ({
   },
   signUpWithEmail: async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signUp({ email, password });
+    if (__DEV__) {
+      console.log('[AUTH] signUp response:', JSON.stringify({
+        error: error?.message,
+        userId: data?.user?.id,
+        identities: data?.user?.identities?.length,
+        session: !!data?.session,
+        confirmedAt: data?.user?.confirmed_at,
+        emailConfirmedAt: data?.user?.email_confirmed_at,
+      }));
+    }
     if (error) throw error;
     // Supabase returns a fake user with empty identities when email already exists
     // (email confirmation enabled — prevents enumeration attacks)
     if (data.user && data.user.identities?.length === 0) {
       throw new Error('An account with this email is already registered.');
+    }
+    // If email confirmation is disabled, Supabase creates a session even for duplicates
+    // but the created_at will be in the past — detect this
+    if (data.user && data.session) {
+      const createdAt = new Date(data.user.created_at).getTime();
+      const now = Date.now();
+      // If user was created more than 30 seconds ago, it's an existing account
+      if (now - createdAt > 30_000) {
+        await supabase.auth.signOut();
+        throw new Error('An account with this email is already registered.');
+      }
     }
     if (data.user) set({ user: data.user, loading: false });
   },
