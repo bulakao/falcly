@@ -54,6 +54,17 @@ export function SwipeImpactPanel({
   const fixedPayoffAmount = useUserStore((s) => s.fixedPayoffAmount);
   const paydays = getPaydays();
   const subscriptionTier = useSubscriptionStore((s) => s.tier);
+  const offerings = useSubscriptionStore((s) => s.offerings);
+
+  const trialDays = useMemo(() => {
+    const pkg = offerings?.availablePackages.find((p) => p.packageType === 'MONTHLY' || p.packageType === 'ANNUAL');
+    const intro = pkg?.product.introPrice;
+    if (!intro || intro.price !== 0) return null;
+    const { periodUnit, periodNumberOfUnits } = intro;
+    const unit = periodUnit?.toLowerCase() ?? 'day';
+    const unitLabel = periodNumberOfUnits === 1 ? unit : `${unit}s`;
+    return `${periodNumberOfUnits} ${unitLabel}`;
+  }, [offerings]);
   const getCurrentCycle = useTransactionStore((s) => s.getCurrentCycle);
   const transactions = useTransactionStore((s) => s.transactions);
   const [amountText, setAmountText] = useState('');
@@ -436,8 +447,10 @@ export function SwipeImpactPanel({
       {/* Trial CTA */}
       {subscriptionTier === 'free' && (
         <Link href={"/paywall-manual" as any} asChild>
-          <Pressable style={[styles.trialCta, { backgroundColor: t.accentBg, borderColor: t.accent }]} accessibilityRole="button" accessibilityLabel="Try free for 30 days — unlock payment planning, installment tracking, and more">
-            <Text style={[styles.trialCtaText, { color: t.accent }]}>Try Free for 30 Days</Text>
+          <Pressable style={[styles.trialCta, { backgroundColor: t.accentBg, borderColor: t.accent }]} accessibilityRole="button" accessibilityLabel={`Try free${trialDays ? ` for ${trialDays}` : ''} — unlock payment planning, installment tracking, and more`}>
+            <Text style={[styles.trialCtaText, { color: t.accent }]}>
+              {trialDays ? `Try Free for ${trialDays}` : 'Upgrade to Pro'}
+            </Text>
             <Text style={[styles.trialCtaSubtext, { color: t.accent }]}>
               Unlock payment planning, installment tracking & more
             </Text>
