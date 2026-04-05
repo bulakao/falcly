@@ -45,31 +45,36 @@ export function SettingsDataSection() {
     <>
       <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Data</Text>
       <SurfaceCard>
-        <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Export</Text>
-        <Text style={[styles.itemHint, { color: t.textMuted, marginBottom: 12 }]}>
-          Cards, installments, subscriptions, and profile as CSV.
-        </Text>
-        <Button
-          label={exporting ? 'Exporting...' : 'Export as CSV'}
-          variant="secondary"
-          onPress={() => {
-            setExporting(true);
-            exportDataAsCSV(cards, {
-              cashOnHand,
-              monthlyIncome,
-              payday,
-              committedExpenses,
-            })
-              .catch((e: unknown) => {
-                const message = e instanceof Error ? e.message : 'Export failed';
-                Alert.alert('Export Error', message);
-              })
-              .finally(() => {
-                setExporting(false);
-              });
-          }}
-          disabled={exporting}
-        />
+        {__DEV__ && (
+          <>
+            <Text style={[styles.itemLabel, { color: t.textSecondary }]}>Export</Text>
+            <Text style={[styles.itemHint, { color: t.textMuted, marginBottom: 12 }]}>
+              Cards, installments, subscriptions, and profile as CSV.
+            </Text>
+            <Button
+              label={exporting ? 'Exporting...' : 'Export as CSV'}
+              variant="secondary"
+              onPress={() => {
+                setExporting(true);
+                exportDataAsCSV(cards, {
+                  cashOnHand,
+                  monthlyIncome,
+                  payday,
+                  committedExpenses,
+                })
+                  .catch((e: unknown) => {
+                    const message = e instanceof Error ? e.message : 'Export failed';
+                    Alert.alert('Export Error', message);
+                  })
+                  .finally(() => {
+                    setExporting(false);
+                  });
+              }}
+              disabled={exporting}
+            />
+            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+          </>
+        )}
 
         {user && (
           <>
