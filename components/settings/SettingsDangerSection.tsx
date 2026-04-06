@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, Alert } from 'react-native';
+import { StyleSheet, Alert, View as RNView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Text } from '@/components/Themed';
 import { useAuthStore } from '@/store/authStore';
@@ -52,6 +52,7 @@ export function SettingsDangerSection() {
               }}
               variant="secondary"
             />
+            <RNView style={styles.gap} />
           </>
         )}
         {user && (
@@ -78,6 +79,7 @@ export function SettingsDangerSection() {
                 );
               }}
             />
+            <RNView style={styles.gap} />
           </>
         )}
         <Button
@@ -129,5 +131,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginTop: 8,
   },
-
+  gap: {
+    height: 10,
+  },
 });
