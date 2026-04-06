@@ -55,6 +55,33 @@ export function SettingsDangerSection() {
             <RNView style={[styles.divider, { backgroundColor: t.border }]} />
           </>
         )}
+        {user && (
+          <>
+            <Button
+              label={busy ? 'Clearing...' : 'Clear Local Data'}
+              variant="secondary"
+              disabled={busy}
+              onPress={() => {
+                Alert.alert(
+                  'Clear Local Data',
+                  'This will erase all local data on this device. Your account and cloud backup are safe — data will re-sync when you sign back in.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Clear',
+                      style: 'destructive',
+                      onPress: () => {
+                        clearLocalData();
+                        router.replace('/welcome');
+                      },
+                    },
+                  ],
+                );
+              }}
+            />
+            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
+          </>
+        )}
         <Button
           label={busy ? 'Deleting...' : user ? 'Delete Account' : 'Clear All Data'}
           variant="destructive-outline"
