@@ -122,9 +122,13 @@ export function SettingsOverlaySection() {
 
         {/* Reset dismissed */}
         <Button
-          label="Reset dismissed tips"
+          label={proUser ? 'Reset dismissed tips' : 'Unlock 🔒'}
           variant="secondary"
           onPress={() => {
+            if (!proUser) {
+              router.push('/paywall');
+              return;
+            }
             resetDismissed();
             Alert.alert('Tips Reset', 'All dismissed tips have been restored.');
           }}
