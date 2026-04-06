@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, Alert, View as RNView } from 'react-native';
+import { StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Text } from '@/components/Themed';
 import { useAuthStore } from '@/store/authStore';
@@ -52,7 +52,6 @@ export function SettingsDangerSection() {
               }}
               variant="secondary"
             />
-            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
           </>
         )}
         {user && (
@@ -79,7 +78,6 @@ export function SettingsDangerSection() {
                 );
               }}
             />
-            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
           </>
         )}
         <Button
@@ -131,8 +129,5 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginTop: 8,
   },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    marginVertical: 14,
-  },
+
 });
