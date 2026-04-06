@@ -159,7 +159,7 @@ export default function PayoffPlannerScreen() {
 
             {budget.length > 0 && !comparison && parseFloat(budget) > 0 && (
               <Text style={[styles.hint, { color: t.caution }]}>
-                Budget doesn't cover minimum payments. Try a higher amount.
+                Budget doesn&apos;t cover minimum payments. Try a higher amount.
               </Text>
             )}
           </>

@@ -208,7 +208,7 @@ export default function ManualPaywallScreen() {
       {/* ── Heading ── */}
       <View style={[styles.quoteCard, { backgroundColor: t.surface, borderLeftColor: t.primary }]}>
         <Text style={[styles.heading, { color: t.textPrimary }]}>
-          Know exactly when it's safe to swipe — on{' '}
+          Know exactly when it&apos;s safe to swipe — on{' '}
           <Text style={{ color: t.primary }}>every card</Text>.
         </Text>
       </View>

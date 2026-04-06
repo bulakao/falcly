@@ -126,7 +126,7 @@ export function SettingsOverlaySection() {
           variant="secondary"
           onPress={() => {
             if (!proUser) {
-              router.push('/paywall');
+              router.push('/paywall-manual' as any);
               return;
             }
             resetDismissed();
