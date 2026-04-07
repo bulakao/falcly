@@ -142,20 +142,22 @@ export default function SettingsScreen() {
 
       {/* ── Currency ── */}
       <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Currency</Text>
-      <Pressable
-        onPress={() => setCurrencyModalVisible(true)}
-        accessibilityRole="button"
-        accessibilityLabel={`Currency: ${globalCurrency}`}
-        style={[styles.currencyDropdown, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}
-      >
-        <Text style={[styles.currencyDropdownLabel, { color: t.textMuted }]}>Default currency</Text>
-        <RNView style={styles.currencyDropdownRight}>
-          <Text style={[styles.currencyDropdownValue, { color: t.inputText }]}>
-            {getCurrencySymbol(globalCurrency)}  {globalCurrency}
-          </Text>
-          <FontAwesome name="chevron-down" size={12} color={t.textMuted} />
-        </RNView>
-      </Pressable>
+      <SurfaceCard>
+        <Pressable
+          onPress={() => setCurrencyModalVisible(true)}
+          accessibilityRole="button"
+          accessibilityLabel={`Currency: ${globalCurrency}`}
+          style={[styles.currencyDropdown, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}
+        >
+          <Text style={[styles.currencyDropdownLabel, { color: t.textMuted }]}>Default currency</Text>
+          <RNView style={styles.currencyDropdownRight}>
+            <Text style={[styles.currencyDropdownValue, { color: t.inputText }]}>
+              {getCurrencySymbol(globalCurrency)}  {globalCurrency}
+            </Text>
+            <FontAwesome name="chevron-down" size={12} color={t.textMuted} />
+          </RNView>
+        </Pressable>
+      </SurfaceCard>
 
       {/* ── Notifications ── */}
       <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Notifications</Text>
@@ -468,7 +470,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    marginBottom: 24,
   },
   currencyDropdownLabel: {
     fontSize: 13,
