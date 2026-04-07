@@ -49,3 +49,6 @@ data.json
 Screenshot*.png
 docs/the-reset/
 .env
+
+# Supabase
+supabase/.temp/
