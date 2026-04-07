@@ -50,8 +50,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 14,
     fontSize: 20,
-    fontFamily: fonts.interBold,
-    textAlign: 'center',
+    fontFamily: fonts.interRegular,
+    textAlign: 'left',
   },
   inputCompact: {
     padding: 8,
