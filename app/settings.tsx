@@ -426,7 +426,7 @@ export default function SettingsScreen() {
             keyExtractor={(item) => item}
             renderItem={({ item: code }) => (
               <Pressable
-                style={[styles.currencyRow, code === globalCurrency && { backgroundColor: t.accentBg }]}
+                style={[styles.currencyListRow, code === globalCurrency && { backgroundColor: t.accentBg }]}
                 onPress={() => {
                   setGlobalCurrency(code);
                   setCurrencyModalVisible(false);
@@ -585,7 +585,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: fonts.interRegular,
   },
-  currencyRow: {
+  currencyListRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
