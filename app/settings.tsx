@@ -104,7 +104,7 @@ export default function SettingsScreen() {
 
   return (
     <RNView style={styles.root}>
-      <RNView style={[styles.badgeAbsolute, { top: insets.top + 14 }]}>
+      <RNView style={[styles.badgeAbsolute, { top: insets.top + 16 }]}>
         <TierBadge />
       </RNView>
     <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 56 }]}>
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
   },
   badgeAbsolute: {
     position: 'absolute',
-    right: 24,
+    right: 16,
     zIndex: 10,
   },
   groupLabel: {
