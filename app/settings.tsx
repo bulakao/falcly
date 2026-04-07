@@ -18,8 +18,9 @@ import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
-import { Button } from '@/components/atoms';
+import { Button, Badge } from '@/components/atoms';
 import { SurfaceCard, PercentInput, MoneyInput, parseMoney } from '@/components/molecules';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 import type { PayoffStrategy } from '@/store/userStore';
 import { scheduleAllReminders } from '@/utils/notifications';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
@@ -89,6 +90,7 @@ export default function SettingsScreen() {
   const payday = useUserStore((s) => s.payday);
   const committedExpenses = useUserStore((s) => s.committedExpenses);
 
+  const tier = useSubscriptionStore((s) => s.tier);
   const cards = useCardStore((s) => s.cards);
 
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
@@ -106,6 +108,30 @@ export default function SettingsScreen() {
     <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 56 }]}>
 
       <SettingsAccountSection />
+
+      {/* ── Subscription ── */}
+      <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Subscription</Text>
+      <SurfaceCard>
+        <Pressable
+          style={styles.defaultRow}
+          onPress={() => router.push('/paywall-manual' as any)}
+          accessibilityRole="button"
+          accessibilityLabel={`${tier === 'pro' ? 'Falcly Pro' : 'Free plan'} — manage subscription`}
+        >
+          <RNView>
+            <Text style={[styles.itemLabel, { color: t.textPrimary }]}>
+              {tier === 'pro' ? 'Falcly Pro' : 'Free Plan'}
+            </Text>
+            <Text style={[styles.itemHint, { color: t.textMuted }]}>
+              {tier === 'pro' ? 'You\'re on the Pro plan' : 'Upgrade to unlock all features'}
+            </Text>
+          </RNView>
+          <RNView style={styles.subscriptionRight}>
+            <Badge label={tier === 'pro' ? 'PRO' : 'FREE'} variant={tier === 'pro' ? 'pro' : 'outline'} />
+            <FontAwesome name="chevron-right" size={12} color={t.textMuted} style={{ marginLeft: 8 }} />
+          </RNView>
+        </Pressable>
+      </SurfaceCard>
 
       {/* ── Appearance ── */}
       <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Appearance</Text>
@@ -482,6 +508,10 @@ const styles = StyleSheet.create({
   defaultValue: {
     fontSize: 14,
     fontFamily: fonts.interSemiBold,
+  },
+  subscriptionRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   themeRow: {
     flexDirection: 'row',
