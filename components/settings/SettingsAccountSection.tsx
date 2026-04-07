@@ -82,28 +82,7 @@ export function SettingsAccountSection() {
             {isOffline ? (
               <AlertBanner message="You are offline. Data is saved locally." variant="stale" />
             ) : (
-              <Pressable
-                style={styles.syncRow}
-                onPress={async () => {
-                  if (syncingNow) return;
-                  setSyncingNow(true);
-                  setSyncFeedback(null);
-                  try {
-                    const { data: { user: authUser } } = await supabase.auth.getUser();
-                    if (!authUser) throw new Error('Not signed in');
-                    await fullSync(authUser.id, cards);
-                    setLastSyncedAt(Date.now());
-                    setSyncFeedback('synced');
-                    setTimeout(() => setSyncFeedback(null), 2000);
-                  } catch {
-                    setSyncFeedback('failed');
-                  } finally {
-                    setSyncingNow(false);
-                  }
-                }}
-                accessibilityRole="button"
-                accessibilityLabel="Sync now"
-              >
+              <RNView style={styles.syncRow}>
                 <RNView>
                   <Text style={[styles.syncLabel, { color: t.textPrimary }]}>Last synced</Text>
                   <Text style={[styles.syncHint, { color: t.textMuted }]}>
@@ -118,8 +97,38 @@ export function SettingsAccountSection() {
                       : 'Never'}
                   </Text>
                 </RNView>
-                <FontAwesome name="refresh" size={14} color={t.textMuted} />
-              </Pressable>
+                <Pressable
+                  onPress={async () => {
+                    if (syncingNow) return;
+                    setSyncingNow(true);
+                    setSyncFeedback(null);
+                    try {
+                      const { data: { user: authUser } } = await supabase.auth.getUser();
+                      if (!authUser) throw new Error('Not signed in');
+                      await fullSync(authUser.id, cards);
+                      setLastSyncedAt(Date.now());
+                      setSyncFeedback('synced');
+                      setTimeout(() => setSyncFeedback(null), 2000);
+                    } catch {
+                      setSyncFeedback('failed');
+                    } finally {
+                      setSyncingNow(false);
+                    }
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Sync now"
+                  disabled={syncingNow}
+                  style={({ pressed }) => [
+                    styles.syncButton,
+                    { backgroundColor: t.inputBg, borderColor: t.inputBorder, opacity: pressed || syncingNow ? 0.6 : 1 },
+                  ]}
+                >
+                  <FontAwesome name="refresh" size={12} color={t.textSecondary} />
+                  <Text style={[styles.syncButtonText, { color: t.textSecondary }]}>
+                    {syncingNow ? 'Syncing…' : 'Sync'}
+                  </Text>
+                </Pressable>
+              </RNView>
             )}
           </>
         )}
@@ -255,7 +264,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 2,
   },
   syncLabel: {
     fontSize: 13,
@@ -265,5 +273,18 @@ const styles = StyleSheet.create({
   syncHint: {
     fontSize: 12,
     lineHeight: 17,
+  },
+  syncButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  syncButtonText: {
+    fontSize: 13,
+    fontFamily: fonts.interSemiBold,
   },
 });
