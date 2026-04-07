@@ -18,7 +18,7 @@ import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
-import { Button } from '@/components/atoms';
+import { Button, TierBadge } from '@/components/atoms';
 import { SurfaceCard, PercentInput, MoneyInput, parseMoney } from '@/components/molecules';
 import type { PayoffStrategy } from '@/store/userStore';
 import { scheduleAllReminders } from '@/utils/notifications';
@@ -104,6 +104,10 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 56 }]}>
+
+      <RNView style={styles.badgeRow}>
+        <TierBadge />
+      </RNView>
 
       <SettingsAccountSection />
 
@@ -448,6 +452,10 @@ const styles = StyleSheet.create({
   container: {
     padding: 24,
     paddingBottom: 48,
+  },
+  badgeRow: {
+    alignItems: 'flex-end',
+    marginBottom: 16,
   },
   groupLabel: {
     fontSize: 15,

@@ -25,7 +25,6 @@ import { posthog, initAnalytics, setAnalyticsOptOut } from '@/utils/analytics';
 import { initLogger, initCrashHandler, logger, installNetworkLogger, useNavigationLogger } from '@/utils/logger';
 import { createChannels, scheduleAllReminders, checkHighUtilization } from '@/utils/notifications';
 import { AppThemeProvider, useEffectiveColorScheme, lightTheme, darkTheme } from '@/theme';
-import { TierBadge } from '@/components/atoms';
 import { fonts } from '@/theme/fonts';
 import type { Theme } from '@react-navigation/native';
 
@@ -232,7 +231,7 @@ function RootLayoutNav() {
           <Stack.Screen name="paywall-manual" options={({ navigation }) => ({ presentation: 'modal', title: 'Upgrade to Pro', headerTitleAlign: 'center', headerLeft: () => <Pressable onPress={() => navigation.goBack()} hitSlop={8} style={{ padding: 8, alignItems: 'center', justifyContent: 'center' }} accessibilityRole="button" accessibilityLabel="Close"><X size={22} color={colorScheme === 'dark' ? darkTheme.textSecondary : lightTheme.textSecondary} strokeWidth={1.5} /></Pressable> })} />
           <Stack.Screen name="onboarding" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_right' }} />
           <Stack.Screen name="onboarding-result" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_right' }} />
-          <Stack.Screen name="settings" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_left', headerRight: () => <TierBadge style={{ marginRight: 16 }} /> }} />
+          <Stack.Screen name="settings" options={{ title: '', headerBackTitle: 'Back', headerTransparent: true, animation: 'slide_from_left' }} />
           <Stack.Screen name="manage-cards" options={{ presentation: 'card', title: '', headerTransparent: true, headerBackTitle: 'Back', headerStyle: { backgroundColor: 'transparent' } as never }} />
           <Stack.Screen name="log-transaction" options={{ presentation: 'modal', title: 'Log Transaction' }} />
           <Stack.Screen name="card-transactions" options={{ presentation: 'fullScreenModal', headerShown: false }} />
