@@ -143,20 +143,20 @@ export default function SettingsScreen() {
       {/* ── Currency ── */}
       <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Currency</Text>
       <SurfaceCard>
-        <Pressable
-          onPress={() => setCurrencyModalVisible(true)}
-          accessibilityRole="button"
-          accessibilityLabel={`Currency: ${globalCurrency}`}
-          style={[styles.currencyDropdown, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}
-        >
+        <RNView style={styles.currencyRow}>
           <Text style={[styles.currencyDropdownLabel, { color: t.textMuted }]}>Default currency</Text>
-          <RNView style={styles.currencyDropdownRight}>
+          <Pressable
+            onPress={() => setCurrencyModalVisible(true)}
+            accessibilityRole="button"
+            accessibilityLabel={`Currency: ${globalCurrency}`}
+            style={[styles.currencyDropdown, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}
+          >
             <Text style={[styles.currencyDropdownValue, { color: t.inputText }]}>
               {getCurrencySymbol(globalCurrency)}  {globalCurrency}
             </Text>
-            <FontAwesome name="chevron-down" size={12} color={t.textMuted} />
-          </RNView>
-        </Pressable>
+            <FontAwesome name="chevron-down" size={12} color={t.textMuted} style={{ marginLeft: 6 }} />
+          </Pressable>
+        </RNView>
       </SurfaceCard>
 
       {/* ── Notifications ── */}
@@ -462,25 +462,24 @@ const styles = StyleSheet.create({
     right: 16,
     zIndex: 10,
   },
-  currencyDropdown: {
+  currencyRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  currencyDropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 2,
     borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   currencyDropdownLabel: {
     fontSize: 13,
   },
-  currencyDropdownRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
   currencyDropdownValue: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: fonts.interRegular,
   },
   groupLabel: {
