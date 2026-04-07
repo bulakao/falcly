@@ -4,9 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Text, View } from '@/components/Themed';
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { SectionHeader, OfflineChip, Badge } from '@/components/atoms';
+import { SectionHeader, OfflineChip, TierBadge } from '@/components/atoms';
 import { BestCardBanner, FinanceCard, SurfaceCard, CardOverlay } from '@/components/molecules';
-import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useAuthStore } from '@/store/authStore';
 import { GanttTimeline } from '@/components/organisms/GanttTimeline';
 import { FutureTimeline } from '@/components/organisms/FutureTimeline';
@@ -55,7 +54,7 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
   const t = useAppTheme();
   const router = useRouter();
   const allCards = useCardStore((s) => s.cards);
-  const tier = useSubscriptionStore((s) => s.tier);
+
   const user = useAuthStore((s) => s.user);
   const bestCard = cards.length > 0 ? calculateBestCard(cards, new Date(), getNetAvailableCash, getCurrentCycleTxSum) : null;
 
@@ -96,11 +95,6 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
     return sorted;
   }, [cards, sortMode, getNetAvailableCash, getCurrentCycleTxSum]);
 
-  function getBadgeLabel() {
-    if (tier === 'pro') return 'PRO';
-    return 'FREE';
-  }
-
   const sortedCards = displayCards.filter(
     (c) => c.installmentsMonthlyAmount > 0 || c.subscriptionsThisCycle > 0 || (c.annualFee > 0 && c.annualFeeMonth > 0),
   );
@@ -140,9 +134,7 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
         </Pressable>
         <View style={styles.spacer} />
         <OfflineChip />
-        <Pressable onPress={() => router.push('/paywall-manual' as any)} accessibilityRole="button" accessibilityLabel={`${getBadgeLabel()} membership`}>
-          <Badge label={getBadgeLabel()} variant={tier === 'pro' ? 'pro' : 'outline'} />
-        </Pressable>
+        <TierBadge />
       </View>
 
       <BestCardBanner bestCard={bestCard} hasCards={allCards.length > 0} hasActiveCards={cards.length > 0} onPress={onBannerPress} onAddPress={onAddPress} />
