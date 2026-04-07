@@ -103,11 +103,11 @@ export default function SettingsScreen() {
 
 
   return (
-    <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 56 }]}>
-
-      <RNView style={styles.badgeRow}>
+    <RNView style={styles.root}>
+      <RNView style={[styles.badgeAbsolute, { top: insets.top + 14 }]}>
         <TierBadge />
       </RNView>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 56 }]}>
 
       <SettingsAccountSection />
 
@@ -445,6 +445,7 @@ export default function SettingsScreen() {
         </RNView>
       </Modal>
     </ScrollView>
+    </RNView>
   );
 }
 
@@ -453,9 +454,13 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 48,
   },
-  badgeRow: {
-    alignItems: 'flex-end',
-    marginBottom: 16,
+  root: {
+    flex: 1,
+  },
+  badgeAbsolute: {
+    position: 'absolute',
+    right: 24,
+    zIndex: 10,
   },
   groupLabel: {
     fontSize: 15,
