@@ -15,7 +15,7 @@ import { Text, View } from '@/components/Themed';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useAuthStore } from '@/store/authStore';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import type { PurchasesPackage } from 'react-native-purchases';
 import { trackProPurchaseCompleted } from '@/utils/analytics';
 
@@ -206,14 +206,6 @@ export default function ManualPaywallScreen() {
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
     >
-      {/* ── Heading ── */}
-      <View style={[styles.quoteCard, { backgroundColor: t.surface, borderLeftColor: t.primary }]}>
-        <Text style={[styles.heading, { color: t.textPrimary }]}>
-          Know exactly when it&apos;s safe to swipe — on{' '}
-          <Text style={{ color: t.primary }}>every card</Text>.
-        </Text>
-      </View>
-
       {/* ── Features ── */}
       <View style={[styles.featuresCard, { backgroundColor: t.surface }]}>
         {FEATURES.map(({ icon: Icon, label, sub }, i) => (
@@ -312,15 +304,8 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
 
-  // Heading
-  quoteCard: {
-    borderRadius: 14,
-    borderLeftWidth: 3,
-    padding: 16,
-    marginBottom: 20,
-  },
   heading: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.nunitoBold,
     lineHeight: 22,
     fontStyle: 'italic',
@@ -354,12 +339,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   featureLabel: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     marginBottom: 2,
   },
   featureSub: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     lineHeight: 16,
   },
 
@@ -384,20 +369,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   packageTitle: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     marginBottom: 6,
   },
   packagePrice: {
-    fontSize: 22,
+    fontSize: typeScale.title2,
     fontFamily: fonts.interBold,
   },
   packagePeriod: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     marginTop: 2,
   },
   savings: {
-    fontSize: 11,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interSemiBold,
     marginTop: 4,
   },
@@ -425,7 +410,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   lifetimeSub: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
   },
   badge: {
     position: 'absolute',
@@ -436,7 +421,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 8,
   },
   badgeText: {
-    fontSize: 9,
+    fontSize: typeScale.micro,
     fontFamily: fonts.interBold,
     letterSpacing: 0.5,
   },
@@ -457,34 +442,34 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   purchaseButtonText: {
-    fontSize: 17,
+    fontSize: typeScale.body2,
     fontFamily: fonts.interBold,
   },
   trialNote: {
     textAlign: 'center',
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     marginBottom: 20,
   },
 
   // Footer
   restoreText: {
     textAlign: 'center',
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     marginBottom: 12,
   },
   skipText: {
     textAlign: 'center',
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     marginBottom: 20,
     textDecorationLine: 'underline',
   },
   error: {
     textAlign: 'center',
-    fontSize: 14,
+    fontSize: typeScale.body,
     marginBottom: 12,
   },
   terms: {
-    fontSize: 11,
+    fontSize: typeScale.caption,
     textAlign: 'center',
     lineHeight: 16,
   },

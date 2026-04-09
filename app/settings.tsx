@@ -6,10 +6,11 @@ import {
   Switch,
   Share,
   View as RNView,
-  Modal,
   FlatList,
   TextInput,
+  Platform,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -17,9 +18,9 @@ import { Text } from '@/components/Themed';
 import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
-import { Button, TierBadge } from '@/components/atoms';
-import { SurfaceCard, PercentInput, MoneyInput, parseMoney } from '@/components/molecules';
+import { fonts, typeScale } from '@/theme/fonts';
+import { Button } from '@/components/atoms';
+import { BottomSheet, SurfaceCard, PercentInput, MoneyInput, parseMoney } from '@/components/molecules';
 import type { PayoffStrategy } from '@/store/userStore';
 import { scheduleAllReminders } from '@/utils/notifications';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
@@ -91,6 +92,8 @@ export default function SettingsScreen() {
 
   const cards = useCardStore((s) => s.cards);
 
+  const [themePickerVisible, setThemePickerVisible] = useState(false);
+
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
   const [currencySearch, setCurrencySearch] = useState('');
   const filteredCurrencies = useMemo(() => {
@@ -104,9 +107,6 @@ export default function SettingsScreen() {
 
   return (
     <RNView style={styles.root}>
-      <RNView style={[styles.badgeAbsolute, { top: insets.top + 16 }]}>
-        <TierBadge />
-      </RNView>
     <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 56 }]}>
 
       <SettingsAccountSection />
@@ -114,29 +114,41 @@ export default function SettingsScreen() {
       {/* ── Appearance ── */}
       <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Appearance</Text>
       <SurfaceCard>
-        <RNView style={styles.themeRow}>
-          {(['system', 'light', 'dark'] as const).map((option) => (
+        <RNView style={styles.currencyRow}>
+          <Text style={[styles.currencyDropdownLabel, { color: t.textMuted }]}>Theme</Text>
+          {Platform.OS === 'android' ? (
+            <RNView style={[styles.themePickerWrap, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}>
+              <Picker
+                selectedValue={themePreference}
+                onValueChange={(v) => setThemePreference(v)}
+                accessibilityLabel="Theme"
+                style={{ color: t.inputText }}
+                dropdownIconColor={t.textMuted}
+              >
+                <Picker.Item label="System" value="system" />
+                <Picker.Item label="Light" value="light" />
+                <Picker.Item label="Dark" value="dark" />
+              </Picker>
+            </RNView>
+          ) : (
             <Pressable
-              key={option}
-              onPress={() => setThemePreference(option)}
+              onPress={() => setThemePickerVisible(true)}
               accessibilityRole="button"
-              accessibilityLabel={`${option.charAt(0).toUpperCase() + option.slice(1)} theme`}
-              accessibilityState={{ selected: themePreference === option }}
-              style={[
-                styles.themeOption,
-                { borderColor: themePreference === option ? t.primary : t.border, backgroundColor: themePreference === option ? t.accentBg : 'transparent' },
-              ]}
+              accessibilityLabel={`Theme: ${themePreference}`}
+              style={[styles.currencyDropdown, { backgroundColor: t.inputBg, borderColor: t.inputBorder, width: '30%' }]}
             >
               <FontAwesome
-                name={option === 'system' ? 'adjust' : option === 'light' ? 'sun-o' : 'moon-o'}
-                size={16}
-                color={themePreference === option ? t.primary : t.textMuted}
+                name={themePreference === 'system' ? 'adjust' : themePreference === 'light' ? 'sun-o' : 'moon-o'}
+                size={14}
+                color={t.inputText}
+                style={{ marginRight: 6 }}
               />
-              <Text style={[styles.themeOptionText, { color: themePreference === option ? t.primary : t.textPrimary }]}>
-                {option.charAt(0).toUpperCase() + option.slice(1)}
+              <Text style={[styles.currencyDropdownValue, { color: t.inputText }]}>
+                {themePreference.charAt(0).toUpperCase() + themePreference.slice(1)}
               </Text>
+              <FontAwesome name="chevron-down" size={12} color={t.textMuted} style={{ marginLeft: 6 }} />
             </Pressable>
-          ))}
+          )}
         </RNView>
       </SurfaceCard>
 
@@ -399,51 +411,59 @@ export default function SettingsScreen() {
       )}
 
       <SettingsDangerSection />
-      {/* Currency picker modal */}
-      <Modal
+      {/* Currency picker */}
+      <BottomSheet
         visible={currencyModalVisible}
-        animationType="slide"
-        onRequestClose={() => setCurrencyModalVisible(false)}
-        accessibilityViewIsModal
+        onClose={() => { setCurrencyModalVisible(false); setCurrencySearch(''); }}
+        title="Select Currency"
+        maxHeight="70%"
       >
-        <RNView style={[styles.modalContainer, { backgroundColor: t.background, paddingTop: insets.top }]}>
-          <RNView style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: t.textPrimary }]}>Select Currency</Text>
-            <Pressable onPress={() => setCurrencyModalVisible(false)} accessibilityRole="button" accessibilityLabel="Close">
-              <Text style={[styles.modalClose, { color: t.primary }]}>Done</Text>
+        <TextInput
+          style={[styles.searchInput, { color: t.textPrimary, borderColor: t.border, backgroundColor: t.inputBg }]}
+          placeholder="Search currency..."
+          placeholderTextColor={t.textMuted}
+          value={currencySearch}
+          onChangeText={setCurrencySearch}
+          autoCorrect={false}
+        />
+        <FlatList
+          data={filteredCurrencies}
+          keyExtractor={(item) => item}
+          renderItem={({ item: code }) => (
+            <Pressable
+              style={[styles.currencyListRow, code === globalCurrency && { backgroundColor: t.accentBg }]}
+              onPress={() => {
+                setGlobalCurrency(code);
+                setCurrencyModalVisible(false);
+                setCurrencySearch('');
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={`${getCurrencySymbol(code)} ${code}`}
+              accessibilityState={{ selected: code === globalCurrency }}
+            >
+              <Text style={[styles.currencySymbol, { color: t.textPrimary }]}>{getCurrencySymbol(code)}</Text>
+              <Text style={[styles.currencyCode, { color: code === globalCurrency ? t.primary : t.textPrimary }]}>{code}</Text>
+              {code === globalCurrency && <Text style={{ color: t.primary }}>✓</Text>}
             </Pressable>
-          </RNView>
-          <TextInput
-            style={[styles.searchInput, { color: t.textPrimary, borderColor: t.border, backgroundColor: t.inputBg }]}
-            placeholder="Search currency..."
-            placeholderTextColor={t.textMuted}
-            value={currencySearch}
-            onChangeText={setCurrencySearch}
-            autoCorrect={false}
-          />
-          <FlatList
-            data={filteredCurrencies}
-            keyExtractor={(item) => item}
-            renderItem={({ item: code }) => (
-              <Pressable
-                style={[styles.currencyListRow, code === globalCurrency && { backgroundColor: t.accentBg }]}
-                onPress={() => {
-                  setGlobalCurrency(code);
-                  setCurrencyModalVisible(false);
-                  setCurrencySearch('');
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={`${getCurrencySymbol(code)} ${code}`}
-                accessibilityState={{ selected: code === globalCurrency }}
-              >
-                <Text style={[styles.currencySymbol, { color: t.textPrimary }]}>{getCurrencySymbol(code)}</Text>
-                <Text style={[styles.currencyCode, { color: code === globalCurrency ? t.primary : t.textPrimary }]}>{code}</Text>
-                {code === globalCurrency && <Text style={{ color: t.primary }}>✓</Text>}
-              </Pressable>
-            )}
-          />
-        </RNView>
-      </Modal>
+          )}
+        />
+      </BottomSheet>
+
+      {/* Theme picker (iOS) */}
+      {Platform.OS === 'ios' && (
+        <BottomSheet visible={themePickerVisible} onClose={() => setThemePickerVisible(false)}>
+          <Picker
+            selectedValue={themePreference}
+            onValueChange={(v) => setThemePreference(v)}
+            accessibilityLabel="Theme"
+            itemStyle={{ color: t.textPrimary }}
+          >
+            <Picker.Item label="System" value="system" />
+            <Picker.Item label="Light" value="light" />
+            <Picker.Item label="Dark" value="dark" />
+          </Picker>
+        </BottomSheet>
+      )}
     </ScrollView>
     </RNView>
   );
@@ -457,11 +477,6 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
   },
-  badgeAbsolute: {
-    position: 'absolute',
-    right: 16,
-    zIndex: 10,
-  },
   currencyRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -470,20 +485,23 @@ const styles = StyleSheet.create({
   currencyDropdown: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
+    width: '30%',
   },
   currencyDropdownLabel: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
+    flexShrink: 1,
   },
   currencyDropdownValue: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
   },
   groupLabel: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interSemiBold,
     marginBottom: 8,
     marginTop: 8,
@@ -493,12 +511,12 @@ const styles = StyleSheet.create({
     marginVertical: 14,
   },
   itemLabel: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     marginBottom: 4,
   },
   itemHint: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     lineHeight: 17,
   },
   valueRow: {
@@ -513,27 +531,15 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   defaultValue: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
 
-  themeRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  themeOption: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1.5,
-  },
-  themeOptionText: {
-    fontSize: 13,
-    fontFamily: fonts.interSemiBold,
+  themePickerWrap: {
+    width: '50%',
+    borderWidth: 2,
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   strategyGrid: {
     flexDirection: 'row',
@@ -547,33 +553,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 10,
     borderWidth: 1.5,
+    overflow: 'hidden',
   },
   strategyChipLabel: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     marginBottom: 2,
   },
   strategyChipDesc: {
-    fontSize: 11,
+    fontSize: typeScale.caption,
     lineHeight: 15,
-  },
-  modalContainer: {
-    flex: 1,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontFamily: fonts.interBold,
-  },
-  modalClose: {
-    fontSize: 16,
-    fontFamily: fonts.interSemiBold,
   },
   searchInput: {
     marginHorizontal: 20,
@@ -582,7 +571,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interRegular,
   },
   currencyListRow: {
@@ -593,12 +582,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   currencySymbol: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
     fontFamily: fonts.interBold,
     width: 40,
   },
   currencyCode: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interSemiBold,
     flex: 1,
   },
