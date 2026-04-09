@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { StyleSheet, Pressable, Image, View as RNView } from 'react-native';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { StyleSheet, Pressable, Image, View as RNView, Animated } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Text, View } from '@/components/Themed';
 import { useRouter } from 'expo-router';
@@ -10,10 +10,14 @@ import { useAuthStore } from '@/store/authStore';
 import { GanttTimeline } from '@/components/organisms/GanttTimeline';
 import { FutureTimeline } from '@/components/organisms/FutureTimeline';
 import { calculateBestCard, calculateCardStatus, getCycleDates } from '@/utils/decisionEngine';
+import { computeAvalanchePlan } from '@/utils/payoffPlanner';
 import { useAppTheme } from '@/theme';
 import { fonts } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';
+import { useUserStore } from '@/store/userStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useOverlayStore } from '@/store/overlayStore';
+import { useCurrency } from '@/hooks/useCurrency';
 import type { Card } from '@/types/card';
 
 type SortMode = 'urgency' | 'utilization' | 'dueDate';
@@ -50,20 +54,151 @@ function GanttSkeleton() {
   );
 }
 
+interface DebtSummaryProps {
+  cards: Card[];
+  monthlyIncome: number | null;
+  committedExpenses: number | null;
+  isPro: boolean;
+  format: (n: number) => string;
+  onUpgrade: () => void;
+  onViewPlanner: () => void;
+}
+
+function DebtSummaryCard({ cards, monthlyIncome, committedExpenses, isPro, format, onUpgrade, onViewPlanner }: DebtSummaryProps) {
+  const t = useAppTheme();
+
+  const summary = useMemo(() => {
+    const debtCards = cards.filter((c) => c.isActive && c.outstandingBalance > 0);
+    if (debtCards.length === 0) return null;
+
+    const totalDebt = debtCards.reduce((sum, c) => sum + c.outstandingBalance, 0);
+
+    // Compute payoff estimate if we have income data
+    let budget: number | null = null;
+    if (monthlyIncome !== null && committedExpenses !== null && monthlyIncome > committedExpenses) {
+      budget = Math.round(monthlyIncome - committedExpenses);
+    }
+
+    const plan = budget ? computeAvalanchePlan(debtCards, budget) : null;
+
+    return { totalDebt, cardCount: debtCards.length, plan, budget };
+  }, [cards, monthlyIncome, committedExpenses]);
+
+  if (!summary) return null;
+
+  if (!isPro) {
+    return (
+      <Pressable
+        style={[styles.debtCard, { backgroundColor: t.surface, borderColor: t.border }]}
+        onPress={onUpgrade}
+        accessibilityRole="button"
+        accessibilityLabel="Upgrade to see payoff timeline"
+      >
+        <Text style={[styles.debtTitle, { color: t.textPrimary }]}>Total Debt</Text>
+        <Text style={[styles.debtAmount, { color: t.risky }]}>{format(summary.totalDebt)}</Text>
+        <Text style={[styles.debtSubtext, { color: t.textMuted }]}>
+          Across {summary.cardCount} card{summary.cardCount !== 1 ? 's' : ''}
+        </Text>
+        <RNView style={[styles.debtDivider, { backgroundColor: t.border }]} />
+        <Text style={[styles.debtCta, { color: t.accent }]}>
+          Upgrade to Pro to see your payoff timeline →
+        </Text>
+      </Pressable>
+    );
+  }
+
+  return (
+    <Pressable
+      style={[styles.debtCard, { backgroundColor: t.surface, borderColor: t.border }]}
+      onPress={onViewPlanner}
+      accessibilityRole="button"
+      accessibilityLabel="View Payoff Planner"
+    >
+      <Text style={[styles.debtTitle, { color: t.textPrimary }]}>Total Debt</Text>
+      <Text style={[styles.debtAmount, { color: t.risky }]}>{format(summary.totalDebt)}</Text>
+      <Text style={[styles.debtSubtext, { color: t.textMuted }]}>
+        Across {summary.cardCount} card{summary.cardCount !== 1 ? 's' : ''}
+      </Text>
+      {summary.plan && (
+        <>
+          <RNView style={[styles.debtDivider, { backgroundColor: t.border }]} />
+          <RNView style={styles.debtStats}>
+            <RNView style={styles.debtStat}>
+              <Text style={[styles.debtStatValue, { color: t.textPrimary }]}>
+                {summary.plan.totalMonths >= 360 ? '360+' : summary.plan.totalMonths}
+              </Text>
+              <Text style={[styles.debtStatLabel, { color: t.textMuted }]}>
+                month{summary.plan.totalMonths !== 1 ? 's' : ''}
+              </Text>
+            </RNView>
+            <RNView style={[styles.debtStatSep, { backgroundColor: t.border }]} />
+            <RNView style={styles.debtStat}>
+              <Text style={[styles.debtStatValue, { color: t.risky }]}>
+                {format(summary.plan.totalInterest)}
+              </Text>
+              <Text style={[styles.debtStatLabel, { color: t.textMuted }]}>in interest</Text>
+            </RNView>
+          </RNView>
+          <Text style={[styles.debtHint, { color: t.textMuted }]}>
+            Avalanche · {format(summary.budget!)} /mo budget
+          </Text>
+        </>
+      )}
+      {!summary.plan && (
+        <>
+          <RNView style={[styles.debtDivider, { backgroundColor: t.border }]} />
+          <Text style={[styles.debtHint, { color: t.textMuted }]}>
+            Set your income & expenses to see payoff estimate
+          </Text>
+        </>
+      )}
+      <Text style={[styles.debtCta, { color: t.primary }]}>View Payoff Planner →</Text>
+    </Pressable>
+  );
+}
+
 export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTxSum, onGanttCardPress, onBannerPress, onAddPress }: AllCardsOverviewProps) {
   const t = useAppTheme();
   const router = useRouter();
   const allCards = useCardStore((s) => s.cards);
+  const { format } = useCurrency();
 
   const user = useAuthStore((s) => s.user);
+  const avatarEmoji = useUserStore((s) => s.avatarEmoji);
+  const monthlyIncome = useUserStore((s) => s.monthlyIncome);
+  const committedExpenses = useUserStore((s) => s.committedExpenses);
+  const isPro = useSubscriptionStore((s) => s.isPro);
   const bestCard = cards.length > 0 ? calculateBestCard(cards, new Date(), getNetAvailableCash, getCurrentCycleTxSum) : null;
 
   const [sortMode, setSortMode] = useState<SortMode>('urgency');
+  const tooltipOpacity = useRef(new Animated.Value(0)).current;
+  const [showTooltip, setShowTooltip] = useState(false);
+
   useEffect(() => {
     AsyncStorage.getItem(SORT_KEY).then((v) => {
       if (v === 'urgency' || v === 'utilization' || v === 'dueDate') setSortMode(v);
     });
-  }, []);
+    const TOOLTIP_KEY = '@falcly/avatar_tooltip_count';
+    const SETTINGS_OPENED_KEY = '@falcly/settings_opened';
+    const MAX_SHOWS = 5;
+    let cancelled = false;
+    Promise.all([
+      AsyncStorage.getItem(SETTINGS_OPENED_KEY),
+      AsyncStorage.getItem(TOOLTIP_KEY),
+    ]).then(([opened, raw]) => {
+      if (cancelled || opened) return;
+      const count = raw ? parseInt(raw, 10) : 0;
+      if (count >= MAX_SHOWS) return;
+      AsyncStorage.setItem(TOOLTIP_KEY, String(count + 1));
+      setShowTooltip(true);
+      Animated.sequence([
+        Animated.timing(tooltipOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.delay(5000),
+        Animated.timing(tooltipOpacity, { toValue: 0, duration: 500, useNativeDriver: true }),
+      ]).start(() => setShowTooltip(false));
+    });
+    return () => { cancelled = true; };
+  }, [tooltipOpacity]);
 
   function handleSortChange(mode: SortMode) {
     setSortMode(mode);
@@ -120,18 +255,30 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
       {/* Top row: avatar + tier badge + offline chip */}
       <View style={styles.topRow}>
         <Pressable
-          style={[styles.avatar, { backgroundColor: user?.user_metadata?.avatar_url ? undefined : user ? t.primary : t.surface }]}
-          onPress={() => router.push('/settings')}
+          style={[styles.avatar, { backgroundColor: avatarEmoji ? t.inputBg : user?.user_metadata?.avatar_url ? undefined : t.surface }]}
+          onPress={() => {
+            AsyncStorage.setItem('@falcly/settings_opened', '1');
+            router.push('/settings');
+          }}
           accessibilityRole="button"
           accessibilityLabel="Settings"
         >
-          {user?.user_metadata?.avatar_url ? (
+          {avatarEmoji ? (
+            <Text style={styles.avatarEmoji}>{avatarEmoji}</Text>
+          ) : user?.user_metadata?.avatar_url ? (
             <Image source={{ uri: user.user_metadata.avatar_url }} style={styles.avatarImage} />
           ) : (
-            <FontAwesome name={user ? 'user' : 'user-plus'} size={16} color={user ? t.primaryText : t.textMuted} />
+            <FontAwesome name="plus" size={16} color={t.textMuted} />
           )}
           {!user && <RNView style={[styles.nudgeDot, { backgroundColor: t.accent }]} />}
         </Pressable>
+        {showTooltip && (
+          <Animated.View style={[styles.tooltip, { backgroundColor: t.surface, borderColor: t.border, opacity: tooltipOpacity }]}>
+            <RNView style={[styles.tooltipArrow, { borderRightColor: t.border }]} />
+            <RNView style={[styles.tooltipArrowInner, { borderRightColor: t.surface }]} />
+            <Text style={[styles.tooltipText, { color: t.textSecondary }]}>Settings</Text>
+          </Animated.View>
+        )}
         <View style={styles.spacer} />
         <OfflineChip />
         <TierBadge />
@@ -186,6 +333,16 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
 
       <FinanceCard />
 
+      <DebtSummaryCard
+        cards={allCards}
+        monthlyIncome={monthlyIncome}
+        committedExpenses={committedExpenses}
+        isPro={isPro()}
+        format={format}
+        onUpgrade={() => router.push('/paywall-manual' as any)}
+        onViewPlanner={() => router.push(isPro() ? '/payoff-planner' : ('/paywall-manual' as any))}
+      />
+
       {sortedCards.length > 0 && (
         <View style={styles.futureSection}>
           <SectionHeader
@@ -236,9 +393,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'visible',
@@ -252,9 +409,51 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   avatarImage: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  avatarEmoji: {
+    fontSize: 22,
+  },
+  tooltip: {
+    position: 'absolute',
+    top: 6,
+    left: 48,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    zIndex: 10,
+    flexDirection: 'row',
+  },
+  tooltipArrow: {
+    position: 'absolute',
+    left: -8,
+    top: 8,
+    width: 0,
+    height: 0,
+    borderTopWidth: 6,
+    borderBottomWidth: 6,
+    borderRightWidth: 8,
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+  },
+  tooltipArrowInner: {
+    position: 'absolute',
+    left: -6,
+    top: 8,
+    width: 0,
+    height: 0,
+    borderTopWidth: 6,
+    borderBottomWidth: 6,
+    borderRightWidth: 8,
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+  },
+  tooltipText: {
+    fontSize: 13,
+    fontFamily: fonts.interSemiBold,
   },
   spacer: {
     flex: 1,
@@ -275,6 +474,63 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: fonts.interBold,
     marginBottom: 8,
+  },
+  debtCard: {
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 16,
+    marginBottom: 24,
+  },
+  debtTitle: {
+    fontSize: 13,
+    fontFamily: fonts.interSemiBold,
+    marginBottom: 4,
+  },
+  debtAmount: {
+    fontSize: 28,
+    fontFamily: fonts.interBold,
+    marginBottom: 2,
+  },
+  debtSubtext: {
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  debtDivider: {
+    height: StyleSheet.hairlineWidth,
+    marginVertical: 12,
+  },
+  debtStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 8,
+  },
+  debtStat: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  debtStatValue: {
+    fontSize: 18,
+    fontFamily: fonts.interBold,
+    marginBottom: 2,
+  },
+  debtStatLabel: {
+    fontSize: 12,
+  },
+  debtStatSep: {
+    width: StyleSheet.hairlineWidth,
+    height: 32,
+  },
+  debtHint: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  debtCta: {
+    fontSize: 14,
+    fontFamily: fonts.interSemiBold,
+    textAlign: 'center',
+    marginTop: 4,
   },
   ganttSkeleton: {
     opacity: 0.35,

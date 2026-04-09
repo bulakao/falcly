@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { StyleSheet, ScrollView, Pressable } from 'react-native';
+import { StyleSheet, ScrollView, Pressable, View as RNView } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { X } from 'lucide-react-native';
 
@@ -8,6 +8,7 @@ import { FormInput, Label } from '@/components/atoms';
 import { PayoffComparisonCard, PayoffTimeline, CardPayoffBreakdown } from '@/components/molecules';
 import { useCardStore } from '@/store/cardStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { useUserStore } from '@/store/userStore';
 import { useCurrency } from '@/hooks/useCurrency';
 import { comparePayoffStrategies } from '@/utils/payoffPlanner';
 import { useAppTheme } from '@/theme';
@@ -20,7 +21,18 @@ export default function PayoffPlannerScreen() {
   const isPro = tier === 'pro';
   const { format } = useCurrency();
 
-  const [budget, setBudget] = useState('');
+  const monthlyIncome = useUserStore((s) => s.monthlyIncome);
+  const committedExpenses = useUserStore((s) => s.committedExpenses);
+  const payoffStrategy = useUserStore((s) => s.payoffStrategy);
+
+  const suggestedBudget = useMemo(() => {
+    if (monthlyIncome !== null && committedExpenses !== null && monthlyIncome > committedExpenses) {
+      return Math.round(monthlyIncome - committedExpenses);
+    }
+    return null;
+  }, [monthlyIncome, committedExpenses]);
+
+  const [budget, setBudget] = useState(() => suggestedBudget?.toString() ?? '');
   const [selectedStrategy, setSelectedStrategy] = useState<'avalanche' | 'snowball'>('avalanche');
 
   const activeCards = useMemo(
@@ -86,9 +98,17 @@ export default function PayoffPlannerScreen() {
         <Text style={[styles.title, { color: t.textPrimary }]}>Payoff Planner</Text>
 
         {activeCards.length === 0 ? (
-          <Text style={[styles.empty, { color: t.textSecondary }]}>
-            No cards with outstanding balance. Nothing to pay off!
-          </Text>
+          <RNView style={styles.emptyState}>
+            <Text style={styles.emptyEmoji}>🎉</Text>
+            <Text style={[styles.emptyTitle, { color: t.textPrimary }]}>
+              {payoffStrategy === 'full' ? 'You pay in full every month' : 'No outstanding balances'}
+            </Text>
+            <Text style={[styles.empty, { color: t.textSecondary }]}>
+              {payoffStrategy === 'full'
+                ? 'No carried debt to plan for. Keep it up!'
+                : 'All your cards are clear. Nothing to pay off!'}
+            </Text>
+          </RNView>
         ) : (
           <>
             <Label>Monthly payment budget</Label>
@@ -99,6 +119,11 @@ export default function PayoffPlannerScreen() {
               placeholder="e.g., 15000"
               accessibilityLabel="Monthly payment budget"
             />
+            {suggestedBudget !== null && budget === suggestedBudget.toString() && (
+              <Text style={[styles.budgetHint, { color: t.textMuted }]}>
+                Based on your income and expenses
+              </Text>
+            )}
 
             {comparison && (
               <>
@@ -197,10 +222,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: fonts.interBold,
   },
+  emptyState: {
+    alignItems: 'center',
+    marginTop: 40,
+    gap: 8,
+  },
+  emptyEmoji: {
+    fontSize: 48,
+    marginBottom: 8,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontFamily: fonts.interBold,
+    textAlign: 'center',
+  },
   empty: {
     fontSize: 15,
     textAlign: 'center',
-    marginTop: 24,
+  },
+  budgetHint: {
+    fontSize: 12,
+    marginTop: 4,
+    marginBottom: 4,
   },
   toggleRow: {
     flexDirection: 'row',
