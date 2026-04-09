@@ -1,3 +1,4 @@
+export { BottomSheet } from './BottomSheet';
 export { DayInput } from './DayInput';
 export { FormFieldGroup } from './FormFieldGroup';
 export { SurfaceCard } from './SurfaceCard';

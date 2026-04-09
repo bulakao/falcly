@@ -1,5 +1,14 @@
 import 'react-native-gesture-handler';
+import { Text as RNText, TextInput as RNTextInput, PixelRatio } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+
+// Font scaling: allow Dynamic Type to scale UP (capped at 1.4x) but never DOWN.
+// Our typeScale values (theme/fonts.ts) follow Apple HIG and are the minimum readable sizes.
+const systemFontScale = PixelRatio.getFontScale();
+const allowScaling = systemFontScale >= 1;
+const textDefaults = { maxFontSizeMultiplier: 1.4, allowFontScaling: allowScaling };
+(RNText as any).defaultProps = { ...((RNText as any).defaultProps || {}), ...textDefaults };
+(RNTextInput as any).defaultProps = { ...((RNTextInput as any).defaultProps || {}), ...textDefaults };
 import { ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments, usePathname, useGlobalSearchParams } from 'expo-router';
@@ -242,6 +251,7 @@ function RootLayoutNav() {
           <Stack.Screen name="add-subscription-item" options={{ presentation: 'modal', title: 'Add Subscription' }} />
           <Stack.Screen name="manage-installments" options={{ presentation: 'modal', title: 'Installments' }} />
           <Stack.Screen name="manage-subscriptions" options={{ presentation: 'modal', title: 'Subscriptions' }} />
+          <Stack.Screen name="avatar-picker" options={{ presentation: 'modal', title: 'Choose Avatar' }} />
           <Stack.Screen name="statement-advisor" options={{ presentation: 'modal', title: 'Statement Advisor' }} />
           <Stack.Screen name="payoff-planner" options={{ presentation: 'modal', title: 'Payoff Planner' }} />
         </Stack>

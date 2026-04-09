@@ -95,4 +95,6 @@ export const profile = sqliteTable('profile', {
   // Payoff strategy
   payoffStrategy: text('payoff_strategy').notNull().default('full'), // full | minimum | fixed | aggressive
   fixedPayoffAmount: real('fixed_payoff_amount'),
+  // Avatar
+  avatarEmoji: text('avatar_emoji'),
 });

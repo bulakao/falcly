@@ -11,7 +11,7 @@ import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { fullSync } from '@/utils/sync';
 import { supabase } from '@/utils/supabase';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { Button, Badge } from '@/components/atoms';
 import { AlertBanner, SurfaceCard } from '@/components/molecules';
 
@@ -30,6 +30,7 @@ export function SettingsAccountSection() {
   const t = useAppTheme();
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  const avatarEmoji = useUserStore((s) => s.avatarEmoji);
   const isPro = useSubscriptionStore((s) => s.isPro);
   const tier = useSubscriptionStore((s) => s.tier);
   const subExpirationDate = useSubscriptionStore((s) => s.getExpirationDate);
@@ -46,13 +47,20 @@ export function SettingsAccountSection() {
       <SurfaceCard>
         {user ? (
           <RNView style={styles.accountRow}>
-            <RNView style={styles.accountAvatar}>
-              {user.user_metadata?.avatar_url ? (
+            <Pressable
+              onPress={() => router.push('/avatar-picker' as never)}
+              accessibilityRole="button"
+              accessibilityLabel="Change avatar"
+              style={[styles.accountAvatar, { backgroundColor: t.inputBg }]}
+            >
+              {avatarEmoji ? (
+                <Text style={styles.avatarEmoji}>{avatarEmoji}</Text>
+              ) : user.user_metadata?.avatar_url ? (
                 <Image source={{ uri: user.user_metadata.avatar_url }} style={styles.accountAvatarImage} />
               ) : (
                 <FontAwesome name="user" size={18} color={t.textMuted} />
               )}
-            </RNView>
+            </Pressable>
             <RNView style={styles.accountInfo}>
               <Text style={[styles.accountName, { color: t.textPrimary }]}>{user.user_metadata?.full_name ?? 'User'}</Text>
               <Text style={[styles.accountEmail, { color: t.textMuted }]}>{user.email}</Text>
@@ -185,7 +193,7 @@ export function SettingsAccountSection() {
 
 const styles = StyleSheet.create({
   groupLabel: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interSemiBold,
     marginBottom: 8,
     marginTop: 8,
@@ -212,6 +220,9 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
   },
+  avatarEmoji: {
+    fontSize: typeScale.title2,
+  },
   accountInfo: {
     flex: 1,
   },
@@ -225,7 +236,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   accountPromptSubtitle: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     marginTop: 4,
     lineHeight: 18,
   },
@@ -233,11 +244,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   accountName: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interBold,
   },
   accountEmail: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
   },
   proBadgeRow: {
     flexDirection: 'row',
@@ -245,11 +256,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   proStatusText: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interSemiBold,
   },
   trialEndText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     marginTop: 8,
   },
   manageSubButton: {
@@ -257,7 +268,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   manageSubText: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interSemiBold,
   },
   syncRow: {
@@ -266,12 +277,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   syncLabel: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     marginBottom: 4,
   },
   syncHint: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     lineHeight: 17,
   },
   syncButton: {
@@ -284,7 +295,7 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
   },
   syncButtonText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
   },
 });

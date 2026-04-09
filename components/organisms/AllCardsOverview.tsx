@@ -12,7 +12,7 @@ import { FutureTimeline } from '@/components/organisms/FutureTimeline';
 import { calculateBestCard, calculateCardStatus, getCycleDates } from '@/utils/decisionEngine';
 import { computeAvalanchePlan } from '@/utils/payoffPlanner';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
@@ -124,19 +124,19 @@ function DebtSummaryCard({ cards, monthlyIncome, committedExpenses, isPro, forma
           <RNView style={[styles.debtDivider, { backgroundColor: t.border }]} />
           <RNView style={styles.debtStats}>
             <RNView style={styles.debtStat}>
-              <Text style={[styles.debtStatValue, { color: t.textPrimary }]}>
+              <Text numberOfLines={1} style={[styles.debtStatValue, { color: t.textPrimary }]}>
                 {summary.plan.totalMonths >= 360 ? '360+' : summary.plan.totalMonths}
               </Text>
-              <Text style={[styles.debtStatLabel, { color: t.textMuted }]}>
+              <Text numberOfLines={1} style={[styles.debtStatLabel, { color: t.textMuted }]}>
                 month{summary.plan.totalMonths !== 1 ? 's' : ''}
               </Text>
             </RNView>
             <RNView style={[styles.debtStatSep, { backgroundColor: t.border }]} />
             <RNView style={styles.debtStat}>
-              <Text style={[styles.debtStatValue, { color: t.risky }]}>
+              <Text numberOfLines={1} style={[styles.debtStatValue, { color: t.risky }]}>
                 {format(summary.plan.totalInterest)}
               </Text>
-              <Text style={[styles.debtStatLabel, { color: t.textMuted }]}>in interest</Text>
+              <Text numberOfLines={1} style={[styles.debtStatLabel, { color: t.textMuted }]}>in interest</Text>
             </RNView>
           </RNView>
           <Text style={[styles.debtHint, { color: t.textMuted }]}>
@@ -305,6 +305,7 @@ export function AllCardsOverview({ cards, getNetAvailableCash, getCurrentCycleTx
                 accessibilityState={{ selected: active }}
               >
                 <Text
+                  numberOfLines={1}
                   style={[
                     styles.sortChipText,
                     { color: t.inputText },
@@ -383,7 +384,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sortChipText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
   },
   topRow: {
@@ -414,7 +415,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   avatarEmoji: {
-    fontSize: 22,
+    fontSize: typeScale.title2,
   },
   tooltip: {
     position: 'absolute',
@@ -452,7 +453,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   tooltipText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
   },
   spacer: {
@@ -471,7 +472,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   cardName: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     marginBottom: 8,
   },
@@ -482,17 +483,17 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   debtTitle: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     marginBottom: 4,
   },
   debtAmount: {
-    fontSize: 28,
+    fontSize: typeScale.title1,
     fontFamily: fonts.interBold,
     marginBottom: 2,
   },
   debtSubtext: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     marginBottom: 4,
   },
   debtDivider: {
@@ -510,24 +511,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   debtStatValue: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
     fontFamily: fonts.interBold,
     marginBottom: 2,
   },
   debtStatLabel: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
   },
   debtStatSep: {
     width: StyleSheet.hairlineWidth,
     height: 32,
   },
   debtHint: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     textAlign: 'center',
     marginBottom: 8,
   },
   debtCta: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     textAlign: 'center',
     marginTop: 4,
@@ -540,7 +541,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
-    height: 24,
+    minHeight: 24,
   },
   ganttSkeletonLabel: {
     width: 60,

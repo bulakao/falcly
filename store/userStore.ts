@@ -33,6 +33,8 @@ interface UserStore {
   payoffStrategy: PayoffStrategy;
   fixedPayoffAmount: number | null;
   lastSyncedAt: number | null;
+  // Avatar
+  avatarEmoji: string | null;
 
   _initialized: boolean;
   loadProfile: () => void;
@@ -54,6 +56,7 @@ interface UserStore {
   setPayoffStrategy: (strategy: PayoffStrategy) => void;
   setFixedPayoffAmount: (amount: number | null) => void;
   setLastSyncedAt: (ts: number) => void;
+  setAvatarEmoji: (emoji: string | null) => void;
   reset: () => void;
 }
 
@@ -88,6 +91,7 @@ export const useUserStore = create<UserStore>()((set) => ({
   payoffStrategy: 'full' as PayoffStrategy,
   fixedPayoffAmount: null,
   lastSyncedAt: null,
+  avatarEmoji: null,
   _initialized: false,
 
   loadProfile: () => {
@@ -113,6 +117,7 @@ export const useUserStore = create<UserStore>()((set) => ({
           defaultMinPaymentFloor: row.defaultMinPaymentFloor ?? 500,
           payoffStrategy: (row.payoffStrategy as PayoffStrategy) ?? 'full',
           fixedPayoffAmount: row.fixedPayoffAmount ?? null,
+          avatarEmoji: row.avatarEmoji ?? null,
           _initialized: true,
         });
       } else {
@@ -205,6 +210,10 @@ export const useUserStore = create<UserStore>()((set) => ({
   setLastSyncedAt: (ts: number) => {
     set({ lastSyncedAt: ts });
   },
+  setAvatarEmoji: (emoji: string | null) => {
+    updateProfile({ avatarEmoji: emoji });
+    set({ avatarEmoji: emoji });
+  },
   reset: () => {
     db.delete(profileTable).where(eq(profileTable.id, PROFILE_ID)).run();
     set({
@@ -226,6 +235,7 @@ export const useUserStore = create<UserStore>()((set) => ({
       payoffStrategy: 'full',
       fixedPayoffAmount: null,
       lastSyncedAt: null,
+      avatarEmoji: null,
     });
   },
 }));
