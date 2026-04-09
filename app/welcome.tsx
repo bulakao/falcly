@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ShieldCheck, CalendarDays, CreditCard, Sparkles } from 'lucide-react-native';
@@ -26,7 +25,6 @@ const BENEFITS = [
 export default function WelcomeScreen() {
   const t = useAppTheme();
   const insets = useSafeAreaInsets();
-  const offerings = useSubscriptionStore((s) => s.offerings);
 
   const trialCtaLabel = 'Unlock Pro features';
 

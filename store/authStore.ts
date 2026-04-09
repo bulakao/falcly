@@ -100,8 +100,6 @@ export const useAuthStore = create<AuthStore>()((set) => ({
     useSubscriptionStore.getState().reset();
   },
   deleteAccount: async () => {
-    // Check if user has active subscription — warn them first
-    const tier = useSubscriptionStore.getState().tier;
     const { error } = await supabase.rpc('delete_own_account');
     if (error) throw error;
     try { await GoogleSignin.signOut(); } catch { /* not signed in via Google */ }

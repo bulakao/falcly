@@ -62,6 +62,7 @@ export default function ManualPaywallScreen() {
     if (tier !== 'free' && tier !== initialTierRef.current) {
       router.back();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- router is stable, tier is the trigger
   }, [tier]);
 
   async function handlePurchase() {

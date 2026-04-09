@@ -49,5 +49,6 @@ export function useRenderTimer(screenName: string): void {
   useEffect(() => {
     const durationMs = Math.round(performance.now() - mountTime.current);
     logger.debug('Render', `${screenName} mounted`, { durationMs, screen: screenName });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally mount-only
   }, []);
 }

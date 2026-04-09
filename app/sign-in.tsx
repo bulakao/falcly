@@ -52,11 +52,10 @@ function showToast(message: string) {
 export default function SignInScreen() {
   const t = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { mode: initialMode, pendingCard, fromOnboarding, fromPaywall, toPaywall, locked } = useLocalSearchParams<{
+  const { mode: initialMode, pendingCard, fromOnboarding, toPaywall, locked } = useLocalSearchParams<{
     mode?: string;
     pendingCard?: string;
     fromOnboarding?: string;
-    fromPaywall?: string;
     toPaywall?: string;  // after auth, show paywall before dashboard
     locked?: string;     // no back button, returning user must sign in
   }>(); 

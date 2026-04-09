@@ -28,7 +28,6 @@ export function createLoggerMiddleware<T>(
 
   return (creator: StateCreator<T>): StateCreator<T> =>
     (set, get, api) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const loggedSet: typeof set = ((...args: any[]) => {
         const prev = get();
         (set as (...a: any[]) => void)(...args);

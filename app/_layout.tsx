@@ -10,7 +10,7 @@ import { Pressable } from 'react-native';
 import { X } from 'lucide-react-native';
 import 'react-native-reanimated';
 
-import { useSubscriptionStore, FREE_CARD_LIMIT } from '@/store/subscriptionStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
 import { initializeRevenueCat, isRevenueCatConfigured, identifyUser, logoutUser } from '@/utils/revenuecat';
@@ -207,6 +207,7 @@ function RootLayoutNav() {
       // Onboarded + signed in but on a pre-onboarding screen → dashboard
       router.replace('/');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- router is stable, adding it causes infinite loops
   }, [isOnboardingComplete, authUser, segments, pathname]);
 
   return (

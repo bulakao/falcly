@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, Pressable, Image, Alert, View as RNView } from 'react-native';
+import { StyleSheet, Pressable, Image, View as RNView } from 'react-native';
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Text } from '@/components/Themed';

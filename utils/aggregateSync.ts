@@ -6,8 +6,11 @@
  * installmentStore/subscriptionItemStore -> aggregateSync -> stores
  */
 export function syncCardAggregates(cardId: string) {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy require to break circular dependency
   const { useCardStore } = require('@/store/cardStore');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { useInstallmentStore } = require('@/store/installmentStore');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { useSubscriptionItemStore } = require('@/store/subscriptionItemStore');
 
   const card = useCardStore.getState().cards.find((c: { id: string }) => c.id === cardId);

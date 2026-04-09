@@ -1,4 +1,4 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 import { useAppTheme, type SemanticTokens } from '@/theme';
 import { fonts } from '@/theme/fonts';
 

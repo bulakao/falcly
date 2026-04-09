@@ -91,6 +91,7 @@ export function SwipeImpactPanel({
 
   const currentCycleTxSum = useMemo(
     () => computeCurrentCycleTxSum(getCurrentCycle(card.id, card.statementDay)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- transactions triggers recalc when txs change
     [card.id, card.statementDay, getCurrentCycle, transactions],
   );
 

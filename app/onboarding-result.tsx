@@ -15,7 +15,6 @@ import { Badge, Button } from '@/components/atoms';
 import { StatusTooltip, SurfaceCard } from '@/components/molecules';
 import { BillingTimeline } from '@/components/organisms';
 
-import { useOnboardingStore } from '@/store/onboardingStore';
 import { calculateCardStatus, utilization } from '@/utils/decisionEngine';
 import type { Card, CardStatus } from '@/types/card';
 import { useAppTheme } from '@/theme';
