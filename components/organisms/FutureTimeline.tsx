@@ -4,7 +4,7 @@ import type { Card, CardStatus, FutureCycleProjection } from '@/types/card';
 import { projectFutureCycles } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';
 import type { SemanticTokens } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { useCurrency } from '@/hooks/useCurrency';
 
 const STATUS_ICONS: Record<CardStatus, string> = {
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   cycleLabel: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
   },
   badge: {
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   badgeText: {
-    fontSize: 11,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interBold,
   },
   itemRow: {
@@ -180,10 +180,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   itemLabel: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
   },
   itemValue: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
   },
   totalRow: {
@@ -195,19 +195,19 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   totalLabel: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interBold,
   },
   totalValue: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interBold,
   },
   reason: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     marginTop: 4,
   },
   signalNote: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontStyle: 'italic',
   },
 });

@@ -18,7 +18,7 @@ import { trackSwipeCheckPerformed, trackDataStalenessWarningShown } from '@/util
 import { useOverlayStore } from '@/store/overlayStore';
 import { getContextualWikiOverlay } from '@/utils/overlayTriggers';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { useCurrency } from '@/hooks/useCurrency';
 
 // Module-level flag so expand/collapse persists across re-mounts within the session
@@ -472,12 +472,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   actionButton: {
+    flex: 1,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
   },
   actionButtonText: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interSemiBold,
   },
   ganttToggle: {
@@ -485,7 +486,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   ganttToggleText: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   ganttContainer: {
@@ -501,12 +502,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interBold,
     marginBottom: 12,
   },
   cycleTxLabel: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontStyle: 'italic',
     marginTop: 2,
     marginBottom: 4,
@@ -516,13 +517,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   navButton: {
+    flex: 1,
     borderRadius: 8,
     borderWidth: 1,
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
   navButtonText: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   fundsPrompt: {
@@ -533,11 +535,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   fundsPromptText: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   hint: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     textAlign: 'center',
     fontStyle: 'italic',
   },
@@ -549,18 +551,18 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   trialCtaText: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     marginBottom: 4,
   },
   trialCtaSubtext: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
   },
   projectionToggle: {
     paddingVertical: 8,
   },
   projectionToggleText: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   projectionContent: {
@@ -572,7 +574,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   proBadge: {
-    fontSize: 11,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interBold,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -588,7 +590,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   tryCardText: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   tryCardOverlay: {
@@ -603,7 +605,7 @@ const styles = StyleSheet.create({
     maxHeight: '50%',
   },
   tryCardTitle: {
-    fontSize: 17,
+    fontSize: typeScale.body2,
     fontFamily: fonts.interBold,
     marginBottom: 12,
   },
@@ -620,7 +622,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   tryCardName: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interRegular,
   },
 });

@@ -13,7 +13,7 @@ import { useInstallmentStore } from '@/store/installmentStore';
 import { Button } from '@/components/atoms';
 import { SurfaceCard } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { useCurrency } from '@/hooks/useCurrency';
 
 export default function ManageInstallmentsScreen() {
@@ -132,12 +132,12 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interMedium,
     marginBottom: 16,
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
     textAlign: 'center',
     paddingVertical: 12,
@@ -148,16 +148,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   itemName: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interSemiBold,
   },
   itemDetail: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interRegular,
     marginTop: 2,
   },
   amount: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
   },
   progressContainer: {
@@ -174,16 +174,16 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   progressText: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interRegular,
     marginTop: 4,
   },
   deleteText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
   },
   sectionLabel: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     marginTop: 16,
     marginBottom: 8,

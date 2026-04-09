@@ -8,7 +8,7 @@ import { FormInput, Label, Caption } from '@/components/atoms';
 import { AlertBanner } from './AlertBanner';
 import { useUserStore } from '@/store/userStore';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { formatUpdatedAgo, getStalenessLevel } from '@/utils/staleness';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -280,7 +280,7 @@ export function FinanceCard() {
 
 const styles = StyleSheet.create({
   timestamp: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     marginTop: 6,
     marginBottom: 4,
   },
@@ -300,19 +300,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   enrichTitle: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interSemiBold,
     marginBottom: 4,
   },
   enrichHint: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
   },
   enrichSection: {
     padding: 16,
     paddingTop: 8,
   },
   splitHint: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     marginTop: 6,
   },
   divider: {
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   hintText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interMedium,
     flex: 1,
   },

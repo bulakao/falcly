@@ -3,7 +3,7 @@ import { Text } from '@/components/Themed';
 import type { Card } from '@/types/card';
 import { getCycleDates } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 
 function formatShortDate(date: Date): string {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -95,7 +95,7 @@ export function BillingTimeline({ card, today }: { card: Card; today?: Date }) {
 const styles = StyleSheet.create({
   container: {},
   title: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interMedium,
     marginBottom: 12,
   },
@@ -154,17 +154,17 @@ const styles = StyleSheet.create({
     transform: [{ translateX: -20 }],
   },
   labelDate: {
-    fontSize: 11,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interSemiBold,
   },
   labelName: {
-    fontSize: 10,
+    fontSize: typeScale.micro,
   },
   todayLabel: {
     fontFamily: fonts.interBold,
   },
   urgency: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interSemiBold,
     textAlign: 'center',
     marginTop: 4,

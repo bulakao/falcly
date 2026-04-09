@@ -1,6 +1,6 @@
 import { StyleSheet, Text, type TextProps } from 'react-native';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 
 interface TypographyProps extends Omit<TextProps, 'style'> {
   children: React.ReactNode;
@@ -49,27 +49,27 @@ export function Caption({ children, color, ...props }: TypographyProps) {
 const styles = StyleSheet.create({
   heading: {
     fontFamily: fonts.nunitoBold,
-    fontSize: 24,
+    fontSize: typeScale.title2b,
     marginBottom: 24,
   },
   sectionTitle: {
     fontFamily: fonts.nunitoBold,
-    fontSize: 16,
+    fontSize: typeScale.headline,
     marginBottom: 4,
   },
   sectionSubtitle: {
     fontFamily: fonts.interRegular,
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     marginBottom: 16,
   },
   label: {
     fontFamily: fonts.interSemiBold,
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     marginBottom: 6,
   },
   caption: {
     fontFamily: fonts.interRegular,
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     marginBottom: 8,
   },
 });

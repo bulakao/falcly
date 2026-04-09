@@ -1,6 +1,6 @@
 import { StyleSheet, Pressable, Text, View } from 'react-native';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 
 interface ChipOption {
   label: string;
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   chipText: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
 });

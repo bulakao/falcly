@@ -3,7 +3,7 @@ import { Text } from '@/components/Themed';
 import { X } from 'lucide-react-native';
 import { Stack, router } from 'expo-router';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 
 export default function StatusGuideScreen() {
   const t = useAppTheme();
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     lineHeight: 18,
     textAlign: 'center',
     marginBottom: 24,
@@ -95,13 +95,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   ruleIcon: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interBold,
     width: 20,
     marginTop: 2,
   },
   ruleText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     lineHeight: 18,
     flex: 1,
   },
@@ -127,12 +127,12 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   tierLabel: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
     letterSpacing: 0.5,
   },
   tierDescription: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     lineHeight: 18,
   },
 });

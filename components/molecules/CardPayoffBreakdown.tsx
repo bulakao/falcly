@@ -3,7 +3,7 @@ import { StyleSheet, Pressable } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import type { CardPayoffSchedule } from '@/types/payoff';
 
 interface CardPayoffBreakdownProps {
@@ -78,15 +78,15 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   bankName: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   subtext: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     marginTop: 2,
   },
   balanceLabel: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   details: {
@@ -99,14 +99,14 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   detailLabel: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
   },
   detailValue: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
   },
   paymentsTitle: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     marginTop: 8,
     marginBottom: 6,
@@ -117,10 +117,10 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   paymentMonth: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
   },
   paymentAmount: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interSemiBold,
   },
 });

@@ -12,7 +12,7 @@ import { useUserStore } from '@/store/userStore';
 import { useCurrency } from '@/hooks/useCurrency';
 import { comparePayoffStrategies } from '@/utils/payoffPlanner';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 
 export default function PayoffPlannerScreen() {
   const t = useAppTheme();
@@ -203,12 +203,12 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   title: {
-    fontSize: 22,
+    fontSize: typeScale.title2,
     fontFamily: fonts.interBold,
     marginBottom: 12,
   },
   teaser: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     lineHeight: 22,
     marginBottom: 8,
   },
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   upgradeText: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
   },
   emptyState: {
@@ -228,20 +228,20 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   emptyEmoji: {
-    fontSize: 48,
+    fontSize: typeScale.jumbo,
     marginBottom: 8,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
     fontFamily: fonts.interBold,
     textAlign: 'center',
   },
   empty: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     textAlign: 'center',
   },
   budgetHint: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     marginTop: 4,
     marginBottom: 4,
   },
@@ -258,16 +258,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toggleText: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   sectionTitle: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interBold,
     marginBottom: 10,
   },
   hint: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     textAlign: 'center',
     marginTop: 16,
   },

@@ -13,7 +13,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Text, View } from '@/components/Themed';
 import { Button, FormInput, Label } from '@/components/atoms';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';
 import { useTransactionStore } from '@/store/transactionStore';
 import type { TransactionType } from '@/store/transactionStore';
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   heading: {
-    fontSize: 22,
+    fontSize: typeScale.title2,
     fontFamily: fonts.interBold,
     marginBottom: 20,
   },
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   currencyPrefix: {
-    fontSize: 20,
+    fontSize: typeScale.title2a,
     fontFamily: fonts.interBold,
   },
   dateRow: {
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   dateChipText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
   },
   landsOnBox: {
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   landsOnText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interMedium,
   },
   warningBox: {
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   warningText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interMedium,
   },
   typeRow: {
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   typeChipText: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   buttonWrapper: {
@@ -427,12 +427,12 @@ const styles = StyleSheet.create({
     maxWidth: 400,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
     fontFamily: fonts.interBold,
     marginBottom: 12,
   },
   modalBody: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
     lineHeight: 20,
     marginBottom: 16,
@@ -441,12 +441,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   modalLabel: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     marginBottom: 2,
   },
   modalDesc: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interRegular,
     lineHeight: 18,
   },

@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import type { PayoffPlan } from '@/types/payoff';
 
 interface PayoffTimelineProps {
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interBold,
     marginBottom: 12,
   },
@@ -90,15 +90,15 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   bankName: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   detail: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     marginTop: 2,
   },
   summary: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
     textAlign: 'center',
     marginTop: 8,

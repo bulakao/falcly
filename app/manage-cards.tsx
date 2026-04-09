@@ -7,7 +7,7 @@ import { useCardStore } from '@/store/cardStore';
 import { useSubscriptionStore, FREE_CARD_LIMIT } from '@/store/subscriptionStore';
 import { calculateCardStatus } from '@/utils/decisionEngine';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import type { Card, CardStatus } from '@/types/card';
 import { router, Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -134,7 +134,7 @@ export default function ManageCardsScreen() {
       options={{
         headerRight: () => (
           <Pressable onPress={handleAddCard} hitSlop={8} style={{ paddingLeft: 12, marginRight: 12 }} accessibilityRole="button" accessibilityLabel="Add card">
-            <Text style={{ color: t.primary, fontSize: 16, fontFamily: fonts.interSemiBold }}>Add Card</Text>
+            <Text style={{ color: t.primary, fontSize: typeScale.headline, fontFamily: fonts.interSemiBold }}>Add Card</Text>
           </Pressable>
         ),
       }}
@@ -185,13 +185,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 28,
+    fontSize: typeScale.title1,
     fontFamily: fonts.nunitoBold,
     paddingHorizontal: 20,
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     paddingHorizontal: 20,
     marginBottom: 12,
   },
@@ -241,11 +241,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bankName: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interBold,
   },
   balance: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     marginTop: 1,
   },
   rowActions: {
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     gap: 24,
   },
   headerAction: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interSemiBold,
   },
   separator: {
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
   },
   emptyText: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interMedium,
   },
 });

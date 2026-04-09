@@ -8,7 +8,7 @@ import { ShieldCheck, CalendarDays, CreditCard, Sparkles } from 'lucide-react-na
 import { Text } from '@/components/Themed';
 import { Button } from '@/components/atoms';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import {
   trackOnboardingWelcomeViewed,
   trackOnboardingGetStartedTapped,
@@ -136,14 +136,14 @@ const styles = StyleSheet.create({
     height: 96,
   },
   headline: {
-    fontSize: 34,
+    fontSize: typeScale.largeTitle,
     fontFamily: fonts.nunitoBold,
     textAlign: 'center',
     lineHeight: 42,
     marginBottom: 8,
   },
   subheadline: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interRegular,
     textAlign: 'center',
     lineHeight: 24,
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   benefitLabel: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interMedium,
     flex: 1,
   },
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loginLink: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
     textAlign: 'center',
   },

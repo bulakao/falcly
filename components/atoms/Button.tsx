@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 import { useAppTheme, type SemanticTokens } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 
 type ButtonVariant = 'primary' | 'secondary' | 'destructive' | 'destructive-outline' | 'ghost';
 
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interBold,
   },
 });

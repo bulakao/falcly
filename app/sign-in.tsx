@@ -19,7 +19,7 @@ import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { useOnboardingStore } from '@/store/onboardingStore';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { syncOnSignIn, uploadCard, type SyncResult } from '@/utils/sync';
 import { supabase } from '@/utils/supabase';
 import { MergePrompt } from '@/components/organisms/MergePrompt';
@@ -441,20 +441,20 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   title: {
-    fontSize: 24,
+    fontSize: typeScale.title2b,
     fontFamily: fonts.interBold,
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     textAlign: 'center',
     marginBottom: 32,
   },
   form: {
   },
   fieldError: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interMedium,
     marginTop: 4,
   },
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   toggleText: {
-    fontSize: 14,
+    fontSize: typeScale.body,
   },
   dividerRow: {
     flexDirection: 'row',
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
   },
   dividerText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     marginHorizontal: 16,
   },
   passwordHintRow: {
@@ -488,17 +488,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   forgotPasswordText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
   },
   generalError: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interMedium,
     textAlign: 'center',
     marginTop: 8,
     marginBottom: 0,
   },
   savePrompt: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     textAlign: 'center',
     marginBottom: 8,
   },

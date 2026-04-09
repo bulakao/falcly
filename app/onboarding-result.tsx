@@ -18,7 +18,7 @@ import { BillingTimeline } from '@/components/organisms';
 import { calculateCardStatus, utilization } from '@/utils/decisionEngine';
 import type { Card, CardStatus } from '@/types/card';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { trackOnboardingFirstStatusViewed } from '@/utils/analytics';
 
 const STATUS_ICONS: Record<CardStatus, string> = {
@@ -192,12 +192,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   explanation: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     textAlign: 'center',
     fontStyle: 'italic',
   },
   cardName: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
     fontFamily: fonts.interBold,
     textAlign: 'center',
     marginBottom: 12,
@@ -214,11 +214,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   usageLabel: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interMedium,
   },
   usagePct: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interBold,
   },
   progressTrack: {
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   usageAmount: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interRegular,
   },
 

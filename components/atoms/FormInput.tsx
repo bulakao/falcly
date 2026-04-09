@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { StyleSheet, TextInput, type TextInputProps } from 'react-native';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 
 interface FormInputProps extends Omit<TextInputProps, 'style' | 'placeholderTextColor'> {
   error?: boolean;
@@ -49,15 +49,15 @@ const styles = StyleSheet.create({
   input: {
     borderRadius: 8,
     padding: 14,
-    fontSize: 20,
+    fontSize: typeScale.title2a,
     fontFamily: fonts.interRegular,
     textAlign: 'left',
   },
   inputCompact: {
     padding: 8,
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
-    minWidth: 64,
+    width: '30%',
     textAlign: 'right',
   },
 });

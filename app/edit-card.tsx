@@ -21,7 +21,7 @@ import { useAppTheme } from '@/theme';
 import { DEFAULT_DUE_DAY_OFFSET, MIN_DUE_DAY_OFFSET } from '@/types/card';
 import { Button, Heading, Label } from '@/components/atoms';
 import { FormFieldGroup } from '@/components/molecules';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { useCurrency } from '@/hooks/useCurrency';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
 
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
     padding: 14,
-    fontSize: 20,
+    fontSize: typeScale.title2a,
     fontFamily: fonts.interBold,
     textAlign: 'center',
   },
@@ -371,21 +371,21 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   managedLabel: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     marginBottom: 4,
   },
   managedValue: {
-    fontSize: 20,
+    fontSize: typeScale.title2a,
     fontFamily: fonts.interBold,
   },
   managedHint: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     marginTop: 4,
   },
   notFound: {
-    fontSize: 24,
+    fontSize: typeScale.title2b,
     fontFamily: fonts.interBold,
     marginBottom: 24,
   },
@@ -400,11 +400,11 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   currencyPickerText: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interMedium,
   },
   currencyHint: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     marginTop: 4,
   },
   modalContainer: {
@@ -419,11 +419,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
     fontFamily: fonts.interBold,
   },
   modalClose: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interSemiBold,
   },
   searchInput: {
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: 15,
+    fontSize: typeScale.callout,
   },
   currencyRow: {
     flexDirection: 'row',
@@ -443,12 +443,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   currencySymbolText: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
     fontFamily: fonts.interBold,
     width: 40,
   },
   currencyLabel: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interSemiBold,
   },
 });

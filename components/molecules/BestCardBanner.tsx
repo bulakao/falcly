@@ -2,7 +2,7 @@ import { StyleSheet, Text, Pressable, View as RNView } from 'react-native';
 import { View } from '@/components/Themed';
 import { ChevronRight, Plus } from 'lucide-react-native';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { UtilizationBar } from '@/components/atoms';
 import StatusTooltip from '@/components/molecules/StatusTooltip';
 import type { BestCardResult, CardStatus } from '@/types/card';
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   label: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interSemiBold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -153,11 +153,12 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   bankName: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
     fontFamily: fonts.interBold,
+    flexShrink: 1,
   },
   reason: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     lineHeight: 20,
   },
   utilizationRow: {
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   utilizationLabel: {
-    fontSize: 11,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interMedium,
     textAlign: 'right',
   },
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   warning: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interSemiBold,
     marginTop: 6,
   },
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   manageText: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interSemiBold,
   },
 });

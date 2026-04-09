@@ -5,7 +5,7 @@ import { Text } from '@/components/Themed';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useOverlayStore } from '@/store/overlayStore';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { Button } from '@/components/atoms';
 import { SurfaceCard } from '@/components/molecules';
 
@@ -140,7 +140,7 @@ export function SettingsOverlaySection() {
 
 const styles = StyleSheet.create({
   groupLabel: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interSemiBold,
     marginBottom: 8,
     marginTop: 8,
@@ -150,12 +150,12 @@ const styles = StyleSheet.create({
     marginVertical: 14,
   },
   itemLabel: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     marginBottom: 4,
   },
   itemHint: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     lineHeight: 17,
   },
   valueRow: {
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   defaultValue: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
 });

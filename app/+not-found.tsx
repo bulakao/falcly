@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 
 export default function NotFoundScreen() {
   const t = useAppTheme();
@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 20,
+    fontSize: typeScale.title2a,
     fontFamily: fonts.interBold,
   },
   link: {
@@ -38,6 +38,6 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   linkText: {
-    fontSize: 14,
+    fontSize: typeScale.body,
   },
 });

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 
 export function OfflineChip() {
   const { isOffline } = useNetworkStatus();
@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   text: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interSemiBold,
   },
 });

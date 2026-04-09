@@ -16,7 +16,7 @@ import { useSubscriptionItemStore } from '@/store/subscriptionItemStore';
 import { Button } from '@/components/atoms';
 import { FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import type { SubscriptionFrequency } from '@/types/subscription-item';
 
 const FREQUENCIES: { label: string; value: SubscriptionFrequency }[] = [
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   label: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     marginTop: 16,
     marginBottom: 8,
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   cardChipText: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   freqRow: {
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   freqChipText: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   buttonWrapper: {

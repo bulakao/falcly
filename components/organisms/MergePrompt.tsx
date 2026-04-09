@@ -2,7 +2,7 @@ import { Modal, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/Themed';
 import { Button } from '@/components/atoms';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import type { Card } from '@/types/card';
 
 interface MergePromptProps {
@@ -56,13 +56,13 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   title: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
     fontFamily: fonts.interBold,
     marginBottom: 8,
     textAlign: 'center',
   },
   body: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     textAlign: 'center',
     marginBottom: 24,
     lineHeight: 20,

@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import type { PayoffPlan } from '@/types/payoff';
 
 interface PayoffComparisonCardProps {
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interBold,
     marginBottom: 12,
   },
@@ -79,20 +79,20 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
   },
   strategyLabel: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     marginBottom: 4,
   },
   value: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
     fontFamily: fonts.interBold,
   },
   subvalue: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     marginTop: 2,
   },
   insight: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     marginTop: 10,
     textAlign: 'center',

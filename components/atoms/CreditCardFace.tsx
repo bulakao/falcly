@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Link } from 'expo-router';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { Caption } from './Typography';
 import { UtilizationBar } from './UtilizationBar';
 import StatusTooltip from '@/components/molecules/StatusTooltip';
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   stalenessIcon: {
-    fontSize: 14,
+    fontSize: typeScale.body,
   },
   statusDot: {
     width: 12,
@@ -147,13 +147,13 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   bankName: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
     fontFamily: fonts.nunitoBold,
     flex: 1,
     marginRight: 8,
   },
   reason: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interRegular,
     marginTop: 2,
   },
@@ -161,12 +161,12 @@ const styles = StyleSheet.create({
     marginTop: -2,
   },
   balance: {
-    fontSize: 26,
+    fontSize: typeScale.title1b,
     fontFamily: fonts.nunitoBold,
     letterSpacing: -0.5,
   },
   limit: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     marginTop: 2,
   },
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statementDay: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interSemiBold,
   },
 });

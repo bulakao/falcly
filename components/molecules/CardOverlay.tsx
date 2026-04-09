@@ -2,7 +2,7 @@ import { StyleSheet, Pressable, View as RNView } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Text } from '@/components/Themed';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import type { CardOverlayItem } from '@/types/overlay';
 
 const TYPE_ICONS: Record<string, string> = {
@@ -107,19 +107,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   icon: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
   },
   title: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
     flex: 1,
   },
   dismiss: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     paddingLeft: 8,
   },
   body: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     lineHeight: 19,
     fontFamily: fonts.interRegular,
   },
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   cta: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
   },
 });

@@ -2,6 +2,7 @@ import { Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { Text } from '@/components/Themed';
 import { useAppTheme } from '@/theme';
+import { typeScale } from '@/theme/fonts';
 
 interface StatusTooltipProps {
   children?: React.ReactNode;
@@ -19,7 +20,7 @@ export default function StatusTooltip({ children }: StatusTooltipProps) {
       accessibilityLabel="Learn about card status"
       accessibilityHint="Opens the status guide"
     >
-      {children ?? <Text style={{ fontSize: 18, color: t.textSecondary }}>ⓘ</Text>}
+      {children ?? <Text style={{ fontSize: typeScale.title3, color: t.textSecondary }}>ⓘ</Text>}
     </Pressable>
   );
 }

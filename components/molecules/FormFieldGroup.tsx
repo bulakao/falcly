@@ -1,7 +1,7 @@
 import { StyleSheet, View, Text } from 'react-native';
 import { FormInput, Label } from '@/components/atoms';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import type { TextInputProps } from 'react-native';
 
 interface FormFieldGroupProps extends Omit<TextInputProps, 'style' | 'placeholderTextColor'> {
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   hint: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     marginTop: 4,
     fontFamily: fonts.interRegular,
   },

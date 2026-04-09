@@ -5,7 +5,7 @@ import { Stack, router } from 'expo-router';
 import { X } from 'lucide-react-native';
 import { useAppTheme } from '@/theme';
 import type { SemanticTokens } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';
 import { useUserStore } from '@/store/userStore';
 import { SurfaceCard } from '@/components/molecules';
@@ -451,24 +451,24 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   scoreNumber: {
-    fontSize: 36,
+    fontSize: typeScale.display,
     fontFamily: fonts.interBold,
     lineHeight: 42,
   },
   scoreLabel: {
-    fontSize: 11,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interSemiBold,
     marginTop: -2,
   },
   scoreSummary: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interRegular,
     textAlign: 'center',
   },
 
   // Section Title
   sectionTitle: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interSemiBold,
     marginBottom: 8,
     marginTop: 12,
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
     marginLeft: -12,
   },
   cardDotText: {
-    fontSize: 10,
+    fontSize: typeScale.micro,
     fontFamily: fonts.interBold,
   },
   dayLabels: {
@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   dayLabel: {
-    fontSize: 10,
+    fontSize: typeScale.micro,
     fontFamily: fonts.interRegular,
   },
   legend: {
@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   legendText: {
-    fontSize: 11,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interRegular,
   },
 
@@ -549,12 +549,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   issueIcon: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     lineHeight: 20,
   },
   issueMessage: {
     flex: 1,
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interRegular,
     lineHeight: 18,
   },
@@ -569,12 +569,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   tipIcon: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     lineHeight: 20,
   },
   tipMessage: {
     flex: 1,
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interRegular,
     lineHeight: 18,
   },
@@ -593,19 +593,19 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   timingBank: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   timingDay: {
-    fontSize: 11,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interRegular,
   },
   timingBest: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interSemiBold,
   },
   timingAvoid: {
-    fontSize: 11,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interRegular,
   },
   timingDivider: {
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   bankStatus: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     width: 24,
     textAlign: 'center',
   },
@@ -639,11 +639,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bankName: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
   },
   bankNotes: {
-    fontSize: 11,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interRegular,
   },
   bankDivider: {
@@ -663,17 +663,17 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   wikiId: {
-    fontSize: 10,
+    fontSize: typeScale.micro,
     fontFamily: fonts.interSemiBold,
     width: 32,
   },
   wikiTitle: {
     flex: 1,
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
   },
   wikiChevron: {
-    fontSize: 10,
+    fontSize: typeScale.micro,
     width: 16,
     textAlign: 'center',
   },
@@ -682,7 +682,7 @@ const styles = StyleSheet.create({
     paddingLeft: 40,
   },
   wikiText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interRegular,
     lineHeight: 18,
     marginBottom: 8,
@@ -692,12 +692,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   wikiExampleLabel: {
-    fontSize: 10,
+    fontSize: typeScale.micro,
     fontFamily: fonts.interSemiBold,
     marginBottom: 2,
   },
   wikiExampleText: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interRegular,
     lineHeight: 17,
   },

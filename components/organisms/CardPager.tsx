@@ -20,7 +20,7 @@ import { AllCardsOverview } from '@/components/organisms/AllCardsOverview';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useOverlayStore } from '@/store/overlayStore';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { getCycleDates } from '@/utils/decisionEngine';
 import { getContextualWikiOverlay } from '@/utils/overlayTriggers';
 import type { Card } from '@/types/card';
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   manageLinkText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
   },
   overviewButton: {

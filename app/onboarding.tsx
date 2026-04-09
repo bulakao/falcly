@@ -17,7 +17,7 @@ import { trackOnboardingCardEntryCompleted } from '@/utils/analytics';
 import { useAppTheme } from '@/theme';
 import { Button, Heading, Label } from '@/components/atoms';
 import { DayInput, FormFieldGroup, formatMoney, MoneyInput, parseMoney } from '@/components/molecules';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 
 
 export default function OnboardingScreen() {
@@ -166,12 +166,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
     padding: 14,
-    fontSize: 20,
+    fontSize: typeScale.title2a,
     fontFamily: fonts.interBold,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     marginBottom: 24,
     marginTop: -16,
   },
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     marginTop: -16,
   },
   hint: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     marginTop: 4,
   },
   bottomBar: {

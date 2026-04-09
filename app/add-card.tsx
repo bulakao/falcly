@@ -22,7 +22,7 @@ import { trackCardAdded } from '@/utils/analytics';
 import { Button, Label } from '@/components/atoms';
 import { DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
 
 export default function AddCardScreen() {
@@ -240,11 +240,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   headerAction: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interSemiBold,
   },
   headerTitle: {
-    fontSize: 17,
+    fontSize: typeScale.body2,
     fontFamily: fonts.interBold,
   },
   container: {
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
     padding: 14,
-    fontSize: 20,
+    fontSize: typeScale.title2a,
     fontFamily: fonts.interBold,
     textAlign: 'center',
   },
@@ -273,11 +273,11 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   currencyPickerText: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interMedium,
   },
   currencyHint: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     marginTop: 4,
   },
   modalContainer: {
@@ -292,11 +292,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
     fontFamily: fonts.interBold,
   },
   modalClose: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interSemiBold,
   },
   searchInput: {
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: 15,
+    fontSize: typeScale.callout,
   },
   currencyRow: {
     flexDirection: 'row',
@@ -316,12 +316,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   currencySymbolText: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
     fontFamily: fonts.interBold,
     width: 40,
   },
   currencyLabel: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interSemiBold,
   },
 });

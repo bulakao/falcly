@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -30,12 +30,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   title: {
-    fontSize: 20,
+    fontSize: typeScale.title2a,
     fontFamily: fonts.interBold,
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     textAlign: 'center',
   },
   icon: {

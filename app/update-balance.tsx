@@ -9,7 +9,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Text, View } from '@/components/Themed';
 import { useCardStore } from '@/store/cardStore';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { Button, FormInput, Caption } from '@/components/atoms';
 import { useCurrency } from '@/hooks/useCurrency';
 
@@ -81,12 +81,12 @@ const styles = StyleSheet.create({
     paddingTop: 32,
   },
   heading: {
-    fontSize: 22,
+    fontSize: typeScale.title2,
     fontFamily: fonts.interBold,
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     marginBottom: 24,
   },
   hintWrapper: {

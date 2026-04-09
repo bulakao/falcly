@@ -14,7 +14,7 @@ import { EmptyState } from '@/components/molecules/EmptyState';
 import { Receipt } from 'lucide-react-native';
 
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { useCardStore } from '@/store/cardStore';
 import { useTransactionStore, type Transaction } from '@/store/transactionStore';
 import { getCycleDates } from '@/utils/decisionEngine';
@@ -262,15 +262,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   backBtn: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interSemiBold,
   },
   heading: {
-    fontSize: 18,
+    fontSize: typeScale.title3,
     fontFamily: fonts.interBold,
   },
   addBtn: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
   },
   listContent: {
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interBold,
     letterSpacing: 0.5,
   },
@@ -298,11 +298,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   subtotalLabel: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   subtotalValue: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
   },
   txRow: {
@@ -318,11 +318,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   txDate: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     width: 48,
   },
   txMerchant: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interMedium,
     flex: 1,
   },
@@ -330,11 +330,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   txAmount: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   txBadge: {
-    fontSize: 11,
+    fontSize: typeScale.caption,
     marginTop: 2,
   },
   emptyBtn: {

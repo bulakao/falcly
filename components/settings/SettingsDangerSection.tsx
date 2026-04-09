@@ -5,7 +5,7 @@ import { Text } from '@/components/Themed';
 import { useAuthStore } from '@/store/authStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { posthog, trackUserSignedOut } from '@/utils/analytics';
 import { Button } from '@/components/atoms';
 import { SurfaceCard } from '@/components/molecules';
@@ -126,7 +126,7 @@ export function SettingsDangerSection() {
 
 const styles = StyleSheet.create({
   groupLabel: {
-    fontSize: 15,
+    fontSize: typeScale.callout,
     fontFamily: fonts.interSemiBold,
     marginBottom: 8,
     marginTop: 8,

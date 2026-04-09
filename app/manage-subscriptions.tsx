@@ -13,7 +13,7 @@ import { useSubscriptionItemStore } from '@/store/subscriptionItemStore';
 import { Button } from '@/components/atoms';
 import { SurfaceCard } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
-import { fonts } from '@/theme/fonts';
+import { fonts, typeScale } from '@/theme/fonts';
 import { useCurrency } from '@/hooks/useCurrency';
 
 function nextBillingDate(billingDay: number): string {
@@ -111,12 +111,12 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interMedium,
     marginBottom: 16,
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
     textAlign: 'center',
     paddingVertical: 12,
@@ -127,20 +127,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   itemName: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interSemiBold,
   },
   itemDetail: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interRegular,
     marginTop: 2,
   },
   amount: {
-    fontSize: 16,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
   },
   deleteText: {
-    fontSize: 13,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
   },
   buttonWrapper: {
