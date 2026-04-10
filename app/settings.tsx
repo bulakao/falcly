@@ -19,7 +19,13 @@ import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
 import { useAppTheme } from '@/theme';
 import { fonts, typeScale } from '@/theme/fonts';
-import { Button } from '@/components/atoms';
+import {
+  Button,
+  MicroText, CaptionText, FootnoteText, SubheadText,
+  BodyText, CalloutText, HeadlineText, Body2Text,
+  H6Text, H5Text, H4Text, H3Text, H2Text, H1Text,
+  LargeTitleText, DisplayText, JumboText,
+} from '@/components/atoms';
 import { BottomSheet, SurfaceCard, PercentInput, MoneyInput, parseMoney } from '@/components/molecules';
 import type { PayoffStrategy } from '@/store/userStore';
 import { scheduleAllReminders } from '@/utils/notifications';
@@ -93,6 +99,7 @@ export default function SettingsScreen() {
   const cards = useCardStore((s) => s.cards);
 
   const [themePickerVisible, setThemePickerVisible] = useState(false);
+  const [showcaseVisible, setShowcaseVisible] = useState(false);
 
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
   const [currencySearch, setCurrencySearch] = useState('');
@@ -383,6 +390,13 @@ export default function SettingsScreen() {
           <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Developer</Text>
           <SurfaceCard>
             <Button
+              label="Type Scale Showcase"
+              variant="secondary"
+              onPress={() => setShowcaseVisible(true)}
+            />
+          </SurfaceCard>
+          <SurfaceCard>
+            <Button
               label="Share Store State"
               variant="secondary"
               onPress={() => {
@@ -464,6 +478,43 @@ export default function SettingsScreen() {
           </Picker>
         </BottomSheet>
       )}
+
+      {/* Type Scale Showcase */}
+      <BottomSheet
+        visible={showcaseVisible}
+        onClose={() => setShowcaseVisible(false)}
+        title="Type Scale"
+        maxHeight="80%"
+      >
+        <ScrollView style={styles.showcaseScroll} contentContainerStyle={styles.showcaseContent}>
+          {([
+            ['MicroText', typeScale.micro, MicroText],
+            ['CaptionText', typeScale.caption, CaptionText],
+            ['FootnoteText', typeScale.footnote, FootnoteText],
+            ['SubheadText', typeScale.subhead, SubheadText],
+            ['BodyText', typeScale.body, BodyText],
+            ['CalloutText', typeScale.callout, CalloutText],
+            ['HeadlineText', typeScale.headline, HeadlineText],
+            ['Body2Text', typeScale.body2, Body2Text],
+            ['H6Text', typeScale.h6, H6Text],
+            ['H5Text', typeScale.h5, H5Text],
+            ['H4Text', typeScale.h4, H4Text],
+            ['H3Text', typeScale.h3, H3Text],
+            ['H2Text', typeScale.h2, H2Text],
+            ['H1Text', typeScale.h1, H1Text],
+            ['LargeTitleText', typeScale.largeTitle, LargeTitleText],
+            ['DisplayText', typeScale.display, DisplayText],
+            ['JumboText', typeScale.jumbo, JumboText],
+          ] as const).map(([name, size, Component]) => (
+            <RNView key={name} style={styles.showcaseRow}>
+              <Component style={{ color: t.textPrimary, fontFamily: fonts.interSemiBold }}>
+                {name}
+              </Component>
+              <Text style={[styles.showcaseSize, { color: t.textMuted }]}>{size}px</Text>
+            </RNView>
+          ))}
+        </ScrollView>
+      </BottomSheet>
     </ScrollView>
     </RNView>
   );
@@ -582,7 +633,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   currencySymbol: {
-    fontSize: typeScale.title3,
+    fontSize: typeScale.h6,
     fontFamily: fonts.interBold,
     width: 40,
   },
@@ -590,5 +641,22 @@ const styles = StyleSheet.create({
     fontSize: typeScale.callout,
     fontFamily: fonts.interSemiBold,
     flex: 1,
+  },
+  showcaseScroll: {
+    maxHeight: '100%',
+  },
+  showcaseContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  showcaseRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    paddingVertical: 10,
+  },
+  showcaseSize: {
+    fontSize: typeScale.footnote,
+    fontFamily: fonts.interRegular,
   },
 });
