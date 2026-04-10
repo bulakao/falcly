@@ -123,7 +123,7 @@ export default function SettingsScreen() {
       <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Appearance</Text>
       <SurfaceCard>
         <RNView style={styles.currencyRow}>
-          <Text style={[styles.currencyDropdownLabel, { color: t.textMuted }]}>Theme</Text>
+          <Text style={[styles.currencyDropdownLabel, { color: t.textPrimary }]}>Theme</Text>
           {Platform.OS === 'android' ? (
             <RNView style={[styles.themePickerWrap, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}>
               <Picker
@@ -164,7 +164,7 @@ export default function SettingsScreen() {
       <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Currency</Text>
       <SurfaceCard>
         <RNView style={styles.currencyRow}>
-          <Text style={[styles.currencyDropdownLabel, { color: t.textMuted }]}>Default currency</Text>
+          <Text style={[styles.currencyDropdownLabel, { color: t.textPrimary }]}>Default currency</Text>
           <Pressable
             onPress={() => setCurrencyModalVisible(true)}
             accessibilityRole="button"
@@ -373,8 +373,7 @@ export default function SettingsScreen() {
               variant="primary"
               onPress={() => router.push('/type-showcase' as never)}
             />
-          </SurfaceCard>
-          <SurfaceCard>
+            <RNView style={[styles.divider, { backgroundColor: t.border }]} />
             <Button
               label="Share Store State"
               variant="primary"

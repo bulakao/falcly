@@ -34,7 +34,7 @@ export function SettingsAccountSection() {
   const avatarEmoji = useUserStore((s) => s.avatarEmoji);
   const isPro = useSubscriptionStore((s) => s.isPro);
   const tier = useSubscriptionStore((s) => s.tier);
-  const subExpirationDate = useSubscriptionStore((s) => s.getExpirationDate);
+
   const cards = useCardStore((s) => s.cards);
   const lastSyncedAt = useUserStore((s) => s.lastSyncedAt);
   const setLastSyncedAt = useUserStore((s) => s.setLastSyncedAt);
@@ -112,7 +112,7 @@ export function SettingsAccountSection() {
                   fullWidth={false}
                   loading={syncingNow}
                   disabled={!isPro()}
-                  icon={isPro() ? <RefreshCw size={14} color={t.primary} /> : <Lock size={14} color={t.textMuted} />}
+                  icon={isPro() ? <RefreshCw size={14} color={t.primaryText} /> : <Lock size={14} color={t.textMuted} />}
                   onPress={async () => {
                     if (syncingNow || !isPro()) return;
                     setSyncingNow(true);
@@ -145,29 +145,6 @@ export function SettingsAccountSection() {
                 Pro — Active
               </Text>
             </RNView>
-            {subExpirationDate() && (
-              <Text style={[styles.trialEndText, { color: t.accent }]}>
-                Renews{' '}
-                {subExpirationDate()!.toLocaleDateString('en-PH', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </Text>
-            )}
-            <Pressable
-              onPress={async () => {
-                try {
-                  const RevenueCatUI = (await import('react-native-purchases-ui')).default;
-                  await RevenueCatUI.presentCustomerCenter();
-                } catch (e) {
-                  console.error('Customer Center error:', e);
-                }
-              }}
-              style={styles.manageSubButton}
-            >
-              <Text style={[styles.manageSubText, { color: t.primary }]}>Manage Subscription</Text>
-            </Pressable>
           </>
         )}
         {tier === 'free' && (
@@ -250,15 +227,12 @@ const styles = StyleSheet.create({
   proBadgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 10,
   },
   proStatusText: {
     fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
-  },
-  trialEndText: {
-    fontSize: typeScale.body,
-    marginTop: 8,
   },
   manageSubButton: {
     paddingVertical: 12,
