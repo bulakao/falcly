@@ -1,5 +1,6 @@
 export { BottomSheet } from './BottomSheet';
 export { DayInput } from './DayInput';
+export { DueDateInput } from './DueDateInput';
 export { FormFieldGroup } from './FormFieldGroup';
 export { SurfaceCard } from './SurfaceCard';
 export { MoneyInput, parseMoney, formatMoney } from './MoneyInput';

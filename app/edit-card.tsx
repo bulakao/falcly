@@ -20,7 +20,7 @@ import { useSubscriptionItemStore } from '@/store/subscriptionItemStore';
 import { useAppTheme } from '@/theme';
 import { DEFAULT_DUE_DAY_OFFSET, MIN_DUE_DAY_OFFSET } from '@/types/card';
 import { Button, Heading, Label } from '@/components/atoms';
-import { FormFieldGroup } from '@/components/molecules';
+import { DueDateInput, FormFieldGroup } from '@/components/molecules';
 import { fonts, typeScale } from '@/theme/fonts';
 import { useCurrency } from '@/hooks/useCurrency';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
@@ -178,14 +178,10 @@ export default function EditCardScreen() {
           selectTextOnFocus
         />
 
-        <FormFieldGroup
-          label="Due Day Offset (days after statement)"
+        <DueDateInput
           value={dueDayOffset}
           onChangeText={setDueDayOffset}
-          placeholder={String(DEFAULT_DUE_DAY_OFFSET)}
-          keyboardType="numeric"
-          selectTextOnFocus
-          hint="Most banks use 21–25 days."
+          statementDay={statementDay}
         />
 
         <FormFieldGroup
@@ -362,7 +358,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
     padding: 14,
-    fontSize: typeScale.title2a,
+    fontSize: typeScale.h6,
     fontFamily: fonts.interBold,
     textAlign: 'center',
   },
@@ -376,7 +372,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   managedValue: {
-    fontSize: typeScale.title2a,
+    fontSize: typeScale.h6,
     fontFamily: fonts.interBold,
   },
   managedHint: {
@@ -385,7 +381,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   notFound: {
-    fontSize: typeScale.title2b,
+    fontSize: typeScale.h4,
     fontFamily: fonts.interBold,
     marginBottom: 24,
   },
@@ -419,7 +415,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   modalTitle: {
-    fontSize: typeScale.title3,
+    fontSize: typeScale.h6,
     fontFamily: fonts.interBold,
   },
   modalClose: {
@@ -443,7 +439,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   currencySymbolText: {
-    fontSize: typeScale.title3,
+    fontSize: typeScale.h6,
     fontFamily: fonts.interBold,
     width: 40,
   },

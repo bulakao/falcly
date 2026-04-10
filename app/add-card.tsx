@@ -20,7 +20,7 @@ import { useUserStore } from '@/store/userStore';
 import { DEFAULT_DUE_DAY_OFFSET, MIN_DUE_DAY_OFFSET } from '@/types/card';
 import { trackCardAdded } from '@/utils/analytics';
 import { Button, Label } from '@/components/atoms';
-import { DayInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
+import { DayInput, DueDateInput, FormFieldGroup, MoneyInput, parseMoney } from '@/components/molecules';
 import { useAppTheme } from '@/theme';
 import { fonts, typeScale } from '@/theme/fonts';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/utils/currency';
@@ -148,13 +148,10 @@ export default function AddCardScreen() {
 
         <DayInput value={statementDay} onChangeText={setStatementDay} />
 
-        <FormFieldGroup
-          label="Due Day Offset (days after statement)"
+        <DueDateInput
           value={dueDayOffset}
           onChangeText={setDueDayOffset}
-          placeholder={String(DEFAULT_DUE_DAY_OFFSET)}
-          keyboardType="numeric"
-          hint="Most banks use 21–25 days."
+          statementDay={statementDay}
         />
 
         <View style={styles.fieldGroup}>
@@ -258,7 +255,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
     padding: 14,
-    fontSize: typeScale.title2a,
+    fontSize: typeScale.h6,
     fontFamily: fonts.interBold,
     textAlign: 'center',
   },
@@ -292,7 +289,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   modalTitle: {
-    fontSize: typeScale.title3,
+    fontSize: typeScale.h6,
     fontFamily: fonts.interBold,
   },
   modalClose: {
@@ -316,7 +313,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   currencySymbolText: {
-    fontSize: typeScale.title3,
+    fontSize: typeScale.h6,
     fontFamily: fonts.interBold,
     width: 40,
   },
