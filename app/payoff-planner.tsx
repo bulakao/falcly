@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   title: {
-    fontSize: typeScale.title2,
+    fontSize: typeScale.h5,
     fontFamily: fonts.interBold,
     marginBottom: 12,
   },
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   emptyTitle: {
-    fontSize: typeScale.title3,
+    fontSize: typeScale.h6,
     fontFamily: fonts.interBold,
     textAlign: 'center',
   },

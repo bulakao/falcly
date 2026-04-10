@@ -20,7 +20,7 @@ export default function StatusTooltip({ children }: StatusTooltipProps) {
       accessibilityLabel="Learn about card status"
       accessibilityHint="Opens the status guide"
     >
-      {children ?? <Text style={{ fontSize: typeScale.title3, color: t.textSecondary }}>ⓘ</Text>}
+      {children ?? <Text style={{ fontSize: typeScale.h6, color: t.textSecondary }}>ⓘ</Text>}
     </Pressable>
   );
 }

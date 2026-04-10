@@ -128,6 +128,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emoji: {
-    fontSize: typeScale.title1,
+    fontSize: typeScale.h2,
   },
 });

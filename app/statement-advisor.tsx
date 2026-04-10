@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bankName: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interSemiBold,
   },
   bankNotes: {

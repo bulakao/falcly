@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   avatarEmoji: {
-    fontSize: typeScale.title2,
+    fontSize: typeScale.h5,
   },
   accountInfo: {
     flex: 1,

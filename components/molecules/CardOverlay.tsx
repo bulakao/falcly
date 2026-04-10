@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   icon: {
-    fontSize: typeScale.title3,
+    fontSize: typeScale.h6,
   },
   title: {
     fontSize: typeScale.body,

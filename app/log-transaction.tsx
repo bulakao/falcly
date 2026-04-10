@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   heading: {
-    fontSize: typeScale.title2,
+    fontSize: typeScale.h5,
     fontFamily: fonts.interBold,
     marginBottom: 20,
   },
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   currencyPrefix: {
-    fontSize: typeScale.title2a,
+    fontSize: typeScale.h6,
     fontFamily: fonts.interBold,
   },
   dateRow: {
@@ -427,7 +427,7 @@ const styles = StyleSheet.create({
     maxWidth: 400,
   },
   modalTitle: {
-    fontSize: typeScale.title3,
+    fontSize: typeScale.h6,
     fontFamily: fonts.interBold,
     marginBottom: 12,
   },

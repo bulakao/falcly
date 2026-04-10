@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interSemiBold,
   },
   heading: {
-    fontSize: typeScale.title3,
+    fontSize: typeScale.h6,
     fontFamily: fonts.interBold,
   },
   addBtn: {

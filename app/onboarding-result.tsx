@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   cardName: {
-    fontSize: typeScale.title3,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     textAlign: 'center',
     marginBottom: 12,

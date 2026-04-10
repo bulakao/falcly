@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   packagePrice: {
-    fontSize: typeScale.title2,
+    fontSize: typeScale.h5,
     fontFamily: fonts.interBold,
   },
   packagePeriod: {

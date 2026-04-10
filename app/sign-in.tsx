@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   title: {
-    fontSize: typeScale.title2b,
+    fontSize: typeScale.h4,
     fontFamily: fonts.interBold,
     textAlign: 'center',
     marginBottom: 8,

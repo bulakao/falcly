@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   bankName: {
-    fontSize: typeScale.title3,
+    fontSize: typeScale.h6,
     fontFamily: fonts.nunitoBold,
     flex: 1,
     marginRight: 8,
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     marginTop: -2,
   },
   balance: {
-    fontSize: typeScale.title1b,
+    fontSize: typeScale.h3,
     fontFamily: fonts.nunitoBold,
     letterSpacing: -0.5,
   },

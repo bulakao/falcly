@@ -199,17 +199,17 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   heading: {
-    fontSize: typeScale.title2,
+    fontSize: typeScale.h5,
     fontFamily: fonts.interBold,
     marginBottom: 20,
   },
   bigAmount: {
-    fontSize: typeScale.hero,
+    fontSize: typeScale.h1,
     fontFamily: fonts.nunitoBold,
     marginVertical: 4,
   },
   projectedAmount: {
-    fontSize: typeScale.title2a,
+    fontSize: typeScale.h6,
     fontFamily: fonts.interBold,
     marginTop: 4,
     marginBottom: 12,

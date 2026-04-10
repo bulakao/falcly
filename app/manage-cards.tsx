@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: typeScale.title1,
+    fontSize: typeScale.h2,
     fontFamily: fonts.nunitoBold,
     paddingHorizontal: 20,
     marginBottom: 4,
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bankName: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
   },
   balance: {
