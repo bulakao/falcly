@@ -1,4 +1,4 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAppTheme, type SemanticTokens } from '@/theme';
 import { fonts, typeScale } from '@/theme/fonts';
 
@@ -11,6 +11,7 @@ interface ButtonProps {
   disabled?: boolean;
   fullWidth?: boolean;
   loading?: boolean;
+  icon?: React.ReactNode;
 }
 
 function getVariantStyles(variant: ButtonVariant, t: SemanticTokens, disabled: boolean) {
@@ -37,7 +38,7 @@ function getVariantStyles(variant: ButtonVariant, t: SemanticTokens, disabled: b
   }
 }
 
-export function Button({ label, onPress, variant = 'primary', disabled = false, fullWidth = true, loading = false }: ButtonProps) {
+export function Button({ label, onPress, variant = 'primary', disabled = false, fullWidth = true, loading = false, icon }: ButtonProps) {
   const t = useAppTheme();
   const isDisabled = disabled || loading;
   const v = getVariantStyles(variant, t, isDisabled);
@@ -63,7 +64,10 @@ export function Button({ label, onPress, variant = 'primary', disabled = false, 
       {loading ? (
         <ActivityIndicator size="small" color={v.text} />
       ) : (
-        <Text style={[styles.label, { color: v.text }]}>{label}</Text>
+        <View style={styles.content}>
+          {icon}
+          <Text style={[styles.label, { color: v.text }]}>{label}</Text>
+        </View>
       )}
     </Pressable>
   );
@@ -76,8 +80,13 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     alignItems: 'center',
   },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   label: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
   },
 });

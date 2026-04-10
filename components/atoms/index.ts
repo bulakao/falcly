@@ -9,7 +9,7 @@ export { EmptyCardFace } from './EmptyCardFace';
 export { UtilizationBar } from './UtilizationBar';
 export {
   MicroText, CaptionText, FootnoteText, SubheadText,
-  BodyText, CalloutText, HeadlineText, Body2Text,
+  BodyText, HeadlineText, Body2Text,
   H6Text, H5Text, H4Text, H3Text, H2Text, H1Text,
   LargeTitleText, DisplayText, JumboText,
 } from './ScaledText';

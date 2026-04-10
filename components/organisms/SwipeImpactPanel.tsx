@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
     marginBottom: 12,
   },

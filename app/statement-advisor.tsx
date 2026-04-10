@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
 
   // Section Title
   sectionTitle: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     marginBottom: 8,
     marginTop: 12,

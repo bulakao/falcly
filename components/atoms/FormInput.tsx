@@ -55,9 +55,9 @@ const styles = StyleSheet.create({
   },
   inputCompact: {
     padding: 8,
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interSemiBold,
-    width: '30%',
+    width: '40%',
     textAlign: 'right',
   },
 });

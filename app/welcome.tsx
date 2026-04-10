@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   benefitLabel: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     fontFamily: fonts.interMedium,
     flex: 1,
   },

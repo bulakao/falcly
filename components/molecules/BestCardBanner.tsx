@@ -28,8 +28,6 @@ export function BestCardBanner({ bestCard, hasCards, hasActiveCards, onPress, on
   const card = bestCard?.card ?? null;
   const { format } = useCurrency(card);
   const accentColor = card ? statusColorMap[bestCard!.status.status] : undefined;
-
-  // Footer action
   const footerAction = !hasCards ? onAddPress : onPress;
   const showWhy = hasActiveCards;
 
@@ -55,10 +53,6 @@ export function BestCardBanner({ bestCard, hasCards, hasActiveCards, onPress, on
                   {format(card.outstandingBalance)} / {format(card.creditLimit)}
                 </Text>
               </RNView>
-              <Text style={[styles.reason, { color: t.textSecondary }]}>{bestCard!.status.reason}</Text>
-              {bestCard!.warning && (
-                <Text style={[styles.warning, { color: accentColor }]}>⚠ {bestCard!.warning}</Text>
-              )}
             </RNView>
           ) : (
             <RNView style={styles.middleSection}>
@@ -164,16 +158,6 @@ const styles = StyleSheet.create({
   utilizationRow: {
     marginBottom: 16,
   },
-  utilizationTrack: {
-    height: 4,
-    borderRadius: 2,
-    width: '100%',
-    marginBottom: 4,
-  },
-  utilizationFill: {
-    height: 4,
-    borderRadius: 2,
-  },
   utilizationLabel: {
     fontSize: typeScale.micro,
     fontFamily: fonts.interMedium,
@@ -184,11 +168,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: 'transparent',
-  },
-  warning: {
-    fontSize: typeScale.caption,
-    fontFamily: fonts.interSemiBold,
-    marginTop: 6,
   },
   divider: {
     height: 1,

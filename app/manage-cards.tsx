@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
   },
   emptyText: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     fontFamily: fonts.interMedium,
   },
 });

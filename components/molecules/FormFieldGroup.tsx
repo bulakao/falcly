@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   hint: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     marginTop: 4,
     fontFamily: fonts.interRegular,
   },

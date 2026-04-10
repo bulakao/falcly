@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   enrichTitle: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     marginBottom: 4,
   },

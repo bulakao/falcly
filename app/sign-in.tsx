@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     textAlign: 'center',
     marginBottom: 32,
   },

@@ -14,7 +14,6 @@ export const CaptionText = createScaledText(typeScale.caption);
 export const FootnoteText = createScaledText(typeScale.footnote);
 export const SubheadText = createScaledText(typeScale.subhead);
 export const BodyText = createScaledText(typeScale.body);
-export const CalloutText = createScaledText(typeScale.callout);
 export const HeadlineText = createScaledText(typeScale.headline);
 export const Body2Text = createScaledText(typeScale.body2);
 export const H6Text = createScaledText(typeScale.h6);

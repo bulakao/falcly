@@ -72,11 +72,11 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   title: {
-    fontSize: typeScale.headline,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
   },
   done: {
-    fontSize: typeScale.headline,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
 });

@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     marginBottom: 24,
     marginTop: -16,
   },

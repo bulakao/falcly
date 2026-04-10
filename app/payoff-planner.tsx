@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   teaser: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     lineHeight: 22,
     marginBottom: 8,
   },
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   empty: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     textAlign: 'center',
   },
   budgetHint: {
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interSemiBold,
   },
   sectionTitle: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
     marginBottom: 10,
   },

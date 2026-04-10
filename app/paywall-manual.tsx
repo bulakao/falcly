@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
   },
 
   heading: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     fontFamily: fonts.nunitoBold,
     lineHeight: 22,
     fontStyle: 'italic',

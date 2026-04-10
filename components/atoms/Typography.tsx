@@ -63,8 +63,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
-    fontFamily: fonts.interSemiBold,
-    fontSize: typeScale.subhead,
+    fontFamily: fonts.interRegular,
+    fontSize: typeScale.body,
     marginBottom: 6,
   },
   caption: {

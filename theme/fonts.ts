@@ -42,10 +42,8 @@ export const typeScale = {
   footnote: 14,
   /** 15px — Labels, section group headers, compact UI */
   subhead: 15,
-  /** 16px — Default body text, buttons, nav items */
+  /** 16px — Default body text, buttons, form labels, nav items */
   body: 16,
-  /** 16px — Emphasized body, form labels, card descriptions */
-  callout: 16,
   /** 17px — Section titles, card names, prominent text */
   headline: 17,
   /** 18px — Dense body text, line-height contexts */

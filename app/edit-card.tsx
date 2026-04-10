@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   currencyPickerText: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     fontFamily: fonts.interMedium,
   },
   currencyHint: {
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
   },
   currencyRow: {
     flexDirection: 'row',
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     width: 40,
   },
   currencyLabel: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
 });
