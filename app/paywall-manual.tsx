@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   featureSub: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     lineHeight: 16,
   },
 
@@ -374,11 +374,11 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   packagePrice: {
-    fontSize: typeScale.h5,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
   },
   packagePeriod: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     marginTop: 2,
   },
   savings: {
@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   lifetimeSub: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
   },
   badge: {
     position: 'absolute',
@@ -442,24 +442,24 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   purchaseButtonText: {
-    fontSize: typeScale.body2,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
   },
   trialNote: {
     textAlign: 'center',
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     marginBottom: 20,
   },
 
   // Footer
   restoreText: {
     textAlign: 'center',
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     marginBottom: 12,
   },
   skipText: {
     textAlign: 'center',
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     marginBottom: 20,
     textDecorationLine: 'underline',
   },

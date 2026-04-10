@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   icon: {
-    fontSize: typeScale.h6,
+    fontSize: typeScale.headline,
   },
   title: {
     fontSize: typeScale.body,
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
   },
   body: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     lineHeight: 19,
     fontFamily: fonts.interRegular,
   },
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   cta: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
 });

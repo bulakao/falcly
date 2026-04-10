@@ -185,13 +185,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: typeScale.h2,
+    fontSize: typeScale.headline,
     fontFamily: fonts.nunitoBold,
     paddingHorizontal: 20,
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     paddingHorizontal: 20,
     marginBottom: 12,
   },
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interBold,
   },
   balance: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     marginTop: 1,
   },
   rowActions: {

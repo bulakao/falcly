@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     height: 96,
   },
   headline: {
-    fontSize: typeScale.largeTitle,
+    fontSize: typeScale.headline,
     fontFamily: fonts.nunitoBold,
     textAlign: 'center',
     lineHeight: 42,

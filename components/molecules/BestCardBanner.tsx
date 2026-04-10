@@ -147,12 +147,12 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   bankName: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
     flexShrink: 1,
   },
   reason: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     lineHeight: 20,
   },
   utilizationRow: {

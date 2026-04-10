@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   plus: {
-    fontSize: typeScale.h1,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interRegular,
     marginBottom: 4,
   },

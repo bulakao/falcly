@@ -95,7 +95,7 @@ export function BillingTimeline({ card, today }: { card: Card; today?: Date }) {
 const styles = StyleSheet.create({
   container: {},
   title: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interMedium,
     marginBottom: 12,
   },
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interBold,
   },
   urgency: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interSemiBold,
     textAlign: 'center',
     marginTop: 4,

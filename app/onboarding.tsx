@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
     padding: 14,
-    fontSize: typeScale.h6,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     textAlign: 'center',
   },
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     marginTop: -16,
   },
   hint: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     marginTop: 4,
   },
   bottomBar: {

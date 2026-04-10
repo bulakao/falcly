@@ -280,7 +280,7 @@ export function FinanceCard() {
 
 const styles = StyleSheet.create({
   timestamp: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     marginTop: 6,
     marginBottom: 4,
   },
@@ -305,14 +305,14 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   enrichHint: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
   },
   enrichSection: {
     padding: 16,
     paddingTop: 8,
   },
   splitHint: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     marginTop: 6,
   },
   divider: {
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   hintText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interMedium,
     flex: 1,
   },

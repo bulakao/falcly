@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interSemiBold,
   },
   headerTitle: {
-    fontSize: typeScale.body2,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
   },
   container: {
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
     padding: 14,
-    fontSize: typeScale.h6,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     textAlign: 'center',
   },
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interMedium,
   },
   currencyHint: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     marginTop: 4,
   },
   modalContainer: {
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   modalTitle: {
-    fontSize: typeScale.h6,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
   },
   modalClose: {
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   currencySymbolText: {
-    fontSize: typeScale.h6,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     width: 40,
   },

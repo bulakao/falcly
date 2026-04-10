@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   actionButtonText: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interSemiBold,
   },
   ganttToggle: {
@@ -507,7 +507,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cycleTxLabel: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontStyle: 'italic',
     marginTop: 2,
     marginBottom: 4,
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interSemiBold,
   },
   hint: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     textAlign: 'center',
     fontStyle: 'italic',
   },
@@ -556,7 +556,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   trialCtaSubtext: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
   },
   projectionToggle: {
     paddingVertical: 8,
@@ -605,7 +605,7 @@ const styles = StyleSheet.create({
     maxHeight: '50%',
   },
   tryCardTitle: {
-    fontSize: typeScale.body2,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     marginBottom: 12,
   },

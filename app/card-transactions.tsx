@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interSemiBold,
   },
   heading: {
-    fontSize: typeScale.h6,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
   },
   addBtn: {
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   sectionTitle: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interBold,
     letterSpacing: 0.5,
   },
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   txDate: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     width: 48,
   },
   txMerchant: {

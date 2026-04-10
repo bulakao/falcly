@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interSemiBold,
   },
   itemDetail: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
     marginTop: 2,
   },
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interBold,
   },
   deleteText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   buttonWrapper: {

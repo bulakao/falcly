@@ -79,20 +79,20 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
   },
   strategyLabel: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     marginBottom: 4,
   },
   value: {
-    fontSize: typeScale.h6,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
   },
   subvalue: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     marginTop: 2,
   },
   insight: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     marginTop: 10,
     textAlign: 'center',

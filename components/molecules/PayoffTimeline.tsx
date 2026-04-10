@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interSemiBold,
   },
   detail: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     marginTop: 2,
   },
   summary: {

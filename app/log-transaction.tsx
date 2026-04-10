@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   heading: {
-    fontSize: typeScale.h5,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     marginBottom: 20,
   },
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   currencyPrefix: {
-    fontSize: typeScale.h6,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
   },
   dateRow: {
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   dateChipText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   landsOnBox: {
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   landsOnText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interMedium,
   },
   warningBox: {
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   warningText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interMedium,
   },
   typeRow: {
@@ -427,7 +427,7 @@ const styles = StyleSheet.create({
     maxWidth: 400,
   },
   modalTitle: {
-    fontSize: typeScale.h6,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     marginBottom: 12,
   },
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   modalDesc: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
     lineHeight: 18,
   },

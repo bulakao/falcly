@@ -147,13 +147,13 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   bankName: {
-    fontSize: typeScale.h6,
+    fontSize: typeScale.headline,
     fontFamily: fonts.nunitoBold,
     flex: 1,
     marginRight: 8,
   },
   reason: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interRegular,
     marginTop: 2,
   },
@@ -161,12 +161,12 @@ const styles = StyleSheet.create({
     marginTop: -2,
   },
   balance: {
-    fontSize: typeScale.h3,
+    fontSize: typeScale.headline,
     fontFamily: fonts.nunitoBold,
     letterSpacing: -0.5,
   },
   limit: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     marginTop: 2,
   },
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statementDay: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interSemiBold,
   },
 });

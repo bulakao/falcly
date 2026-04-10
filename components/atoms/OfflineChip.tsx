@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   text: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interSemiBold,
   },
 });

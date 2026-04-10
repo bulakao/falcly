@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     paddingTop: 32,
   },
   heading: {
-    fontSize: typeScale.h5,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     marginBottom: 4,
   },

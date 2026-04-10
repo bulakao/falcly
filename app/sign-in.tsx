@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   title: {
-    fontSize: typeScale.h4,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     textAlign: 'center',
     marginBottom: 8,
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
   form: {
   },
   fieldError: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interMedium,
     marginTop: 4,
   },
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
   },
   dividerText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     marginHorizontal: 16,
   },
   passwordHintRow: {
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   forgotPasswordText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
   },
   generalError: {
     fontSize: typeScale.body,

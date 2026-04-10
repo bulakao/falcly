@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interSemiBold,
   },
   subtext: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     marginTop: 2,
   },
   balanceLabel: {
@@ -99,14 +99,14 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   detailLabel: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
   },
   detailValue: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   paymentsTitle: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     marginTop: 8,
     marginBottom: 6,
@@ -117,10 +117,10 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   paymentMonth: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
   },
   paymentAmount: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interSemiBold,
   },
 });

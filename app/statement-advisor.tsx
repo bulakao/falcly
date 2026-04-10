@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   scoreNumber: {
-    fontSize: typeScale.display,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     lineHeight: 42,
   },
@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
     marginTop: -2,
   },
   scoreSummary: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
     textAlign: 'center',
   },
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
   },
   issueMessage: {
     flex: 1,
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
     lineHeight: 18,
   },
@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
   },
   tipMessage: {
     flex: 1,
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
     lineHeight: 18,
   },
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interRegular,
   },
   timingBest: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interSemiBold,
   },
   timingAvoid: {
@@ -669,7 +669,7 @@ const styles = StyleSheet.create({
   },
   wikiTitle: {
     flex: 1,
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   wikiChevron: {
@@ -682,7 +682,7 @@ const styles = StyleSheet.create({
     paddingLeft: 40,
   },
   wikiText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
     lineHeight: 18,
     marginBottom: 8,
@@ -697,7 +697,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   wikiExampleText: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interRegular,
     lineHeight: 17,
   },

@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   title: {
-    fontSize: typeScale.h6,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     marginBottom: 8,
     textAlign: 'center',

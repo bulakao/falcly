@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   label: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     marginTop: 16,
     marginBottom: 8,

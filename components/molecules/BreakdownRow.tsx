@@ -62,12 +62,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   label: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     flex: 1,
     flexShrink: 1,
   },
   value: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     flexShrink: 0,
   },

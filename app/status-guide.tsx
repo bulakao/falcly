@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   subtitle: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     lineHeight: 18,
     textAlign: 'center',
     marginBottom: 24,
@@ -95,13 +95,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   ruleIcon: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interBold,
     width: 20,
     marginTop: 2,
   },
   ruleText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     lineHeight: 18,
     flex: 1,
   },
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   tierDescription: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     lineHeight: 18,
   },
 });

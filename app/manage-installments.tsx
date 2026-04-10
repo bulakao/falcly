@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interSemiBold,
   },
   itemDetail: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
     marginTop: 2,
   },
@@ -174,16 +174,16 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   progressText: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interRegular,
     marginTop: 4,
   },
   deleteText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   sectionLabel: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     marginTop: 16,
     marginBottom: 8,

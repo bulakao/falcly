@@ -180,10 +180,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   itemLabel: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
   },
   itemValue: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   totalRow: {
@@ -195,19 +195,19 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   totalLabel: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
   },
   totalValue: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
   },
   reason: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     marginTop: 4,
   },
   signalNote: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontStyle: 'italic',
   },
 });

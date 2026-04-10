@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: typeScale.h6,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
   },
   link: {

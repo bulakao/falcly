@@ -199,17 +199,17 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   heading: {
-    fontSize: typeScale.h5,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     marginBottom: 20,
   },
   bigAmount: {
-    fontSize: typeScale.h1,
+    fontSize: typeScale.headline,
     fontFamily: fonts.nunitoBold,
     marginVertical: 4,
   },
   projectedAmount: {
-    fontSize: typeScale.h6,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     marginTop: 4,
     marginBottom: 12,
@@ -218,21 +218,21 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   interestText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interMedium,
   },
   paymentNote: {
     marginTop: 8,
   },
   paymentText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   breakdownSection: {
     marginTop: 4,
   },
   nudge: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     marginBottom: 8,
   },
   actions: {

@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   explanation: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     textAlign: 'center',
     fontStyle: 'italic',
   },
@@ -214,11 +214,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   usageLabel: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interMedium,
   },
   usagePct: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
   },
   progressTrack: {
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   usageAmount: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interRegular,
   },
 

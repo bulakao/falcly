@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   manageLinkText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   overviewButton: {

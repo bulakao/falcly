@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   title: {
-    fontSize: typeScale.h5,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     marginBottom: 12,
   },
@@ -228,11 +228,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   emptyEmoji: {
-    fontSize: typeScale.jumbo,
+    fontSize: typeScale.headline,
     marginBottom: 8,
   },
   emptyTitle: {
-    fontSize: typeScale.h6,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     textAlign: 'center',
   },
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   budgetHint: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     marginTop: 4,
     marginBottom: 4,
   },

@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   heading: {
-    fontSize: typeScale.h4,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     marginBottom: 24,
   },

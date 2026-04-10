@@ -49,17 +49,17 @@ export function Caption({ children, color, ...props }: TypographyProps) {
 const styles = StyleSheet.create({
   heading: {
     fontFamily: fonts.nunitoBold,
-    fontSize: typeScale.h5,
+    fontSize: typeScale.headline,
     marginBottom: 24,
   },
   sectionTitle: {
     fontFamily: fonts.nunitoBold,
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     marginBottom: 4,
   },
   sectionSubtitle: {
     fontFamily: fonts.interRegular,
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     marginBottom: 16,
   },
   label: {
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   },
   caption: {
     fontFamily: fonts.interRegular,
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     marginBottom: 8,
   },
 });

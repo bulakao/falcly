@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   text: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   centered: {
