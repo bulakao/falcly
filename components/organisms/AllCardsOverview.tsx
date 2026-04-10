@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sortChipText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interSemiBold,
   },
   topRow: {
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   avatarEmoji: {
-    fontSize: typeScale.title2,
+    fontSize: typeScale.h5,
   },
   tooltip: {
     position: 'absolute',
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   cardName: {
-    fontSize: typeScale.headline,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interBold,
     marginBottom: 8,
   },
@@ -483,17 +483,17 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   debtTitle: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.footnote,
     fontFamily: fonts.interSemiBold,
     marginBottom: 4,
   },
   debtAmount: {
-    fontSize: typeScale.title1,
+    fontSize: typeScale.h5,
     fontFamily: fonts.interBold,
     marginBottom: 2,
   },
   debtSubtext: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.footnote,
     marginBottom: 4,
   },
   debtDivider: {
@@ -511,24 +511,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   debtStatValue: {
-    fontSize: typeScale.title3,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     marginBottom: 2,
   },
   debtStatLabel: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
   },
   debtStatSep: {
     width: StyleSheet.hairlineWidth,
     height: 32,
   },
   debtHint: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     textAlign: 'center',
     marginBottom: 8,
   },
   debtCta: {
-    fontSize: typeScale.body,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     textAlign: 'center',
     marginTop: 4,

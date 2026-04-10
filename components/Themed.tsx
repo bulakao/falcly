@@ -37,7 +37,7 @@ export function useThemeColor(
  * Generous for accessibility, prevents layout destruction.
  * Individual components can override with their own maxFontSizeMultiplier prop.
  */
-const DEFAULT_MAX_FONT_SCALE = 1.4;
+const DEFAULT_MAX_FONT_SCALE = 1.2;
 const ALLOW_SCALING = PixelRatio.getFontScale() >= 1;
 
 export function Text(props: TextProps) {

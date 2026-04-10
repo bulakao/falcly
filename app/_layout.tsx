@@ -6,7 +6,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 // Our typeScale values (theme/fonts.ts) follow Apple HIG and are the minimum readable sizes.
 const systemFontScale = PixelRatio.getFontScale();
 const allowScaling = systemFontScale >= 1;
-const textDefaults = { maxFontSizeMultiplier: 1.4, allowFontScaling: allowScaling };
+const textDefaults = { maxFontSizeMultiplier: 1.2, allowFontScaling: allowScaling };
 (RNText as any).defaultProps = { ...((RNText as any).defaultProps || {}), ...textDefaults };
 (RNTextInput as any).defaultProps = { ...((RNTextInput as any).defaultProps || {}), ...textDefaults };
 import { ThemeProvider } from '@react-navigation/native';

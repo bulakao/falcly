@@ -49,13 +49,13 @@ const styles = StyleSheet.create({
   input: {
     borderRadius: 8,
     padding: 14,
-    fontSize: typeScale.title2a,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
     textAlign: 'left',
   },
   inputCompact: {
     padding: 8,
-    fontSize: typeScale.body,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interSemiBold,
     width: '30%',
     textAlign: 'right',

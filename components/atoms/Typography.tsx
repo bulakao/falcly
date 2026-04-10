@@ -49,17 +49,17 @@ export function Caption({ children, color, ...props }: TypographyProps) {
 const styles = StyleSheet.create({
   heading: {
     fontFamily: fonts.nunitoBold,
-    fontSize: typeScale.title2b,
+    fontSize: typeScale.h5,
     marginBottom: 24,
   },
   sectionTitle: {
     fontFamily: fonts.nunitoBold,
-    fontSize: typeScale.headline,
+    fontSize: typeScale.subhead,
     marginBottom: 4,
   },
   sectionSubtitle: {
     fontFamily: fonts.interRegular,
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.footnote,
     marginBottom: 16,
   },
   label: {

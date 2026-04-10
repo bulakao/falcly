@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   bankName: {
-    fontSize: typeScale.body,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interSemiBold,
   },
   detail: {

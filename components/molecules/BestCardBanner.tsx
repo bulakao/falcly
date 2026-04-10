@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   label: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interSemiBold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -153,12 +153,12 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   bankName: {
-    fontSize: typeScale.title3,
+    fontSize: typeScale.subhead,
     fontFamily: fonts.interBold,
     flexShrink: 1,
   },
   reason: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.footnote,
     lineHeight: 20,
   },
   utilizationRow: {
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   utilizationLabel: {
-    fontSize: typeScale.caption,
+    fontSize: typeScale.micro,
     fontFamily: fonts.interMedium,
     textAlign: 'right',
   },
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   warning: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interSemiBold,
     marginTop: 6,
   },
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   manageText: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interSemiBold,
   },
 });

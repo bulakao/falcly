@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   bankName: {
-    fontSize: typeScale.body,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interSemiBold,
   },
   subtext: {

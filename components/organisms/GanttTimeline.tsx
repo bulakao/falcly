@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   bankName: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.headline,
     fontFamily: fonts.interBold,
     flexShrink: 1,
   },

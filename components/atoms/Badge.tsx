@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   text: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     fontFamily: fonts.interBold,
   },
 });
