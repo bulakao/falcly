@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, Pressable, Image, View as RNView } from 'react-native';
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { RefreshCw, Lock } from 'lucide-react-native';
 import { Text } from '@/components/Themed';
 import { useAuthStore } from '@/store/authStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
@@ -79,7 +80,7 @@ export function SettingsAccountSection() {
             </RNView>
             <RNView style={styles.accountPromptButtons}>
               <Button label="Create Account" onPress={() => router.push({ pathname: '/sign-in', params: { mode: 'signup' } })} />
-              <Button label="Sign In" variant="secondary" onPress={() => router.push('/sign-in')} />
+              <Button label="Sign In" variant="primary" onPress={() => router.push('/sign-in')} />
             </RNView>
           </>
         )}
@@ -105,9 +106,15 @@ export function SettingsAccountSection() {
                       : 'Never'}
                   </Text>
                 </RNView>
-                <Pressable
+                <Button
+                  label={syncingNow ? 'Syncing…' : 'Sync'}
+                  variant="primary"
+                  fullWidth={false}
+                  loading={syncingNow}
+                  disabled={!isPro()}
+                  icon={isPro() ? <RefreshCw size={14} color={t.primary} /> : <Lock size={14} color={t.textMuted} />}
                   onPress={async () => {
-                    if (syncingNow) return;
+                    if (syncingNow || !isPro()) return;
                     setSyncingNow(true);
                     setSyncFeedback(null);
                     try {
@@ -123,19 +130,7 @@ export function SettingsAccountSection() {
                       setSyncingNow(false);
                     }
                   }}
-                  accessibilityRole="button"
-                  accessibilityLabel="Sync now"
-                  disabled={syncingNow}
-                  style={({ pressed }) => [
-                    styles.syncButton,
-                    { backgroundColor: t.inputBg, borderColor: t.inputBorder, opacity: pressed || syncingNow ? 0.6 : 1 },
-                  ]}
-                >
-                  <FontAwesome name="refresh" size={12} color={t.textSecondary} />
-                  <Text style={[styles.syncButtonText, { color: t.textSecondary }]}>
-                    {syncingNow ? 'Syncing…' : 'Sync'}
-                  </Text>
-                </Pressable>
+                />
               </RNView>
             )}
           </>
@@ -193,8 +188,10 @@ export function SettingsAccountSection() {
 
 const styles = StyleSheet.create({
   groupLabel: {
-    fontSize: typeScale.callout,
-    fontFamily: fonts.interSemiBold,
+    fontSize: typeScale.caption,
+    fontFamily: fonts.interRegular,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginBottom: 8,
     marginTop: 8,
   },
@@ -236,7 +233,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   accountPromptSubtitle: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     marginTop: 4,
     lineHeight: 18,
   },
@@ -244,11 +241,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   accountName: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
   },
   accountEmail: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
   },
   proBadgeRow: {
     flexDirection: 'row',
@@ -256,11 +253,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   proStatusText: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   trialEndText: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     marginTop: 8,
   },
   manageSubButton: {
@@ -268,7 +265,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   manageSubText: {
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
   },
   syncRow: {
@@ -277,25 +274,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   syncLabel: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     marginBottom: 4,
   },
   syncHint: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     lineHeight: 17,
-  },
-  syncButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-  },
-  syncButtonText: {
-    fontSize: typeScale.subhead,
-    fontFamily: fonts.interSemiBold,
   },
 });

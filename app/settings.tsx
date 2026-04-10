@@ -19,13 +19,7 @@ import { useUserStore } from '@/store/userStore';
 import { useCardStore } from '@/store/cardStore';
 import { useAppTheme } from '@/theme';
 import { fonts, typeScale } from '@/theme/fonts';
-import {
-  Button,
-  MicroText, CaptionText, FootnoteText, SubheadText,
-  BodyText, CalloutText, HeadlineText, Body2Text,
-  H6Text, H5Text, H4Text, H3Text, H2Text, H1Text,
-  LargeTitleText, DisplayText, JumboText,
-} from '@/components/atoms';
+import { Button } from '@/components/atoms';
 import { BottomSheet, SurfaceCard, PercentInput, MoneyInput, parseMoney } from '@/components/molecules';
 import type { PayoffStrategy } from '@/store/userStore';
 import { scheduleAllReminders } from '@/utils/notifications';
@@ -36,6 +30,13 @@ import {
   SettingsDataSection,
   SettingsDangerSection,
 } from '@/components/settings';
+
+const STRATEGIES: { key: PayoffStrategy; label: string; desc: string }[] = [
+  { key: 'full', label: 'Full Balance', desc: 'Pay everything' },
+  { key: 'minimum', label: 'Minimum Only', desc: 'Pay the minimum only' },
+  { key: 'fixed', label: 'Fixed Amount', desc: 'Pay a set amount each month' },
+  { key: 'aggressive', label: 'Aggressive', desc: 'Pay as much as possible after expenses' },
+];
 
 export default function SettingsScreen() {
   const t = useAppTheme();
@@ -99,7 +100,7 @@ export default function SettingsScreen() {
   const cards = useCardStore((s) => s.cards);
 
   const [themePickerVisible, setThemePickerVisible] = useState(false);
-  const [showcaseVisible, setShowcaseVisible] = useState(false);
+  const [strategyPickerVisible, setStrategyPickerVisible] = useState(false);
 
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
   const [currencySearch, setCurrencySearch] = useState('');
@@ -142,7 +143,7 @@ export default function SettingsScreen() {
               onPress={() => setThemePickerVisible(true)}
               accessibilityRole="button"
               accessibilityLabel={`Theme: ${themePreference}`}
-              style={[styles.currencyDropdown, { backgroundColor: t.inputBg, borderColor: t.inputBorder, width: '30%' }]}
+              style={[styles.currencyDropdown, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}
             >
               <FontAwesome
                 name={themePreference === 'system' ? 'adjust' : themePreference === 'light' ? 'sun-o' : 'moon-o'}
@@ -297,44 +298,22 @@ export default function SettingsScreen() {
       {/* ── Payoff Strategy ── */}
       <Text style={[styles.groupLabel, { color: t.textSecondary }]}>Payoff Strategy</Text>
       <SurfaceCard>
-        <Text style={[styles.itemHint, { color: t.textMuted, marginBottom: 12 }]}>
-          How you plan to pay your credit card bills each month.
-        </Text>
-        <RNView style={styles.strategyGrid}>
-          {([
-            { key: 'full' as PayoffStrategy, label: 'Full Balance', desc: 'Pay everything' },
-            { key: 'minimum' as PayoffStrategy, label: 'Minimum Only', desc: 'Pay the minimum only' },
-            { key: 'fixed' as PayoffStrategy, label: 'Fixed Amount', desc: 'Pay a set amount each month' },
-            { key: 'aggressive' as PayoffStrategy, label: 'Aggressive', desc: 'Pay as much as possible after expenses' },
-          ]).map((option) => (
-            <Pressable
-              key={option.key}
-              onPress={() => setPayoffStrategy(option.key)}
-              accessibilityRole="button"
-              accessibilityLabel={`${option.label}: ${option.desc}`}
-              accessibilityState={{ selected: payoffStrategy === option.key }}
-              style={[
-                styles.strategyChip,
-                {
-                  borderColor: payoffStrategy === option.key ? t.primary : t.border,
-                  backgroundColor: payoffStrategy === option.key ? t.accentBg : 'transparent',
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.strategyChipLabel,
-                  { color: payoffStrategy === option.key ? t.primary : t.textPrimary },
-                ]}
-              >
-                {option.label}
-              </Text>
-              <Text style={[styles.strategyChipDesc, { color: t.textMuted }]}>
-                {option.desc}
-              </Text>
-            </Pressable>
-          ))}
-        </RNView>
+        <Pressable
+          onPress={() => setStrategyPickerVisible(true)}
+          accessibilityRole="button"
+          accessibilityLabel={`Payoff strategy: ${STRATEGIES.find((s) => s.key === payoffStrategy)?.label}`}
+          style={[styles.strategySelected, { borderColor: t.primary, backgroundColor: t.accentBg }]}
+        >
+          <RNView style={{ flex: 1 }}>
+            <Text style={[styles.strategySelectedLabel, { color: t.primary }]}>
+              {STRATEGIES.find((s) => s.key === payoffStrategy)?.label}
+            </Text>
+            <Text style={[styles.strategySelectedDesc, { color: t.textMuted }]}>
+              {STRATEGIES.find((s) => s.key === payoffStrategy)?.desc}
+            </Text>
+          </RNView>
+          <FontAwesome name="chevron-down" size={12} color={t.primary} />
+        </Pressable>
         {payoffStrategy === 'fixed' && (
           <>
             <RNView style={[styles.divider, { backgroundColor: t.border }]} />
@@ -391,14 +370,14 @@ export default function SettingsScreen() {
           <SurfaceCard>
             <Button
               label="Type Scale Showcase"
-              variant="secondary"
-              onPress={() => setShowcaseVisible(true)}
+              variant="primary"
+              onPress={() => router.push('/type-showcase' as never)}
             />
           </SurfaceCard>
           <SurfaceCard>
             <Button
               label="Share Store State"
-              variant="secondary"
+              variant="primary"
               onPress={() => {
                 const state = {
                   profile: { cashOnHand, monthlyIncome, payday, committedExpenses },
@@ -479,41 +458,37 @@ export default function SettingsScreen() {
         </BottomSheet>
       )}
 
-      {/* Type Scale Showcase */}
+      {/* Strategy picker */}
       <BottomSheet
-        visible={showcaseVisible}
-        onClose={() => setShowcaseVisible(false)}
-        title="Type Scale"
-        maxHeight="80%"
+        visible={strategyPickerVisible}
+        onClose={() => setStrategyPickerVisible(false)}
+        title="Payoff Strategy"
       >
-        <ScrollView style={styles.showcaseScroll} contentContainerStyle={styles.showcaseContent}>
-          {([
-            ['MicroText', typeScale.micro, MicroText],
-            ['CaptionText', typeScale.caption, CaptionText],
-            ['FootnoteText', typeScale.footnote, FootnoteText],
-            ['SubheadText', typeScale.subhead, SubheadText],
-            ['BodyText', typeScale.body, BodyText],
-            ['CalloutText', typeScale.callout, CalloutText],
-            ['HeadlineText', typeScale.headline, HeadlineText],
-            ['Body2Text', typeScale.body2, Body2Text],
-            ['H6Text', typeScale.h6, H6Text],
-            ['H5Text', typeScale.h5, H5Text],
-            ['H4Text', typeScale.h4, H4Text],
-            ['H3Text', typeScale.h3, H3Text],
-            ['H2Text', typeScale.h2, H2Text],
-            ['H1Text', typeScale.h1, H1Text],
-            ['LargeTitleText', typeScale.largeTitle, LargeTitleText],
-            ['DisplayText', typeScale.display, DisplayText],
-            ['JumboText', typeScale.jumbo, JumboText],
-          ] as const).map(([name, size, Component]) => (
-            <RNView key={name} style={styles.showcaseRow}>
-              <Component style={{ color: t.textPrimary, fontFamily: fonts.interSemiBold }}>
-                {name}
-              </Component>
-              <Text style={[styles.showcaseSize, { color: t.textMuted }]}>{size}px</Text>
-            </RNView>
+        <RNView style={styles.strategyList}>
+          {STRATEGIES.map((option) => (
+            <Pressable
+              key={option.key}
+              onPress={() => { setPayoffStrategy(option.key); setStrategyPickerVisible(false); }}
+              accessibilityRole="button"
+              accessibilityLabel={`${option.label}: ${option.desc}`}
+              accessibilityState={{ selected: payoffStrategy === option.key }}
+              style={[
+                styles.strategyListItem,
+                payoffStrategy === option.key && { backgroundColor: t.accentBg },
+              ]}
+            >
+              <RNView style={{ flex: 1 }}>
+                <Text style={[styles.strategyListLabel, { color: payoffStrategy === option.key ? t.primary : t.textPrimary }]}>
+                  {option.label}
+                </Text>
+                <Text style={[styles.strategyListDesc, { color: t.textMuted }]}>
+                  {option.desc}
+                </Text>
+              </RNView>
+              {payoffStrategy === option.key && <Text style={{ color: t.primary }}>✓</Text>}
+            </Pressable>
           ))}
-        </ScrollView>
+        </RNView>
       </BottomSheet>
     </ScrollView>
     </RNView>
@@ -541,10 +516,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    width: '30%',
+    width: '40%',
   },
   currencyDropdownLabel: {
-    fontSize: typeScale.subhead,
+    fontSize: typeScale.body,
     flexShrink: 1,
   },
   currencyDropdownValue: {
@@ -552,8 +527,10 @@ const styles = StyleSheet.create({
     fontFamily: fonts.interRegular,
   },
   groupLabel: {
-    fontSize: typeScale.callout,
-    fontFamily: fonts.interSemiBold,
+    fontSize: typeScale.caption,
+    fontFamily: fonts.interRegular,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginBottom: 8,
     marginTop: 8,
   },
@@ -562,12 +539,12 @@ const styles = StyleSheet.create({
     marginVertical: 14,
   },
   itemLabel: {
-    fontSize: typeScale.subhead,
-    fontFamily: fonts.interSemiBold,
+    fontSize: typeScale.body,
+    fontFamily: fonts.interRegular,
     marginBottom: 4,
   },
   itemHint: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     lineHeight: 17,
   },
   valueRow: {
@@ -583,37 +560,49 @@ const styles = StyleSheet.create({
   },
   defaultValue: {
     fontSize: typeScale.body,
-    fontFamily: fonts.interSemiBold,
+    fontFamily: fonts.interRegular,
   },
 
   themePickerWrap: {
-    width: '50%',
+    width: '40%',
     borderWidth: 2,
     borderRadius: 8,
     overflow: 'hidden',
   },
-  strategyGrid: {
+  strategySelected: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  strategyChip: {
-    flexBasis: '46%',
-    flexGrow: 1,
+    alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 10,
     borderWidth: 1.5,
-    overflow: 'hidden',
   },
-  strategyChipLabel: {
-    fontSize: typeScale.subhead,
+  strategySelectedLabel: {
+    fontSize: typeScale.body,
     fontFamily: fonts.interSemiBold,
     marginBottom: 2,
   },
-  strategyChipDesc: {
+  strategySelectedDesc: {
     fontSize: typeScale.caption,
-    lineHeight: 15,
+  },
+  strategyList: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  strategyListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+  },
+  strategyListLabel: {
+    fontSize: typeScale.body,
+    fontFamily: fonts.interRegular,
+    marginBottom: 2,
+  },
+  strategyListDesc: {
+    fontSize: typeScale.caption,
   },
   searchInput: {
     marginHorizontal: 20,
@@ -622,7 +611,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: typeScale.callout,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
   },
   currencyListRow: {
@@ -633,30 +622,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   currencySymbol: {
-    fontSize: typeScale.h6,
+    fontSize: typeScale.body,
     fontFamily: fonts.interBold,
     width: 40,
   },
   currencyCode: {
-    fontSize: typeScale.callout,
-    fontFamily: fonts.interSemiBold,
-    flex: 1,
-  },
-  showcaseScroll: {
-    maxHeight: '100%',
-  },
-  showcaseContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  showcaseRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-    paddingVertical: 10,
-  },
-  showcaseSize: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.body,
     fontFamily: fonts.interRegular,
+    flex: 1,
   },
 });

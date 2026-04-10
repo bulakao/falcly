@@ -1,13 +1,15 @@
-import { StyleSheet, Pressable, Alert, Switch, View as RNView } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, Pressable, Alert, Switch, Platform, View as RNView } from 'react-native';
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { Picker } from '@react-native-picker/picker';
 import { Text } from '@/components/Themed';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useOverlayStore } from '@/store/overlayStore';
 import { useAppTheme } from '@/theme';
 import { fonts, typeScale } from '@/theme/fonts';
 import { Button } from '@/components/atoms';
-import { SurfaceCard } from '@/components/molecules';
+import { BottomSheet, SurfaceCard } from '@/components/molecules';
 
 export function SettingsOverlaySection() {
   const t = useAppTheme();
@@ -16,6 +18,7 @@ export function SettingsOverlaySection() {
   const setOverlayPrefs = useOverlayStore((s) => s.setOverlayPrefs);
   const resetDismissed = useOverlayStore((s) => s.resetDismissed);
   const proUser = useSubscriptionStore((s) => s.isPro)();
+  const [frequencyPickerVisible, setFrequencyPickerVisible] = useState(false);
 
   return (
     <>
@@ -91,39 +94,47 @@ export function SettingsOverlaySection() {
         <RNView style={[styles.divider, { backgroundColor: t.border }]} />
 
         {/* Frequency picker */}
-        <Pressable
-          style={styles.defaultRow}
-          onPress={() => {
-            if (!proUser) { router.push('/paywall-manual' as any); return; }
-            const options = [
-              { label: 'Daily', value: 1 },
-              { label: 'Every 3 days', value: 3 },
-              { label: 'Weekly', value: 7 },
-              { label: 'Monthly', value: 30 },
-            ];
-            const current = overlayPrefs.frequencyDays;
-            const idx = options.findIndex((o) => o.value === current);
-            const next = options[(idx + 1) % options.length];
-            setOverlayPrefs({ frequencyDays: next.value });
-          }}
-          accessibilityRole="button"
-          accessibilityLabel={`Tip frequency: ${overlayPrefs.frequencyDays === 1 ? 'Daily' : overlayPrefs.frequencyDays === 3 ? 'Every 3 days' : overlayPrefs.frequencyDays === 7 ? 'Weekly' : 'Monthly'}`}
-        >
+        <RNView style={styles.valueRow}>
           <RNView style={styles.lockRow}>
             <Text style={[styles.itemLabel, { color: t.textPrimary }]}>Tip frequency</Text>
             {!proUser && <FontAwesome name="lock" size={12} color={t.textMuted} />}
           </RNView>
-          <Text style={[styles.defaultValue, { color: proUser ? t.primary : t.textMuted }]}>
-            {overlayPrefs.frequencyDays === 1 ? 'Daily' : overlayPrefs.frequencyDays === 3 ? 'Every 3 days' : overlayPrefs.frequencyDays === 7 ? 'Weekly' : 'Monthly'}
-          </Text>
-        </Pressable>
+          {Platform.OS === 'android' ? (
+            <RNView style={[styles.frequencyPicker, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}>
+              <Picker
+                selectedValue={overlayPrefs.frequencyDays}
+                onValueChange={(v) => { if (proUser) setOverlayPrefs({ frequencyDays: v }); }}
+                enabled={proUser}
+                style={{ color: t.inputText }}
+                dropdownIconColor={t.textMuted}
+              >
+                <Picker.Item label="Daily" value={1} />
+                <Picker.Item label="Every 3 days" value={3} />
+                <Picker.Item label="Weekly" value={7} />
+                <Picker.Item label="Monthly" value={30} />
+              </Picker>
+            </RNView>
+          ) : (
+            <Pressable
+              onPress={() => { if (!proUser) { router.push('/paywall-manual' as any); return; } setFrequencyPickerVisible(true); }}
+              accessibilityRole="button"
+              accessibilityLabel={`Tip frequency: ${overlayPrefs.frequencyDays === 1 ? 'Daily' : overlayPrefs.frequencyDays === 3 ? 'Every 3 days' : overlayPrefs.frequencyDays === 7 ? 'Weekly' : 'Monthly'}`}
+              style={[styles.frequencyDropdown, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}
+            >
+              <Text style={[styles.frequencyValue, { color: proUser ? t.inputText : t.textMuted }]}>
+                {overlayPrefs.frequencyDays === 1 ? 'Daily' : overlayPrefs.frequencyDays === 3 ? 'Every 3 days' : overlayPrefs.frequencyDays === 7 ? 'Weekly' : 'Monthly'}
+              </Text>
+              <FontAwesome name="chevron-down" size={12} color={t.textMuted} />
+            </Pressable>
+          )}
+        </RNView>
 
         <RNView style={[styles.divider, { backgroundColor: t.border }]} />
 
         {/* Reset dismissed */}
         <Button
           label={proUser ? 'Reset dismissed tips' : 'Unlock 🔒'}
-          variant="secondary"
+          variant="primary"
           onPress={() => {
             if (!proUser) {
               router.push('/paywall-manual' as any);
@@ -134,14 +145,35 @@ export function SettingsOverlaySection() {
           }}
         />
       </SurfaceCard>
+      {Platform.OS === 'ios' && (
+        <BottomSheet
+          visible={frequencyPickerVisible}
+          onClose={() => setFrequencyPickerVisible(false)}
+          title="Tip Frequency"
+        >
+          <Picker
+            selectedValue={overlayPrefs.frequencyDays}
+            onValueChange={(v) => setOverlayPrefs({ frequencyDays: v })}
+            accessibilityLabel="Tip frequency"
+            itemStyle={{ color: t.textPrimary }}
+          >
+            <Picker.Item label="Daily" value={1} />
+            <Picker.Item label="Every 3 days" value={3} />
+            <Picker.Item label="Weekly" value={7} />
+            <Picker.Item label="Monthly" value={30} />
+          </Picker>
+        </BottomSheet>
+      )}
     </>
   );
 }
 
 const styles = StyleSheet.create({
   groupLabel: {
-    fontSize: typeScale.callout,
-    fontFamily: fonts.interSemiBold,
+    fontSize: typeScale.caption,
+    fontFamily: fonts.interRegular,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginBottom: 8,
     marginTop: 8,
   },
@@ -150,24 +182,18 @@ const styles = StyleSheet.create({
     marginVertical: 14,
   },
   itemLabel: {
-    fontSize: typeScale.subhead,
-    fontFamily: fonts.interSemiBold,
+    fontSize: typeScale.body,
+    fontFamily: fonts.interRegular,
     marginBottom: 4,
   },
   itemHint: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     lineHeight: 17,
   },
   valueRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  defaultRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 2,
   },
   lockRow: {
     flexDirection: 'row',
@@ -176,6 +202,27 @@ const styles = StyleSheet.create({
   },
   defaultValue: {
     fontSize: typeScale.body,
-    fontFamily: fonts.interSemiBold,
+    fontFamily: fonts.interRegular,
+  },
+  frequencyPicker: {
+    width: '40%',
+    borderWidth: 2,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  frequencyDropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    width: '40%',
+    gap: 6,
+  },
+  frequencyValue: {
+    fontSize: typeScale.body,
+    fontFamily: fonts.interRegular,
   },
 });

@@ -50,7 +50,7 @@ export function SettingsDangerSection() {
                   },
                 ]);
               }}
-              variant="secondary"
+              variant="primary"
             />
             <RNView style={styles.gap} />
           </>
@@ -59,7 +59,7 @@ export function SettingsDangerSection() {
           <>
             <Button
               label={busy ? 'Clearing...' : 'Clear Local Data'}
-              variant="secondary"
+              variant="primary"
               disabled={busy}
               onPress={() => {
                 Alert.alert(
@@ -126,8 +126,10 @@ export function SettingsDangerSection() {
 
 const styles = StyleSheet.create({
   groupLabel: {
-    fontSize: typeScale.callout,
-    fontFamily: fonts.interSemiBold,
+    fontSize: typeScale.caption,
+    fontFamily: fonts.interRegular,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginBottom: 8,
     marginTop: 8,
   },

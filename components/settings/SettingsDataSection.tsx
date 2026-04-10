@@ -30,7 +30,7 @@ export function SettingsDataSection() {
         </Text>
         <Button
           label={exporting ? 'Exporting...' : 'Export as CSV'}
-          variant="secondary"
+          variant="primary"
           onPress={() => {
             setExporting(true);
             exportDataAsCSV(cards, { cashOnHand, monthlyIncome, payday, committedExpenses })
@@ -49,8 +49,10 @@ export function SettingsDataSection() {
 
 const styles = StyleSheet.create({
   groupLabel: {
-    fontSize: typeScale.callout,
-    fontFamily: fonts.interSemiBold,
+    fontSize: typeScale.caption,
+    fontFamily: fonts.interRegular,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginBottom: 8,
     marginTop: 8,
   },
@@ -59,12 +61,12 @@ const styles = StyleSheet.create({
     marginVertical: 14,
   },
   itemLabel: {
-    fontSize: typeScale.subhead,
-    fontFamily: fonts.interSemiBold,
+    fontSize: typeScale.body,
+    fontFamily: fonts.interRegular,
     marginBottom: 4,
   },
   itemHint: {
-    fontSize: typeScale.footnote,
+    fontSize: typeScale.caption,
     lineHeight: 17,
   },
 });
